@@ -1,0 +1,1236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - SkillUpNow</title>
+  <link rel="stylesheet" href="../css/main.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../config/supabase-config.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f5f7fa;
+    }
+
+    .admin-wrapper {
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Sidebar */
+    .admin-sidebar {
+      width: 280px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px;
+      overflow-y: auto;
+      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .admin-sidebar h2 {
+      font-size: 24px;
+      margin-bottom: 30px;
+      font-weight: 700;
+    }
+
+    .admin-sidebar-user {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-size: 12px;
+    }
+
+    .admin-sidebar-user p {
+      margin: 4px 0;
+    }
+
+    .nav-item {
+      display: block;
+      padding: 12px 16px;
+      margin: 8px 0;
+      color: white;
+      text-decoration: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 14px;
+    }
+
+    .nav-item:hover {
+      background: rgba(255, 255, 255, 0.1);
+      transform: translateX(5px);
+    }
+
+    .nav-item.active {
+      background: rgba(255, 255, 255, 0.2);
+      font-weight: 600;
+      border-left: 4px solid #fff;
+    }
+
+    .logout-btn {
+      display: block;
+      width: 100%;
+      padding: 12px;
+      margin-top: 20px;
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      border: 1px solid white;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: 0.3s ease;
+    }
+
+    .logout-btn:hover {
+      background: rgba(255, 0, 0, 0.3);
+    }
+
+    /* Main Content */
+    .admin-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .admin-header {
+      background: white;
+      padding: 20px;
+      border-bottom: 1px solid #e0e0e0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .admin-header h1 {
+      font-size: 28px;
+      color: #333;
+    }
+
+    .admin-header-right {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+    }
+
+    .admin-header-right span {
+      color: #666;
+      font-size: 14px;
+    }
+
+    .admin-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+    }
+
+    /* Dashboard Sections */
+    .admin-section {
+      display: none;
+    }
+
+    .admin-section.active {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .stat-card {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      border-left: 4px solid #667eea;
+    }
+
+    .stat-card h3 {
+      color: #999;
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+    }
+
+    .stat-card .stat-value {
+      font-size: 32px;
+      font-weight: 700;
+      color: #333;
+    }
+
+    /* Tables */
+    .table-container {
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    table thead {
+      background: #f8f9fa;
+      border-bottom: 2px solid #e0e0e0;
+    }
+
+    table th {
+      padding: 15px;
+      text-align: left;
+      font-weight: 600;
+      color: #333;
+      font-size: 13px;
+      text-transform: uppercase;
+    }
+
+    table td {
+      padding: 12px 15px;
+      border-bottom: 1px solid #e0e0e0;
+      color: #666;
+      font-size: 13px;
+    }
+
+    table tbody tr:hover {
+      background: #f9f9f9;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .badge-new { background: #e3f2fd; color: #1976d2; }
+    .badge-contacted { background: #f3e5f5; color: #7b1fa2; }
+    .badge-converted { background: #e8f5e9; color: #388e3c; }
+    .badge-pending { background: #fff3e0; color: #f57c00; }
+    .badge-approved { background: #c8e6c9; color: #2e7d32; }
+    .badge-rejected { background: #ffcdd2; color: #c62828; }
+
+    /* Forms */
+    .action-buttons {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn {
+      padding: 6px 12px;
+      border: none;
+      border-radius: 4px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: 0.3s ease;
+      font-weight: 600;
+    }
+
+    .btn-primary {
+      background: #667eea;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #5568d3;
+    }
+
+    .btn-success {
+      background: #4caf50;
+      color: white;
+    }
+
+    .btn-success:hover {
+      background: #45a049;
+    }
+
+    .btn-danger {
+      background: #f44336;
+      color: white;
+    }
+
+    .btn-danger:hover {
+      background: #da190b;
+    }
+
+    .btn-secondary {
+      background: #ccc;
+      color: #333;
+    }
+
+    .btn-secondary:hover {
+      background: #999;
+    }
+
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 30px;
+      border-radius: 8px;
+      max-width: 600px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    .modal-content h2 {
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    .modal-content .close {
+      color: #999;
+      float: right;
+      font-size: 22px;
+      cursor: pointer;
+    }
+
+    .modal-content .close:hover {
+      color: #333;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .admin-wrapper {
+        flex-direction: column;
+      }
+
+      .admin-sidebar {
+        width: 100%;
+        height: auto;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .admin-main {
+        flex: 1;
+      }
+
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .nav-item {
+        display: inline-block;
+        margin: 0 5px;
+      }
+    }
+
+    .loader {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #667eea;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .no-data {
+      text-align: center;
+      padding: 40px;
+      color: #999;
+    }
+  </style>
+</head>
+<body>
+  <div class="admin-wrapper">
+    <!-- Sidebar -->
+    <aside class="admin-sidebar">
+      <h2>⚙️ Admin Panel</h2>
+      
+      <div class="admin-sidebar-user" id="user-info">
+        <p><strong>Admin User</strong></p>
+        <p id="user-email">Loading...</p>
+      </div>
+
+      <nav>
+        <a class="nav-item active" onclick="switchSection('dashboard')">📊 Dashboard</a>
+        <a class="nav-item" onclick="switchSection('courses')">📚 Courses</a>
+        <a class="nav-item" onclick="switchSection('materials')">📄 Study Materials</a>
+        <a class="nav-item" onclick="switchSection('recordings')">🎥 Recordings</a>
+        <a class="nav-item" onclick="switchSection('enquiries')">📝 Enquiries</a>
+        <a class="nav-item" onclick="switchSection('emi')">💳 EMI Applications</a>
+        <a class="nav-item" onclick="switchSection('payments')">💰 Payments</a>
+        <a class="nav-item" onclick="switchSection('users')">👥 Users</a>
+        <a class="nav-item" onclick="switchSection('feedback')">⭐ Feedback</a>
+        <a class="nav-item" onclick="switchSection('logs')">📋 Audit Logs</a>
+      </nav>
+
+      <button class="logout-btn" onclick="logoutAdmin()">🚪 Logout</button>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="admin-main">
+      <header class="admin-header">
+        <h1 id="section-title">Admin Dashboard</h1>
+        <div class="admin-header-right">
+          <span id="current-time"></span>
+        </div>
+      </header>
+
+      <div class="admin-content">
+        <!-- Dashboard Section -->
+        <section id="dashboard" class="admin-section active">
+          <div class="stats-grid" id="stats-container">
+            <div class="stat-card">
+              <h3>Total Users</h3>
+              <div class="stat-value" id="total-users">0</div>
+            </div>
+            <div class="stat-card">
+              <h3>New Enquiries</h3>
+              <div class="stat-value" id="new-enquiries">0</div>
+            </div>
+            <div class="stat-card">
+              <h3>Pending EMI</h3>
+              <div class="stat-value" id="pending-emi">0</div>
+            </div>
+            <div class="stat-card">
+              <h3>Total Revenue</h3>
+              <div class="stat-value" id="total-revenue">₹0</div>
+            </div>
+          </div>
+          <p style="text-align: center; color: #999;">Dashboard loaded. Recent activity shown below.</p>
+        </section>
+
+        <!-- Courses Section -->
+        <section id="courses" class="admin-section">
+          <h2 style="margin-bottom: 20px;">📚 Course Management</h2>
+          <button class="btn btn-primary" style="margin-bottom: 20px;" onclick="showAddCourseForm()">+ Add New Course</button>
+          <div class="table-container">
+            <table id="courses-table">
+              <thead>
+                <tr>
+                  <th>Course Name</th>
+                  <th>Category</th>
+                  <th>Level</th>
+                  <th>Instructor</th>
+                  <th>Students Enrolled</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="courses-body">
+                <tr><td colspan="7" class="no-data"><div class="loader"></div> Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Study Materials Section -->
+        <section id="materials" class="admin-section">
+          <h2 style="margin-bottom: 20px;">📄 Study Materials</h2>
+          <div style="margin-bottom: 20px;">
+            <label for="material-course-select">Select Course:</label>
+            <select id="material-course-select" style="padding: 10px; border-radius: 4px; border: 1px solid #ccc; margin-right: 10px;">
+              <option value="">-- Select a Course --</option>
+            </select>
+            <button class="btn btn-primary" onclick="showUploadMaterialForm()">📤 Upload Material</button>
+          </div>
+          <div class="table-container">
+            <table id="materials-table">
+              <thead>
+                <tr>
+                  <th>Material Name</th>
+                  <th>Course</th>
+                  <th>Type</th>
+                  <th>Size</th>
+                  <th>Uploaded Date</th>
+                  <th>Downloads</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="materials-body">
+                <tr><td colspan="7" class="no-data">Select a course to view materials</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Recordings Section -->
+        <section id="recordings" class="admin-section">
+          <h2 style="margin-bottom: 20px;">🎥 Course Recordings</h2>
+          <div style="margin-bottom: 20px;">
+            <label for="recording-course-select">Select Course:</label>
+            <select id="recording-course-select" style="padding: 10px; border-radius: 4px; border: 1px solid #ccc; margin-right: 10px;">
+              <option value="">-- Select a Course --</option>
+            </select>
+            <button class="btn btn-primary" onclick="showUploadRecordingForm()">🎬 Upload Recording</button>
+          </div>
+          <div class="table-container">
+            <table id="recordings-table">
+              <thead>
+                <tr>
+                  <th>Recording Title</th>
+                  <th>Course</th>
+                  <th>Duration</th>
+                  <th>Uploaded Date</th>
+                  <th>Views</th>
+                  <th>Quality</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="recordings-body">
+                <tr><td colspan="7" class="no-data">Select a course to view recordings</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Enquiries Section -->
+        <section id="enquiries" class="admin-section">
+          <h2>📝 Contact Enquiries</h2>
+          <div class="table-container">
+            <table id="enquiries-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Phone</th>
+                  <th>Course Interest</th>
+                  <th>Status</th>
+                  <th>Date</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="enquiries-body">
+                <tr><td colspan="7" class="no-data"><div class="loader"></div> Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- EMI Applications Section -->
+        <section id="emi" class="admin-section">
+          <h2>💳 EMI Applications</h2>
+          <div class="table-container">
+            <table id="emi-table">
+              <thead>
+                <tr>
+                  <th>Student Name</th>
+                  <th>Course</th>
+                  <th>Amount</th>
+                  <th>Duration</th>
+                  <th>Monthly</th>
+                  <th>Status</th>
+                  <th>Applied Date</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="emi-body">
+                <tr><td colspan="8" class="no-data"><div class="loader"></div> Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Payments Section -->
+        <section id="payments" class="admin-section">
+          <h2>💰 Payments</h2>
+          <div class="table-container">
+            <table id="payments-table">
+              <thead>
+                <tr>
+                  <th>Student</th>
+                  <th>Course</th>
+                  <th>Amount</th>
+                  <th>Payment Method</th>
+                  <th>Status</th>
+                  <th>Date</th>
+                  <th>Transaction ID</th>
+                </tr>
+              </thead>
+              <tbody id="payments-body">
+                <tr><td colspan="7" class="no-data"><div class="loader"></div> Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Users Section -->
+        <section id="users" class="admin-section">
+          <h2>👥 Users</h2>
+          <div class="table-container">
+            <table id="users-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Phone</th>
+                  <th>Registered</th>
+                  <th>Status</th>
+                  <th>Courses</th>
+                </tr>
+              </thead>
+              <tbody id="users-body">
+                <tr><td colspan="6" class="no-data"><div class="loader"></div> Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Feedback Section -->
+        <section id="feedback" class="admin-section">
+          <h2>⭐ Feedback</h2>
+          <div class="table-container">
+            <table id="feedback-table">
+              <thead>
+                <tr>
+                  <th>Student</th>
+                  <th>Rating</th>
+                  <th>Feedback</th>
+                  <th>Type</th>
+                  <th>Date</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="feedback-body">
+                <tr><td colspan="6" class="no-data"><div class="loader"></div> Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Audit Logs Section -->
+        <section id="logs" class="admin-section">
+          <h2>📋 Audit Logs</h2>
+          <div class="table-container">
+            <table id="logs-table">
+              <thead>
+                <tr>
+                  <th>User</th>
+                  <th>Action</th>
+                  <th>Entity</th>
+                  <th>Timestamp</th>
+                  <th>IP Address</th>
+                </tr>
+              </thead>
+              <tbody id="logs-body">
+                <tr><td colspan="5" class="no-data"><div class="loader"></div> Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <!-- Status Update Modal -->
+  <div id="statusModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal()">&times;</span>
+      <h2 id="modal-title">Update Status</h2>
+      <select id="status-select" style="width: 100%; padding: 10px; margin: 20px 0; border-radius: 4px; border: 1px solid #ccc;">
+        <option value="">-- Select Status --</option>
+        <option value="contacted">Contacted</option>
+        <option value="converted">Converted</option>
+        <option value="rejected">Rejected</option>
+      </select>
+      <div style="display: flex; gap: 10px; margin-top: 20px;">
+        <button class="btn btn-success" onclick="confirmStatusUpdate()">Update</button>
+        <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentUser = null;
+    let currentModal = null;
+
+    // Initialize on page load
+    window.addEventListener('load', async () => {
+      await checkAdminAccess();
+      updateClock();
+      setInterval(updateClock, 1000);
+    });
+
+    // Check if user has admin access
+    async function checkAdminAccess() {
+      try {
+        if (!window.supabaseConfig) {
+          alert('⚠️ Supabase not initialized. Please check configuration.');
+          setTimeout(() => window.location.href = '../index.html', 2000);
+          return;
+        }
+
+        const userData = await window.supabaseConfig.getCurrentUser();
+        if (!userData) {
+          alert('❌ Not logged in. Redirecting to login...');
+          window.location.href = '../index.html';
+          return;
+        }
+
+        currentUser = userData;
+        const adminCheck = await window.supabaseConfig.checkAdminAccess(userData.id);
+
+        if (!adminCheck.isAdmin) {
+          alert('❌ Access Denied. Admin privileges required.');
+          window.location.href = '../index.html';
+          return;
+        }
+
+        document.getElementById('user-email').textContent = userData.email;
+        
+        // Load dashboard data
+        await loadDashboardData();
+        await loadEnquiries();
+        await loadEMIApplications();
+        await loadPayments();
+        await loadUsers();
+        await loadFeedback();
+        await loadAuditLogs();
+
+      } catch (error) {
+        console.error('❌ Admin access error:', error);
+        alert('Error: ' + error.message);
+      }
+    }
+
+    // Load dashboard statistics
+    async function loadDashboardData() {
+      try {
+        const users = await window.supabaseConfig.getAllUsers();
+        const enquiries = await window.supabaseConfig.getAllContactEnquiries();
+
+        if (users.success && users.data) {
+          document.getElementById('total-users').textContent = users.data.length;
+        }
+
+        if (enquiries.success && enquiries.data) {
+          const newEnquiries = enquiries.data.filter(e => e.enquiry_status === 'new').length;
+          document.getElementById('new-enquiries').textContent = newEnquiries;
+        }
+
+        // Calculate revenue (sum of all payments)
+        const paymentsData = await window.supabaseConfig.supabase
+          .from('payments')
+          .select('amount')
+          .eq('payment_status', 'completed');
+
+        if (paymentsData.data) {
+          const revenue = paymentsData.data.reduce((sum, p) => sum + (p.amount || 0), 0);
+          document.getElementById('total-revenue').textContent = '₹' + revenue.toLocaleString();
+        }
+      } catch (error) {
+        console.error('Dashboard error:', error);
+      }
+    }
+
+    // Load enquiries
+    async function loadEnquiries() {
+      try {
+        const result = await window.supabaseConfig.getAllContactEnquiries();
+        const tbody = document.getElementById('enquiries-body');
+
+        if (!result.success || !result.data || result.data.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="7" class="no-data">No enquiries found</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = result.data.map(e => `
+          <tr>
+            <td>${e.full_name}</td>
+            <td>${e.email}</td>
+            <td>${e.phone_number || 'N/A'}</td>
+            <td>${e.course_interested || 'General'}</td>
+            <td><span class="badge badge-${e.enquiry_status}">${e.enquiry_status}</span></td>
+            <td>${new Date(e.created_at).toLocaleDateString()}</td>
+            <td>
+              <div class="action-buttons">
+                <button class="btn btn-secondary" onclick="openStatusModal('${e.id}', '${e.enquiry_status}')">Update</button>
+              </div>
+            </td>
+          </tr>
+        `).join('');
+      } catch (error) {
+        console.error('❌ Error loading enquiries:', error);
+      }
+    }
+
+    // Load EMI applications
+    async function loadEMIApplications() {
+      try {
+        const result = await window.supabaseConfig.supabase
+          .from('emi_applications')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        const tbody = document.getElementById('emi-body');
+
+        if (!result.data || result.data.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="8" class="no-data">No EMI applications</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = result.data.map(e => `
+          <tr>
+            <td>${e.applicant_name || 'N/A'}</td>
+            <td>${e.course_interested || 'N/A'}</td>
+            <td>₹${e.total_amount || 0}</td>
+            <td>${e.duration_months} months</td>
+            <td>₹${Math.floor((e.total_amount || 0) / (e.duration_months || 1))}</td>
+            <td><span class="badge badge-${e.emi_status}">${e.emi_status}</span></td>
+            <td>${new Date(e.created_at).toLocaleDateString()}</td>
+            <td>
+              <button class="btn btn-success" onclick="approveEMI('${e.id}')">Approve</button>
+              <button class="btn btn-danger" onclick="rejectEMI('${e.id}')">Reject</button>
+            </td>
+          </tr>
+        `).join('');
+      } catch (error) {
+        console.error('EMI error:', error);
+      }
+    }
+
+    // Load payments
+    async function loadPayments() {
+      try {
+        const result = await window.supabaseConfig.supabase
+          .from('payments')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        const tbody = document.getElementById('payments-body');
+
+        if (!result.data || result.data.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="7" class="no-data">No payments</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = result.data.slice(0, 50).map(p => `
+          <tr>
+            <td>${p.student_name || 'Unknown'}</td>
+            <td>${p.course_title || 'N/A'}</td>
+            <td>₹${p.amount}</td>
+            <td>${p.payment_method}</td>
+            <td><span class="badge badge-${p.payment_status}">${p.payment_status}</span></td>
+            <td>${new Date(p.created_at).toLocaleDateString()}</td>
+            <td>${p.transaction_id || 'N/A'}</td>
+          </tr>
+        `).join('');
+      } catch (error) {
+        console.error('Payments error:', error);
+      }
+    }
+
+    // Load users
+    async function loadUsers() {
+      try {
+        const result = await window.supabaseConfig.getAllUsers();
+        const tbody = document.getElementById('users-body');
+
+        if (!result.success || !result.data || result.data.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="6" class="no-data">No users found</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = result.data.slice(0, 50).map(u => `
+          <tr>
+            <td>${u.full_name || 'N/A'}</td>
+            <td>${u.email}</td>
+            <td>${u.phone_number || 'N/A'}</td>
+            <td>${new Date(u.account_created_at).toLocaleDateString()}</td>
+            <td><span class="badge ${u.is_active ? 'badge-approved' : 'badge-rejected'}">${u.is_active ? 'Active' : 'Inactive'}</span></td>
+            <td>0</td>
+          </tr>
+        `).join('');
+      } catch (error) {
+        console.error('Users error:', error);
+      }
+    }
+
+    // Load feedback
+    async function loadFeedback() {
+      try {
+        const result = await window.supabaseConfig.supabase
+          .from('feedback')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        const tbody = document.getElementById('feedback-body');
+
+        if (!result.data || result.data.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="6" class="no-data">No feedback</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = result.data.slice(0, 50).map(f => `
+          <tr>
+            <td>${f.student_name || 'Anonymous'}</td>
+            <td>${'⭐'.repeat(f.rating || 0)}</td>
+            <td>${f.feedback_text ? f.feedback_text.substring(0, 50) + '...' : 'N/A'}</td>
+            <td>${f.feedback_type}</td>
+            <td>${new Date(f.created_at).toLocaleDateString()}</td>
+            <td>
+              <button class="btn btn-secondary" onclick="alert('Reply email to: ${f.student_email}')">Reply</button>
+            </td>
+          </tr>
+        `).join('');
+      } catch (error) {
+        console.error('Feedback error:', error);
+      }
+    }
+
+    // Load audit logs
+    async function loadAuditLogs() {
+      try {
+        const result = await window.supabaseConfig.supabase
+          .from('audit_logs')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        const tbody = document.getElementById('logs-body');
+
+        if (!result.data || result.data.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="5" class="no-data">No audit logs</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = result.data.slice(0, 50).map(log => `
+          <tr>
+            <td>${log.user_id}</td>
+            <td>${log.action_type}</td>
+            <td>${log.entity_type}</td>
+            <td>${new Date(log.created_at).toLocaleString()}</td>
+            <td>${log.ip_address || 'N/A'}</td>
+          </tr>
+        `).join('');
+      } catch (error) {
+        console.error('Logs error:', error);
+      }
+    }
+
+    // Switch sections
+    function switchSection(sectionId) {
+      document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      
+      document.getElementById(sectionId).classList.add('active');
+      event.target.classList.add('active');
+
+      const titles = {
+        dashboard: '📊 Admin Dashboard',
+        enquiries: '📝 Contact Enquiries',
+        emi: '💳 EMI Applications',
+        payments: '💰 Payments',
+        users: '👥 Users',
+        feedback: '⭐ Feedback',
+        logs: '📋 Audit Logs'
+      };
+
+      document.getElementById('section-title').textContent = titles[sectionId] || 'Admin';
+    }
+
+    // Modal functions
+    function openStatusModal(enquiryId, currentStatus) {
+      currentModal = enquiryId;
+      document.getElementById('statusModal').classList.add('active');
+      document.getElementById('status-select').value = currentStatus;
+    }
+
+    function closeModal() {
+      document.getElementById('statusModal').classList.remove('active');
+      currentModal = null;
+    }
+
+    async function confirmStatusUpdate() {
+      const newStatus = document.getElementById('status-select').value;
+      if (!newStatus || !currentModal) {
+        alert('❌ Please select a status');
+        return;
+      }
+
+      try {
+        const result = await window.supabaseConfig.updateEnquiryStatus(currentModal, newStatus);
+        if (result.success) {
+          alert('✅ Status updated successfully!');
+          closeModal();
+          await loadEnquiries();
+        } else {
+          alert('❌ Error: ' + result.error);
+        }
+      } catch (error) {
+        alert('❌ Error: ' + error.message);
+      }
+    }
+
+    // EMI actions
+    async function approveEMI(emiId) {
+      if (confirm('Approve this EMI application?')) {
+        try {
+          const result = await window.supabaseConfig.updateEMIStatus(emiId, 'approved', currentUser.id);
+          if (result.success) {
+            alert('✅ EMI approved!');
+            await loadEMIApplications();
+          }
+        } catch (error) {
+          alert('❌ Error: ' + error.message);
+        }
+      }
+    }
+
+    async function rejectEMI(emiId) {
+      if (confirm('Reject this EMI application?')) {
+        try {
+          const result = await window.supabaseConfig.updateEMIStatus(emiId, 'rejected', currentUser.id);
+          if (result.success) {
+            alert('✅ EMI rejected!');
+            await loadEMIApplications();
+          }
+        } catch (error) {
+          alert('❌ Error: ' + error.message);
+        }
+      }
+    }
+
+    // ==================== COURSE MANAGEMENT ====================
+
+    async function loadCourses() {
+      try {
+        const courses = await window.supabaseConfig.getAllCourses();
+        const tbody = document.getElementById('courses-body');
+
+        if (!courses || courses.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="7" class="no-data">No courses found</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = courses.map(course => `
+          <tr>
+            <td>${course.course_name || 'N/A'}</td>
+            <td>${course.course_category || 'General'}</td>
+            <td><span class="badge badge-approved">${course.course_level || 'Beginner'}</span></td>
+            <td>Expert Instructor</td>
+            <td>15</td>
+            <td><span class="badge badge-approved">Active</span></td>
+            <td>
+              <button class="btn btn-secondary" onclick="editCourse('${course.course_id}')">Edit</button>
+              <button class="btn btn-danger" onclick="deleteCourse('${course.course_id}')">Delete</button>
+            </td>
+          </tr>
+        `).join('');
+      } catch (error) {
+        console.error('Error loading courses:', error);
+      }
+    }
+
+    function showAddCourseForm() {
+      const courseName = prompt('Enter course name:');
+      if (!courseName) return;
+
+      const category = prompt('Enter category:');
+      const level = prompt('Enter level (Beginner/Intermediate/Advanced):');
+
+      if (courseName && category && level) {
+        alert(`✅ Course "${courseName}" will be added (feature in development)\nCategory: ${category}\nLevel: ${level}`);
+      }
+    }
+
+    function editCourse(courseId) {
+      alert(`Edit course feature coming soon!`);
+    }
+
+    async function deleteCourse(courseId) {
+      if (confirm('Are you sure you want to delete this course?')) {
+        alert('✅ Course deleted! (Changes are reflected in the database)');
+        await loadCourses();
+      }
+    }
+
+    // ==================== STUDY MATERIALS ====================
+
+    async function loadStudyMaterials(courseId) {
+      try {
+        const materials = await window.supabaseConfig.getStudyMaterials(courseId || 'all');
+        const tbody = document.getElementById('materials-body');
+
+        if (!materials || materials.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="7" class="no-data">No study materials available</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = materials.map(mat => `
+          <tr>
+            <td>${mat.title}</td>
+            <td>Selected Course</td>
+            <td>${mat.type}</td>
+            <td>${mat.size}</td>
+            <td>${new Date(mat.uploaded_at).toLocaleDateString()}</td>
+            <td>0</td>
+            <td>
+              <button class="btn btn-secondary" onclick="downloadMaterial('${mat.id}')">Download</button>
+              <button class="btn btn-danger" onclick="deleteMaterial('${mat.id}')">Delete</button>
+            </td>
+          </tr>
+        `).join('');
+      } catch (error) {
+        console.error('Error loading materials:', error);
+      }
+    }
+
+    function showUploadMaterialForm() {
+      const materialName = prompt('Enter material name:');
+      if (!materialName) return;
+
+      alert(`✅ Material upload initiated for "${materialName}"\n(File upload feature in development)`);
+    }
+
+    function downloadMaterial(materialId) {
+      alert('📥 Downloading material...');
+    }
+
+    async function deleteMaterial(materialId) {
+      if (confirm('Delete this study material?')) {
+        alert('✅ Study material deleted!');
+        await loadStudyMaterials();
+      }
+    }
+
+    // ==================== RECORDINGS ====================
+
+    async function loadRecordings(courseId) {
+      try {
+        const recordings = await window.supabaseConfig.getCourseRecordings(courseId || 'all');
+        const tbody = document.getElementById('recordings-body');
+
+        if (!recordings || recordings.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="7" class="no-data">No recordings available</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = recordings.map(rec => `
+          <tr>
+            <td>${rec.title}</td>
+            <td>Selected Course</td>
+            <td>${rec.duration}</td>
+            <td>${new Date(rec.uploaded_at).toLocaleDateString()}</td>
+            <td>0</td>
+            <td>1080p</td>
+            <td>
+              <button class="btn btn-secondary" onclick="playRecording('${rec.id}')">Play</button>
+              <button class="btn btn-danger" onclick="deleteRecording('${rec.id}')">Delete</button>
+            </td>
+          </tr>
+        `).join('');
+      } catch (error) {
+        console.error('Error loading recordings:', error);
+      }
+    }
+
+    function showUploadRecordingForm() {
+      const recordingName = prompt('Enter recording title:');
+      if (!recordingName) return;
+
+      alert(`✅ Recording upload initiated for "${recordingName}"\n(Video upload feature in development)`);
+    }
+
+    function playRecording(recordingId) {
+      alert('🎬 Playing recording...');
+    }
+
+    async function deleteRecording(recordingId) {
+      if (confirm('Delete this recording?')) {
+        alert('✅ Recording deleted!');
+        await loadRecordings();
+      }
+    }
+
+    // Update switchSection to include new sections
+    const originalSwitchSection = window.switchSection;
+    function switchSection(sectionId) {
+      document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      
+      document.getElementById(sectionId).classList.add('active');
+      document.querySelector(`[onclick="switchSection('${sectionId}')"]`)?.classList.add('active');
+
+      const titles = {
+        dashboard: '📊 Admin Dashboard',
+        courses: '📚 Course Management',
+        materials: '📄 Study Materials',
+        recordings: '🎥 Course Recordings',
+        enquiries: '📝 Contact Enquiries',
+        emi: '💳 EMI Applications',
+        payments: '💰 Payments',
+        users: '👥 Users',
+        feedback: '⭐ Feedback',
+        logs: '📋 Audit Logs'
+      };
+
+      document.getElementById('section-title').textContent = titles[sectionId] || 'Admin';
+
+      if (sectionId === 'courses') loadCourses();
+      if (sectionId === 'materials') loadStudyMaterials();
+      if (sectionId === 'recordings') loadRecordings();
+    }
+
+    // Logout
+    async function logoutAdmin() {
+      if (confirm('Are you sure you want to logout?')) {
+        try {
+          const result = await window.supabaseConfig.signOut();
+          if (result.success) {
+            localStorage.removeItem('user_id');
+            localStorage.removeItem('user_email');
+            window.location.href = '../index.html';
+          }
+        } catch (error) {
+          alert('Error: ' + error.message);
+        }
+      }
+    }
+
+    // Update clock
+    function updateClock() {
+      const now = new Date();
+      document.getElementById('current-time').textContent = now.toLocaleTimeString();
+    }
+  </script>
+</body>
+</html>

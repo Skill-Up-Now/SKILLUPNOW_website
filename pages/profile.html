@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="User Profile - SkillUpNow">
+  <title>My Profile - SkillUpNow</title>
+  
+  <!-- CSS Files -->
+  <link rel="stylesheet" href="../css/variables.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="stylesheet" href="../css/forms.css">
+  <link rel="stylesheet" href="../css/responsive.css">
+
+  <style>
+    /* Profile Wrapper */
+    .profile-wrapper {
+      min-height: 100vh;
+      padding: 2rem 5vw;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* Header Section */
+    .profile-header {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      padding: 2.5rem;
+      border-radius: var(--r3);
+      margin-bottom: 3rem;
+      box-shadow: var(--shadow-card);
+    }
+
+    .profile-avatar {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: var(--grad);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3rem;
+      color: white;
+      flex-shrink: 0;
+      box-shadow: var(--shadow-btn);
+    }
+
+    .profile-info h2 {
+      margin-bottom: 0.5rem;
+      font-size: 1.8rem;
+    }
+
+    .profile-info p {
+      color: var(--txt3);
+      margin-bottom: 0.3rem;
+    }
+
+    .profile-actions {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    /* Tab Navigation */
+    .profile-tabs {
+      display: flex;
+      gap: 1rem;
+      border-bottom: 2px solid var(--border);
+      margin-bottom: 2rem;
+      overflow-x: auto;
+      padding-bottom: 1rem;
+    }
+
+    .profile-tab {
+      padding: 1rem 1.5rem;
+      background: transparent;
+      border: 2px solid transparent;
+      border-bottom: 3px solid transparent;
+      cursor: pointer;
+      font-family: 'Plus Jakarta Sans', 'Poppins', sans-serif;
+      font-weight: 600;
+      color: var(--txt3);
+      transition: all 0.3s;
+      white-space: nowrap;
+      position: relative;
+    }
+
+    .profile-tab:hover {
+      color: var(--txt2);
+    }
+
+    .profile-tab.active {
+      color: var(--v2);
+      border-bottom-color: var(--v2);
+    }
+
+    /* Tab Content */
+    .profile-content {
+      display: none;
+    }
+
+    .profile-content.active {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Courses Grid */
+    .courses-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 2rem;
+    }
+
+    .course-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--r2);
+      padding: 1.5rem;
+      transition: all 0.3s;
+      box-shadow: var(--shadow-card);
+    }
+
+    .course-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 40px rgba(124, 92, 252, 0.2);
+      border-color: var(--v3);
+    }
+
+    .course-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      margin-bottom: 1rem;
+    }
+
+    .course-badge {
+      display: inline-block;
+      padding: 0.4rem 0.8rem;
+      background: rgba(107, 63, 216, 0.2);
+      color: var(--v2);
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+
+    .course-progress {
+      width: 100%;
+      height: 6px;
+      background: var(--panel2);
+      border-radius: 10px;
+      overflow: hidden;
+      margin: 1rem 0;
+    }
+
+    .course-progress-bar {
+      height: 100%;
+      background: var(--grad);
+      border-radius: 10px;
+      transition: width 0.3s ease;
+    }
+
+    /* Status Section */
+    .status-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .status-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      padding: 1.5rem;
+      border-radius: var(--r2);
+      text-align: center;
+    }
+
+    .status-value {
+      font-size: 2rem;
+      font-weight: 800;
+      background: var(--grad);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin: 0.5rem 0;
+    }
+
+    .status-label {
+      color: var(--txt3);
+      font-size: 0.9rem;
+    }
+
+    /* Certificates Section */
+    .certificates-list {
+      display: grid;
+      gap: 1.5rem;
+    }
+
+    .cert-item {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      padding: 1.5rem;
+      border-radius: var(--r2);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: all 0.3s;
+    }
+
+    .cert-item:hover {
+      transform: translateX(5px);
+      border-color: var(--v3);
+    }
+
+    .cert-details h4 {
+      margin-bottom: 0.5rem;
+      font-size: 1.1rem;
+    }
+
+    .cert-date {
+      color: var(--txt3);
+      font-size: 0.85rem;
+    }
+
+    .cert-actions {
+      display: flex;
+      gap: 0.8rem;
+    }
+
+    .cert-btn {
+      padding: 0.6rem 1rem;
+      background: var(--grad);
+      color: white;
+      border: none;
+      border-radius: var(--r4);
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+
+    .cert-btn:hover {
+      transform: scale(1.05);
+      box-shadow: var(--shadow-btn);
+    }
+
+    /* Learning Paths */
+    .paths-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .path-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--r2);
+      padding: 1.5rem;
+      transition: all 0.3s;
+    }
+
+    .path-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 40px rgba(124, 92, 252, 0.2);
+    }
+
+    .path-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .path-icon {
+      width: 50px;
+      height: 50px;
+      border-radius: 10px;
+      background: var(--grad);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      color: white;
+    }
+
+    .path-title {
+      font-weight: 700;
+      font-size: 1rem;
+    }
+
+    .path-progress {
+      color: var(--txt3);
+      font-size: 0.85rem;
+    }
+
+    .path-courses {
+      color: var(--txt3);
+      font-size: 0.85rem;
+      margin: 1rem 0;
+    }
+
+    .path-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 3rem 2rem;
+      background: var(--panel);
+      border: 2px dashed var(--border);
+      border-radius: var(--r3);
+    }
+
+    .empty-state-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+
+    .empty-state h3 {
+      margin-bottom: 0.5rem;
+    }
+
+    .empty-state p {
+      color: var(--txt3);
+    }
+
+    /* Alert/Loading */
+    .loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      color: var(--txt3);
+    }
+
+    .loading-spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid var(--border);
+      border-top-color: var(--v2);
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <!-- Mesh Background -->
+  <div class="mesh-bg"></div>
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+  <div class="orb orb3"></div>
+
+  <!-- Navigation -->
+  <nav>
+    <a href="../index.html" class="nav-logo">
+      <div class="logo-icon" style="background: var(--grad);">⚡</div>
+      SkillUpNow
+    </a>
+    <div class="nav-actions">
+      <button class="theme-toggle" id="theme-toggle-btn">
+        <div class="theme-toggle-btn">🌙</div>
+      </button>
+      <button class="nav-cta" onclick="logout()">Logout</button>
+    </div>
+  </nav>
+
+  <!-- Profile Container -->
+  <div class="profile-wrapper">
+    <!-- Profile Header -->
+    <div class="profile-header" id="profile-header">
+      <div class="profile-avatar" id="profile-avatar">👤</div>
+      <div class="profile-info">
+        <h2 id="profile-name">Loading...</h2>
+        <p id="profile-email">Email</p>
+        <p id="profile-status">Status: Active</p>
+        <div class="profile-actions">
+          <button class="btn-grad" onclick="editProfile()">Edit Profile</button>
+          <button class="btn-outline" onclick="changePassword()">Change Password</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab Navigation -->
+    <div class="profile-tabs">
+      <button class="profile-tab active" data-tab="courses">📚 My Courses</button>
+      <button class="profile-tab" data-tab="status">📊 My Status</button>
+      <button class="profile-tab" data-tab="certificates">🏆 Certificates</button>
+      <button class="profile-tab" data-tab="paths">🎯 Learning Paths</button>
+    </div>
+
+    <!-- Tab Contents -->
+    <!-- My Courses -->
+    <div class="profile-content active" id="courses-content">
+      <div id="courses-list" class="courses-grid"></div>
+    </div>
+
+    <!-- My Status -->
+    <div class="profile-content" id="status-content">
+      <div class="status-grid" id="status-grid"></div>
+    </div>
+
+    <!-- Certificates -->
+    <div class="profile-content" id="certificates-content">
+      <div id="certificates-list" class="certificates-list"></div>
+    </div>
+
+    <!-- Learning Paths -->
+    <div class="profile-content" id="paths-content">
+      <div class="paths-grid" id="paths-grid"></div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../config/supabase-config.js"></script>
+  <script src="../js/theme.js"></script>
+
+  <script>
+    let currentUser = null;
+
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', async () => {
+      await initProfile();
+      setupTabNavigation();
+      setupTheme();
+    });
+
+    // Setup Tab Navigation
+    function setupTabNavigation() {
+      const tabs = document.querySelectorAll('.profile-tab');
+      tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          tabs.forEach(t => t.classList.remove('active'));
+          document.querySelectorAll('.profile-content').forEach(c => c.classList.remove('active'));
+          
+          tab.classList.add('active');
+          const tabId = tab.getAttribute('data-tab');
+          document.getElementById(`${tabId}-content`).classList.add('active');
+          
+          // Load content when tab is clicked
+          if (tabId === 'courses') loadMyCourses();
+          if (tabId === 'status') loadMyStatus();
+          if (tabId === 'certificates') loadCertificates();
+          if (tabId === 'paths') loadLearningPaths();
+        });
+      });
+    }
+
+    // Initialize Profile
+    async function initProfile() {
+      try {
+        currentUser = await window.supabaseConfig.getCurrentUser();
+        if (!currentUser) {
+          window.location.href = '../index.html';
+          return;
+        }
+
+        // Check if user is admin
+        const isAdmin = await window.supabaseConfig.checkAdminAccess(currentUser.id);
+        if (isAdmin.isAdmin) {
+          window.location.href = './admin-dashboard.html';
+          return;
+        }
+
+        // Load profile info
+        const profile = await window.supabaseConfig.getUserProfile(currentUser.id);
+        displayProfileInfo(profile);
+        
+        // Load initial content
+        await loadMyCourses();
+      } catch (error) {
+        console.error('Profile init error:', error);
+        window.location.href = '../index.html';
+      }
+    }
+
+    // Display Profile Info
+    function displayProfileInfo(profile) {
+      const email = currentUser?.email || 'user@example.com';
+      const name = profile?.full_name || 'User';
+      const avatar = name.charAt(0).toUpperCase();
+      
+      document.getElementById('profile-avatar').textContent = avatar;
+      document.getElementById('profile-name').textContent = name;
+      document.getElementById('profile-email').textContent = `Email: ${email}`;
+      document.getElementById('profile-status').textContent = 'Status: Active Learner ✓';
+    }
+
+    // Load My Courses
+    async function loadMyCourses() {
+      const container = document.getElementById('courses-list');
+      container.innerHTML = '<div class="loading"><div class="loading-spinner"></div> Loading courses...</div>';
+      
+      try {
+        const courses = await window.supabaseConfig.getUserCourses(currentUser.id);
+        
+        if (courses.length === 0) {
+          container.innerHTML = `
+            <div style="grid-column: 1/-1;">
+              <div class="empty-state">
+                <div class="empty-state-icon">📚</div>
+                <h3>No Courses Yet</h3>
+                <p>Start learning by exploring our course catalog</p>
+                <a href="../pages/courses.html" class="btn-grad" style="display: inline-block; margin-top: 1rem;">Browse Courses</a>
+              </div>
+            </div>
+          `;
+          return;
+        }
+
+        container.innerHTML = courses.map(course => `
+          <div class="course-card">
+            <div class="course-header">
+              <h4>${course.course_name}</h4>
+              <span class="course-badge">${course.status}</span>
+            </div>
+            <p style="color: var(--txt3); font-size: 0.9rem; margin-bottom: 1rem;">${course.instructor || 'Expert Instructor'}</p>
+            <div class="course-progress">
+              <div class="course-progress-bar" style="width: ${course.progress || 0}%"></div>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--txt3);">
+              <span>Progress: ${course.progress || 0}%</span>
+              <span>${course.modules_completed || 0}/${course.total_modules || 10} modules</span>
+            </div>
+            <button class="btn-grad" style="width: 100%; margin-top: 1rem; padding: 0.7rem;">Continue Learning</button>
+          </div>
+        `).join('');
+      } catch (error) {
+        console.error('Load courses error:', error);
+        container.innerHTML = '<div style="grid-column: 1/-1;"><p style="color: var(--txt3);">Error loading courses</p></div>';
+      }
+    }
+
+    // Load My Status
+    async function loadMyStatus() {
+      const container = document.getElementById('status-grid');
+      container.innerHTML = '<div style="grid-column: 1/-1;" class="loading"><div class="loading-spinner"></div> Loading stats...</div>';
+      
+      try {
+        const stats = await window.supabaseConfig.getUserStats(currentUser.id);
+        
+        container.innerHTML = `
+          <div class="status-card">
+            <span style="font-size: 1.5rem;">📚</span>
+            <div class="status-value">${stats.courses_enrolled || 0}</div>
+            <div class="status-label">Courses Enrolled</div>
+          </div>
+          <div class="status-card">
+            <span style="font-size: 1.5rem;">✅</span>
+            <div class="status-value">${stats.courses_completed || 0}</div>
+            <div class="status-label">Courses Completed</div>
+          </div>
+          <div class="status-card">
+            <span style="font-size: 1.5rem;">🏆</span>
+            <div class="status-value">${stats.certificates_earned || 0}</div>
+            <div class="status-label">Certificates</div>
+          </div>
+          <div class="status-card">
+            <span style="font-size: 1.5rem;">⏱️</span>
+            <div class="status-value">${stats.hours_learned || 0}h</div>
+            <div class="status-label">Hours Learned</div>
+          </div>
+        `;
+      } catch (error) {
+        console.error('Load status error:', error);
+        container.innerHTML = '<div style="grid-column: 1/-1;"><p style="color: var(--txt3);">Error loading stats</p></div>';
+      }
+    }
+
+    // Load Certificates
+    async function loadCertificates() {
+      const container = document.getElementById('certificates-list');
+      container.innerHTML = '<div class="loading"><div class="loading-spinner"></div> Loading certificates...</div>';
+      
+      try {
+        const certs = await window.supabaseConfig.getUserCertificates(currentUser.id);
+        
+        if (certs.length === 0) {
+          container.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-state-icon">🏆</div>
+              <h3>No Certificates Yet</h3>
+              <p>Complete courses to earn certificates and showcase your skills</p>
+            </div>
+          `;
+          return;
+        }
+
+        container.innerHTML = certs.map(cert => `
+          <div class="cert-item">
+            <div class="cert-details">
+              <h4>${cert.course_name}</h4>
+              <p class="cert-date">Earned on ${new Date(cert.earned_date).toLocaleDateString()}</p>
+            </div>
+            <div class="cert-actions">
+              <button class="cert-btn" onclick="viewCertificate('${cert.id}')">View</button>
+              <button class="cert-btn" onclick="downloadCertificate('${cert.id}')">Download</button>
+            </div>
+          </div>
+        `).join('');
+      } catch (error) {
+        console.error('Load certificates error:', error);
+        container.innerHTML = '<p style="color: var(--txt3); text-align: center;">Error loading certificates</p>';
+      }
+    }
+
+    // Load Learning Paths
+    async function loadLearningPaths() {
+      const container = document.getElementById('paths-grid');
+      container.innerHTML = '<div class="loading"><div class="loading-spinner"></div> Loading paths...</div>';
+      
+      try {
+        const paths = await window.supabaseConfig.getUserLearningPaths(currentUser.id);
+        
+        if (paths.length === 0) {
+          container.innerHTML = `
+            <div style="grid-column: 1/-1;">
+              <div class="empty-state">
+                <div class="empty-state-icon">🎯</div>
+                <h3>No Learning Paths</h3>
+                <p>Start a structured learning path to master new skills</p>
+              </div>
+            </div>
+          `;
+          return;
+        }
+
+        container.innerHTML = paths.map(path => `
+          <div class="path-card">
+            <div class="path-header">
+              <div class="path-icon" style="background: var(--grad);">${path.icon || '🎓'}</div>
+              <div>
+                <div class="path-title">${path.path_name}</div>
+                <div class="path-progress">${path.progress || 0}% Complete</div>
+              </div>
+            </div>
+            <p style="color: var(--txt3); font-size: 0.85rem;">${path.description || 'Complete this learning path'}</p>
+            <div class="path-courses">📚 ${path.total_courses || 0} Courses</div>
+            <div class="path-footer">
+              <div style="font-size: 0.85rem; color: var(--txt3);">
+                <strong>${path.courses_completed || 0}/${path.total_courses || 0}</strong> done
+              </div>
+              <button class="cert-btn" style="background: var(--v2);">Continue Path</button>
+            </div>
+          </div>
+        `).join('');
+      } catch (error) {
+        console.error('Load paths error:', error);
+        container.innerHTML = '<div style="grid-column: 1/-1;"><p style="color: var(--txt3); text-align: center;">Error loading learning paths</p></div>';
+      }
+    }
+
+    // Action Functions
+    function editProfile() {
+      alert('Edit profile feature coming soon!');
+    }
+
+    function changePassword() {
+      alert('Change password feature coming soon!');
+    }
+
+    function viewCertificate(certId) {
+      alert('View certificate feature coming soon!');
+    }
+
+    function downloadCertificate(certId) {
+      alert('Download certificate feature coming soon!');
+    }
+
+    // Logout
+    async function logout() {
+      const result = await window.supabaseConfig.signOut();
+      if (result.success) {
+        window.location.href = '../index.html';
+      }
+    }
+  </script>
+</body>
+</html>

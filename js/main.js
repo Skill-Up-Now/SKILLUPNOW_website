@@ -1,0 +1,469 @@
+/* ==========================================
+   MAIN APPLICATION SCRIPT
+   ========================================== */
+
+class SkillUpNowApp {
+  constructor() {
+    this.currentUser = null;
+    this.selectedCourses = [];
+    this.cart = [];
+    this.emiCalculators = {};
+    this.init();
+  }
+
+  init() {
+    this.setupCursor();
+    this.setupModalFunctionality();
+    this.setupFormValidation();
+    this.setupScrollReveal();
+    this.setupEventListeners();
+    this.setupLazyLoading();
+    this.checkUserSession();
+  }
+
+  // ==================== CUSTOM CURSOR ====================
+  setupCursor() {
+    const cursor = document.getElementById('cursor');
+    const cursorRing = document.getElementById('cursor-ring');
+
+    if (cursor && cursorRing) {
+      document.addEventListener('mousemove', (e) => {
+        cursor.style.left = e.clientX + 'px';
+        cursor.style.top = e.clientY + 'px';
+        cursorRing.style.left = e.clientX + 'px';
+        cursorRing.style.top = e.clientY + 'px';
+      });
+
+      document.addEventListener('mousedown', () => {
+        cursor.style.transform = 'translate(-50%, -50%) scale(0.8)';
+      });
+
+      document.addEventListener('mouseup', () => {
+        cursor.style.transform = 'translate(-50%, -50%) scale(1)';
+      });
+    }
+  }
+
+  // ==================== MODAL FUNCTIONALITY ====================
+  setupModalFunctionality() {
+    const modal = document.getElementById('mo');
+    if (!modal) return;
+
+    // Close modal on overlay click
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        this.closeModal();
+      }
+    });
+
+    // Close modal on close button
+    const closeBtn = modal.querySelector('.mcls');
+    if (closeBtn) {
+      closeBtn.addEventListener('click', () => this.closeModal());
+    }
+
+    // ESC key to close modal
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && modal.classList.contains('open')) {
+        this.closeModal();
+      }
+    });
+  }
+
+  openModal(type = 'login') {
+    const modal = document.getElementById('mo');
+    if (modal) {
+      modal.classList.add('open');
+      this.switchModalTab(type);
+    }
+  }
+
+  closeModal() {
+    const modal = document.getElementById('mo');
+    if (modal) {
+      modal.classList.remove('open');
+    }
+  }
+
+  switchModalTab(tab) {
+    const loginForm = document.getElementById('lf');
+    const registerForm = document.getElementById('rf');
+
+    if (loginForm && registerForm) {
+      if (tab === 'login') {
+        loginForm.style.display = 'block';
+        registerForm.style.display = 'none';
+      } else if (tab === 'register') {
+        loginForm.style.display = 'none';
+        registerForm.style.display = 'block';
+      }
+    }
+  }
+
+  // ==================== FORM VALIDATION ====================
+  setupFormValidation() {
+    const forms = document.querySelectorAll('form');
+    forms.forEach(form => {
+      new FormValidator(form);
+    });
+  }
+
+  // ==================== SCROLL REVEAL ====================
+  setupScrollReveal() {
+    const revealElements = document.querySelectorAll('.reveal');
+
+    const intersectionObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry, index) => {
+        if (entry.isIntersecting) {
+          setTimeout(() => {
+            entry.target.classList.add('visible');
+          }, index * 80);
+          intersectionObserver.unobserve(entry.target);
+        }
+      });
+    }, {
+      threshold: 0.08,
+      rootMargin: '0px 0px -40px 0px'
+    });
+
+    revealElements.forEach(el => intersectionObserver.observe(el));
+  }
+
+  // ==================== EVENT LISTENERS ====================
+  setupEventListeners() {
+    // Course filtering
+    this.setupCourseFiltering();
+
+    // Add to cart
+    this.setupAddToCart();
+
+    // Payment page link
+    this.setupPaymentNavigation();
+  }
+
+  setupCourseFiltering() {
+    const filterButtons = document.querySelectorAll('.ftab');
+    const courseCards = document.querySelectorAll('.course-card');
+
+    filterButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        const category = button.dataset.filter || button.textContent.toLowerCase();
+
+        filterButtons.forEach(btn => btn.classList.remove('active'));
+        button.classList.add('active');
+
+        courseCards.forEach(card => {
+          const cardCategory = card.dataset.cat || card.textContent.toLowerCase();
+          if (category === 'all' || cardCategory === category || button.textContent === 'All') {
+            card.style.display = 'block';
+            setTimeout(() => card.classList.add('visible'), 0);
+          } else {
+            card.style.display = 'none';
+          }
+        });
+      });
+    });
+  }
+
+  setupAddToCart() {
+    const enrollButtons = document.querySelectorAll('.cenroll, .hcard-enroll, .pbtn-grad');
+    enrollButtons.forEach(button => {
+      button.addEventListener('click', (e) => {
+        if (button.classList.contains('pbtn-grad')) {
+          this.openModal('register');
+        } else {
+          e.preventDefault();
+          this.addToCart();
+          this.showNotification('Course added to cart!', 'success');
+        }
+      });
+    });
+  }
+
+  setupPaymentNavigation() {
+    const paymentLinks = document.querySelectorAll('[data-page="payment"]');
+    paymentLinks.forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        window.location.href = 'pages/payment.html';
+      });
+    });
+  }
+
+  // ==================== LAZY LOADING ====================
+  setupLazyLoading() {
+    const lazyImages = document.querySelectorAll('img[data-src]');
+
+    if ('IntersectionObserver' in window) {
+      const imageObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const img = entry.target;
+            img.src = img.dataset.src;
+            img.classList.add('loaded');
+            imageObserver.unobserve(img);
+          }
+        });
+      });
+
+      lazyImages.forEach(img => imageObserver.observe(img));
+    } else {
+      // Fallback for older browsers
+      lazyImages.forEach(img => {
+        img.src = img.dataset.src;
+      });
+    }
+  }
+
+  // ==================== SESSION MANAGEMENT ====================
+  async checkUserSession() {
+    try {
+      // Check Supabase auth session
+      const user = await window.supabaseConfig.getCurrentUser();
+      if (user) {
+        this.currentUser = user;
+        await this.updateUIForLoggedInUser();
+      }
+    } catch (error) {
+      console.error('Session check error:', error);
+    }
+  }
+
+  async updateUIForLoggedInUser() {
+    if (!this.currentUser) return;
+
+    const profileSection = document.getElementById('profile-section');
+    const signInBtn = document.getElementById('signin-btn');
+    const ctaBtn = document.getElementById('cta-btn');
+    const profileBtn = document.getElementById('profile-btn');
+
+    // Show profile icon
+    if (profileSection) {
+      profileSection.style.display = 'flex';
+      
+      // Add click handler to profile button
+      if (profileBtn) {
+        profileBtn.addEventListener('click', () => {
+          window.location.href = 'pages/profile.html';
+        });
+        
+        // Show profile initial
+        const name = this.currentUser.email?.split('@')[0] || 'User';
+        profileBtn.textContent = name.charAt(0).toUpperCase();
+      }
+    }
+
+    // Hide sign in and get started buttons
+    if (signInBtn) signInBtn.style.display = 'none';
+    if (ctaBtn) {
+      ctaBtn.textContent = 'My Courses';
+      ctaBtn.onclick = () => window.location.href = 'pages/courses.html';
+      ctaBtn.style.background = 'var(--v2)';
+    }
+  }
+
+  // ==================== SHOPPING CART ====================
+  addToCart(course = null) {
+    if (!course) {
+      course = this.getSelectedCourseData();
+    }
+
+    this.cart.push({
+      ...course,
+      id: Date.now(),
+      quantity: 1
+    });
+
+    localStorage.setItem('cart', JSON.stringify(this.cart));
+  }
+
+  removeFromCart(courseId) {
+    this.cart = this.cart.filter(item => item.id !== courseId);
+    localStorage.setItem('cart', JSON.stringify(this.cart));
+  }
+
+  getCart() {
+    const cartData = localStorage.getItem('cart');
+    return cartData ? JSON.parse(cartData) : [];
+  }
+
+  getSelectedCourseData() {
+    return {
+      name: 'Selected Course',
+      price: 14999,
+      duration: '48 hours'
+    };
+  }
+
+  // ==================== EMI MANAGEMENT ====================
+  createEMICalculator(courseId, price) {
+    if (!this.emiCalculators[courseId]) {
+      this.emiCalculators[courseId] = new EMICalculator();
+    }
+    return this.emiCalculators[courseId].calculate(price, 12, 12);
+  }
+
+  getEMIOptions(price) {
+    const options = [
+      { months: 3, rate: 0 },   // Zero cost
+      { months: 6, rate: 0 },   // Zero cost
+      { months: 12, rate: 0 },  // Zero cost
+      { months: 24, rate: 12 }  // With interest
+    ];
+
+    return EMICalculator.compareOptions(price, options);
+  }
+
+  // ==================== NOTIFICATIONS ====================
+  showNotification(message, type = 'info', duration = 3000) {
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.textContent = message;
+    notification.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 1rem 1.5rem;
+      background: var(--${type === 'success' ? 'v1' : 'v2'});
+      color: white;
+      border-radius: var(--r4);
+      box-shadow: var(--shadow-btn);
+      z-index: 9999;
+      animation: slideInRight 0.3s ease;
+    `;
+
+    document.body.appendChild(notification);
+
+    setTimeout(() => {
+      notification.style.animation = 'slideOutLeft 0.3s ease';
+      setTimeout(() => notification.remove(), 300);
+    }, duration);
+  }
+
+  // ==================== AUTHENTICATION ====================
+  login(email, password) {
+    // Mock authentication
+    const user = {
+      id: 1,
+      name: email.split('@')[0],
+      email: email,
+      loginTime: new Date()
+    };
+
+    sessionStorage.setItem('userSession', JSON.stringify(user));
+    this.currentUser = user;
+    this.updateUIForLoggedInUser();
+    this.closeModal();
+    this.showNotification('Login successful!', 'success');
+
+    return user;
+  }
+
+  logout() {
+    sessionStorage.removeItem('userSession');
+    this.currentUser = null;
+    this.cart = [];
+    localStorage.removeItem('cart');
+    window.location.reload();
+  }
+
+  register(userData) {
+    // Mock registration
+    const user = {
+      id: Math.random(),
+      ...userData,
+      registrationTime: new Date()
+    };
+
+    sessionStorage.setItem('userSession', JSON.stringify(user));
+    this.currentUser = user;
+    this.updateUIForLoggedInUser();
+    this.closeModal();
+    this.showNotification('Registration successful!', 'success');
+
+    return user;
+  }
+
+  // ==================== UTILITIES ====================
+  formatCurrency(amount) {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      minimumFractionDigits: 0
+    }).format(amount);
+  }
+
+  formatDate(date) {
+    return new Intl.DateTimeFormat('en-IN', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    }).format(new Date(date));
+  }
+
+  debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+      const later = () => {
+        clearTimeout(timeout);
+        func(...args);
+      };
+      clearTimeout(timeout);
+      timeout = setTimeout(later, wait);
+    };
+  }
+
+  throttle(func, limit) {
+    let inThrottle;
+    return function (...args) {
+      if (!inThrottle) {
+        func.apply(this, args);
+        inThrottle = true;
+        setTimeout(() => inThrottle = false, limit);
+      }
+    };
+  }
+
+  // Analytics/Tracking
+  trackEvent(eventName, eventData = {}) {
+    console.log(`Event: ${eventName}`, eventData);
+    // Send to analytics service
+    if (window.gtag) {
+      window.gtag('event', eventName, eventData);
+    }
+  }
+}
+
+// Initialize app when DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+  window.app = new SkillUpNowApp();
+});
+
+// Global functions for easy access
+function openModal(type = 'login') {
+  if (window.app) window.app.openModal(type);
+}
+
+function closeModal() {
+  if (window.app) window.app.closeModal();
+}
+
+function switchModalTab(tab) {
+  if (window.app) window.app.switchModalTab(tab);
+}
+
+function addToCart() {
+  if (window.app) window.app.addToCart();
+}
+
+window.addEventListener('error', (event) => {
+  console.error('Global error:', event);
+  if (window.app) {
+    window.app.showNotification('An error occurred. Please try again.', 'error');
+  }
+});
+
+// Export for use
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = SkillUpNowApp;
+}

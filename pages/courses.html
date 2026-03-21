@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Browse Our Courses - SkillUpNow">
+  <title>Our Courses - SkillUpNow</title>
+  
+  <link rel="stylesheet" href="../css/variables.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="stylesheet" href="../css/forms.css">
+  <link rel="stylesheet" href="../css/responsive.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Supabase Database Connection -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../config/supabase-config.js"></script>
+
+  <!-- Modal Styles -->
+  <style>
+    /* Modal Overlay */
+    .moverlay {
+      position: fixed;
+      inset: 0;
+      z-index: 9998;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      pointer-events: none;
+    }
+
+    .moverlay.open {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: all;
+    }
+
+    /* Modal Box */
+    .modal-box {
+      background: var(--panel);
+      border: 1.5px solid var(--border);
+      border-radius: var(--r3);
+      padding: 2.5rem;
+      max-width: 480px;
+      width: 90vw;
+      z-index: 9999;
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3);
+      transform: scale(0.95);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .moverlay.open .modal-box {
+      transform: scale(1);
+    }
+
+    /* Modal Close Button */
+    .mcls {
+      position: absolute;
+      top: 1.3rem;
+      right: 1.3rem;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: var(--panel2);
+      border: 1px solid var(--border);
+      color: var(--txt3);
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+
+    .mcls:hover {
+      background: var(--border);
+      color: var(--txt);
+      transform: scale(1.1);
+    }
+
+    /* Modal Form Styling */
+    .modal-box .form-group {
+      animation: fadeUp 0.5s ease backwards;
+    }
+
+    .modal-box .form-group:nth-child(n+2) {
+      animation-delay: 0.1s;
+    }
+
+    .modal-box .form-group:nth-child(n+3) {
+      animation-delay: 0.2s;
+    }
+    .course-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--r2);
+      overflow: hidden;
+      transition: all 0.3s var(--ease);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .course-card:hover {
+      border-color: var(--v1);
+      transform: translateY(-8px);
+      box-shadow: 0 20px 40px rgba(124,92,252,0.15);
+    }
+
+    .course-header {
+      background: linear-gradient(135deg, rgba(124,92,252,0.2) 0%, rgba(61,107,255,0.2) 100%);
+      padding: 2rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .course-icon {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--v1) 0%, var(--v2) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      flex-shrink: 0;
+    }
+
+    .course-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--txt);
+      margin: 0;
+    }
+
+    .course-badge {
+      display: inline-block;
+      background: rgba(124,92,252,0.2);
+      color: var(--v1);
+      padding: 0.3rem 0.8rem;
+      border-radius: 2rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-top: 0.3rem;
+    }
+
+    .course-body {
+      padding: 1.5rem;
+      flex: 1;
+    }
+
+    .course-meta {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+      font-size: 0.9rem;
+      color: var(--txt3);
+    }
+
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .course-desc {
+      color: var(--txt3);
+      font-size: 0.95rem;
+      line-height: 1.5;
+      margin-bottom: 1rem;
+    }
+
+    .course-footer {
+      padding: 1.5rem;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .course-price {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--v1);
+    }
+
+    .filter-sidebar {
+      background: var(--panel2);
+      padding: 2rem;
+      border-radius: var(--r2);
+      height: fit-content;
+    }
+
+    .filter-group {
+      margin-bottom: 2rem;
+    }
+
+    .filter-group h4 {
+      margin: 0 0 1rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--txt2);
+    }
+
+    .filter-option {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      margin-bottom: 0.7rem;
+      cursor: pointer;
+    }
+
+    .filter-option input[type="checkbox"] {
+      cursor: pointer;
+    }
+
+    .filter-option label {
+      cursor: pointer;
+      margin: 0;
+      font-weight: 400;
+    }
+
+    .courses-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 2rem;
+    }
+
+    .search-box {
+      background: var(--panel);
+      border: 1.5px solid var(--border);
+      padding: 0.9rem 1.1rem;
+      border-radius: var(--r2);
+      width: 100%;
+      color: var(--txt);
+      font-size: 0.95rem;
+      margin-bottom: 2rem;
+    }
+
+    .search-box::placeholder {
+      color: var(--txt4);
+    }
+  </style>
+</head>
+<body>
+  <div id="cursor"></div>
+  <div id="cursor-ring"></div>
+  <div class="mesh-bg"></div>
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+  <div class="orb orb3"></div>
+
+  <nav>
+    <a href="../index.html" class="nav-logo">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      SkillUpNow
+    </a>
+
+    <ul class="nav-links">
+      <li><a href="courses.html">Courses</a></li>
+      <li><a href="../index.html#why">Why Us</a></li>
+      <li><a href="contact-enquiry.html">Fee Enquiry</a></li>
+      <li><a href="feedback.html">Reviews</a></li>
+    </ul>
+
+    <div class="nav-actions">
+      <div class="theme-toggle" role="button" tabindex="0" aria-pressed="false">
+        <div class="theme-toggle-btn">🌙</div>
+      </div>
+      <div id="profile-section" style="display: none; display: flex; align-items: center; gap: 1rem; position: relative;">
+        <button id="profile-btn" class="profile-icon-btn" title="View Profile">👤</button>
+        <div id="profile-dropdown" class="profile-dropdown">
+          <a href="profile.html" style="display: flex; align-items: center; gap: 0.8rem; padding: 1rem; text-decoration: none; color: var(--txt2); border-bottom: 1px solid var(--border); transition: all 0.25s;">
+            <span style="font-size: 1.2rem;">👤</span>
+            <div><div style="font-weight: 600; color: var(--txt);">My Profile</div><div style="font-size: 0.75rem; color: var(--txt4);">Manage account</div></div>
+          </a>
+          <a href="courses.html" style="display: flex; align-items: center; gap: 0.8rem; padding: 1rem; text-decoration: none; color: var(--txt2); border-bottom: 1px solid var(--border); transition: all 0.25s;">
+            <span style="font-size: 1.2rem;">📚</span>
+            <div><div style="font-weight: 600; color: var(--txt);">My Courses</div><div style="font-size: 0.75rem; color: var(--txt4);">Continue learning</div></div>
+          </a>
+          <a href="payment.html" style="display: flex; align-items: center; gap: 0.8rem; padding: 1rem; text-decoration: none; color: var(--txt2); border-bottom: 1px solid var(--border); transition: all 0.25s;">
+            <span style="font-size: 1.2rem;">💳</span>
+            <div><div style="font-weight: 600; color: var(--txt);">Payments</div><div style="font-size: 0.75rem; color: var(--txt4);">Track transactions</div></div>
+          </a>
+          <button onclick="window.profileNav.logout()" style="width: 100%; text-align: left; padding: 1rem; border: none; background: transparent; color: var(--txt2); cursor: pointer; display: flex; align-items: center; gap: 0.8rem; transition: all 0.25s;">
+            <span style="font-size: 1.2rem;">🚪</span>
+            <div><div style="font-weight: 600; color: var(--txt);">Logout</div><div style="font-size: 0.75rem; color: var(--txt4);">Sign out</div></div>
+          </button>
+        </div>
+      </div>
+      <button class="nav-signin" id="signin-btn" onclick="openModal('login')" style="display: none;">Sign In</button>
+      <button class="nav-cta" id="cta-btn" onclick="openModal('register')">Get Started</button>
+    </div>
+  </nav>
+
+  <section style="padding: 3rem 5vw; min-height: calc(100vh - 200px);">
+    <div style="max-width: 1400px; margin: 0 auto;">
+      <h1 style="font-family: 'Cormorant Garamond', serif; font-size: 2.5rem; text-align: center; margin-bottom: 1rem;">Our Premium Courses</h1>
+      <p style="text-align: center; color: var(--txt3); margin-bottom: 2rem; font-size: 1.05rem;">Choose from 48+ expertly-designed courses covering cloud, DevOps, AI, security, and more.</p>
+
+      <div style="display: grid; grid-template-columns: 1fr 3fr; gap: 2rem; margin-bottom: 3rem;">
+        <!-- Sidebar Filters -->
+        <div class="filter-sidebar">
+          <h3 style="margin-top: 0;">Filters</h3>
+
+          <!-- Search -->
+          <input type="text" id="searchBox" class="search-box" placeholder="Search courses...">
+
+          <!-- Category Filter -->
+          <div class="filter-group">
+            <h4>Category</h4>
+            <div class="filter-option">
+              <input type="checkbox" id="cat-cloud" value="cloud" onchange="applyFilters()">
+              <label for="cat-cloud">Cloud Computing</label>
+            </div>
+            <div class="filter-option">
+              <input type="checkbox" id="cat-devops" value="devops" onchange="applyFilters()">
+              <label for="cat-devops">DevOps & Containers</label>
+            </div>
+            <div class="filter-option">
+              <input type="checkbox" id="cat-ai" value="ai" onchange="applyFilters()">
+              <label for="cat-ai">AI & Machine Learning</label>
+            </div>
+            <div class="filter-option">
+              <input type="checkbox" id="cat-security" value="security" onchange="applyFilters()">
+              <label for="cat-security">Cybersecurity</label>
+            </div>
+            <div class="filter-option">
+              <input type="checkbox" id="cat-data" value="data" onchange="applyFilters()">
+              <label for="cat-data">Data Engineering</label>
+            </div>
+          </div>
+
+          <!-- Level Filter -->
+          <div class="filter-group">
+            <h4>Level</h4>
+            <div class="filter-option">
+              <input type="checkbox" id="level-beginner" value="beginner" onchange="applyFilters()">
+              <label for="level-beginner">Beginner</label>
+            </div>
+            <div class="filter-option">
+              <input type="checkbox" id="level-intermediate" value="intermediate" onchange="applyFilters()">
+              <label for="level-intermediate">Intermediate</label>
+            </div>
+            <div class="filter-option">
+              <input type="checkbox" id="level-advanced" value="advanced" onchange="applyFilters()">
+              <label for="level-advanced">Advanced</label>
+            </div>
+          </div>
+
+          <button class="btn-outline" onclick="resetFilters()" style="width: 100%; margin-top: 1rem; border: 1.5px solid var(--border2);">Reset Filters</button>
+        </div>
+
+        <!-- Courses Grid -->
+        <div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <p id="courseCount" style="color: var(--txt3); margin: 0;">Showing 12 courses</p>
+            <select id="sortBy" onchange="applySort()" style="background: var(--panel); border: 1.5px solid var(--border); color: var(--txt); padding: 0.7rem 1rem; border-radius: var(--r1);">
+              <option value="popular">Most Popular</option>
+              <option value="newest">Newest</option>
+              <option value="rating">Top Rated</option>
+            </select>
+          </div>
+
+          <div class="courses-grid" id="coursesGrid">
+            <!-- Courses will be populated here -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer style="background: rgba(8,6,18,0.95); border-top: 1px solid var(--border); padding: 3rem 5vw; text-align: center; margin-top: 4rem;">
+    <p style="color: var(--txt4); font-size: 0.9rem;">© 2025 SkillUpNow. Start your learning journey today! | <a href="contact-enquiry.html" style="color: var(--v2); text-decoration: none;">Fee Enquiry</a></p>
+  </footer>
+
+  <!-- Modal -->
+  <div class="moverlay" id="mo" onclick="if(event.target===this) closeModal()">
+    <div class="modal-box" style="animation: modalSlideUp 0.3s cubic-bezier(0.4,0,0.2,1);">
+      <button class="mcls" onclick="closeModal()" style="position: absolute; top: 1.3rem; right: 1.3rem; width: 30px; height: 30px; border-radius: 50%; background: var(--panel); border: 1px solid var(--border); color: var(--txt3); font-size: 0.85rem; display: flex; align-items: center; justify-content: center; font-weight: 700; transition: all 0.2s; cursor: pointer;">✕</button>
+
+      <div id="lf">
+        <h3 style="font-family: 'Cormorant Garamond', serif; font-weight: 700; font-size: 1.9rem; color: var(--txt); margin-bottom: 0.4rem; letter-spacing: -0.01em;">Welcome Back</h3>
+        <p class="msub" style="font-size: 0.85rem; color: var(--txt3); margin-bottom: 2rem; font-weight: 400;">Sign in to access your learning dashboard</p>
+
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" placeholder="you@example.com" style="background: rgba(255,255,255,0.04); border: 1px solid var(--border); color: var(--txt); padding: 0.8rem 1rem; border-radius: var(--r2); font-size: 0.9rem;"/>
+        </div>
+
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" placeholder="••••••••" style="background: rgba(255,255,255,0.04); border: 1px solid var(--border); color: var(--txt); padding: 0.8rem 1rem; border-radius: var(--r2); font-size: 0.9rem;"/>
+        </div>
+
+        <button class="btn-grad" style="width: 100%; padding: 0.95rem; margin-top: 0.5rem;" onclick="submitLogin()">Sign In</button>
+
+        <div style="text-align: center; font-size: 0.83rem; color: var(--txt3); margin-top: 1rem;">
+          No account yet? <a onclick="switchModalTab('register')" style="color: var(--v2); font-weight: 700; text-decoration: none; cursor: pointer;">Create one free →</a>
+        </div>
+      </div>
+
+      <div id="rf" style="display: none;">
+        <h3 style="font-family: 'Cormorant Garamond', serif; font-weight: 700; font-size: 1.9rem; color: var(--txt); margin-bottom: 0.4rem; letter-spacing: -0.01em;">Join SkillUpNow</h3>
+        <p class="msub" style="font-size: 0.85rem; color: var(--txt3); margin-bottom: 2rem; font-weight: 400;">Join 12,000+ professionals already upskilling</p>
+
+        <div class="form-group">
+          <label>Full Name</label>
+          <input type="text" placeholder="Your full name" style="background: rgba(255,255,255,0.04); border: 1px solid var(--border); color: var(--txt); padding: 0.8rem 1rem; border-radius: var(--r2); font-size: 0.9rem;"/>
+        </div>
+
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" placeholder="you@example.com" style="background: rgba(255,255,255,0.04); border: 1px solid var(--border); color: var(--txt); padding: 0.8rem 1rem; border-radius: var(--r2); font-size: 0.9rem;"/>
+        </div>
+
+        <div class="form-group">
+          <label>Phone Number</label>
+          <input type="tel" placeholder="+91 9876543210" style="background: rgba(255,255,255,0.04); border: 1px solid var(--border); color: var(--txt); padding: 0.8rem 1rem; border-radius: var(--r2); font-size: 0.9rem;"/>
+        </div>
+
+        <div class="form-group">
+          <label>I want to learn</label>
+          <select style="background: rgba(255,255,255,0.04); border: 1px solid var(--border); color: var(--txt); padding: 0.8rem 1rem; border-radius: var(--r2); font-size: 0.9rem;">
+            <option>Cloud Computing</option>
+            <option>DevOps & CI/CD</option>
+            <option>AI / Machine Learning</option>
+            <option>Cybersecurity</option>
+            <option>Data Engineering</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" placeholder="Create a strong password" style="background: rgba(255,255,255,0.04); border: 1px solid var(--border); color: var(--txt); padding: 0.8rem 1rem; border-radius: var(--r2); font-size: 0.9rem;"/>
+        </div>
+
+        <button class="btn-grad" style="width: 100%; padding: 0.95rem;" onclick="submitRegister()">Create My Account</button>
+
+        <div style="text-align: center; font-size: 0.83rem; color: var(--txt3); margin-top: 1rem;">
+          Already have an account? <a onclick="switchModalTab('login')" style="color: var(--v2); font-weight: 700; text-decoration: none; cursor: pointer;">Sign in →</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/validations.js"></script>
+  <script src="../js/theme.js"></script>
+  <script src="../js/profile-nav.js"></script>
+  <script src="../js/emi-calculator.js"></script>
+  <script src="../js/payment.js"></script>
+  <script src="../js/main.js"></script>
+
+  <script>
+    const courses = [
+      { id: 1, title: 'AWS Solutions Architect Pro', category: 'cloud', level: 'advanced', icon: '☁️', price: 14999, duration: '48 hrs', students: 3200, rating: 4.8, badge: 'Bestseller', desc: 'Comprehensive guide to designing scalable, secure, and reliable AWS solutions.' },
+      { id: 2, title: 'Kubernetes & Docker Mastery', category: 'devops', level: 'intermediate', icon: '🐳', price: 12999, duration: '36 hrs', students: 2800, rating: 4.7, desc: 'Master containerization and orchestration with Docker and Kubernetes.' },
+      { id: 3, title: 'Generative AI with Python', category: 'ai', level: 'advanced', icon: '🤖', price: 16999, duration: '60 hrs', students: 1500, rating: 4.9, badge: 'New Course', desc: 'Build advanced AI applications using ChatGPT, LLMs, and generative models.' },
+      { id: 4, title: 'Cybersecurity Fundamentals', category: 'security', level: 'beginner', icon: '🔒', price: 11999, duration: '40 hrs', students: 4100, rating: 4.6, desc: 'Essential security concepts, threat analysis, and defense mechanisms.' },
+      { id: 5, title: 'Terraform & IaC Engineering', category: 'devops', level: 'intermediate', icon: '🏗️', price: 13999, duration: '32 hrs', students: 1800, rating: 4.8, badge: 'Popular', desc: 'Infrastructure as Code using Terraform, CloudFormation, and CI/CD pipelines.' },
+      { id: 6, title: 'Data Engineering with Spark', category: 'data', level: 'advanced', icon: '⚡', price: 15999, duration: '52 hrs', students: 2100, rating: 4.7, desc: 'Build production-grade data pipelines with Apache Spark and Python.' },
+      { id: 7, title: 'Google Cloud Professional', category: 'cloud', level: 'advanced', icon: '☁️', price: 14999, duration: '48 hrs', students: 1900, rating: 4.8, desc: 'Become a GCP expert with comprehensive cloud architecture and implementation.' },
+      { id: 8, title: 'Microservices Architecture', category: 'devops', level: 'advanced', icon: '🔧', price: 15999, duration: '44 hrs', students: 1200, rating: 4.9, desc: 'Design and build resilient microservices-based applications.' },
+      { id: 9, title: 'Advanced Python Development', category: 'cloud', level: 'intermediate', icon: '🐍', price: 11999, duration: '40 hrs', students: 3500, rating: 4.7, desc: 'Master advanced Python concepts including async, decorators, and metaprogramming.' },
+      { id: 10, title: 'Machine Learning Engineering', category: 'ai', level: 'advanced', icon: '🧠', price: 17999, duration: '64 hrs', students: 980, rating: 4.9, badge: 'Expert', desc: 'Production ML pipeline development, model deployment, and MLOps.' },
+      { id: 11, title: 'Network Security & Ethical Hacking', category: 'security', level: 'advanced', icon: '🛡️', price: 17999, duration: '56 hrs', students: 780, rating: 4.8, desc: 'Penetration testing, vulnerability assessment, and network hardening.' },
+      { id: 12, title: 'Azure Cloud Fundamentals', category: 'cloud', level: 'beginner', icon: '☁️', price: 10999, duration: '32 hrs', students: 2400, rating: 4.6, desc: 'Introduction to Microsoft Azure cloud services and cloud computing concepts.' }
+    ];
+
+    let filteredCourses = [...courses];
+    let currentSort = 'popular';
+
+    function renderCourses(coursesToRender) {
+      const grid = document.getElementById('coursesGrid');
+      grid.innerHTML = coursesToRender.map(course => `
+        <div class="course-card reveal">
+          <div class="course-header">
+            <div class="course-icon">${course.icon}</div>
+            <div>
+              <h3 class="course-title">${course.title}</h3>
+              <span class="course-badge">${course.level}</span>
+              ${course.badge ? `<span class="course-badge" style="margin-left: 0.3rem;">${course.badge}</span>` : ''}
+            </div>
+          </div>
+          <div class="course-body">
+            <div class="course-meta">
+              <div class="meta-item">⏱️ ${course.duration}</div>
+              <div class="meta-item">👥 ${course.students} students</div>
+              <div class="meta-item">⭐ ${course.rating}</div>
+            </div>
+            <p class="course-desc">${course.desc}</p>
+          </div>
+          <div class="course-footer">
+            <button class="btn-grad" onclick="enrollCourse(${course.id}, '${course.title}')">Enroll Now</button>
+          </div>
+        </div>
+      `).join('');
+
+      document.getElementById('courseCount').textContent = `Showing ${coursesToRender.length} courses`;
+
+      // Trigger animations
+      if (window.app && window.app.setupScrollReveal) {
+        setTimeout(() => window.app.setupScrollReveal(), 100);
+      }
+    }
+
+    function applyFilters() {
+      const searchTerm = document.getElementById('searchBox').value.toLowerCase();
+      const selectedCategories = Array.from(document.querySelectorAll('[id^="cat-"]:checked')).map(el => el.value);
+      const selectedLevels = Array.from(document.querySelectorAll('[id^="level-"]:checked')).map(el => el.value);
+      const selectedPrices = Array.from(document.querySelectorAll('[id^="price-"]:checked')).map(el => el.value);
+
+      filteredCourses = courses.filter(course => {
+        const matchesSearch = course.title.toLowerCase().includes(searchTerm) || course.desc.toLowerCase().includes(searchTerm);
+        const matchesCategory = selectedCategories.length === 0 || selectedCategories.includes(course.category);
+        const matchesLevel = selectedLevels.length === 0 || selectedLevels.includes(course.level);
+        
+        let matchesPrice = selectedPrices.length === 0;
+        if (!matchesPrice) {
+          matchesPrice = selectedPrices.some(range => {
+
+        return matchesSearch && matchesCategory && matchesLevel
+
+    function applySort() {
+      currentSort = document.getElementById('sortBy').value;
+      let sorted = [...filteredCourses];
+
+      if (currentSort === 'rating') sorted.sort((a, b) => b.rating - a.rating);
+      else if (currentSort === 'newest') sorted.reverse();
+      else sorted.sort((a, b) => b.students - a.students); // popular
+
+      renderCourses(sorted);
+    }
+
+    function resetFilters() {
+      document.querySelectorAll('input[type="checkbox"]').forEach(el => el.checked = false);
+      document.getElementById('searchBox').value = '';
+      document.getElementById('sortBy').value = 'popular';
+      filteredCourses = [...courses];
+      applySort();
+    }
+
+    async function enrollCourse(courseId, courseTitle) {
+      // Check if user is logged in
+      const userId = localStorage.getItem('user_id');
+      
+      if (!userId) {
+        // Prompt user to login
+        if (window.app) {
+          window.app.showNotification('Please login to enroll in this course', 'info');
+        }
+        openModal('login');
+        return;
+      }
+
+      if (!window.supabaseConfig) {
+        if (window.app) window.app.showNotification('Database connection error', 'error');
+        return;
+      }
+
+      // Find full course data
+      const course = courses.find(c => c.id == courseId);
+      if (!course) {
+        if (window.app) window.app.showNotification('Course not found', 'error');
+        return;
+      }
+
+      try {
+        const result = await window.supabaseConfig.enrollCourse(userId, {
+          id: course.id,
+          title: course.title,
+          category: course.category,
+          level: course.level
+        });
+
+        if (result.success) {
+          if (window.app) {
+            window.app.showNotification(`✅ Successfully enrolled in ${courseTitle}!`, 'success');
+          }
+          console.log('✅ Course enrollment saved to database');
+        } else {
+          if (window.app) {
+            window.app.showNotification(result.error || 'Enrollment failed', 'error');
+          }
+        }
+      } catch (error) {
+        console.error('Enrollment error:', error);
+        if (window.app) {
+          window.app.showNotification('An error occurred during enrollment', 'error');
+        }
+      }
+    }
+
+    function openModal(type = 'login') {
+      const modal = document.getElementById('mo');
+      if (modal) {
+        modal.classList.add('open');
+        const loginForm = document.getElementById('lf');
+        const registerForm = document.getElementById('rf');
+        
+        if (type === 'login') {
+          loginForm.style.display = 'block';
+          registerForm.style.display = 'none';
+        } else {
+          loginForm.style.display = 'none';
+          registerForm.style.display = 'block';
+        }
+      }
+    }
+
+    function closeModal() {
+      const modal = document.getElementById('mo');
+      if (modal) {
+        modal.classList.remove('open');
+      }
+    }
+
+    function switchModalTab(tab) {
+      const loginForm = document.getElementById('lf');
+      const registerForm = document.getElementById('rf');
+      
+      if (tab === 'login') {
+        loginForm.style.display = 'block';
+        registerForm.style.display = 'none';
+      } else {
+        loginForm.style.display = 'none';
+        registerForm.style.display = 'block';
+      }
+    }
+
+    function submitLogin() {
+      const loginForm = document.getElementById('lf');
+      const email = loginForm.querySelector('input[type="email"]').value.trim();
+      const password = loginForm.querySelector('input[type="password"]').value;
+
+      if (!email || !password) {
+        if (window.app) window.app.showNotification('Please fill all fields', 'error');
+        return;
+      }
+
+      if (!window.supabaseConfig) {
+        console.error('Supabase not initialized');
+        if (window.app) window.app.showNotification('Database connection error', 'error');
+        return;
+      }
+
+      const btn = loginForm.querySelector('button.btn-grad');
+      const originalText = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = 'Signing in...';
+
+      window.supabaseConfig.signIn(email, password).then(result => {
+        if (result.success) {
+          if (window.app) window.app.showNotification('Welcome back!', 'success');
+          localStorage.setItem('user_id', result.data.user.id);
+          localStorage.setItem('user_email', result.data.user.email);
+          setTimeout(() => closeModal(), 1000);
+        } else {
+          if (window.app) window.app.showNotification(result.error || 'Login failed', 'error');
+        }
+        btn.disabled = false;
+        btn.textContent = originalText;
+      }).catch(error => {
+        console.error('Login error:', error);
+        if (window.app) window.app.showNotification('An error occurred', 'error');
+        btn.disabled = false;
+        btn.textContent = originalText;
+      });
+    }
+
+    function submitRegister() {
+      const registerForm = document.getElementById('rf');
+      const name = registerForm.querySelector('input[type="text"]').value.trim();
+      const email = registerForm.querySelector('input[type="email"]').value.trim();
+      const phone = registerForm.querySelector('input[type="tel"]').value.trim();
+      const interest = registerForm.querySelector('select').value;
+      const password = registerForm.querySelector('input[type="password"]').value;
+
+      if (!name || !email || !phone || !password) {
+        if (window.app) window.app.showNotification('Please fill all fields', 'error');
+        return;
+      }
+
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        if (window.app) window.app.showNotification('Please enter a valid email', 'error');
+        return;
+      }
+
+      if (password.length < 6) {
+        if (window.app) window.app.showNotification('Password must be at least 6 characters', 'error');
+        return;
+      }
+
+      if (!window.supabaseConfig) {
+        console.error('Supabase not initialized');
+        if (window.app) window.app.showNotification('Database connection error', 'error');
+        return;
+      }
+
+      const btn = registerForm.querySelector('button.btn-grad');
+      const originalText = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = 'Creating account...';
+
+      window.supabaseConfig.signUp(email, password, {
+        full_name: name,
+        email: email,
+        phone_number: phone,
+        learning_interest: interest,
+        experience_level: 'beginner'
+      }).then(result => {
+        if (result.success) {
+          if (window.app) window.app.showNotification('Account created! Check your email.', 'success');
+          localStorage.setItem('user_email', email);
+          setTimeout(() => {
+            closeModal();
+            registerForm.querySelectorAll('input, select').forEach(field => field.value = '');
+          }, 1000);
+        } else {
+          if (window.app) window.app.showNotification(result.error || 'Registration failed', 'error');
+        }
+        btn.disabled = false;
+        btn.textContent = originalText;
+      }).catch(error => {
+        console.error('Registration error:', error);
+        if (window.app) window.app.showNotification('An error occurred', 'error');
+        btn.disabled = false;
+        btn.textContent = originalText;
+      });
+    }
+
+    document.getElementById('searchBox').addEventListener('input', applyFilters);
+
+    // Initialize
+    setTimeout(() => {
+      const themeManager = new ThemeManager();
+      themeManager.init();
+      const app = new SkillUpNowApp();
+      app.init();
+      window.app = app;
+      renderCourses(courses);
+    }, 100);
+  </script>
+
+  <!-- Footer -->
+  <footer style="background: var(--panel); border-top: 1px solid var(--border); padding: 2rem 5vw; margin-top: 4rem;">
+    <div style="max-width: 1200px; margin: 0 auto; text-align: center; color: var(--txt3); font-size: 0.9rem;">
+      <p>&copy; 2026 SkillUpNow. All rights reserved. | <a href="#" style="color: var(--v2); text-decoration: none;">Privacy Policy</a> | <a href="#" style="color: var(--v2); text-decoration: none;">Terms of Service</a></p>
+    </div>
+  </footer>
+</body>
+</html>

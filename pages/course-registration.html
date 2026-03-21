@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Course Registration - SkillUpNow">
+  <title>Course Registration - SkillUpNow</title>
+  
+  <link rel="stylesheet" href="../css/variables.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="stylesheet" href="../css/forms.css">
+  <link rel="stylesheet" href="../css/responsive.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div id="cursor"></div>
+  <div id="cursor-ring"></div>
+  <div class="mesh-bg"></div>
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+  <div class="orb orb3"></div>
+
+  <nav>
+    <a href="../index.html" class="nav-logo">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      SkillUpNow
+    </a>
+
+    <ul class="nav-links">
+      <li><a href="courses.html">Courses</a></li>
+      <li><a href="../index.html#why">Why Us</a></li>
+      <li><a href="contact-enquiry.html">Fee Enquiry</a></li>
+      <li><a href="feedback.html">Reviews</a></li>
+    </ul>
+
+    <div class="nav-actions">
+      <div class="theme-toggle" role="button" tabindex="0" aria-pressed="false">
+        <div class="theme-toggle-btn">🌙</div>
+      </div>      <div id="profile-section" style="display: flex; align-items: center; gap: 1rem; position: relative;">
+        <button id="profile-btn" class="profile-icon-btn" title="View Profile">👤</button>
+        <div id="profile-dropdown" class="profile-dropdown">
+          <a href="profile.html" style="display: flex; align-items: center; gap: 0.8rem; padding: 1rem; text-decoration: none; color: var(--txt2); border-bottom: 1px solid var(--border); transition: all 0.25s;">
+            <span style="font-size: 1.2rem;">👤</span>
+            <div><div style="font-weight: 600; color: var(--txt);">My Profile</div></div>
+          </a>
+          <button onclick="window.profileNav.logout()" style="width: 100%; text-align: left; padding: 1rem; border: none; background: transparent; cursor: pointer; display: flex; align-items: center; gap: 0.8rem;">
+            <span style="font-size: 1.2rem;">🚪</span>
+            <div><div style="font-weight: 600; color: var(--txt);">Logout</div></div>
+          </button>
+        </div>
+      </div>    </div>
+  </nav>
+
+  <section style="padding: 3rem 5vw; min-height: calc(100vh - 200px);">
+    <div style="max-width: 900px; margin: 0 auto;">
+      <h1 style="font-family: 'Cormorant Garamond', serif; font-size: 2.5rem; text-align: center; margin-bottom: 1rem;">Course Registration</h1>
+      <p style="text-align: center; color: var(--txt3); margin-bottom: 3rem; font-size: 1.05rem;">Start your learning journey today. Register for our premium courses.</p>
+
+      <form class="form-container" id="courseRegForm" onsubmit="submitCourseRegistration(event)">
+        <!-- Student Information -->
+        <h2 style="margin-bottom: 2rem; border-bottom: 2px solid var(--border); padding-bottom: 1rem;">Student Information</h2>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>First Name *</label>
+            <input type="text" name="firstName" required data-validate="required"/>
+          </div>
+          <div class="form-group">
+            <label>Last Name *</label>
+            <input type="text" name="lastName" required data-validate="required"/>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Email Address *</label>
+            <input type="email" name="email" required data-validate="required|email"/>
+          </div>
+          <div class="form-group">
+            <label>Phone Number *</label>
+            <input type="tel" name="phone" required data-validate="required|phone"/>
+          </div>
+        </div>
+
+        <!-- Course Selection -->
+        <h2 style="margin-top: 3rem; margin-bottom: 2rem; border-bottom: 2px solid var(--border); padding-bottom: 1rem;">Select Course</h2>
+
+        <div class="form-group">
+          <label>Choose Course *</label>
+          <select name="course" required onchange="updateCourseDetails()" style="background: var(--panel); border: 1.5px solid var(--border); color: var(--txt); padding: 0.9rem 1.1rem; border-radius: var(--r2);">
+            <option value="">Select a course</option>
+            <option value="aws">AWS Solutions Architect Pro - ₹14,999</option>
+            <option value="k8s">Kubernetes & Docker Mastery - ₹12,999</option>
+            <option value="ai">Generative AI with Python - ₹16,999</option>
+            <option value="cyber">Cybersecurity Fundamentals - ₹11,999</option>
+            <option value="terraform">Terraform & IaC Engineering - ₹13,999</option>
+            <option value="spark">Data Engineering with Spark - ₹15,999</option>
+          </select>
+        </div>
+
+        <div style="background: var(--panel2); padding: 1.5rem; border-radius: var(--r2); margin-bottom: 2rem;">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+            <span style="color: var(--txt3);">Course Price:</span>
+            <span id="coursePrice" style="font-weight: 700; color: var(--v1);">-</span>
+          </div>
+          <div style="display: flex; justify-content: space-between;">
+            <span style="color: var(--txt3);">Duration:</span>
+            <span id="courseDuration" style="font-weight: 600; color: var(--txt2);">-</span>
+          </div>
+        </div>
+
+        <!-- Learning Background -->
+        <h2 style="margin-top: 3rem; margin-bottom: 2rem; border-bottom: 2px solid var(--border); padding-bottom: 1rem;">Learning Background</h2>
+
+        <div class="form-group">
+          <label>Experience Level *</label>
+          <div style="display: flex; gap: 1rem; margin-top: 0.5rem;">
+            <label style="display: flex; gap: 0.5rem; align-items: center; margin: 0; font-weight: 400;">
+              <input type="radio" name="experience" value="beginner" required/>
+              Beginner
+            </label>
+            <label style="display: flex; gap: 0.5rem; align-items: center; margin: 0; font-weight: 400;">
+              <input type="radio" name="experience" value="intermediate" required/>
+              Intermediate
+            </label>
+            <label style="display: flex; gap: 0.5rem; align-items: center; margin: 0; font-weight: 400;">
+              <input type="radio" name="experience" value="advanced" required/>
+              Advanced
+            </label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>What are your learning goals? *</label>
+          <textarea name="goals" placeholder="Tell us about your learning goals..." required data-validate="required|min:10" style="background: var(--panel); border: 1.5px solid var(--border); color: var(--txt); padding: 0.9rem 1.1rem; border-radius: var(--r2);"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Current Role</label>
+          <input type="text" name="currentRole" placeholder="e.g., Systems Administrator, Developer, etc."/>
+        </div>
+
+        <!-- Schedule Preference -->
+        <h2 style="margin-top: 3rem; margin-bottom: 2rem; border-bottom: 2px solid var(--border); padding-bottom: 1rem;">Schedule Preference</h2>
+
+        <div class="form-group">
+          <label>Preferred Learning Schedule *</label>
+          <div style="display: flex; flex-direction: column; gap: 0.8rem;">
+            <label style="display: flex; gap: 0.7rem; align-items: center; margin: 0; font-weight: 400;">
+              <input type="radio" name="schedule" value="weekday-evening" required/>
+              <span>Weekday Evening (6 PM - 9 PM)</span>
+            </label>
+            <label style="display: flex; gap: 0.7rem; align-items: center; margin: 0; font-weight: 400;">
+              <input type="radio" name="schedule" value="weekend" required/>
+              <span>Weekend (10 AM - 6 PM)</span>
+            </label>
+            <label style="display: flex; gap: 0.7rem; align-items: center; margin: 0; font-weight: 400;">
+              <input type="radio" name="schedule" value="flexible" required/>
+              <span>Flexible (On-demand)</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Additional Info -->
+        <h2 style="margin-top: 3rem; margin-bottom: 2rem; border-bottom: 2px solid var(--border); padding-bottom: 1rem;">Additional Information</h2>
+
+        <div style="background: rgba(124,92,252,0.1); border-left: 4px solid var(--v1); padding: 1rem; border-radius: 0 var(--r2) var(--r2) 0; margin-bottom: 2rem;">
+          <p style="margin: 0; font-size: 0.95rem; color: var(--txt);">✓ Lifetime access to course materials<br/>✓ Live mentorship sessions<br/>✓ Project-based learning<br/>✓ Job placement support</p>
+        </div>
+
+        <!-- Terms & Conditions -->
+        <div style="background: var(--panel2); padding: 1.5rem; border-radius: var(--r2); margin-bottom: 2rem;">
+          <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+            <input type="checkbox" name="agreeTerms" required/>
+            <label style="margin: 0; font-size: 0.95rem;">I agree to the terms and conditions</label>
+          </div>
+          <div style="display: flex; gap: 1rem;">
+            <input type="checkbox" name="newsletter" />
+            <label style="margin: 0; font-size: 0.95rem;">Send me course updates and special offers</label>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+          <button type="submit" class="btn-grad" style="flex: 1;">Complete Registration</button>
+          <button type="reset" class="btn-outline" style="flex: 1; border: 1.5px solid var(--border2);">Clear Form</button>
+        </div>
+      </form>
+
+      <!-- Success Message -->
+      <div id="successMessage" style="display: none; margin-top: 2rem;">
+        <div style="background: rgba(16,185,129,0.1); border-left: 4px solid #10b981; padding: 2rem; border-radius: 0 var(--r2) var(--r2) 0; text-align: center;">
+          <h3 style="color: #10b981; font-size: 1.5rem; margin-bottom: 1rem;">✓ Registration Successful!</h3>
+          <p style="color: var(--txt3); margin-bottom: 1rem;">You have been enrolled in the course. Check your email for login credentials.</p>
+          <p style="color: var(--txt4); margin-bottom: 1.5rem; font-size: 0.95rem;">You will receive an invitation link shortly. Your learning journey starts now!</p>
+          <a href="../index.html" class="btn-grad">Back to Home</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer style="background: rgba(8,6,18,0.95); border-top: 1px solid var(--border); padding: 3rem 5vw; text-align: center; margin-top: 4rem;">
+    <p style="color: var(--txt4); font-size: 0.9rem;">© 2025 SkillUpNow. Start learning today!</p>
+  </footer>
+
+  <script src="../js/validations.js"></script>
+  <script src="../js/theme.js"></script>
+  <script src="../js/profile-nav.js"></script>
+  <script src="../js/emi-calculator.js"></script>
+  <script src="../js/payment.js"></script>
+  <script src="../js/main.js"></script>
+
+  <script>
+    const courseData = {
+      aws: { price: '₹14,999', duration: '48 hours', name: 'AWS Solutions Architect' },
+      k8s: { price: '₹12,999', duration: '36 hours', name: 'Kubernetes & Docker' },
+      ai: { price: '₹16,999', duration: '60 hours', name: 'Generative AI Python' },
+      cyber: { price: '₹11,999', duration: '40 hours', name: 'Cybersecurity' },
+      terraform: { price: '₹13,999', duration: '32 hours', name: 'Terraform & IaC' },
+      spark: { price: '₹15,999', duration: '52 hours', name: 'Data Engineering' }
+    };
+
+    function updateCourseDetails() {
+      const course = document.querySelector('select[name="course"]').value;
+      if (course && courseData[course]) {
+        document.getElementById('coursePrice').textContent = courseData[course].price;
+        document.getElementById('courseDuration').textContent = courseData[course].duration;
+      }
+    }
+
+    const form = document.getElementById('courseRegForm');
+    const validator = new FormValidator(form);
+
+    function submitCourseRegistration(e) {
+      e.preventDefault();
+
+      if (!validator.validateAll()) {
+        if (window.app) window.app.showNotification('Please correct the errors', 'error');
+        return;
+      }
+
+      setTimeout(() => {
+        form.style.display = 'none';
+        document.getElementById('successMessage').style.display = 'block';
+        if (window.app) {
+          window.app.showNotification('Course registration successful!', 'success');
+        }
+      }, 500);
+    }
+  </script>
+</body>
+</html>

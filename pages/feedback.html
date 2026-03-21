@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Course Feedback - SkillUpNow">
+  <title>Course Feedback - SkillUpNow</title>
+  
+  <link rel="stylesheet" href="../css/variables.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="stylesheet" href="../css/forms.css">
+  <link rel="stylesheet" href="../css/responsive.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    .rating-stars {
+      display: flex;
+      gap: 0.8rem;
+      margin-top: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .star {
+      cursor: pointer;
+      font-size: 2rem;
+      color: var(--txt4);
+      transition: all 0.2s var(--ease);
+    }
+
+    .star:hover,
+    .star.active {
+      color: var(--v1);
+      transform: scale(1.2);
+    }
+
+    .rating-label {
+      display: block;
+      margin-top: 0.5rem;
+      font-size: 0.85rem;
+      color: var(--txt3);
+      min-height: 1.2rem;
+    }
+
+    .feedback-section {
+      background: var(--panel2);
+      padding: 2rem;
+      border-radius: var(--r2);
+      margin-bottom: 2rem;
+      border-left: 4px solid var(--v1);
+    }
+  </style>
+</head>
+<body>
+  <div id="cursor"></div>
+  <div id="cursor-ring"></div>
+  <div class="mesh-bg"></div>
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+  <div class="orb orb3"></div>
+
+  <nav>
+    <a href="../index.html" class="nav-logo">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      SkillUpNow
+    </a>
+
+    <ul class="nav-links">
+      <li><a href="courses.html">Courses</a></li>
+      <li><a href="../index.html#why">Why Us</a></li>
+      <li><a href="contact-enquiry.html">Fee Enquiry</a></li>
+      <li><a href="feedback.html">Reviews</a></li>
+    </ul>
+
+    <div class="nav-actions">
+      <div class="theme-toggle" role="button" tabindex="0" aria-pressed="false">
+        <div class="theme-toggle-btn">🌙</div>
+      </div>
+      <div id="profile-section" style="display: flex; align-items: center; gap: 1rem; position: relative;">
+        <button id="profile-btn" class="profile-icon-btn" title="View Profile">👤</button>
+        <div id="profile-dropdown" class="profile-dropdown">
+          <a href="profile.html" style="display: flex; align-items: center; gap: 0.8rem; padding: 1rem; text-decoration: none; color: var(--txt2); border-bottom: 1px solid var(--border); transition: all 0.25s;">
+            <span style="font-size: 1.2rem;">👤</span>
+            <div><div style="font-weight: 600; color: var(--txt);">My Profile</div></div>
+          </a>
+          <button onclick="window.profileNav.logout()" style="width: 100%; text-align: left; padding: 1rem; border: none; background: transparent; cursor: pointer; display: flex; align-items: center; gap: 0.8rem;">
+            <span style="font-size: 1.2rem;">🚪</span>
+            <div><div style="font-weight: 600; color: var(--txt);">Logout</div></div>
+          </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <section style="padding: 3rem 5vw; min-height: calc(100vh - 200px);">
+    <div style="max-width: 900px; margin: 0 auto;">
+      <h1 style="font-family: 'Cormorant Garamond', serif; font-size: 2.5rem; text-align: center; margin-bottom: 1rem;">Share Your Feedback</h1>
+      <p style="text-align: center; color: var(--txt3); margin-bottom: 3rem; font-size: 1.05rem;">Your feedback helps us improve. Tell us about your learning experience.</p>
+
+      <form class="form-container" id="feedbackForm" onsubmit="submitFeedback(event)">
+        <!-- Course Selection -->
+        <h2 style="margin-bottom: 2rem; border-bottom: 2px solid var(--border); padding-bottom: 1rem;">Course Details</h2>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Course Name *</label>
+            <select name="course" required style="background: var(--panel); border: 1.5px solid var(--border); color: var(--txt); padding: 0.9rem 1.1rem; border-radius: var(--r2);">
+              <option value="">Select a course</option>
+              <option value="aws">AWS Solutions Architect Pro</option>
+              <option value="k8s">Kubernetes & Docker Mastery</option>
+              <option value="ai">Generative AI with Python</option>
+              <option value="cyber">Cybersecurity Fundamentals</option>
+              <option value="terraform">Terraform & IaC Engineering</option>
+              <option value="spark">Data Engineering with Spark</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Completion Date *</label>
+            <input type="date" name="completionDate" required data-validate="required|date"/>
+          </div>
+        </div>
+
+        <!-- Ratings Section -->
+        <div class="feedback-section">
+          <h3 style="margin-bottom: 2rem;">Rating Your Experience</h3>
+
+          <div style="margin-bottom: 2.5rem;">
+            <label style="display: block; margin-bottom: 0.5rem;">Course Content Quality *</label>
+            <div class="rating-stars" id="contentRating">
+              <span class="star" onclick="setRating(this, 'contentQuality', 1)">★</span>
+              <span class="star" onclick="setRating(this, 'contentQuality', 2)">★</span>
+              <span class="star" onclick="setRating(this, 'contentQuality', 3)">★</span>
+              <span class="star" onclick="setRating(this, 'contentQuality', 4)">★</span>
+              <span class="star" onclick="setRating(this, 'contentQuality', 5)">★</span>
+            </div>
+            <span class="rating-label" id="contentQualityLabel">Click to rate</span>
+            <input type="hidden" name="contentQuality" value="0" required/>
+          </div>
+
+          <div style="margin-bottom: 2.5rem;">
+            <label style="display: block; margin-bottom: 0.5rem;">Instructor Quality *</label>
+            <div class="rating-stars" id="instructorRating">
+              <span class="star" onclick="setRating(this, 'instructorQuality', 1)">★</span>
+              <span class="star" onclick="setRating(this, 'instructorQuality', 2)">★</span>
+              <span class="star" onclick="setRating(this, 'instructorQuality', 3)">★</span>
+              <span class="star" onclick="setRating(this, 'instructorQuality', 4)">★</span>
+              <span class="star" onclick="setRating(this, 'instructorQuality', 5)">★</span>
+            </div>
+            <span class="rating-label" id="instructorQualityLabel">Click to rate</span>
+            <input type="hidden" name="instructorQuality" value="0" required/>
+          </div>
+
+          <div style="margin-bottom: 2.5rem;">
+            <label style="display: block; margin-bottom: 0.5rem;">Course Pacing *</label>
+            <div class="rating-stars" id="pacingRating">
+              <span class="star" onclick="setRating(this, 'coursePacing', 1)">★</span>
+              <span class="star" onclick="setRating(this, 'coursePacing', 2)">★</span>
+              <span class="star" onclick="setRating(this, 'coursePacing', 3)">★</span>
+              <span class="star" onclick="setRating(this, 'coursePacing', 4)">★</span>
+              <span class="star" onclick="setRating(this, 'coursePacing', 5)">★</span>
+            </div>
+            <span class="rating-label" id="coursePacingLabel">Click to rate</span>
+            <input type="hidden" name="coursePacing" value="0" required/>
+          </div>
+
+          <div style="margin-bottom: 2.5rem;">
+            <label style="display: block; margin-bottom: 0.5rem;">Learning Materials *</label>
+            <div class="rating-stars" id="materialsRating">
+              <span class="star" onclick="setRating(this, 'learningMaterials', 1)">★</span>
+              <span class="star" onclick="setRating(this, 'learningMaterials', 2)">★</span>
+              <span class="star" onclick="setRating(this, 'learningMaterials', 3)">★</span>
+              <span class="star" onclick="setRating(this, 'learningMaterials', 4)">★</span>
+              <span class="star" onclick="setRating(this, 'learningMaterials', 5)">★</span>
+            </div>
+            <span class="rating-label" id="learningMaterialsLabel">Click to rate</span>
+            <input type="hidden" name="learningMaterials" value="0" required/>
+          </div>
+
+          <div>
+            <label style="display: block; margin-bottom: 0.5rem;">Support & Mentorship *</label>
+            <div class="rating-stars" id="supportRating">
+              <span class="star" onclick="setRating(this, 'supportQuality', 1)">★</span>
+              <span class="star" onclick="setRating(this, 'supportQuality', 2)">★</span>
+              <span class="star" onclick="setRating(this, 'supportQuality', 3)">★</span>
+              <span class="star" onclick="setRating(this, 'supportQuality', 4)">★</span>
+              <span class="star" onclick="setRating(this, 'supportQuality', 5)">★</span>
+            </div>
+            <span class="rating-label" id="supportQualityLabel">Click to rate</span>
+            <input type="hidden" name="supportQuality" value="0" required/>
+          </div>
+        </div>
+
+        <!-- Recommendation -->
+        <h2 style="margin-bottom: 2rem; border-bottom: 2px solid var(--border); padding-bottom: 1rem;">Recommendation</h2>
+
+        <div class="form-group">
+          <label>Would you recommend this course to others? *</label>
+          <div style="display: flex; gap: 2rem; margin-top: 0.5rem;">
+            <label style="display: flex; gap: 0.7rem; align-items: center; margin: 0; font-weight: 400;">
+              <input type="radio" name="recommend" value="definitely" required/>
+              <span>Definitely Yes</span>
+            </label>
+            <label style="display: flex; gap: 0.7rem; align-items: center; margin: 0; font-weight: 400;">
+              <input type="radio" name="recommend" value="probably" required/>
+              <span>Probably Yes</span>
+            </label>
+            <label style="display: flex; gap: 0.7rem; align-items: center; margin: 0; font-weight: 400;">
+              <input type="radio" name="recommend" value="unsure" required/>
+              <span>Unsure</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Detailed Feedback -->
+        <h2 style="margin-top: 3rem; margin-bottom: 2rem; border-bottom: 2px solid var(--border); padding-bottom: 1rem;">Detailed Feedback</h2>
+
+        <div class="form-group">
+          <label>What did you like most about this course? *</label>
+          <textarea name="likeBest" placeholder="Share what you enjoyed most..." required data-validate="required|min:10" style="background: var(--panel); border: 1.5px solid var(--border); color: var(--txt); padding: 0.9rem 1.1rem; border-radius: var(--r2); min-height: 100px;"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>What could be improved?</label>
+          <textarea name="improvements" placeholder="Areas for improvement..." style="background: var(--panel); border: 1.5px solid var(--border); color: var(--txt); padding: 0.9rem 1.1rem; border-radius: var(--r2); min-height: 100px;"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>How will you apply this knowledge? *</label>
+          <textarea name="application" placeholder="Describe how you plan to apply what you learned..." required data-validate="required|min:10" style="background: var(--panel); border: 1.5px solid var(--border); color: var(--txt); padding: 0.9rem 1.1rem; border-radius: var(--r2); min-height: 100px;"></textarea>
+        </div>
+
+        <!-- Personal Info -->
+        <h2 style="margin-top: 3rem; margin-bottom: 2rem; border-bottom: 2px solid var(--border); padding-bottom: 1rem;">Personal Information</h2>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Full Name</label>
+            <input type="text" name="fullName" placeholder="Anonymous" data-validate=""/>
+          </div>
+          <div class="form-group">
+            <label>Email (for follow-up)</label>
+            <input type="email" name="email" placeholder="name@example.com" data-validate="email"/>
+          </div>
+        </div>
+
+        <!-- Options -->
+        <div style="background: var(--panel2); padding: 1.5rem; border-radius: var(--r2); margin-bottom: 2rem;">
+          <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+            <input type="checkbox" name="anonymous" id="anonymousCheck"/>
+            <label style="margin: 0; font-size: 0.95rem;" for="anonymousCheck">Keep my feedback anonymous</label>
+          </div>
+          <div style="display: flex; gap: 1rem;">
+            <input type="checkbox" name="allowPublish" checked/>
+            <label style="margin: 0; font-size: 0.95rem;">Allow my feedback to be published as a testimonial</label>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+          <button type="submit" class="btn-grad" style="flex: 1;">Submit Feedback</button>
+          <button type="reset" class="btn-outline" style="flex: 1; border: 1.5px solid var(--border2);">Clear Form</button>
+        </div>
+      </form>
+
+      <!-- Success Message -->
+      <div id="successMessage" style="display: none; margin-top: 2rem;">
+        <div style="background: rgba(16,185,129,0.1); border-left: 4px solid #10b981; padding: 2rem; border-radius: 0 var(--r2) var(--r2) 0; text-align: center;">
+          <h3 style="color: #10b981; font-size: 1.5rem; margin-bottom: 1rem;">✓ Thank You for Your Feedback!</h3>
+          <p style="color: var(--txt3); margin-bottom: 1rem;">Your feedback has been recorded successfully.</p>
+          <p style="color: var(--txt4); margin-bottom: 1.5rem; font-size: 0.95rem;">We really appreciate your time and valuable insights. Your feedback helps us enhance our courses and teaching methods.</p>
+          <a href="../index.html" class="btn-grad">Back to Home</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer style="background: rgba(8,6,18,0.95); border-top: 1px solid var(--border); padding: 3rem 5vw; text-align: center; margin-top: 4rem;">
+    <p style="color: var(--txt4); font-size: 0.9rem;">© 2025 SkillUpNow. Learning with your feedback!</p>
+  </footer>
+
+  <script src="../js/validations.js"></script>
+  <script src="../js/theme.js"></script>
+  <script src="../js/profile-nav.js"></script>
+  <script src="../js/emi-calculator.js"></script>
+  <script src="../js/payment.js"></script>
+  <script src="../js/main.js"></script>
+
+  <script>
+    const ratingLabels = {
+      contentQuality: ['Poor', 'Fair', 'Good', 'Very Good', 'Excellent'],
+      instructorQuality: ['Poor', 'Fair', 'Good', 'Very Good', 'Excellent'],
+      coursePacing: ['Too Fast', 'Fast', 'Just Right', 'Slow', 'Too Slow'],
+      learningMaterials: ['Poor', 'Fair', 'Good', 'Very Good', 'Excellent'],
+      supportQuality: ['Poor', 'Fair', 'Good', 'Very Good', 'Excellent']
+    };
+
+    function setRating(element, fieldName, rating) {
+      const parent = element.parentElement;
+      const stars = parent.querySelectorAll('.star');
+      
+      stars.forEach((star, index) => {
+        if (index < rating) {
+          star.classList.add('active');
+        } else {
+          star.classList.remove('active');
+        }
+      });
+
+      document.querySelector(`input[name="${fieldName}"]`).value = rating;
+      document.getElementById(fieldName + 'Label').textContent = ratingLabels[fieldName][rating - 1];
+    }
+
+    const form = document.getElementById('feedbackForm');
+    const validator = new FormValidator(form);
+
+    form.addEventListener('change', (e) => {
+      if (e.target.name === 'anonymous') {
+        const emailField = form.querySelector('input[name="email"]');
+        const nameField = form.querySelector('input[name="fullName"]');
+        if (e.target.checked) {
+          emailField.disabled = true;
+          nameField.disabled = true;
+          emailField.value = 'anonymous@skillupnow.com';
+          nameField.value = 'Anonymous Student';
+        } else {
+          emailField.disabled = false;
+          nameField.disabled = false;
+          emailField.value = '';
+          nameField.value = '';
+        }
+      }
+    });
+
+    function submitFeedback(e) {
+      e.preventDefault();
+
+      // Check if all star ratings are selected
+      const ratings = ['contentQuality', 'instructorQuality', 'coursePacing', 'learningMaterials', 'supportQuality'];
+      let valid = true;
+      for (const rating of ratings) {
+        if (parseInt(form.querySelector(`input[name="${rating}"]`).value) === 0) {
+          valid = false;
+          if (window.app) window.app.showNotification(`Please rate ${rating}`, 'error');
+          break;
+        }
+      }
+
+      if (!valid) return;
+
+      if (!validator.validateAll()) {
+        if (window.app) window.app.showNotification('Please correct the errors', 'error');
+        return;
+      }
+
+      setTimeout(() => {
+        form.style.display = 'none';
+        document.getElementById('successMessage').style.display = 'block';
+        if (window.app) {
+          window.app.showNotification('Feedback submitted successfully!', 'success');
+        }
+      }, 500);
+    }
+
+    // Initialize theme on page load
+    setTimeout(() => {
+      const themeManager = new ThemeManager();
+      themeManager.init();
+      const app = new SkillUpNowApp();
+      app.init();
+      window.app = app;
+    }, 100);
+  </script>
+</body>
+</html>

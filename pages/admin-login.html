@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Admin Login - SkillUpNow">
+  <title>Admin Login - SkillUpNow</title>
+
+  <link rel="stylesheet" href="../css/variables.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="stylesheet" href="../css/forms.css">
+  <link rel="stylesheet" href="../css/responsive.css">
+
+  <style>
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--txt);
+    }
+
+    .login-container {
+      width: 100%;
+      max-width: 480px;
+      padding: 2rem;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--r3);
+      box-shadow: var(--shadow-card);
+    }
+
+    .login-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .login-header-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+
+    .login-header h1 {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+      background: var(--grad);
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .login-header p {
+      color: var(--txt3);
+      font-size: 0.95rem;
+    }
+
+    .login-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .form-group label {
+      font-weight: 600;
+      color: var(--txt);
+      font-size: 0.95rem;
+    }
+
+    .form-group input {
+      padding: 0.9rem 1rem;
+      border: 1px solid var(--border);
+      border-radius: var(--r1);
+      background: var(--bg);
+      color: var(--txt);
+      font-family: inherit;
+      transition: all 0.3s;
+      font-size: 0.95rem;
+    }
+
+    .form-group input:focus {
+      outline: none;
+      border-color: var(--v2);
+      box-shadow: 0 0 0 3px rgba(124, 92, 252, 0.1);
+    }
+
+    .form-group input::placeholder {
+      color: var(--txt4);
+    }
+
+    .login-btn {
+      padding: 1rem;
+      background: var(--grad);
+      color: white;
+      border: none;
+      border-radius: var(--r2);
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .login-btn:hover {
+      box-shadow: var(--shadow-btn);
+      transform: translateY(-2px);
+    }
+
+    .login-btn:active {
+      transform: translateY(0);
+    }
+
+    .login-btn.loading {
+      opacity: 0.7;
+      pointer-events: none;
+    }
+
+    .alert {
+      padding: 1rem;
+      border-radius: var(--r1);
+      margin-bottom: 1rem;
+      font-size: 0.9rem;
+      display: none;
+    }
+
+    .alert.error {
+      display: block;
+      background: rgba(255, 68, 68, 0.1);
+      border: 1px solid rgba(255, 68, 68, 0.3);
+      color: #ff4444;
+    }
+
+    .alert.success {
+      display: block;
+      background: rgba(68, 255, 68, 0.1);
+      border: 1px solid rgba(68, 255, 68, 0.3);
+      color: #44ff44;
+    }
+
+    .login-footer {
+      text-align: center;
+      margin-top: 2rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .login-footer p {
+      color: var(--txt3);
+      font-size: 0.85rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .login-footer a {
+      color: var(--v2);
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+
+    .login-footer a:hover {
+      color: var(--v1);
+    }
+
+    .theme-toggle {
+      position: fixed;
+      top: 2rem;
+      right: 2rem;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .theme-toggle:hover {
+      border-color: var(--v2);
+      box-shadow: var(--shadow-card);
+    }
+
+    .nav-logo {
+      position: fixed;
+      top: 2rem;
+      left: 2rem;
+      font-size: 1.2rem;
+      font-weight: 800;
+      background: var(--grad);
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    @media (max-width: 600px) {
+      .login-container {
+        border-radius: var(--r2);
+        padding: 1.5rem;
+      }
+
+      .login-header h1 {
+        font-size: 1.5rem;
+      }
+
+      .nav-logo,
+      .theme-toggle {
+        position: static;
+        margin-bottom: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Theme Toggle -->
+  <button class="theme-toggle" id="theme-toggle-btn" title="Toggle Theme">
+    <span id="theme-icon">🌙</span>
+  </button>
+
+  <!-- Main Login Container -->
+  <div class="login-container">
+    <!-- Header -->
+    <div class="login-header">
+      <div class="login-header-icon">🔐</div>
+      <h1>Admin Portal</h1>
+      <p>Secure access for administrators</p>
+    </div>
+
+    <!-- Alert Message -->
+    <div id="alert" class="alert"></div>
+
+    <!-- Login Form -->
+    <form class="login-form" id="loginForm" onsubmit="handleLogin(event)">
+      <div class="form-group">
+        <label for="email">📧 Email Address</label>
+        <input 
+          type="email" 
+          id="email" 
+          name="email" 
+          placeholder="admin@example.com"
+          required
+          autocomplete="email"
+        >
+      </div>
+
+      <div class="form-group">
+        <label for="password">🔑 Password</label>
+        <input 
+          type="password" 
+          id="password" 
+          name="password" 
+          placeholder="Enter your password"
+          required
+          autocomplete="current-password"
+        >
+      </div>
+
+      <button type="submit" class="login-btn" id="loginBtn">🔓 Sign In as Admin</button>
+    </form>
+
+    <!-- Footer -->
+    <div class="login-footer">
+      <p>Not an admin?</p>
+      <a href="../index.html">Back to Home</a>
+      <!-- <p style="margin-top: 1rem; font-size: 0.8rem;">Admin credentials required. Contact support if you need access.</p> -->
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="../config/supabase-config.js"></script>
+  <script src="../js/theme.js"></script>
+
+  <script>
+    async function handleLogin(event) {
+      event.preventDefault();
+
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const alert = document.getElementById('alert');
+      const loginBtn = document.getElementById('loginBtn');
+
+      // Validate inputs
+      if (!email || !password) {
+        showAlert('Please enter both email and password', 'error');
+        return;
+      }
+
+      try {
+        // Disable button
+        loginBtn.disabled = true;
+        loginBtn.classList.add('loading');
+        loginBtn.textContent = '⏳ Signing in...';
+
+        // Attempt login
+        const result = await window.supabaseConfig.signIn(email, password);
+
+        if (!result.success) {
+          showAlert(result.error || 'Login failed. Please try again.', 'error');
+          loginBtn.disabled = false;
+          loginBtn.classList.remove('loading');
+          loginBtn.textContent = '🔓 Sign In as Admin';
+          return;
+        }
+
+        // Check if admin
+        const user = result.data.user;
+        const adminCheck = await window.supabaseConfig.checkAdminAccess(user.id);
+
+        if (!adminCheck.isAdmin) {
+          // Not an admin - sign out and show error
+          await window.supabaseConfig.signOut();
+          showAlert('❌ Access Denied: You do not have admin privileges.', 'error');
+          loginBtn.disabled = false;
+          loginBtn.classList.remove('loading');
+          loginBtn.textContent = '🔓 Sign In as Admin';
+          return;
+        }
+
+        // Admin verified - redirect to dashboard
+        showAlert('✅ Admin access verified. Redirecting...', 'success');
+        setTimeout(() => {
+          window.location.href = './admin-dashboard.html';
+        }, 1000);
+
+      } catch (error) {
+        console.error('Login error:', error);
+        showAlert('An error occurred. Please try again.', 'error');
+        loginBtn.disabled = false;
+        loginBtn.classList.remove('loading');
+        loginBtn.textContent = '🔓 Sign In as Admin';
+      }
+    }
+
+    function showAlert(message, type) {
+      const alert = document.getElementById('alert');
+      alert.className = `alert ${type}`;
+      alert.textContent = message;
+      alert.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    // Check if already logged in
+    document.addEventListener('DOMContentLoaded', async () => {
+      try {
+        const user = await window.supabaseConfig.getCurrentUser();
+        if (user) {
+          const adminCheck = await window.supabaseConfig.checkAdminAccess(user.id);
+          if (adminCheck.isAdmin) {
+            window.location.href = './admin-dashboard.html';
+          }
+        }
+      } catch (error) {
+        console.error('Auth check error:', error);
+      }
+    });
+  </script>
+</body>
+</html>

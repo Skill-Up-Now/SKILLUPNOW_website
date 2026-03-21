@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Fee Enquiry & Contact Form - SkillUpNow">
+  <title>Fee Enquiry & Contact - SkillUpNow</title>
+  
+  <link rel="stylesheet" href="../css/variables.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="stylesheet" href="../css/forms.css">
+  <link rel="stylesheet" href="../css/responsive.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Supabase Database Connection -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../config/supabase-config.js"></script>
+
+  <style>
+    .enquiry-hero {
+      text-align: center;
+      padding: 6rem 5vw 4rem;
+      background: linear-gradient(180deg, rgba(124,92,252,0.1) 0%, transparent 100%);
+    }
+
+    .enquiry-hero h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2rem, 4.5vw, 3.8rem);
+      font-weight: 700;
+      color: var(--txt);
+      margin-bottom: 1rem;
+      background: var(--grad);
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .enquiry-hero p {
+      color: var(--txt3);
+      font-size: 1.1rem;
+      max-width: 600px;
+      margin: 0 auto 3rem;
+      line-height: 1.6;
+    }
+
+    .enquiry-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      padding: 4rem 5vw;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .enquiry-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .form-section-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--txt);
+      margin-top: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .form-group label {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--txt2);
+      text-transform: capitalize;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      color: var(--txt);
+      padding: 0.85rem 1.1rem;
+      border-radius: var(--r2);
+      font-size: 0.9rem;
+      font-family: 'Outfit', sans-serif;
+      transition: all 0.3s ease;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: var(--v1);
+      background: var(--panel2);
+      box-shadow: 0 0 0 3px rgba(124, 92, 252, 0.1);
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .form-checkbox {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-top: 0.5rem;
+    }
+
+    .form-checkbox input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+      accent-color: var(--v1);
+    }
+
+    .form-checkbox label {
+      cursor: pointer;
+      font-size: 0.85rem;
+      color: var(--txt3);
+      margin: 0;
+    }
+
+    .submit-btn {
+      background: var(--grad);
+      color: white;
+      padding: 1rem;
+      border: none;
+      border-radius: var(--r2);
+      font-weight: 700;
+      font-size: 0.95rem;
+      cursor: pointer;
+      margin-top: 1.5rem;
+      transition: all 0.3s ease;
+      box-shadow: var(--shadow-btn);
+    }
+
+    .submit-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 40px rgba(124, 92, 252, 0.55);
+    }
+
+    .enquiry-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+
+    .info-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      padding: 2rem;
+      border-radius: var(--r2);
+      transition: all 0.3s ease;
+    }
+
+    .info-card:hover {
+      border-color: var(--v1);
+      box-shadow: 0 12px 40px rgba(124, 92, 252, 0.15);
+      transform: translateY(-4px);
+    }
+
+    .info-icon {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--v1) 0%, var(--v2) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .info-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--txt);
+      margin-bottom: 0.5rem;
+    }
+
+    .info-desc {
+      font-size: 0.9rem;
+      color: var(--txt3);
+      line-height: 1.6;
+    }
+
+    .info-link {
+      color: var(--v1);
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.3s ease;
+    }
+
+    .info-link:hover {
+      color: var(--v2);
+    }
+
+    .benefits-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+
+    .benefit-item {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      font-size: 0.9rem;
+      color: var(--txt3);
+    }
+
+    .benefit-icon {
+      width: 24px;
+      height: 24px;
+      background: linear-gradient(135deg, var(--v1) 0%, var(--b1) 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .timeline-benefits {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+
+    .timeline-item {
+      display: flex;
+      gap: 1.5rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .timeline-item:last-child {
+      border-bottom: none;
+    }
+
+    .timeline-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--v1);
+      margin-top: 0.3rem;
+      flex-shrink: 0;
+    }
+
+    .timeline-content h4 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--txt);
+      margin-bottom: 0.3rem;
+    }
+
+    .timeline-content p {
+      font-size: 0.85rem;
+      color: var(--txt3);
+      line-height: 1.5;
+    }
+
+    @media (max-width: 768px) {
+      .enquiry-container {
+        grid-template-columns: 1fr;
+        gap: 3rem;
+        padding: 3rem 5vw;
+      }
+
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+
+      .benefits-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .enquiry-hero {
+        padding: 4rem 5vw 3rem;
+      }
+
+      .enquiry-hero h1 {
+        font-size: clamp(1.5rem, 3.5vw, 2.5rem);
+      }
+    }
+
+    /* Modal Overlay */
+    .moverlay {
+      position: fixed;
+      inset: 0;
+      z-index: 9998;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      pointer-events: none;
+    }
+
+    .moverlay.open {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: all;
+    }
+
+    /* Modal Box */
+    .modal-box {
+      background: var(--panel);
+      border: 1.5px solid var(--border);
+      border-radius: var(--r3);
+      padding: 2.5rem;
+      max-width: 480px;
+      width: 90vw;
+      z-index: 9999;
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3);
+      transform: scale(0.95);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .moverlay.open .modal-box {
+      transform: scale(1);
+    }
+
+    /* Modal Close Button */
+    .mcls {
+      position: absolute;
+      top: 1.3rem;
+      right: 1.3rem;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: var(--panel2);
+      border: 1px solid var(--border);
+      color: var(--txt3);
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+
+    .mcls:hover {
+      background: var(--border);
+      color: var(--txt);
+      transform: scale(1.1);
+    }
+
+    /* Modal Form Styling */
+    .modal-box .form-group {
+      animation: fadeUp 0.5s ease backwards;
+    }
+
+    .modal-box .form-group:nth-child(n+2) {
+      animation-delay: 0.1s;
+    }
+
+    .modal-box .form-group:nth-child(n+3) {
+      animation-delay: 0.2s;
+    }
+  </style>
+</head>
+<body>
+  <!-- Cursor Elements -->
+  <div id="cursor"></div>
+  <div id="cursor-ring"></div>
+
+  <!-- Background Elements -->
+  <div class="mesh-bg"></div>
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+  <div class="orb orb3"></div>
+
+  <!-- Navigation -->
+  <nav>
+    <a href="../index.html" class="nav-logo">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      SkillUpNow
+    </a>
+
+    <ul class="nav-links">
+      <li><a href="courses.html">Courses</a></li>
+      <li><a href="../index.html#why">Why Us</a></li>
+      <li><a href="contact-enquiry.html">Fee Enquiry</a></li>
+      <li><a href="feedback.html">Reviews</a></li>
+    </ul>
+
+    <div class="nav-actions">
+      <div class="theme-toggle" role="button" tabindex="0" aria-pressed="false">
+        <div class="theme-toggle-btn">🌙</div>
+      </div>      <div id="profile-section" style="display: flex; align-items: center; gap: 1rem; position: relative;">
+        <button id="profile-btn" class="profile-icon-btn" title="View Profile">👤</button>
+        <div id="profile-dropdown" class="profile-dropdown">
+          <a href="profile.html" style="display: flex; align-items: center; gap: 0.8rem; padding: 1rem; text-decoration: none; color: var(--txt2); border-bottom: 1px solid var(--border); transition: all 0.25s;">
+            <span style="font-size: 1.2rem;">👤</span>
+            <div><div style="font-weight: 600; color: var(--txt);">My Profile</div></div>
+          </a>
+          <button onclick="window.profileNav.logout()" style="width: 100%; text-align: left; padding: 1rem; border: none; background: transparent; cursor: pointer; display: flex; align-items: center; gap: 0.8rem;">
+            <span style="font-size: 1.2rem;">🚪</span>
+            <div><div style="font-weight: 600; color: var(--txt);">Logout</div></div>
+          </button>
+        </div>
+      </div>    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="enquiry-hero">
+    <h1>Fee Enquiry & Contact Information</h1>
+    <p>Get comprehensive information about our training programs, flexible payment options, and EMI facilities. Our team is here to help you choose the right path for your career growth.</p>
+  </section>
+
+  <!-- Main Content -->
+  <section class="enquiry-container">
+    <!-- Form Column -->
+    <div class="enquiry-form">
+      <h2 style="font-family: 'Cormorant Garamond', serif; font-size: 1.8rem; color: var(--txt); margin-bottom: 0.5rem;">Send Your Enquiry</h2>
+      
+      <form id="enquiryForm" onsubmit="handleEnquirySubmit(event)">
+        <!-- Personal Information -->
+        <div class="form-section-title">Personal Information</div>
+        
+        <div class="form-group">
+          <label>Full Name</label>
+          <input type="text" name="fullName" placeholder="Your full name" required>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Email Address</label>
+            <input type="email" name="email" placeholder="your@email.com" required>
+          </div>
+          <div class="form-group">
+            <label>Phone Number</label>
+            <input type="tel" name="phone" placeholder="+91 9876543210" required>
+          </div>
+        </div>
+
+        <!-- Program Details -->
+        <div class="form-section-title">Program & Payment Interest</div>
+        
+        <div class="form-group">
+          <label>Which course are you interested in?</label>
+          <select name="courseInterest" required>
+            <option value="">Select a course...</option>
+            <option value="cloud">Cloud Computing (AWS/Azure/GCP)</option>
+            <option value="devops">DevOps & CI/CD</option>
+            <option value="ml">AI & Machine Learning</option>
+            <option value="security">Cybersecurity Professional</option>
+            <option value="data">Data Engineering</option>
+            <option value="python">Python Programming</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Program Duration</label>
+          <select name="duration" required>
+            <option value="">Select duration...</option>
+            <option value="4">4 Weeks - Intensive</option>
+            <option value="8">8 Weeks - Standard</option>
+            <option value="12">12 Weeks - Comprehensive</option>
+            <option value="16">16 Weeks - Professional</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Preferred Payment Method</label>
+          <select name="paymentMethod" required>
+            <option value="">Select payment method...</option>
+            <option value="onetime">One-Time Payment</option>
+            <option value="emi3">EMI - 3 Months</option>
+            <option value="emi6">EMI - 6 Months</option>
+            <option value="emi12">EMI - 12 Months</option>
+            <option value="corporate">Corporate Training</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+
+        <!-- Additional Information -->
+        <div class="form-section-title">Tell Us More</div>
+        
+        <div class="form-group">
+          <label>Professional Experience</label>
+          <select name="experience" required>
+            <option value="">Select experience level...</option>
+            <option value="fresher">Fresher (0-1 year)</option>
+            <option value="junior">Junior (1-3 years)</option>
+            <option value="mid">Mid-Level (3-5 years)</option>
+            <option value="senior">Senior (5+ years)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Your Message / Questions</label>
+          <textarea name="message" placeholder="Tell us your specific queries or requirements..."></textarea>
+        </div>
+
+        <!-- Preferences -->
+        <div style="margin-top: 1.5rem; display: flex; flex-direction: column; gap: 0.8rem;">
+          <div class="form-checkbox">
+            <input type="checkbox" id="scheduleCall" name="scheduleCall">
+            <label for="scheduleCall">Schedule a free consultation call with our counselor</label>
+          </div>
+          <div class="form-checkbox">
+            <input type="checkbox" id="receive" name="receive" checked>
+            <label for="receive">Receive emails about course updates and special offers</label>
+          </div>
+          <div class="form-checkbox">
+            <input type="checkbox" id="agree" name="agree" required>
+            <label for="agree">I agree to the terms and privacy policy</label>
+          </div>
+        </div>
+
+        <button type="submit" class="submit-btn">Submit Enquiry →</button>
+      </form>
+    </div>
+
+    <!-- Info Column -->
+    <div class="enquiry-info">
+      <!-- Contact Methods -->
+      <div class="info-card">
+        <div class="info-icon" style="background: linear-gradient(135deg, #00d084 0%, #3ec96c 100%);">📞</div>
+        <div class="info-title">Get in Touch</div>
+        <div class="info-desc">
+          <p>Reach out to our support team during business hours:</p>
+          <p style="margin-top: 0.8rem;">
+            <strong>📧 Email:</strong> <a class="info-link" href="mailto:skillupnow@gmail.com">skillupnow@gmail.com</a>
+          </p>
+          <p style="margin-top: 0.8rem;">
+            <strong style="color: #2ecc71;">📱 Phone Numbers:</strong>
+            <br>• <a class="info-link" href="tel:+916383633054">+91 6383633054</a>
+            <br>• <a class="info-link" href="tel:+916381721061">+91 6381721061</a>
+          </p>
+          <p style="margin-top: 1rem; font-size: 0.8rem; color: var(--txt4);">
+            • Mon - Fri: 9:00 AM - 6:00 PM IST<br>
+            • Sat: 10:00 AM - 4:00 PM IST<br>
+            • Sun: Closed
+          </p>
+        </div>
+      </div>
+
+      <!-- Payment Options -->
+      <div class="info-card">
+        <div class="info-icon">💳</div>
+        <div class="info-title">Flexible Payment Options</div>
+        <div class="info-desc">We offer various payment plans to suit your budget:</div>
+        <div class="benefits-grid">
+          <div class="benefit-item">
+            <div class="benefit-icon">✓</div>
+            <span>One-Time Payment</span>
+          </div>
+          <div class="benefit-item">
+            <div class="benefit-icon">✓</div>
+            <span>3-Month EMI</span>
+          </div>
+          <div class="benefit-item">
+            <div class="benefit-icon">✓</div>
+            <span>6-Month EMI</span>
+          </div>
+          <div class="benefit-item">
+            <div class="benefit-icon">✓</div>
+            <span>12-Month EMI</span>
+          </div>
+          <div class="benefit-item">
+            <div class="benefit-icon">✓</div>
+            <span>Corporate Plans</span>
+          </div>
+          <div class="benefit-item">
+            <div class="benefit-icon">✓</div>
+            <span>Zero Interest EMI</span>
+          </div>
+        </div>
+        <p style="margin-top: 1rem; font-size: 0.85rem; color: var(--txt3);">
+          <strong>Note:</strong> Specific pricing and EMI options vary by course level and duration. Contact us for personalized quotes.
+        </p>
+      </div>
+
+      <!-- Why SkillUpNow -->
+      <div class="info-card">
+        <div class="info-icon">⭐</div>
+        <div class="info-title">Why Choose SkillUpNow?</div>
+        <div class="timeline-benefits">
+          <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+              <h4>Industry-Expert Instructors</h4>
+              <p>Learn from professionals with 15+ years of industry experience</p>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+              <h4>Live Project-Based Learning</h4>
+              <p>Work on real-world scenarios and build professional portfolio</p>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+              <h4>96% Placement Guarantee</h4>
+              <p>Job assistance and career counseling included</p>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+              <h4>Lifetime Access</h4>
+              <p>Access course materials forever, even after completion</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ Section -->
+  <section style="padding: 4rem 5vw; background: var(--panel); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
+    <div style="max-width: 900px; margin: 0 auto;">
+      <h2 style="font-family: 'Cormorant Garamond', serif; font-size: 2.2rem; text-align: center; color: var(--txt); margin-bottom: 3rem; background: var(--grad); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Frequently Asked Questions</h2>
+      
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+        <div class="info-card">
+          <h4 style="color: var(--txt); font-weight: 700; margin-bottom: 0.5rem;">Do you offer discounts for bulk registrations?</h4>
+          <p style="color: var(--txt3); font-size: 0.9rem;">Yes, we offer special corporate rates for group registrations of 5 or more students. Contact our team for custom quotes.</p>
+        </div>
+        
+        <div class="info-card">
+          <h4 style="color: var(--txt); font-weight: 700; margin-bottom: 0.5rem;">Is there a money-back guarantee?</h4>
+          <p style="color: var(--txt3); font-size: 0.9rem;">We offer a 7-day satisfaction guarantee. If not satisfied, get a full refund, no questions asked.</p>
+        </div>
+
+        <div class="info-card">
+          <h4 style="color: var(--txt); font-weight: 700; margin-bottom: 0.5rem;">What payment methods do you accept?</h4>
+          <p style="color: var(--txt3); font-size: 0.9rem;">We accept credit/debit cards, UPI, net banking, and EMI through major financial partners.</p>
+        </div>
+
+        <div class="info-card">
+          <h4 style="color: var(--txt); font-weight: 700; margin-bottom: 0.5rem;">Can I defer my start date?</h4>
+          <p style="color: var(--txt3); font-size: 0.9rem;">Yes, you can defer your course start by up to 60 days free of charge. Just notify us in advance.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer style="background: rgba(8,6,18,0.95); border-top: 1px solid var(--border); padding: 3rem 5vw;">
+    <div style="max-width: 1200px; margin: 0 auto; text-align: center;">
+      <p style="color: var(--txt3); margin-bottom: 1rem;">Have questions? Our team is ready to help!</p>
+      <a href="mailto:info@skillupnow.org" class="btn-grad" style="display: inline-block; margin-bottom: 2rem;">Contact Us Now</a>
+      
+      <div style="padding-top: 2rem; border-top: 1px solid var(--border);">
+        <p style="font-size: 0.78rem; color: var(--txt4);">© 2025 SkillUpNow. All rights reserved. | <a href="#" style="color: var(--v2); text-decoration: none;">Privacy Policy</a> | <a href="#" style="color: var(--v2); text-decoration: none;">Terms of Service</a></p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Modal -->
+  <div class="moverlay" id="mo" onclick="if(event.target===this) closeModal()">
+    <div class="modal-box" style="animation: modalSlideUp 0.3s cubic-bezier(0.4,0,0.2,1);">
+      <button class="mcls" onclick="closeModal()" style="position: absolute; top: 1.3rem; right: 1.3rem; width: 30px; height: 30px; border-radius: 50%; background: var(--panel); border: 1px solid var(--border); color: var(--txt3); font-size: 0.85rem; display: flex; align-items: center; justify-content: center; font-weight: 700; transition: all 0.2s; cursor: pointer;">✕</button>
+
+      <div id="lf">
+        <h3 style="font-family: 'Cormorant Garamond', serif; font-weight: 700; font-size: 1.9rem; color: var(--txt); margin-bottom: 0.4rem; letter-spacing: -0.01em;">Welcome Back</h3>
+        <p class="msub" style="font-size: 0.85rem; color: var(--txt3); margin-bottom: 2rem; font-weight: 400;">Sign in to access your learning dashboard</p>
+
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" placeholder="you@example.com" style="background: rgba(255,255,255,0.04); border: 1px solid var(--border); color: var(--txt); padding: 0.8rem 1rem; border-radius: var(--r2); font-size: 0.9rem;"/>
+        </div>
+
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" placeholder="••••••••" style="background: rgba(255,255,255,0.04); border: 1px solid var(--border); color: var(--txt); padding: 0.8rem 1rem; border-radius: var(--r2); font-size: 0.9rem;"/>
+        </div>
+
+        <button class="btn-grad" style="width: 100%; padding: 0.95rem; margin-top: 0.5rem;" onclick="submitLogin()">Sign In</button>
+
+        <div style="display: flex; align-items: center; gap: 1rem; margin: 1.2rem 0; font-size: 0.73rem; color: var(--txt4); font-weight: 600;">
+          <span style="flex: 1; height: 1px; background: var(--border);"></span>
+          or continue with
+          <span style="flex: 1; height: 1px; background: var(--border);"></span>
+        </div>
+
+        <div style="text-align: center; font-size: 0.83rem; color: var(--txt3); margin-top: 1rem;">
+          No account yet? <a onclick="switchModalTab('register')" style="color: var(--v2); font-weight: 700; text-decoration: none; cursor: pointer;">Create one free →</a>
+        </div>
+      </div>
+
+      <div id="rf" style="display: none;">
+        <h3 style="font-family: 'Cormorant Garamond', serif; font-weight: 700; font-size: 1.9rem; color: var(--txt); margin-bottom: 0.4rem; letter-spacing: -0.01em;">Join SkillUpNow</h3>
+        <p class="msub" style="font-size: 0.85rem; color: var(--txt3); margin-bottom: 2rem; font-weight: 400;">Join 12,000+ professionals already upskilling</p>
+
+        <div class="form-group">
+          <label>Full Name</label>
+          <input type="text" placeholder="Your full name" style="background: rgba(255,255,255,0.04); border: 1px solid var(--border); color: var(--txt); padding: 0.8rem 1rem; border-radius: var(--r2); font-size: 0.9rem;"/>
+        </div>
+
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" placeholder="you@example.com" style="background: rgba(255,255,255,0.04); border: 1px solid var(--border); color: var(--txt); padding: 0.8rem 1rem; border-radius: var(--r2); font-size: 0.9rem;"/>
+        </div>
+
+        <div class="form-group">
+          <label>Phone Number</label>
+          <input type="tel" placeholder="+91 9876543210" style="background: rgba(255,255,255,0.04); border: 1px solid var(--border); color: var(--txt); padding: 0.8rem 1rem; border-radius: var(--r2); font-size: 0.9rem;"/>
+        </div>
+
+        <div class="form-group">
+          <label>I want to learn</label>
+          <select style="background: rgba(255,255,255,0.04); border: 1px solid var(--border); color: var(--txt); padding: 0.8rem 1rem; border-radius: var(--r2); font-size: 0.9rem;">
+            <option>Cloud Computing</option>
+            <option>DevOps & CI/CD</option>
+            <option>AI / Machine Learning</option>
+            <option>Cybersecurity</option>
+            <option>Data Engineering</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" placeholder="Create a strong password" style="background: rgba(255,255,255,0.04); border: 1px solid var(--border); color: var(--txt); padding: 0.8rem 1rem; border-radius: var(--r2); font-size: 0.9rem;"/>
+        </div>
+
+        <button class="btn-grad" style="width: 100%; padding: 0.95rem;" onclick="submitRegister()">Create My Account</button>
+
+        <div style="display: flex; align-items: center; gap: 1rem; margin: 1.2rem 0; font-size: 0.73rem; color: var(--txt4); font-weight: 600;">
+          <span style="flex: 1; height: 1px; background: var(--border);"></span>
+          or
+          <span style="flex: 1; height: 1px; background: var(--border);"></span>
+        </div>
+
+        <div style="text-align: center; font-size: 0.83rem; color: var(--txt3); margin-top: 1rem;">
+          Already have an account? <a onclick="switchModalTab('login')" style="color: var(--v2); font-weight: 700; text-decoration: none; cursor: pointer;">Sign in →</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="../js/theme.js"></script>
+  <script src="../js/profile-nav.js"></script>
+  <script src="../js/main.js"></script>
+  <script src="../js/validations.js"></script>
+
+  <script>
+    async function handleEnquirySubmit(event) {
+      event.preventDefault();
+      const form = event.target;
+      const formData = new FormData(form);
+      
+      // Validate form
+      const fullName = formData.get('fullName');
+      const email = formData.get('email');
+      const phone = formData.get('phone');
+      
+      if (!fullName || !email || !phone) {
+        alert('Please fill in all required fields');
+        return;
+      }
+
+      if (!window.supabaseConfig) {
+        alert('Database connection error. Please try again later.');
+        console.error('Supabase not initialized');
+        return;
+      }
+
+      // Prepare enquiry data
+      const enquiryData = {
+        full_name: fullName,
+        email: email,
+        phone_number: phone,
+        course_interested: formData.get('courseInterested') || '',
+        course_title: formData.get('courseTitle') || '',
+        program_duration: formData.get('programDuration') || '',
+        learning_experience: formData.get('experience') || '',
+        current_role: formData.get('role') || '',
+        company_name: formData.get('company') || '',
+        budget_range: formData.get('budget') || '',
+        preferred_payment_method: formData.get('paymentMethod') || '',
+        preferred_contact_method: formData.get('contactMethod') || 'email',
+        message: formData.get('message') || ''
+      };
+
+      try {
+        const result = await window.supabaseConfig.submitContactEnquiry(enquiryData);
+        
+        if (result.success) {
+          alert('✅ Thank you for your enquiry! Our team will contact you within 24 hours.\n\nWe appreciate your interest in SkillUpNow.');
+          console.log('✅ Enquiry saved to database');
+          form.reset();
+        } else {
+          alert('❌ Error submitting enquiry: ' + (result.error || 'Unknown error'));
+          console.error('Enquiry submission error:', result.error);
+        }
+      } catch (error) {
+        alert('❌ An error occurred while submitting your enquiry. Please try again.');
+        console.error('Enquiry submission error:', error);
+      }
+    }
+
+    // Initialize modal functionality if not already done
+    function openModal(type = 'login') {
+      const modal = document.getElementById('mo');
+      if (modal) {
+        modal.classList.add('open');
+        const loginForm = document.getElementById('lf');
+        const registerForm = document.getElementById('rf');
+        
+        if (type === 'login') {
+          loginForm.style.display = 'block';
+          registerForm.style.display = 'none';
+        } else {
+          loginForm.style.display = 'none';
+          registerForm.style.display = 'block';
+        }
+      }
+    }
+
+    function closeModal() {
+      const modal = document.getElementById('mo');
+      if (modal) {
+        modal.classList.remove('open');
+      }
+    }
+
+    function switchModalTab(tab) {
+      const loginForm = document.getElementById('lf');
+      const registerForm = document.getElementById('rf');
+      
+      if (tab === 'login') {
+        loginForm.style.display = 'block';
+        registerForm.style.display = 'none';
+      } else {
+        loginForm.style.display = 'none';
+        registerForm.style.display = 'block';
+      }
+    }
+
+    function submitLogin() {
+      const loginForm = document.getElementById('lf');
+      const email = loginForm.querySelector('input[type="email"]').value.trim();
+      const password = loginForm.querySelector('input[type="password"]').value;
+
+      if (!email || !password) {
+        if (window.app) window.app.showNotification('Please fill all fields', 'error');
+        return;
+      }
+
+      if (!window.supabaseConfig) {
+        console.error('Supabase not initialized');
+        return;
+      }
+
+      const btn = loginForm.querySelector('button.btn-grad');
+      const originalText = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = 'Signing in...';
+
+      window.supabaseConfig.signIn(email, password).then(result => {
+        if (result.success) {
+          alert('Welcome back!');
+          localStorage.setItem('user_id', result.data.user.id);
+          localStorage.setItem('user_email', result.data.user.email);
+          setTimeout(() => closeModal(), 1000);
+        } else {
+          alert(result.error || 'Login failed');
+        }
+        btn.disabled = false;
+        btn.textContent = originalText;
+      }).catch(error => {
+        console.error('Login error:', error);
+        alert('An error occurred');
+        btn.disabled = false;
+        btn.textContent = originalText;
+      });
+    }
+
+    function submitRegister() {
+      const registerForm = document.getElementById('rf');
+      const name = registerForm.querySelector('input[type="text"]').value.trim();
+      const email = registerForm.querySelector('input[type="email"]').value.trim();
+      const phone = registerForm.querySelector('input[type="tel"]').value.trim();
+      const interest = registerForm.querySelector('select').value;
+      const password = registerForm.querySelector('input[type="password"]').value;
+
+      if (!name || !email || !phone || !password) {
+        alert('Please fill all fields');
+        return;
+      }
+
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        alert('Please enter a valid email');
+        return;
+      }
+
+      if (password.length < 6) {
+        alert('Password must be at least 6 characters');
+        return;
+      }
+
+      if (!window.supabaseConfig) {
+        console.error('Supabase not initialized');
+        return;
+      }
+
+      const btn = registerForm.querySelector('button.btn-grad');
+      const originalText = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = 'Creating account...';
+
+      window.supabaseConfig.signUp(email, password, {
+        full_name: name,
+        email: email,
+        phone_number: phone,
+        learning_interest: interest,
+        experience_level: 'beginner'
+      }).then(result => {
+        if (result.success) {
+          alert('Account created! Check your email.');
+          localStorage.setItem('user_email', email);
+          setTimeout(() => {
+            closeModal();
+            registerForm.querySelectorAll('input, select').forEach(field => field.value = '');
+          }, 1000);
+        } else {
+          alert(result.error || 'Registration failed');
+        }
+        btn.disabled = false;
+        btn.textContent = originalText;
+      }).catch(error => {
+        console.error('Registration error:', error);
+        alert('An error occurred');
+        btn.disabled = false;
+        btn.textContent = originalText;
+      });
+    }
+  </script>
+</body>
+</html>

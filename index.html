@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0d0b1a">
+  <meta name="description" content="SkillUpNow - Premium IT Training & Professional Development">
+  <title>SkillUpNow — Elite IT & Professional Training</title>
+  
+  <!-- CSS Files -->
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/forms.css">
+  <link rel="stylesheet" href="css/responsive.css">
+
+  <!-- Modal Styles -->
+  <style>
+    /* Modal Overlay */
+    .moverlay {
+      position: fixed;
+      inset: 0;
+      z-index: 9998;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      pointer-events: none;
+    }
+
+    .moverlay.open {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: all;
+    }
+
+    /* Modal Box */
+    .modal-box {
+      background: var(--panel);
+      border: 1.5px solid var(--border);
+      border-radius: var(--r3);
+      padding: 2.5rem;
+      max-width: 480px;
+      width: 90vw;
+      z-index: 9999;
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3);
+      transform: scale(0.95);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .moverlay.open .modal-box {
+      transform: scale(1);
+    }
+
+    /* Modal Close Button */
+    .mcls {
+      position: absolute;
+      top: 1.3rem;
+      right: 1.3rem;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: var(--panel2);
+      border: 1px solid var(--border);
+      color: var(--txt3);
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+
+    .mcls:hover {
+      background: var(--border);
+      color: var(--txt);
+      transform: scale(1.1);
+    }
+
+    /* Modal Form Styling */
+    .modal-box .form-group {
+      animation: fadeUp 0.5s ease backwards;
+    }
+
+    .modal-box .form-group:nth-child(n+2) {
+      animation-delay: 0.1s;
+    }
+
+    .modal-box .form-group:nth-child(n+3) {
+      animation-delay: 0.2s;
+    }
+  </style>
+  
+  <!-- Icons & Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config/supabase-config.js"></script>
+  <script src="js/theme.js"></script>
+  <script src="js/profile-nav.js"></script>
+  <script src="js/main.js"></script>
+</head>
+<body>
+  <!-- Cursor Elements -->
+  <div id="cursor"></div>
+  <div id="cursor-ring"></div>
+
+  <!-- Background Elements -->
+  <div class="mesh-bg"></div>
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+  <div class="orb orb3"></div>
+
+  <!-- Navigation -->
+  <nav>
+    <a href="index.html" class="nav-logo">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      SkillUpNow
+    </a>
+
+    <ul class="nav-links">
+      <li><a href="pages/courses.html">Courses</a></li>
+      <li><a href="#why">Why Us</a></li>
+      <li><a href="pages/contact-enquiry.html">Fee Enquiry</a></li>
+      <li><a href="pages/feedback.html">Reviews</a></li>
+    </ul>
+
+    <div class="nav-actions">
+      <div class="theme-toggle" role="button" tabindex="0" aria-pressed="false">
+        <div class="theme-toggle-btn">🌙</div>
+      </div>
+      <div id="profile-section" style="display: none; display: flex; align-items: center; gap: 1rem; position: relative;">
+        <button id="profile-btn" class="profile-icon-btn" title="View Profile">👤</button>
+        <div id="profile-dropdown" class="profile-dropdown">
+          <a href="pages/profile.html" style="display: flex; align-items: center; gap: 0.8rem; padding: 1rem; text-decoration: none; color: var(--txt2); border-bottom: 1px solid var(--border); transition: all 0.25s;">
+            <span style="font-size: 1.2rem;">👤</span>
+            <div>
+              <div style="font-weight: 600; color: var(--txt);">My Profile</div>
+              <div style="font-size: 0.75rem; color: var(--txt4);">Manage account</div>
+            </div>
+          </a>
+          <a href="pages/courses.html" style="display: flex; align-items: center; gap: 0.8rem; padding: 1rem; text-decoration: none; color: var(--txt2); border-bottom: 1px solid var(--border); transition: all 0.25s;">
+            <span style="font-size: 1.2rem;">📚</span>
+            <div>
+              <div style="font-weight: 600; color: var(--txt);">My Courses</div>
+              <div style="font-size: 0.75rem; color: var(--txt4);">Continue learning</div>
+            </div>
+          </a>
+          <a href="../pages/payment.html" style="display: flex; align-items: center; gap: 0.8rem; padding: 1rem; text-decoration: none; color: var(--txt2); border-bottom: 1px solid var(--border); transition: all 0.25s;">
+            <span style="font-size: 1.2rem;">💳</span>
+            <div>
+              <div style="font-weight: 600; color: var(--txt);">Payments</div>
+              <div style="font-size: 0.75rem; color: var(--txt4);">Track transactions</div>
+            </div>
+          </a>
+          <button onclick="window.profileNav.logout()" style="width: 100%; text-align: left; padding: 1rem; border: none; background: transparent; color: var(--txt2); cursor: pointer; display: flex; align-items: center; gap: 0.8rem; transition: all 0.25s;">
+            <span style="font-size: 1.2rem;">🚪</span>
+            <div>
+              <div style="font-weight: 600; color: var(--txt);">Logout</div>
+              <div style="font-size: 0.75rem; color: var(--txt4);">Sign out</div>
+            </div>
+          </button>
+        </div>
+      </div>
+      <button class="nav-signin" id="signin-btn" onclick="openModal('login')">Sign In</button>
+      <button class="nav-cta" id="cta-btn" onclick="openModal('register')">Get Started</button>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero" style="padding: 5rem 5vw 4rem; display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 4rem; overflow: hidden;">
+    <div class="hero-content">
+      <div class="hero-eyebrow" style="display: inline-flex; align-items: center; gap: 0.6rem; background: rgba(124,92,252,0.1); border: 1px solid var(--border2); padding: 0.45rem 1.1rem; border-radius: var(--r4); font-size: 0.74rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--v2); margin-bottom: 1.8rem; animation: fadeUp 0.7s ease both;">
+        <span class="live-dot" style="width: 7px; height: 7px; border-radius: 50%; background: #4ade80; box-shadow: 0 0 8px rgba(74,222,128,0.7); animation: livePulse 1.6s ease infinite;"></span>
+        12,000+ Professionals Enrolled
+      </div>
+
+      <h1 style="font-family: 'Cormorant Garamond', serif; font-weight: 700; font-size: clamp(3rem, 5.5vw, 5.2rem); line-height: 1.04; letter-spacing: -0.02em; color: var(--txt); margin-bottom: 1.5rem; animation: fadeUp 0.7s 0.1s ease both;">
+        Master the Skills<br/>That <span class="text-gradient">Define</span><br/>Your Future
+      </h1>
+
+      <p class="hero-desc" style="font-size: 1.06rem; color: var(--txt3); line-height: 1.8; max-width: 500px; font-weight: 400; margin-bottom: 2.4rem; animation: fadeUp 0.7s 0.2s ease both;">
+        World-class IT training in Cloud, DevOps, AI/ML & Cybersecurity — with live mentorship, real-world projects and flexible no-cost EMI.
+      </p>
+
+      <div class="hero-actions" style="display: flex; gap: 1rem; flex-wrap: wrap; animation: fadeUp 0.7s 0.3s ease both;">
+        <a href="pages/courses.html" class="btn-grad">Explore Courses</a>
+        <a href="pages/contact-enquiry.html" class="btn-outline">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          Get Fee Quote
+        </a>
+      </div>
+
+      <div class="hero-stats" style="display: flex; gap: 2.5rem; margin-top: 3.2rem; animation: fadeUp 0.7s 0.42s ease both; padding-top: 2rem; border-top: 1px solid var(--border); flex-wrap: wrap;">
+        <div><span class="stat-number">12K+</span><span class="stat-label">Students</span></div>
+        <div><span class="stat-number">48</span><span class="stat-label">Courses</span></div>
+        <div><span class="stat-number">4.9★</span><span class="stat-label">Rating</span></div>
+        <div><span class="stat-number">96%</span><span class="stat-label">Placement</span></div>
+      </div>
+    </div>
+
+    <div class="hero-visual" style="animation: fadeUp 0.9s 0.2s ease both;">
+      <div style="position: relative; transform-style: preserve-3d;">
+        <div style="background: rgba(20,16,40,0.9); border: 1px solid var(--border2); border-radius: var(--r3); padding: 1.8rem; box-shadow: var(--shadow-card), 0 0 80px rgba(124,92,252,0.08); transition: transform 0.5s cubic-bezier(0.4,0,0.2,1); position: relative; overflow: hidden;">
+          <div style="position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, var(--v2), transparent);"></div>
+          
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.4rem;">
+            <span style="font-size: 0.8rem; font-weight: 700; color: var(--txt2); letter-spacing: 0.06em; text-transform: uppercase;">Top Courses Live</span>
+            <span style="display: flex; align-items: center; gap: 0.4rem; font-size: 0.7rem; font-weight: 700; color: #4ade80; letter-spacing: 0.06em;">
+              <span style="width: 6px; height: 6px; border-radius: 50%; background: #4ade80; animation: livePulse 1.6s infinite;"></span> Live
+            </span>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+            <div style="display: flex; align-items: center; gap: 0.9rem; background: rgba(255,255,255,0.04); border: 1px solid var(--border); padding: 0.9rem 1.1rem; border-radius: var(--r2); transition: all 0.3s cubic-bezier(0.4,0,0.2,1);">
+              <div style="width: 42px; height: 42px; border-radius: var(--r1); background: linear-gradient(135deg,rgba(255,160,50,0.15),rgba(255,100,50,0.1)); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">☁️</div>
+              <div><h4 style="font-size: 0.86rem; font-weight: 700; color: var(--txt); line-height: 1.2;">AWS Solutions Architect</h4><span style="font-size: 0.72rem; color: var(--txt4); font-weight: 400;">32 lessons · 18 hrs</span></div>
+              <span style="font-size: 0.67rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; padding: 0.22rem 0.6rem; border-radius: var(--r4); background: rgba(255,130,92,0.12); color: #ff8c5a; border: 1px solid rgba(255,130,92,0.25); flex-shrink: 0; margin-left: auto;">Hot</span>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 0.9rem; background: rgba(255,255,255,0.04); border: 1px solid var(--border); padding: 0.9rem 1.1rem; border-radius: var(--r2); transition: all 0.3s cubic-bezier(0.4,0,0.2,1);">
+              <div style="width: 42px; height: 42px; border-radius: var(--r1); background: linear-gradient(135deg,rgba(59,130,246,0.15),rgba(37,99,235,0.1)); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">🐳</div>
+              <div><h4 style="font-size: 0.86rem; font-weight: 700; color: var(--txt); line-height: 1.2;">Kubernetes & Docker</h4><span style="font-size: 0.72rem; color: var(--txt4); font-weight: 400;">28 lessons · 14 hrs</span></div>
+              <span style="font-size: 0.67rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; padding: 0.22rem 0.6rem; border-radius: var(--r4); background: rgba(74,222,128,0.1); color: #4ade80; border: 1px solid rgba(74,222,128,0.2); flex-shrink: 0; margin-left: auto;">New</span>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 0.9rem; background: rgba(255,255,255,0.04); border: 1px solid var(--border); padding: 0.9rem 1.1rem; border-radius: var(--r2); transition: all 0.3s cubic-bezier(0.4,0,0.2,1);">
+              <div style="width: 42px; height: 42px; border-radius: var(--r1); background: linear-gradient(135deg,rgba(124,92,252,0.2),rgba(61,107,255,0.1)); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">🤖</div>
+              <div><h4 style="font-size: 0.86rem; font-weight: 700; color: var(--txt); line-height: 1.2;">Generative AI with Python</h4><span style="font-size: 0.72rem; color: var(--txt4); font-weight: 400;">40 lessons · 22 hrs</span></div>
+              <span style="font-size: 0.67rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; padding: 0.22rem 0.6rem; border-radius: var(--r4); background: var(--v5); color: var(--v2); border: 1px solid var(--border2); flex-shrink: 0; margin-left: auto;">Pro</span>
+            </div>
+          </div>
+
+          <div style="margin-top: 1.3rem; padding-top: 1.3rem; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+            <span style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; font-weight: 600; color: var(--v2);">💳 Flexible Payment Options</span>
+            <button class="btn-grad" style="padding: 0.5rem 1.2rem; font-size: 0.78rem;" onclick="window.location.href='pages/courses.html'">Enroll Now →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Trust Bar -->
+  <div style="background: rgba(255,255,255,0.025); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 1.2rem 5vw; display: flex; align-items: center; justify-content: center; gap: 3rem; flex-wrap: wrap;">
+    <div style="display: flex; align-items: center; gap: 0.6rem; font-size: 0.82rem; font-weight: 600; color: var(--txt3);">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7c5cfc" stroke-width="2" style="flex-shrink: 0;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> SSL Secured Payments
+    </div>
+    <div style="display: flex; align-items: center; gap: 0.6rem; font-size: 0.82rem; font-weight: 600; color: var(--txt3);">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7c5cfc" stroke-width="2" style="flex-shrink: 0;"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg> Zero-Cost EMI Available
+    </div>
+    <div style="display: flex; align-items: center; gap: 0.6rem; font-size: 0.82rem; font-weight: 600; color: var(--txt3);">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7c5cfc" stroke-width="2" style="flex-shrink: 0;"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg> 12,000+ Students
+    </div>
+    <div style="display: flex; align-items: center; gap: 0.6rem; font-size: 0.82rem; font-weight: 600; color: var(--txt3);">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7c5cfc" stroke-width="2" style="flex-shrink: 0;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> 4.9 Average Rating
+    </div>
+  </div>
+
+  <!-- Explore Our Platform -->
+  <section style="padding: 6rem 5vw; background: linear-gradient(180deg, transparent 0%, rgba(124,92,252,0.03) 100%);">
+    <div style="max-width: 1400px; margin: 0 auto;">
+      <div style="text-align: center; margin-bottom: 4rem;">
+        <h2 style="font-family: 'Inter', 'Outfit', sans-serif; font-size: clamp(2rem, 4.5vw, 3.2rem); font-weight: 700; color: var(--txt); margin-bottom: 1rem;">Everything You Need to Succeed</h2>
+        <p style="font-size: 1.1rem; color: var(--txt3); max-width: 600px; margin: 0 auto;">Access premium learning resources, flexible payment options, and expert guidance on your path to mastery</p>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2.5rem;">
+        <!-- Browse Courses -->
+        <a href="pages/courses.html" style="text-decoration: none; group display: flex; flex-direction: column; background: var(--panel); border: 1.5px solid var(--border); border-radius: var(--r2); padding: 2rem; transition: all 0.35s cubic-bezier(0.4,0,0.2,1); position: relative; overflow: hidden;">
+          <div style="position: absolute; inset: 0; background: linear-gradient(135deg, rgba(124,92,252,0.08), transparent); opacity: 0; transition: opacity 0.35s ease;"></div>
+          <div style="position: relative; z-index: 1;">
+            <div style="width: 56px; height: 56px; background: linear-gradient(135deg, var(--v1) 0%, var(--v2) 100%); border-radius: var(--r1); display: flex; align-items: center; justify-content: center; font-size: 1.8rem; margin-bottom: 1.5rem; transition: transform 0.35s ease;">📚</div>
+            <h3 style="font-family: 'Inter', 'Outfit', sans-serif; font-size: 1.3rem; font-weight: 700; color: var(--txt); margin-bottom: 0.7rem;">Browse All Courses</h3>
+            <p style="font-size: 0.95rem; color: var(--txt3); line-height: 1.6; margin-bottom: 1.5rem;">Explore 48+ expertly-designed courses in cloud, DevOps, AI, security, and data engineering with live mentorship.</p>
+            <div style="display: flex; align-items: center; gap: 0.6rem; font-weight: 600; color: var(--v1); font-size: 0.9rem;">
+              Explore Now <span style="transition: transform 0.35s ease;">→</span>
+            </div>
+          </div>
+        </a>
+
+        <!-- Fee Enquiry -->
+        <a href="pages/contact-enquiry.html" style="text-decoration: none; display: flex; flex-direction: column; background: var(--panel); border: 1.5px solid var(--border); border-radius: var(--r2); padding: 2rem; transition: all 0.35s cubic-bezier(0.4,0,0.2,1); position: relative; overflow: hidden;">
+          <div style="position: absolute; inset: 0; background: linear-gradient(135deg, rgba(61,107,255,0.08), transparent); opacity: 0; transition: opacity 0.35s ease;"></div>
+          <div style="position: relative; z-index: 1;">
+            <div style="width: 56px; height: 56px; background: linear-gradient(135deg, var(--b1) 0%, var(--b2) 100%); border-radius: var(--r1); display: flex; align-items: center; justify-content: center; font-size: 1.8rem; margin-bottom: 1.5rem; transition: transform 0.35s ease;">💳</div>
+            <h3 style="font-family: 'Inter', 'Outfit', sans-serif; font-size: 1.3rem; font-weight: 700; color: var(--txt); margin-bottom: 0.7rem;">Fee Enquiry & Pricing</h3>
+            <p style="font-size: 0.95rem; color: var(--txt3); line-height: 1.6; margin-bottom: 1.5rem;">Get detailed pricing information, flexible EMI options, and personalized consultation from our financial advisors.</p>
+            <div style="display: flex; align-items: center; gap: 0.6rem; font-weight: 600; color: var(--b1); font-size: 0.9rem;">
+              Send Enquiry <span style="transition: transform 0.35s ease;">→</span>
+            </div>
+          </div>
+        </a>
+
+        <!-- Course Registration -->
+        <a href="pages/course-registration.html" style="text-decoration: none; display: flex; flex-direction: column; background: var(--panel); border: 1.5px solid var(--border); border-radius: var(--r2); padding: 2rem; transition: all 0.35s cubic-bezier(0.4,0,0.2,1); position: relative; overflow: hidden;">
+          <div style="position: absolute; inset: 0; background: linear-gradient(135deg, rgba(124,92,252,0.08), transparent); opacity: 0; transition: opacity 0.35s ease;"></div>
+          <div style="position: relative; z-index: 1;">
+            <div style="width: 56px; height: 56px; background: linear-gradient(135deg, #ff8c5a 0%, #ff6b35 100%); border-radius: var(--r1); display: flex; align-items: center; justify-content: center; font-size: 1.8rem; margin-bottom: 1.5rem; transition: transform 0.35s ease;">✍️</div>
+            <h3 style="font-family: 'Inter', 'Outfit', sans-serif; font-size: 1.3rem; font-weight: 700; color: var(--txt); margin-bottom: 0.7rem;">Quick Registration</h3>
+            <p style="font-size: 0.95rem; color: var(--txt3); line-height: 1.6; margin-bottom: 1.5rem;">Register quickly for your chosen course, select batch timing, and get instant enrollment confirmation.</p>
+            <div style="display: flex; align-items: center; gap: 0.6rem; font-weight: 600; color: #ff8c5a; font-size: 0.9rem;">
+              Register Now <span style="transition: transform 0.35s ease;">→</span>
+            </div>
+          </div>
+        </a>
+
+        <!-- EMI Application -->
+        <a href="pages/emi-application.html" style="text-decoration: none; display: flex; flex-direction: column; background: var(--panel); border: 1.5px solid var(--border); border-radius: var(--r2); padding: 2rem; transition: all 0.35s cubic-bezier(0.4,0,0.2,1); position: relative; overflow: hidden;">
+          <div style="position: absolute; inset: 0; background: linear-gradient(135deg, rgba(16,185,129,0.08), transparent); opacity: 0; transition: opacity 0.35s ease;"></div>
+          <div style="position: relative; z-index: 1;">
+            <div style="width: 56px; height: 56px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: var(--r1); display: flex; align-items: center; justify-content: center; font-size: 1.8rem; margin-bottom: 1.5rem; transition: transform 0.35s ease;">💰</div>
+            <h3 style="font-family: 'Inter', 'Outfit', sans-serif; font-size: 1.3rem; font-weight: 700; color: var(--txt); margin-bottom: 0.7rem;">EMI Application</h3>
+            <p style="font-size: 0.95rem; color: var(--txt3); line-height: 1.6; margin-bottom: 1.5rem;">Apply for zero-cost EMI with quick approval process. Flexible 3, 6, or 12-month payment plans available.</p>
+            <div style="display: flex; align-items: center; gap: 0.6rem; font-weight: 600; color: #10b981; font-size: 0.9rem;">
+              Apply Now <span style="transition: transform 0.35s ease;">→</span>
+            </div>
+          </div>
+        </a>
+
+        <!-- Payment & Checkout -->
+        <a href="pages/payment.html" style="text-decoration: none; display: flex; flex-direction: column; background: var(--panel); border: 1.5px solid var(--border); border-radius: var(--r2); padding: 2rem; transition: all 0.35s cubic-bezier(0.4,0,0.2,1); position: relative; overflow: hidden;">
+          <div style="position: absolute; inset: 0; background: linear-gradient(135deg, rgba(168,85,247,0.08), transparent); opacity: 0; transition: opacity 0.35s ease;"></div>
+          <div style="position: relative; z-index: 1;">
+            <div style="width: 56px; height: 56px; background: linear-gradient(135deg, #a855f7 0%, #9333ea 100%); border-radius: var(--r1); display: flex; align-items: center; justify-content: center; font-size: 1.8rem; margin-bottom: 1.5rem; transition: transform 0.35s ease;">🛒</div>
+            <h3 style="font-family: 'Inter', 'Outfit', sans-serif; font-size: 1.3rem; font-weight: 700; color: var(--txt); margin-bottom: 0.7rem;">Secure Checkout</h3>
+            <p style="font-size: 0.95rem; color: var(--txt3); line-height: 1.6; margin-bottom: 1.5rem;">Complete your payment securely with multiple payment methods, SSL encryption, and instant confirmation.</p>
+            <div style="display: flex; align-items: center; gap: 0.6rem; font-weight: 600; color: #a855f7; font-size: 0.9rem;">
+              Proceed to Payment <span style="transition: transform 0.35s ease;">→</span>
+            </div>
+          </div>
+        </a>
+
+        <!-- Student Feedback -->
+        <a href="pages/feedback.html" style="text-decoration: none; display: flex; flex-direction: column; background: var(--panel); border: 1.5px solid var(--border); border-radius: var(--r2); padding: 2rem; transition: all 0.35s cubic-bezier(0.4,0,0.2,1); position: relative; overflow: hidden;">
+          <div style="position: absolute; inset: 0; background: linear-gradient(135deg, rgba(59,130,246,0.08), transparent); opacity: 0; transition: opacity 0.35s ease;"></div>
+          <div style="position: relative; z-index: 1;">
+            <div style="width: 56px; height: 56px; background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); border-radius: var(--r1); display: flex; align-items: center; justify-content: center; font-size: 1.8rem; margin-bottom: 1.5rem; transition: transform 0.35s ease;">⭐</div>
+            <h3 style="font-family: 'Inter', 'Outfit', sans-serif; font-size: 1.3rem; font-weight: 700; color: var(--txt); margin-bottom: 0.7rem;">Share Your Feedback</h3>
+            <p style="font-size: 0.95rem; color: var(--txt3); line-height: 1.6; margin-bottom: 1.5rem;">Help us improve by sharing your learning experience. Your feedback shapes our future courses and content.</p>
+            <div style="display: flex; align-items: center; gap: 0.6rem; font-weight: 600; color: #3b82f6; font-size: 0.9rem;">
+              Give Feedback <span style="transition: transform 0.35s ease;">→</span>
+            </div>
+          </div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Student Testimonials -->
+  <section style="padding: 6rem 5vw; background: rgba(124,92,252,0.04); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
+    <div style="max-width: 1400px; margin: 0 auto;">
+      <div style="text-align: center; margin-bottom: 4rem;">
+        <h2 style="font-family: 'Inter', 'Outfit', sans-serif; font-size: clamp(2rem, 4.5vw, 3.2rem); font-weight: 700; color: var(--txt); margin-bottom: 1rem;">What Our Students Say</h2>
+        <p style="font-size: 1.1rem; color: var(--txt3); max-width: 600px; margin: 0 auto;">Real experiences from professionals who transformed their careers with SkillUpNow</p>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2.5rem;">
+        <!-- Review 1 -->
+        <div style="background: var(--panel); border: 1.5px solid var(--border); border-radius: var(--r2); padding: 2.5rem; transition: all 0.3s ease;">
+          <div style="display: flex; gap: 0.4rem; margin-bottom: 1rem;">
+            <span style="color: var(--v1); font-size: 1.1rem;">★</span>
+            <span style="color: var(--v1); font-size: 1.1rem;">★</span>
+            <span style="color: var(--v1); font-size: 1.1rem;">★</span>
+            <span style="color: var(--v1); font-size: 1.1rem;">★</span>
+            <span style="color: var(--v1); font-size: 1.1rem;">★</span>
+          </div>
+          <p style="font-size: 0.95rem; color: var(--txt); line-height: 1.7; margin-bottom: 1.5rem; font-style: italic;">"The AWS course was exceptional! Instructors are industry experts with real-world experience. I got placed within 2 months of course completion. Highly recommended!"</p>
+          <div style="display: flex; align-items: center; gap: 1rem;">
+            <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, var(--v1), var(--v2)); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 0.9rem;">RJ</div>
+            <div>
+              <h4 style="font-family: 'Inter', 'Outfit', sans-serif; margin: 0; font-weight: 700; color: var(--txt); font-size: 0.95rem;">Rajesh Kumar</h4>
+              <p style="margin: 0; font-size: 0.8rem; color: var(--txt3);">Cloud Architect, TechCorp</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Review 2 -->
+        <div style="background: var(--panel); border: 1.5px solid var(--border); border-radius: var(--r2); padding: 2.5rem; transition: all 0.3s ease;">
+          <div style="display: flex; gap: 0.4rem; margin-bottom: 1rem;">
+            <span style="color: var(--v1); font-size: 1.1rem;">★</span>
+            <span style="color: var(--v1); font-size: 1.1rem;">★</span>
+            <span style="color: var(--v1); font-size: 1.1rem;">★</span>
+            <span style="color: var(--v1); font-size: 1.1rem;">★</span>
+            <span style="color: var(--v1); font-size: 1.1rem;">★</span>
+          </div>
+          <p style="font-size: 0.95rem; color: var(--txt); line-height: 1.7; margin-bottom: 1.5rem; font-style: italic;">"Switching to DevOps was the best decision. The hands-on projects and EMI payment option made it accessible. Now earning 40% more!"</p>
+          <div style="display: flex; align-items: center; gap: 1rem;">
+            <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #ff8c5a, #ff6b35); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 0.9rem;">PR</div>
+            <div>
+              <h4 style="font-family: 'Inter', 'Outfit', sans-serif; margin: 0; font-weight: 700; color: var(--txt); font-size: 0.95rem;">Priya Sharma</h4>
+              <p style="margin: 0; font-size: 0.8rem; color: var(--txt3);">DevOps Engineer, StartupXYZ</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Review 3 -->
+        <div style="background: var(--panel); border: 1.5px solid var(--border); border-radius: var(--r2); padding: 2.5rem; transition: all 0.3s ease;">
+          <div style="display: flex; gap: 0.4rem; margin-bottom: 1rem;">
+            <span style="color: var(--v1); font-size: 1.1rem;">★</span>
+            <span style="color: var(--v1); font-size: 1.1rem;">★</span>
+            <span style="color: var(--v1); font-size: 1.1rem;">★</span>
+            <span style="color: var(--v1); font-size: 1.1rem;">★</span>
+            <span style="color: var(--v1); font-size: 1.1rem;">★</span>
+          </div>
+          <p style="font-size: 0.95rem; color: var(--txt); line-height: 1.7; margin-bottom: 1.5rem; font-style: italic;">"AI/ML course opened doors I never expected. The mentor support and portfolio projects were game-changers. Got offers from 3 companies!"</p>
+          <div style="display: flex; align-items: center; gap: 1rem;">
+            <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #10b981, #059669); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 0.9rem;">AV</div>
+            <div>
+              <h4 style="font-family: 'Inter', 'Outfit', sans-serif; margin: 0; font-weight: 700; color: var(--txt); font-size: 0.95rem;">Arjun Verma</h4>
+              <p style="margin: 0; font-size: 0.8rem; color: var(--txt3);">ML Engineer, DataCo</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Review 4 -->
+        <div style="background: var(--panel); border: 1.5px solid var(--border); border-radius: var(--r2); padding: 2.5rem; transition: all 0.3s ease;">
+          <div style="display: flex; gap: 0.4rem; margin-bottom: 1rem;">
+            <span style="color: var(--v1); font-size: 1.1rem;">★</span>
+            <span style="color: var(--v1); font-size: 1.1rem;">★</span>
+            <span style="color: var(--v1); font-size: 1.1rem;">★</span>
+            <span style="color: var(--v1); font-size: 1.1rem;">★</span>
+            <span style="color: var(--v1); font-size: 1.1rem;">★</span>
+          </div>
+          <p style="font-size: 0.95rem; color: var(--txt); line-height: 1.7; margin-bottom: 1.5rem; font-style: italic;">"Best investment in my career! The structured curriculum and lifetime course access make it worthwhile. Support team was very responsive."</p>
+          <div style="display: flex; align-items: center; gap: 1rem;">
+            <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #3b82f6, #1d4ed8); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 0.9rem;">SK</div>
+            <div>
+              <h4 style="font-family: 'Inter', 'Outfit', sans-serif; margin: 0; font-weight: 700; color: var(--txt); font-size: 0.95rem;">Sanjana Khan</h4>
+              <p style="margin: 0; font-size: 0.8rem; color: var(--txt3);">Cybersecurity Analyst, SecureInc</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Review 5 -->
+        <div style="background: var(--panel); border: 1.5px solid var(--border); border-radius: var(--r2); padding: 2.5rem; transition: all 0.3s ease;">
+          <div style="display: flex; gap: 0.4rem; margin-bottom: 1rem;">
+            <span style="color: var(--v1); font-size: 1.1rem;">★</span>
+            <span style="color: var(--v1); font-size: 1.1rem;">★</span>
+            <span style="color: var(--v1); font-size: 1.1rem;">★</span>
+            <span style="color: var(--v1); font-size: 1.1rem;">★</span>
+            <span style="color: var(--v1); font-size: 1.1rem;">★</span>
+          </div>
+          <p style="font-size: 0.95rem; color: var(--txt); line-height: 1.7; margin-bottom: 1.5rem; font-style: italic;">"Coming from non-IT background, the beginner-friendly approach helped me transition smoothly. Now working as a junior developer!"</p>
+          <div style="display: flex; align-items: center; gap: 1rem;">
+            <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #a855f7, #9333ea); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 0.9rem;">MD</div>
+            <div>
+              <h4 style="font-family: 'Inter', 'Outfit', sans-serif; margin: 0; font-weight: 700; color: var(--txt); font-size: 0.95rem;">Mohan Das</h4>
+              <p style="margin: 0; font-size: 0.8rem; color: var(--txt3);">Web Developer, TechStart</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Review 6 -->
+        <div style="background: var(--panel); border: 1.5px solid var(--border); border-radius: var(--r2); padding: 2.5rem; transition: all 0.3s ease;">
+          <div style="display: flex; gap: 0.4rem; margin-bottom: 1rem;">
+            <span style="color: var(--v1); font-size: 1.1rem;">★</span>
+            <span style="color: var(--v1); font-size: 1.1rem;">★</span>
+            <span style="color: var(--v1); font-size: 1.1rem;">★</span>
+            <span style="color: var(--v1); font-size: 1.1rem;">★</span>
+            <span style="color: var(--v1); font-size: 1.1rem;">★</span>
+          </div>
+          <p style="font-size: 0.95rem; color: var(--txt); line-height: 1.7; margin-bottom: 1.5rem; font-style: italic;">"The live mock interviews and resume building sessions were incredibly helpful. Got hired at a Fortune 500 company!"</p>
+          <div style="display: flex; align-items: center; gap: 1rem;">
+            <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #06b6d4, #0891b2); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 0.9rem;">ND</div>
+            <div>
+              <h4 style="font-family: 'Inter', 'Outfit', sans-serif; margin: 0; font-weight: 700; color: var(--txt); font-size: 0.95rem;">Neha Desai</h4>
+              <p style="margin: 0; font-size: 0.8rem; color: var(--txt3);">Senior Software Engineer, MegaCorp</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Modal -->
+  <div class="moverlay" id="mo" onclick="if(event.target===this) closeModal()">
+    <div class="modal-box" style="animation: modalSlideUp 0.3s cubic-bezier(0.4,0,0.2,1);">
+      <button class="mcls" onclick="closeModal()" style="position: absolute; top: 1.3rem; right: 1.3rem; width: 30px; height: 30px; border-radius: 50%; background: var(--panel); border: 1px solid var(--border); color: var(--txt3); font-size: 0.85rem; display: flex; align-items: center; justify-content: center; font-weight: 700; transition: all 0.2s; cursor: pointer;">✕</button>
+
+      <div id="lf">
+        <h3 style="font-family: 'Cormorant Garamond', serif; font-weight: 700; font-size: 1.9rem; color: var(--txt); margin-bottom: 0.4rem; letter-spacing: -0.01em;">Welcome Back</h3>
+        <p class="msub" style="font-size: 0.85rem; color: var(--txt3); margin-bottom: 2rem; font-weight: 400;">Sign in to access your learning dashboard</p>
+
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" placeholder="you@example.com" style="background: rgba(255,255,255,0.04); border: 1px solid var(--border); color: var(--txt); padding: 0.8rem 1rem; border-radius: var(--r2); font-size: 0.9rem;"/>
+        </div>
+
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" placeholder="••••••••" style="background: rgba(255,255,255,0.04); border: 1px solid var(--border); color: var(--txt); padding: 0.8rem 1rem; border-radius: var(--r2); font-size: 0.9rem;"/>
+        </div>
+
+        <button class="btn-grad" style="width: 100%; padding: 0.95rem; margin-top: 0.5rem;" onclick="submitLogin()">Sign In</button>
+
+        <div style="display: flex; align-items: center; gap: 1rem; margin: 1.2rem 0; font-size: 0.73rem; color: var(--txt4); font-weight: 600;">
+          <span style="flex: 1; height: 1px; background: var(--border);"></span>
+          or continue with
+          <span style="flex: 1; height: 1px; background: var(--border);"></span>
+        </div>
+
+        <div style="text-align: center; font-size: 0.83rem; color: var(--txt3); margin-top: 1rem;">
+          No account yet? <a onclick="switchModalTab('register')" style="color: var(--v2); font-weight: 700; text-decoration: none; cursor: pointer;">Create one free →</a>
+        </div>
+      </div>
+
+      <div id="rf" style="display: none;">
+        <h3 style="font-family: 'Cormorant Garamond', serif; font-weight: 700; font-size: 1.9rem; color: var(--txt); margin-bottom: 0.4rem; letter-spacing: -0.01em;">Join SkillUpNow</h3>
+        <p class="msub" style="font-size: 0.85rem; color: var(--txt3); margin-bottom: 2rem; font-weight: 400;">Join 12,000+ professionals already upskilling</p>
+
+        <div class="form-group">
+          <label>Full Name</label>
+          <input type="text" placeholder="Your full name" style="background: rgba(255,255,255,0.04); border: 1px solid var(--border); color: var(--txt); padding: 0.8rem 1rem; border-radius: var(--r2); font-size: 0.9rem;"/>
+        </div>
+
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" placeholder="you@example.com" style="background: rgba(255,255,255,0.04); border: 1px solid var(--border); color: var(--txt); padding: 0.8rem 1rem; border-radius: var(--r2); font-size: 0.9rem;"/>
+        </div>
+
+        <div class="form-group">
+          <label>Phone Number</label>
+          <input type="tel" placeholder="+91 9876543210" style="background: rgba(255,255,255,0.04); border: 1px solid var(--border); color: var(--txt); padding: 0.8rem 1rem; border-radius: var(--r2); font-size: 0.9rem;"/>
+        </div>
+
+        <div class="form-group">
+          <label>I want to learn</label>
+          <select style="background: rgba(255,255,255,0.04); border: 1px solid var(--border); color: var(--txt); padding: 0.8rem 1rem; border-radius: var(--r2); font-size: 0.9rem;">
+            <option>Cloud Computing</option>
+            <option>DevOps & CI/CD</option>
+            <option>AI / Machine Learning</option>
+            <option>Cybersecurity</option>
+            <option>Data Engineering</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" placeholder="Create a strong password" style="background: rgba(255,255,255,0.04); border: 1px solid var(--border); color: var(--txt); padding: 0.8rem 1rem; border-radius: var(--r2); font-size: 0.9rem;"/>
+        </div>
+
+        <button class="btn-grad" style="width: 100%; padding: 0.95rem;" onclick="submitRegister()">Create My Account</button>
+
+        <div style="display: flex; align-items: center; gap: 1rem; margin: 1.2rem 0; font-size: 0.73rem; color: var(--txt4); font-weight: 600;">
+          <span style="flex: 1; height: 1px; background: var(--border);"></span>
+          or
+          <span style="flex: 1; height: 1px; background: var(--border);"></span>
+        </div>
+
+        <div style="text-align: center; font-size: 0.83rem; color: var(--txt3); margin-top: 1rem;">
+          Already have an account? <a onclick="switchModalTab('login')" style="color: var(--v2); font-weight: 700; text-decoration: none; cursor: pointer;">Sign in →</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer style="background: rgba(8,6,18,0.95); border-top: 1px solid var(--border); padding: 5rem 5vw 2.5rem; margin-top: 6rem;">
+    <div style="display: grid; grid-template-columns: 2.2fr 1fr 1fr 1fr; gap: 3.5rem; margin-bottom: 3.5rem;">
+      <div>
+        <a href="index.html" class="nav-logo" style="margin-bottom: 1rem; display: inline-flex;">
+          <div class="logo-icon">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          SkillUpNow
+        </a>
+        <p style="font-size: 0.84rem; color: var(--txt4); line-height: 1.75; max-width: 280px; margin-top: 1rem;">Premium IT & professional skills training. Secure, scalable, and built for career transformation.</p>
+        <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.74rem; color: var(--txt4); margin-top: 1.2rem; font-weight: 500;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+          skillupnow.org · SSL Enabled
+        </div>
+      </div>
+
+      <div>
+        <h5 style="font-size: 0.74rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--txt2); margin-bottom: 1.3rem;">Courses</h5>
+        <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.7rem;">
+          <li><a href="#" style="font-size: 0.84rem; color: var(--txt4); text-decoration: none; font-weight: 400; transition: all 0.2s;">Cloud Computing</a></li>
+          <li><a href="#" style="font-size: 0.84rem; color: var(--txt4); text-decoration: none; font-weight: 400; transition: all 0.2s;">DevOps & CI/CD</a></li>
+          <li><a href="#" style="font-size: 0.84rem; color: var(--txt4); text-decoration: none; font-weight: 400; transition: all 0.2s;">AI & Machine Learning</a></li>
+          <li><a href="#" style="font-size: 0.84rem; color: var(--txt4); text-decoration: none; font-weight: 400; transition: all 0.2s;">Cybersecurity</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h5 style="font-size: 0.74rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--txt2); margin-bottom: 1.3rem;">Platform</h5>
+        <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.7rem;">
+          <li><a href="#" style="font-size: 0.84rem; color: var(--txt4); text-decoration: none; font-weight: 400; transition: all 0.2s;">How It Works</a></li>
+          <li><a href="#" style="font-size: 0.84rem; color: var(--txt4); text-decoration: none; font-weight: 400; transition: all 0.2s;">Pricing & EMI</a></li>
+          <li><a href="#" style="font-size: 0.84rem; color: var(--txt4); text-decoration: none; font-weight: 400; transition: all 0.2s;">Certifications</a></li>
+          <li><a href="#" style="font-size: 0.84rem; color: var(--txt4); text-decoration: none; font-weight: 400; transition: all 0.2s;">Support</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h5 style="font-size: 0.74rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--txt2); margin-bottom: 1.3rem;">Company</h5>
+        <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.7rem;">
+          <li><a href="#" style="font-size: 0.84rem; color: var(--txt4); text-decoration: none; font-weight: 400; transition: all 0.2s;">About Us</a></li>
+          <li><a href="#" style="font-size: 0.84rem; color: var(--txt4); text-decoration: none; font-weight: 400; transition: all 0.2s;">Blog</a></li>
+          <li><a href="#" style="font-size: 0.84rem; color: var(--txt4); text-decoration: none; font-weight: 400; transition: all 0.2s;">Privacy Policy</a></li>
+          <li><a href="#" style="font-size: 0.84rem; color: var(--txt4); text-decoration: none; font-weight: 400; transition: all 0.2s;">Terms of Service</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div style="padding-top: 2rem; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+      <p style="font-size: 0.78rem; color: var(--txt4);">© 2025 SkillUpNow. All rights reserved.</p>
+      <div style="display: flex; gap: 0.65rem;">
+        <a href="#" style="width: 36px; height: 36px; border-radius: var(--r1); border: 1px solid var(--border); background: var(--panel); display: flex; align-items: center; justify-content: center; text-decoration: none; transition: all 0.25s;">📘</a>
+        <a href="#" style="width: 36px; height: 36px; border-radius: var(--r1); border: 1px solid var(--border); background: var(--panel); display: flex; align-items: center; justify-content: center; text-decoration: none; transition: all 0.25s;">𝕏</a>
+        <a href="#" style="width: 36px; height: 36px; border-radius: var(--r1); border: 1px solid var(--border); background: var(--panel); display: flex; align-items: center; justify-content: center; text-decoration: none; transition: all 0.25s;">📺</a>
+        <a href="#" style="width: 36px; height: 36px; border-radius: var(--r1); border: 1px solid var(--border); background: var(--panel); display: flex; align-items: center; justify-content: center; text-decoration: none; transition: all 0.25s;">📷</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="js/validations.js"></script>
+  <script src="js/theme.js"></script>
+  <script src="js/emi-calculator.js"></script>
+  <script src="js/payment.js"></script>
+  <script src="js/main.js"></script>
+
+  <script>
+    // ==================== LOGIN & REGISTRATION WITH DATABASE ====================
+    
+    async function submitLogin() {
+      const loginForm = document.getElementById('lf');
+      const email = loginForm.querySelector('input[type="email"]').value.trim();
+      const password = loginForm.querySelector('input[type="password"]').value;
+
+      if (!email || !password) {
+        if (window.app) window.app.showNotification('Please fill all fields', 'error');
+        return;
+      }
+
+      if (!window.supabaseConfig) {
+        console.error('Supabase not initialized');
+        if (window.app) window.app.showNotification('Database connection error', 'error');
+        return;
+      }
+
+      // Show loading state
+      const btn = loginForm.querySelector('button.btn-grad');
+      const originalText = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = 'Signing in...';
+
+      try {
+        const result = await window.supabaseConfig.signIn(email, password);
+
+        if (result.success) {
+          console.log('✅ Login successful');
+          if (window.app) {
+            window.app.showNotification('Welcome back! Redirecting...', 'success');
+          }
+          
+          // Store user data in localStorage
+          localStorage.setItem('user_id', result.data.user.id);
+          localStorage.setItem('user_email', result.data.user.email);
+          
+          // Close modal
+          setTimeout(() => {
+            closeModal();
+            // Optional: Redirect to dashboard
+            // location.href = 'pages/dashboard.html';
+          }, 1500);
+        } else {
+          console.error('Login failed:', result.error);
+          if (window.app) {
+            window.app.showNotification(result.error || 'Login failed. Please try again.', 'error');
+          }
+        }
+      } catch (error) {
+        console.error('Login error:', error);
+        if (window.app) {
+          window.app.showNotification('An error occurred. Please try again.', 'error');
+        }
+      } finally {
+        btn.disabled = false;
+        btn.textContent = originalText;
+      }
+    }
+
+    async function submitRegister() {
+      const registerForm = document.getElementById('rf');
+      const name = registerForm.querySelector('input[type="text"]').value.trim();
+      const email = registerForm.querySelector('input[type="email"]').value.trim();
+      const phone = registerForm.querySelector('input[type="tel"]').value.trim();
+      const interest = registerForm.querySelector('select').value;
+      const password = registerForm.querySelector('input[type="password"]').value;
+
+      if (!name || !email || !phone || !password) {
+        if (window.app) window.app.showNotification('Please fill all fields', 'error');
+        return;
+      }
+
+      // Validate email format
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        if (window.app) window.app.showNotification('Please enter a valid email', 'error');
+        return;
+      }
+
+      // Validate password length
+      if (password.length < 6) {
+        if (window.app) window.app.showNotification('Password must be at least 6 characters', 'error');
+        return;
+      }
+
+      if (!window.supabaseConfig) {
+        console.error('Supabase not initialized');
+        if (window.app) window.app.showNotification('Database connection error', 'error');
+        return;
+      }
+
+      // Show loading state
+      const btn = registerForm.querySelector('button.btn-grad');
+      const originalText = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = 'Creating account...';
+
+      try {
+        const result = await window.supabaseConfig.signUp(email, password, {
+          full_name: name,
+          email: email,
+          phone_number: phone,
+          learning_interest: interest,
+          experience_level: 'beginner'
+        });
+
+        if (result.success) {
+          console.log('✅ Registration successful');
+          if (window.app) {
+            window.app.showNotification('Account created! Please check your email to verify.', 'success');
+          }
+          
+          // Store user data
+          localStorage.setItem('user_email', email);
+          
+          // Wait and close modal
+          setTimeout(() => {
+            closeModal();
+            // Clear form
+            registerForm.querySelectorAll('input, select').forEach(field => field.value = '');
+          }, 1500);
+        } else {
+          console.error('Registration failed:', result.error);
+          if (window.app) {
+            window.app.showNotification(result.error || 'Registration failed. Please try again.', 'error');
+          }
+        }
+      } catch (error) {
+        console.error('Registration error:', error);
+        if (window.app) {
+          window.app.showNotification('An error occurred. Please try again.', 'error');
+        }
+      } finally {
+        btn.disabled = false;
+        btn.textContent = originalText;
+      }
+    }
+
+    // ==================== CHECK USER SESSION ON PAGE LOAD ====================
+    
+    window.addEventListener('load', async () => {
+      if (window.supabaseConfig) {
+        try {
+          const session = await window.supabaseConfig.getSession();
+          if (session) {
+            console.log('✅ User already logged in');
+            const user = await window.supabaseConfig.getCurrentUser();
+            if (user) {
+              localStorage.setItem('user_id', user.id);
+              localStorage.setItem('user_email', user.email);
+              console.log('User:', user.email);
+            }
+          }
+        } catch (error) {
+          console.error('Session check error:', error);
+        }
+      }
+    });
+  </script>
+</body>
+</html>
