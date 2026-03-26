@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+
+# Block private folders
+Disallow: /db/
+Disallow: /config/
+Disallow: /.env
+
+# Sitemap location
+Sitemap: https://skillupnowadmin.org/sitemap.xml
