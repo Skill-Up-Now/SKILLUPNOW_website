@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#0d0b1a">
+  <meta name="theme-color" content="#ffffff">
   <meta name="description" content="SkillUpNow - Premium IT Training & Professional Development">
   <title>SkillUpNow — Elite IT & Professional Training</title>
   <!-- Primary SEO 
@@ -109,14 +109,131 @@
     .modal-box .form-group:nth-child(n+3) {
       animation-delay: 0.2s;
     }
+
+    /* ── HERO VISUAL: Orbit Rings ── */
+    .hero-visual {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 500px;
+      width: 500px;
+    }
+    .orbit-wrap {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+    }
+    .orbit {
+      position: absolute;
+      border-radius: 50%;
+      border: 1px dashed rgba(124,92,252,.18);
+    }
+    .orbit-a { width: 320px; height: 320px; animation: orb-spin 22s linear infinite; }
+    .orbit-b { width: 460px; height: 460px; animation: orb-spin 35s linear infinite reverse; border-color: rgba(0,207,238,.1); }
+    @keyframes orb-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    .orb-dot { position: absolute; width: 8px; height: 8px; border-radius: 50%; top: -4px; left: 50%; margin-left: -4px; }
+    .orbit-a .orb-dot { background: var(--v2); box-shadow: 0 0 10px var(--v2); }
+    .orbit-b .orb-dot { background: #00cfee; box-shadow: 0 0 10px #00cfee; }
+
+    /* ── HERO VISUAL: 3D Scene ── */
+    .scene {
+      position: relative;
+      width: 340px; height: 340px;
+      transform-style: preserve-3d;
+      perspective: 1200px;
+      animation: float-s 6s ease-in-out infinite;
+    }
+    @keyframes float-s {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(-18px); }
+    }
+
+    /* ── HERO VISUAL: Laptop Mockup ── */
+    .laptop { position: absolute; bottom: 50px; left: 50%; transform: translateX(-50%); width: 268px; }
+    .lp-lid {
+      height: 170px; width: 100%;
+      background: linear-gradient(150deg, #16162a, #1d1d3e);
+      border-radius: 10px 10px 3px 3px;
+      border: 1px solid rgba(255,255,255,.09);
+      box-shadow: 0 18px 50px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.07);
+      overflow: hidden; padding: 10px;
+    }
+    .lp-screen { height: 100%; border-radius: 5px; background: linear-gradient(140deg, #0c0c20 0%, #161635 100%); position: relative; overflow: hidden; }
+    .lp-glow { position: absolute; inset: 0; background: linear-gradient(135deg, rgba(124,92,252,.14), rgba(0,207,238,.09)); animation: scr-pulse 3s ease-in-out infinite; }
+    @keyframes scr-pulse { 0%, 100% { opacity: 1; } 50% { opacity: .65; } }
+    .lp-scr-content { position: relative; z-index: 1; padding: 8px; display: flex; flex-direction: column; gap: 5px; }
+    .s-bar { height: 4px; border-radius: 2px; animation: bar-anim 2.5s ease-in-out infinite alternate; }
+    .s-bar:nth-child(1) { width: 75%; background: linear-gradient(90deg, var(--v2), #00cfee); animation-delay: 0s; }
+    .s-bar:nth-child(2) { width: 55%; background: rgba(255,255,255,.12); animation-delay: .18s; }
+    .s-bar:nth-child(3) { width: 65%; background: rgba(255,255,255,.08); animation-delay: .36s; }
+    .s-bar:nth-child(4) { width: 42%; background: rgba(124,92,252,.35); animation-delay: .54s; }
+    @keyframes bar-anim { from { transform: scaleX(.82); opacity: .6; } to { transform: scaleX(1); opacity: 1; } }
+    .s-code-block { margin-top: 6px; padding: 5px 6px; background: rgba(124,92,252,.1); border-left: 2px solid var(--v2); border-radius: 3px; }
+    .s-code-line { height: 3px; border-radius: 2px; margin-bottom: 3px; }
+    .s-code-line:nth-child(1) { width: 60%; background: rgba(0,207,238,.4); }
+    .s-code-line:nth-child(2) { width: 80%; background: rgba(255,255,255,.15); }
+    .s-code-line:nth-child(3) { width: 45%; background: rgba(124,92,252,.5); }
+    .lp-base { width: 290px; height: 9px; margin: 0 auto; background: linear-gradient(150deg, #1e1e40, #17172e); border-radius: 0 0 7px 7px; border: 1px solid rgba(255,255,255,.06); border-top: none; }
+    .lp-foot { width: 272px; height: 11px; margin: 0 auto; background: linear-gradient(150deg, #101020, #0d0d1c); border-radius: 5px; box-shadow: 0 8px 28px rgba(0,0,0,.5); }
+
+    /* ── HERO VISUAL: Floating Stat Cards ── */
+    .f-card {
+      position: absolute;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--r1);
+      padding: .65rem 1rem;
+      box-shadow: 0 8px 28px rgba(0,0,0,.28), var(--shadow-glow);
+      backdrop-filter: blur(10px);
+      font-size: .72rem; font-weight: 600;
+      display: flex; align-items: center; gap: .5rem;
+      z-index: 2; white-space: nowrap;
+    }
+    .f-card:nth-child(1) { top: 18px;    left: -18px;  animation: fc-float 4.2s ease-in-out infinite; }
+    .f-card:nth-child(2) { top: 44%;     right: -24px; animation: fc-float 4.8s ease-in-out infinite .7s; }
+    .f-card:nth-child(3) { bottom: 90px; left: -24px;  animation: fc-float 5.2s ease-in-out infinite 1.3s; }
+    @keyframes fc-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+    .fc-val { color: var(--v2); }
+    .fc-lbl { color: var(--txt3); font-weight: 400; font-size: .68rem; display: block; margin-top: 1px; }
+
+    /* ── HERO VISUAL: AI Brain Badge ── */
+    .ai-badge { position: absolute; top: 16px; right: 16px; font-size: 2.2rem; animation: brain-glow 2.5s ease-in-out infinite; z-index: 2; }
+    @keyframes brain-glow {
+      0%, 100% { filter: drop-shadow(0 0 8px rgba(124,92,252,.8)); }
+      50%       { filter: drop-shadow(0 0 22px rgba(124,92,252,1)) drop-shadow(0 0 38px rgba(0,207,238,.4)); }
+    }
+
+    /* ── SCROLL REVEAL: slide from right ── */
+    .sr-r { opacity: 0; transform: translateX(28px); transition: opacity .7s ease, transform .7s ease; }
+    .sr-r.vis { opacity: 1; transform: translateX(0); }
+
+    @media (max-width: 520px) {
+      .hero-visual { width: 340px; height: 420px; }
+      .orbit-a { width: 240px; height: 240px; }
+      .orbit-b { width: 340px; height: 340px; }
+      .scene   { width: 260px; height: 260px; }
+      .laptop  { width: 200px; bottom: 30px; }
+      .lp-lid  { height: 130px; }
+      .lp-base { width: 220px; }
+      .lp-foot { width: 206px; }
+      .f-card:nth-child(1) { left: -6px; }
+      .f-card:nth-child(2) { right: -10px; }
+      .f-card:nth-child(3) { left: -6px; }
+    }
   </style>
   
   <!-- Icons & Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,700&family=Outfit:wght@300;400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,300&display=swap" rel="stylesheet">
 
   <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="config/supabase-config.js"></script>
   <script src="js/theme.js"></script>
@@ -159,32 +276,32 @@
       <div id="profile-section" style="display: none; display: flex; align-items: center; gap: 1rem; position: relative;">
         <button id="profile-btn" class="profile-icon-btn" title="View Profile">👤</button>
         <div id="profile-dropdown" class="profile-dropdown">
-          <a href="pages/profile.html" style="display: flex; align-items: center; gap: 0.8rem; padding: 1rem; text-decoration: none; color: var(--txt2); border-bottom: 1px solid var(--border); transition: all 0.25s;">
-            <span style="font-size: 1.2rem;">👤</span>
+          <a href="pages/profile.html?edit=1" style="display: flex; align-items: center; gap: 0.8rem; padding: 1rem; text-decoration: none; color: var(--txt2); border-bottom: 1px solid var(--border); transition: all 0.25s;" onmouseover="this.style.background='rgba(124,92,252,0.08)'" onmouseout="this.style.background=''">
+            <span style="font-size: 1.2rem;">✏️</span>
             <div>
-              <div style="font-weight: 600; color: var(--txt);">My Profile</div>
-              <div style="font-size: 0.75rem; color: var(--txt4);">Manage account</div>
+              <div style="font-weight: 600; color: var(--txt);">Edit Profile</div>
+              <div style="font-size: 0.75rem; color: var(--txt4);">Update your info</div>
             </div>
           </a>
-          <a href="pages/courses.html" style="display: flex; align-items: center; gap: 0.8rem; padding: 1rem; text-decoration: none; color: var(--txt2); border-bottom: 1px solid var(--border); transition: all 0.25s;">
-            <span style="font-size: 1.2rem;">📚</span>
+          <a href="pages/profile.html#learning-paths" style="display: flex; align-items: center; gap: 0.8rem; padding: 1rem; text-decoration: none; color: var(--txt2); border-bottom: 1px solid var(--border); transition: all 0.25s;" onmouseover="this.style.background='rgba(124,92,252,0.08)'" onmouseout="this.style.background=''">
+            <span style="font-size: 1.2rem;">🗺️</span>
             <div>
-              <div style="font-weight: 600; color: var(--txt);">My Courses</div>
-              <div style="font-size: 0.75rem; color: var(--txt4);">Continue learning</div>
+              <div style="font-weight: 600; color: var(--txt);">My Learning Path</div>
+              <div style="font-size: 0.75rem; color: var(--txt4);">Track your journey</div>
             </div>
           </a>
-          <a href="../pages/payment.html" style="display: flex; align-items: center; gap: 0.8rem; padding: 1rem; text-decoration: none; color: var(--txt2); border-bottom: 1px solid var(--border); transition: all 0.25s;">
-            <span style="font-size: 1.2rem;">💳</span>
+          <a id="dd-admin-link" href="pages/admin-dashboard.html" style="display: none; align-items: center; gap: 0.8rem; padding: 1rem; text-decoration: none; color: var(--txt2); border-bottom: 1px solid var(--border); transition: all 0.25s;" onmouseover="this.style.background='rgba(124,92,252,0.08)'" onmouseout="this.style.background=''">
+            <span style="font-size: 1.2rem;">⚙️</span>
             <div>
-              <div style="font-weight: 600; color: var(--txt);">Payments</div>
-              <div style="font-size: 0.75rem; color: var(--txt4);">Track transactions</div>
+              <div style="font-weight: 600; color: var(--txt);">Admin Panel</div>
+              <div style="font-size: 0.75rem; color: var(--txt4);">Manage platform</div>
             </div>
           </a>
-          <button onclick="window.profileNav.logout()" style="width: 100%; text-align: left; padding: 1rem; border: none; background: transparent; color: var(--txt2); cursor: pointer; display: flex; align-items: center; gap: 0.8rem; transition: all 0.25s;">
+          <button onclick="showLogoutConfirm()" style="width: 100%; text-align: left; padding: 1rem; border: none; background: transparent; color: var(--txt2); cursor: pointer; display: flex; align-items: center; gap: 0.8rem; transition: all 0.25s;" onmouseover="this.style.background='rgba(255,107,107,0.08)'" onmouseout="this.style.background=''">
             <span style="font-size: 1.2rem;">🚪</span>
             <div>
-              <div style="font-weight: 600; color: var(--txt);">Logout</div>
-              <div style="font-size: 0.75rem; color: var(--txt4);">Sign out</div>
+              <div style="font-weight: 600; color: #ff6b6b;">Logout</div>
+              <div style="font-size: 0.75rem; color: var(--txt4);">Sign out safely</div>
             </div>
           </button>
         </div>
@@ -193,6 +310,8 @@
       <button class="nav-cta" id="cta-btn" onclick="openModal('register')">Get Started</button>
     </div>
   </nav>
+
+  <nav class="breadcrumb"><a href="index.html">🏠 Home</a></nav>
 
   <!-- Hero Section -->
   <section class="hero" style="padding: 5rem 5vw 4rem; display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 4rem; overflow: hidden;">
@@ -226,45 +345,67 @@
       </div>
     </div>
 
-    <div class="hero-visual" style="animation: fadeUp 0.9s 0.2s ease both;">
-      <div style="position: relative; transform-style: preserve-3d;">
-        <div style="background: rgba(20,16,40,0.9); border: 1px solid var(--border2); border-radius: var(--r3); padding: 1.8rem; box-shadow: var(--shadow-card), 0 0 80px rgba(124,92,252,0.08); transition: transform 0.5s cubic-bezier(0.4,0,0.2,1); position: relative; overflow: hidden;">
-          <div style="position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, var(--v2), transparent);"></div>
-          
-          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.4rem;">
-            <span style="font-size: 0.8rem; font-weight: 700; color: var(--txt2); letter-spacing: 0.06em; text-transform: uppercase;">Top Courses Live</span>
-            <span style="display: flex; align-items: center; gap: 0.4rem; font-size: 0.7rem; font-weight: 700; color: #4ade80; letter-spacing: 0.06em;">
-              <span style="width: 6px; height: 6px; border-radius: 50%; background: #4ade80; animation: livePulse 1.6s infinite;"></span> Live
-            </span>
-          </div>
+    <div class="hero-visual sr-r">
 
-          <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-            <div style="display: flex; align-items: center; gap: 0.9rem; background: rgba(255,255,255,0.04); border: 1px solid var(--border); padding: 0.9rem 1.1rem; border-radius: var(--r2); transition: all 0.3s cubic-bezier(0.4,0,0.2,1);">
-              <div style="width: 42px; height: 42px; border-radius: var(--r1); background: linear-gradient(135deg,rgba(255,160,50,0.15),rgba(255,100,50,0.1)); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">☁️</div>
-              <div><h4 style="font-size: 0.86rem; font-weight: 700; color: var(--txt); line-height: 1.2;">AWS Solutions Architect</h4><span style="font-size: 0.72rem; color: var(--txt4); font-weight: 400;">32 lessons · 18 hrs</span></div>
-              <span style="font-size: 0.67rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; padding: 0.22rem 0.6rem; border-radius: var(--r4); background: rgba(255,130,92,0.12); color: #ff8c5a; border: 1px solid rgba(255,130,92,0.25); flex-shrink: 0; margin-left: auto;">Hot</span>
-            </div>
+      <!-- Orbit rings -->
+      <div class="orbit-wrap">
+        <div class="orbit orbit-a"><div class="orb-dot"></div></div>
+        <div class="orbit orbit-b"><div class="orb-dot"></div></div>
+      </div>
 
-            <div style="display: flex; align-items: center; gap: 0.9rem; background: rgba(255,255,255,0.04); border: 1px solid var(--border); padding: 0.9rem 1.1rem; border-radius: var(--r2); transition: all 0.3s cubic-bezier(0.4,0,0.2,1);">
-              <div style="width: 42px; height: 42px; border-radius: var(--r1); background: linear-gradient(135deg,rgba(59,130,246,0.15),rgba(37,99,235,0.1)); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">🐳</div>
-              <div><h4 style="font-size: 0.86rem; font-weight: 700; color: var(--txt); line-height: 1.2;">Kubernetes & Docker</h4><span style="font-size: 0.72rem; color: var(--txt4); font-weight: 400;">28 lessons · 14 hrs</span></div>
-              <span style="font-size: 0.67rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; padding: 0.22rem 0.6rem; border-radius: var(--r4); background: rgba(74,222,128,0.1); color: #4ade80; border: 1px solid rgba(74,222,128,0.2); flex-shrink: 0; margin-left: auto;">New</span>
-            </div>
+      <!-- 3D floating scene (mouse parallax applied via JS) -->
+      <div class="scene" id="scene3d">
 
-            <div style="display: flex; align-items: center; gap: 0.9rem; background: rgba(255,255,255,0.04); border: 1px solid var(--border); padding: 0.9rem 1.1rem; border-radius: var(--r2); transition: all 0.3s cubic-bezier(0.4,0,0.2,1);">
-              <div style="width: 42px; height: 42px; border-radius: var(--r1); background: linear-gradient(135deg,rgba(124,92,252,0.2),rgba(61,107,255,0.1)); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">🤖</div>
-              <div><h4 style="font-size: 0.86rem; font-weight: 700; color: var(--txt); line-height: 1.2;">Generative AI with Python</h4><span style="font-size: 0.72rem; color: var(--txt4); font-weight: 400;">40 lessons · 22 hrs</span></div>
-              <span style="font-size: 0.67rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; padding: 0.22rem 0.6rem; border-radius: var(--r4); background: var(--v5); color: var(--v2); border: 1px solid var(--border2); flex-shrink: 0; margin-left: auto;">Pro</span>
-            </div>
-          </div>
-
-          <div style="margin-top: 1.3rem; padding-top: 1.3rem; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
-            <span style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; font-weight: 600; color: var(--v2);">💳 Flexible Payment Options</span>
-            <button class="btn-grad" style="padding: 0.5rem 1.2rem; font-size: 0.78rem;" onclick="window.location.href='pages/courses.html'">Enroll Now →</button>
+        <!-- Floating stat cards -->
+        <div class="f-card">
+          <span style="font-size:1.1rem">🎯</span>
+          <div>
+            <span class="fc-val">87% Complete</span>
+            <span class="fc-lbl">Course Progress</span>
           </div>
         </div>
-      </div>
-    </div>
+        <div class="f-card">
+          <span style="font-size:1.1rem">⚡</span>
+          <div>
+            <span class="fc-val">+340 XP</span>
+            <span class="fc-lbl">Points Earned</span>
+          </div>
+        </div>
+        <div class="f-card">
+          <span style="font-size:1.1rem">🏆</span>
+          <div>
+            <span class="fc-val">Top 5%</span>
+            <span class="fc-lbl">Global Rank</span>
+          </div>
+        </div>
+
+        <!-- Laptop mockup -->
+        <div class="laptop">
+          <div class="lp-lid">
+            <div class="lp-screen">
+              <div class="lp-glow"></div>
+              <div class="lp-scr-content">
+                <div class="s-bar"></div>
+                <div class="s-bar"></div>
+                <div class="s-bar"></div>
+                <div class="s-bar"></div>
+                <div class="s-code-block">
+                  <div class="s-code-line"></div>
+                  <div class="s-code-line"></div>
+                  <div class="s-code-line"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="lp-base"></div>
+          <div class="lp-foot"></div>
+        </div>
+
+        <!-- AI brain badge -->
+        <div class="ai-badge">🧠</div>
+
+      </div><!-- /.scene -->
+    </div><!-- /.hero-visual -->
   </section>
 
   <!-- Trust Bar -->
@@ -293,10 +434,10 @@
 
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2.5rem;">
         <!-- Browse Courses -->
-        <a href="pages/courses.html" style="text-decoration: none; group display: flex; flex-direction: column; background: var(--panel); border: 1.5px solid var(--border); border-radius: var(--r2); padding: 2rem; transition: all 0.35s cubic-bezier(0.4,0,0.2,1); position: relative; overflow: hidden;">
+        <a href="pages/courses.html" class="platform-card">
           <div style="position: absolute; inset: 0; background: linear-gradient(135deg, rgba(124,92,252,0.08), transparent); opacity: 0; transition: opacity 0.35s ease;"></div>
           <div style="position: relative; z-index: 1;">
-            <div style="width: 56px; height: 56px; background: linear-gradient(135deg, var(--v1) 0%, var(--v2) 100%); border-radius: var(--r1); display: flex; align-items: center; justify-content: center; font-size: 1.8rem; margin-bottom: 1.5rem; transition: transform 0.35s ease;">📚</div>
+            <div class="platform-icon" style="background: linear-gradient(135deg, var(--v1) 0%, var(--v2) 100%); animation-delay: 0s;">📚</div>
             <h3 style="font-family: 'Inter', 'Outfit', sans-serif; font-size: 1.3rem; font-weight: 700; color: var(--txt); margin-bottom: 0.7rem;">Browse All Courses</h3>
             <p style="font-size: 0.95rem; color: var(--txt3); line-height: 1.6; margin-bottom: 1.5rem;">Explore 48+ expertly-designed courses in cloud, DevOps, AI, security, and data engineering with live mentorship.</p>
             <div style="display: flex; align-items: center; gap: 0.6rem; font-weight: 600; color: var(--v1); font-size: 0.9rem;">
@@ -306,10 +447,10 @@
         </a>
 
         <!-- Fee Enquiry -->
-        <a href="pages/contact-enquiry.html" style="text-decoration: none; display: flex; flex-direction: column; background: var(--panel); border: 1.5px solid var(--border); border-radius: var(--r2); padding: 2rem; transition: all 0.35s cubic-bezier(0.4,0,0.2,1); position: relative; overflow: hidden;">
+        <a href="pages/contact-enquiry.html" class="platform-card">
           <div style="position: absolute; inset: 0; background: linear-gradient(135deg, rgba(61,107,255,0.08), transparent); opacity: 0; transition: opacity 0.35s ease;"></div>
           <div style="position: relative; z-index: 1;">
-            <div style="width: 56px; height: 56px; background: linear-gradient(135deg, var(--b1) 0%, var(--b2) 100%); border-radius: var(--r1); display: flex; align-items: center; justify-content: center; font-size: 1.8rem; margin-bottom: 1.5rem; transition: transform 0.35s ease;">💳</div>
+            <div class="platform-icon" style="background: linear-gradient(135deg, var(--b1) 0%, var(--b2) 100%); animation-delay: 0.5s;">💳</div>
             <h3 style="font-family: 'Inter', 'Outfit', sans-serif; font-size: 1.3rem; font-weight: 700; color: var(--txt); margin-bottom: 0.7rem;">Fee Enquiry & Pricing</h3>
             <p style="font-size: 0.95rem; color: var(--txt3); line-height: 1.6; margin-bottom: 1.5rem;">Get detailed pricing information, flexible EMI options, and personalized consultation from our financial advisors.</p>
             <div style="display: flex; align-items: center; gap: 0.6rem; font-weight: 600; color: var(--b1); font-size: 0.9rem;">
@@ -319,10 +460,10 @@
         </a>
 
         <!-- Course Registration -->
-        <a href="pages/course-registration.html" style="text-decoration: none; display: flex; flex-direction: column; background: var(--panel); border: 1.5px solid var(--border); border-radius: var(--r2); padding: 2rem; transition: all 0.35s cubic-bezier(0.4,0,0.2,1); position: relative; overflow: hidden;">
+        <a href="pages/course-registration.html" class="platform-card">
           <div style="position: absolute; inset: 0; background: linear-gradient(135deg, rgba(124,92,252,0.08), transparent); opacity: 0; transition: opacity 0.35s ease;"></div>
           <div style="position: relative; z-index: 1;">
-            <div style="width: 56px; height: 56px; background: linear-gradient(135deg, #ff8c5a 0%, #ff6b35 100%); border-radius: var(--r1); display: flex; align-items: center; justify-content: center; font-size: 1.8rem; margin-bottom: 1.5rem; transition: transform 0.35s ease;">✍️</div>
+            <div class="platform-icon" style="background: linear-gradient(135deg, #ff8c5a 0%, #ff6b35 100%); animation-delay: 1s;">✍️</div>
             <h3 style="font-family: 'Inter', 'Outfit', sans-serif; font-size: 1.3rem; font-weight: 700; color: var(--txt); margin-bottom: 0.7rem;">Quick Registration</h3>
             <p style="font-size: 0.95rem; color: var(--txt3); line-height: 1.6; margin-bottom: 1.5rem;">Register quickly for your chosen course, select batch timing, and get instant enrollment confirmation.</p>
             <div style="display: flex; align-items: center; gap: 0.6rem; font-weight: 600; color: #ff8c5a; font-size: 0.9rem;">
@@ -332,10 +473,10 @@
         </a>
 
         <!-- EMI Application -->
-        <a href="pages/emi-application.html" style="text-decoration: none; display: flex; flex-direction: column; background: var(--panel); border: 1.5px solid var(--border); border-radius: var(--r2); padding: 2rem; transition: all 0.35s cubic-bezier(0.4,0,0.2,1); position: relative; overflow: hidden;">
+        <a href="pages/emi-application.html" class="platform-card">
           <div style="position: absolute; inset: 0; background: linear-gradient(135deg, rgba(16,185,129,0.08), transparent); opacity: 0; transition: opacity 0.35s ease;"></div>
           <div style="position: relative; z-index: 1;">
-            <div style="width: 56px; height: 56px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: var(--r1); display: flex; align-items: center; justify-content: center; font-size: 1.8rem; margin-bottom: 1.5rem; transition: transform 0.35s ease;">💰</div>
+            <div class="platform-icon" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); animation-delay: 1.5s;">💰</div>
             <h3 style="font-family: 'Inter', 'Outfit', sans-serif; font-size: 1.3rem; font-weight: 700; color: var(--txt); margin-bottom: 0.7rem;">EMI Application</h3>
             <p style="font-size: 0.95rem; color: var(--txt3); line-height: 1.6; margin-bottom: 1.5rem;">Apply for zero-cost EMI with quick approval process. Flexible 3, 6, or 12-month payment plans available.</p>
             <div style="display: flex; align-items: center; gap: 0.6rem; font-weight: 600; color: #10b981; font-size: 0.9rem;">
@@ -345,10 +486,10 @@
         </a>
 
         <!-- Payment & Checkout -->
-        <a href="pages/payment.html" style="text-decoration: none; display: flex; flex-direction: column; background: var(--panel); border: 1.5px solid var(--border); border-radius: var(--r2); padding: 2rem; transition: all 0.35s cubic-bezier(0.4,0,0.2,1); position: relative; overflow: hidden;">
+        <a href="pages/payment.html" class="platform-card">
           <div style="position: absolute; inset: 0; background: linear-gradient(135deg, rgba(168,85,247,0.08), transparent); opacity: 0; transition: opacity 0.35s ease;"></div>
           <div style="position: relative; z-index: 1;">
-            <div style="width: 56px; height: 56px; background: linear-gradient(135deg, #a855f7 0%, #9333ea 100%); border-radius: var(--r1); display: flex; align-items: center; justify-content: center; font-size: 1.8rem; margin-bottom: 1.5rem; transition: transform 0.35s ease;">🛒</div>
+            <div class="platform-icon" style="background: linear-gradient(135deg, #a855f7 0%, #9333ea 100%); animation-delay: 2s;">🛒</div>
             <h3 style="font-family: 'Inter', 'Outfit', sans-serif; font-size: 1.3rem; font-weight: 700; color: var(--txt); margin-bottom: 0.7rem;">Secure Checkout</h3>
             <p style="font-size: 0.95rem; color: var(--txt3); line-height: 1.6; margin-bottom: 1.5rem;">Complete your payment securely with multiple payment methods, SSL encryption, and instant confirmation.</p>
             <div style="display: flex; align-items: center; gap: 0.6rem; font-weight: 600; color: #a855f7; font-size: 0.9rem;">
@@ -358,10 +499,10 @@
         </a>
 
         <!-- Student Feedback -->
-        <a href="pages/feedback.html" style="text-decoration: none; display: flex; flex-direction: column; background: var(--panel); border: 1.5px solid var(--border); border-radius: var(--r2); padding: 2rem; transition: all 0.35s cubic-bezier(0.4,0,0.2,1); position: relative; overflow: hidden;">
+        <a href="pages/feedback.html" class="platform-card">
           <div style="position: absolute; inset: 0; background: linear-gradient(135deg, rgba(59,130,246,0.08), transparent); opacity: 0; transition: opacity 0.35s ease;"></div>
           <div style="position: relative; z-index: 1;">
-            <div style="width: 56px; height: 56px; background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); border-radius: var(--r1); display: flex; align-items: center; justify-content: center; font-size: 1.8rem; margin-bottom: 1.5rem; transition: transform 0.35s ease;">⭐</div>
+            <div class="platform-icon" style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); animation-delay: 2.5s;">⭐</div>
             <h3 style="font-family: 'Inter', 'Outfit', sans-serif; font-size: 1.3rem; font-weight: 700; color: var(--txt); margin-bottom: 0.7rem;">Share Your Feedback</h3>
             <p style="font-size: 0.95rem; color: var(--txt3); line-height: 1.6; margin-bottom: 1.5rem;">Help us improve by sharing your learning experience. Your feedback shapes our future courses and content.</p>
             <div style="display: flex; align-items: center; gap: 0.6rem; font-weight: 600; color: #3b82f6; font-size: 0.9rem;">
@@ -381,117 +522,187 @@
         <p style="font-size: 1.1rem; color: var(--txt3); max-width: 600px; margin: 0 auto;">Real experiences from professionals who transformed their careers with SkillUpNow</p>
       </div>
 
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2.5rem;">
-        <!-- Review 1 -->
-        <div style="background: var(--panel); border: 1.5px solid var(--border); border-radius: var(--r2); padding: 2.5rem; transition: all 0.3s ease;">
-          <div style="display: flex; gap: 0.4rem; margin-bottom: 1rem;">
-            <span style="color: var(--v1); font-size: 1.1rem;">★</span>
-            <span style="color: var(--v1); font-size: 1.1rem;">★</span>
-            <span style="color: var(--v1); font-size: 1.1rem;">★</span>
-            <span style="color: var(--v1); font-size: 1.1rem;">★</span>
-            <span style="color: var(--v1); font-size: 1.1rem;">★</span>
-          </div>
-          <p style="font-size: 0.95rem; color: var(--txt); line-height: 1.7; margin-bottom: 1.5rem; font-style: italic;">"The AWS course was exceptional! Instructors are industry experts with real-world experience. I got placed within 2 months of course completion. Highly recommended!"</p>
-          <div style="display: flex; align-items: center; gap: 1rem;">
-            <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, var(--v1), var(--v2)); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 0.9rem;">RJ</div>
-            <div>
-              <h4 style="font-family: 'Inter', 'Outfit', sans-serif; margin: 0; font-weight: 700; color: var(--txt); font-size: 0.95rem;">Rajesh Kumar</h4>
-              <p style="margin: 0; font-size: 0.8rem; color: var(--txt3);">Cloud Architect, TechCorp</p>
+      <div class="reviews-track-wrap">
+        <div class="reviews-track">
+          <!-- Review 1 -->
+          <div class="review-card">
+            <div style="display: flex; gap: 0.4rem; margin-bottom: 1rem;">
+              <span style="color: var(--v1); font-size: 1.1rem;">★</span>
+              <span style="color: var(--v1); font-size: 1.1rem;">★</span>
+              <span style="color: var(--v1); font-size: 1.1rem;">★</span>
+              <span style="color: var(--v1); font-size: 1.1rem;">★</span>
+              <span style="color: var(--v1); font-size: 1.1rem;">★</span>
+            </div>
+            <p style="font-size: 0.95rem; color: var(--txt); line-height: 1.7; margin-bottom: 1.5rem; font-style: italic;">"The AWS course was exceptional! Instructors are industry experts with real-world experience. I got placed within 2 months of course completion. Highly recommended!"</p>
+            <div style="display: flex; align-items: center; gap: 1rem;">
+              <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, var(--v1), var(--v2)); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 0.9rem;">RJ</div>
+              <div>
+                <h4 style="font-family: 'Inter', 'Outfit', sans-serif; margin: 0; font-weight: 700; color: var(--txt); font-size: 0.95rem;">Rajesh Kumar</h4>
+                <p style="margin: 0; font-size: 0.8rem; color: var(--txt3);">Cloud Architect, TechCorp</p>
+              </div>
             </div>
           </div>
-        </div>
 
-        <!-- Review 2 -->
-        <div style="background: var(--panel); border: 1.5px solid var(--border); border-radius: var(--r2); padding: 2.5rem; transition: all 0.3s ease;">
-          <div style="display: flex; gap: 0.4rem; margin-bottom: 1rem;">
-            <span style="color: var(--v1); font-size: 1.1rem;">★</span>
-            <span style="color: var(--v1); font-size: 1.1rem;">★</span>
-            <span style="color: var(--v1); font-size: 1.1rem;">★</span>
-            <span style="color: var(--v1); font-size: 1.1rem;">★</span>
-            <span style="color: var(--v1); font-size: 1.1rem;">★</span>
-          </div>
-          <p style="font-size: 0.95rem; color: var(--txt); line-height: 1.7; margin-bottom: 1.5rem; font-style: italic;">"Switching to DevOps was the best decision. The hands-on projects and EMI payment option made it accessible. Now earning 40% more!"</p>
-          <div style="display: flex; align-items: center; gap: 1rem;">
-            <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #ff8c5a, #ff6b35); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 0.9rem;">PR</div>
-            <div>
-              <h4 style="font-family: 'Inter', 'Outfit', sans-serif; margin: 0; font-weight: 700; color: var(--txt); font-size: 0.95rem;">Priya Sharma</h4>
-              <p style="margin: 0; font-size: 0.8rem; color: var(--txt3);">DevOps Engineer, StartupXYZ</p>
+          <!-- Review 2 -->
+          <div class="review-card">
+            <div style="display: flex; gap: 0.4rem; margin-bottom: 1rem;">
+              <span style="color: var(--v1); font-size: 1.1rem;">★</span>
+              <span style="color: var(--v1); font-size: 1.1rem;">★</span>
+              <span style="color: var(--v1); font-size: 1.1rem;">★</span>
+              <span style="color: var(--v1); font-size: 1.1rem;">★</span>
+              <span style="color: var(--v1); font-size: 1.1rem;">★</span>
+            </div>
+            <p style="font-size: 0.95rem; color: var(--txt); line-height: 1.7; margin-bottom: 1.5rem; font-style: italic;">"Switching to DevOps was the best decision. The hands-on projects and EMI payment option made it accessible. Now earning 40% more!"</p>
+            <div style="display: flex; align-items: center; gap: 1rem;">
+              <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #ff8c5a, #ff6b35); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 0.9rem;">PR</div>
+              <div>
+                <h4 style="font-family: 'Inter', 'Outfit', sans-serif; margin: 0; font-weight: 700; color: var(--txt); font-size: 0.95rem;">Priya Sharma</h4>
+                <p style="margin: 0; font-size: 0.8rem; color: var(--txt3);">DevOps Engineer, StartupXYZ</p>
+              </div>
             </div>
           </div>
-        </div>
 
-        <!-- Review 3 -->
-        <div style="background: var(--panel); border: 1.5px solid var(--border); border-radius: var(--r2); padding: 2.5rem; transition: all 0.3s ease;">
-          <div style="display: flex; gap: 0.4rem; margin-bottom: 1rem;">
-            <span style="color: var(--v1); font-size: 1.1rem;">★</span>
-            <span style="color: var(--v1); font-size: 1.1rem;">★</span>
-            <span style="color: var(--v1); font-size: 1.1rem;">★</span>
-            <span style="color: var(--v1); font-size: 1.1rem;">★</span>
-            <span style="color: var(--v1); font-size: 1.1rem;">★</span>
-          </div>
-          <p style="font-size: 0.95rem; color: var(--txt); line-height: 1.7; margin-bottom: 1.5rem; font-style: italic;">"AI/ML course opened doors I never expected. The mentor support and portfolio projects were game-changers. Got offers from 3 companies!"</p>
-          <div style="display: flex; align-items: center; gap: 1rem;">
-            <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #10b981, #059669); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 0.9rem;">AV</div>
-            <div>
-              <h4 style="font-family: 'Inter', 'Outfit', sans-serif; margin: 0; font-weight: 700; color: var(--txt); font-size: 0.95rem;">Arjun Verma</h4>
-              <p style="margin: 0; font-size: 0.8rem; color: var(--txt3);">ML Engineer, DataCo</p>
+          <!-- Review 3 -->
+          <div class="review-card">
+            <div style="display: flex; gap: 0.4rem; margin-bottom: 1rem;">
+              <span style="color: var(--v1); font-size: 1.1rem;">★</span>
+              <span style="color: var(--v1); font-size: 1.1rem;">★</span>
+              <span style="color: var(--v1); font-size: 1.1rem;">★</span>
+              <span style="color: var(--v1); font-size: 1.1rem;">★</span>
+              <span style="color: var(--v1); font-size: 1.1rem;">★</span>
+            </div>
+            <p style="font-size: 0.95rem; color: var(--txt); line-height: 1.7; margin-bottom: 1.5rem; font-style: italic;">"AI/ML course opened doors I never expected. The mentor support and portfolio projects were game-changers. Got offers from 3 companies!"</p>
+            <div style="display: flex; align-items: center; gap: 1rem;">
+              <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #10b981, #059669); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 0.9rem;">AV</div>
+              <div>
+                <h4 style="font-family: 'Inter', 'Outfit', sans-serif; margin: 0; font-weight: 700; color: var(--txt); font-size: 0.95rem;">Arjun Verma</h4>
+                <p style="margin: 0; font-size: 0.8rem; color: var(--txt3);">ML Engineer, DataCo</p>
+              </div>
             </div>
           </div>
-        </div>
 
-        <!-- Review 4 -->
-        <div style="background: var(--panel); border: 1.5px solid var(--border); border-radius: var(--r2); padding: 2.5rem; transition: all 0.3s ease;">
-          <div style="display: flex; gap: 0.4rem; margin-bottom: 1rem;">
-            <span style="color: var(--v1); font-size: 1.1rem;">★</span>
-            <span style="color: var(--v1); font-size: 1.1rem;">★</span>
-            <span style="color: var(--v1); font-size: 1.1rem;">★</span>
-            <span style="color: var(--v1); font-size: 1.1rem;">★</span>
-            <span style="color: var(--v1); font-size: 1.1rem;">★</span>
-          </div>
-          <p style="font-size: 0.95rem; color: var(--txt); line-height: 1.7; margin-bottom: 1.5rem; font-style: italic;">"Best investment in my career! The structured curriculum and lifetime course access make it worthwhile. Support team was very responsive."</p>
-          <div style="display: flex; align-items: center; gap: 1rem;">
-            <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #3b82f6, #1d4ed8); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 0.9rem;">SK</div>
-            <div>
-              <h4 style="font-family: 'Inter', 'Outfit', sans-serif; margin: 0; font-weight: 700; color: var(--txt); font-size: 0.95rem;">Sanjana Khan</h4>
-              <p style="margin: 0; font-size: 0.8rem; color: var(--txt3);">Cybersecurity Analyst, SecureInc</p>
+          <!-- Review 4 -->
+          <div class="review-card">
+            <div style="display: flex; gap: 0.4rem; margin-bottom: 1rem;">
+              <span style="color: var(--v1); font-size: 1.1rem;">★</span>
+              <span style="color: var(--v1); font-size: 1.1rem;">★</span>
+              <span style="color: var(--v1); font-size: 1.1rem;">★</span>
+              <span style="color: var(--v1); font-size: 1.1rem;">★</span>
+              <span style="color: var(--v1); font-size: 1.1rem;">★</span>
+            </div>
+            <p style="font-size: 0.95rem; color: var(--txt); line-height: 1.7; margin-bottom: 1.5rem; font-style: italic;">"Best investment in my career! The structured curriculum and lifetime course access make it worthwhile. Support team was very responsive."</p>
+            <div style="display: flex; align-items: center; gap: 1rem;">
+              <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #3b82f6, #1d4ed8); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 0.9rem;">SK</div>
+              <div>
+                <h4 style="font-family: 'Inter', 'Outfit', sans-serif; margin: 0; font-weight: 700; color: var(--txt); font-size: 0.95rem;">Sanjana Khan</h4>
+                <p style="margin: 0; font-size: 0.8rem; color: var(--txt3);">Cybersecurity Analyst, SecureInc</p>
+              </div>
             </div>
           </div>
-        </div>
 
-        <!-- Review 5 -->
-        <div style="background: var(--panel); border: 1.5px solid var(--border); border-radius: var(--r2); padding: 2.5rem; transition: all 0.3s ease;">
-          <div style="display: flex; gap: 0.4rem; margin-bottom: 1rem;">
-            <span style="color: var(--v1); font-size: 1.1rem;">★</span>
-            <span style="color: var(--v1); font-size: 1.1rem;">★</span>
-            <span style="color: var(--v1); font-size: 1.1rem;">★</span>
-            <span style="color: var(--v1); font-size: 1.1rem;">★</span>
-            <span style="color: var(--v1); font-size: 1.1rem;">★</span>
-          </div>
-          <p style="font-size: 0.95rem; color: var(--txt); line-height: 1.7; margin-bottom: 1.5rem; font-style: italic;">"Coming from non-IT background, the beginner-friendly approach helped me transition smoothly. Now working as a junior developer!"</p>
-          <div style="display: flex; align-items: center; gap: 1rem;">
-            <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #a855f7, #9333ea); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 0.9rem;">MD</div>
-            <div>
-              <h4 style="font-family: 'Inter', 'Outfit', sans-serif; margin: 0; font-weight: 700; color: var(--txt); font-size: 0.95rem;">Mohan Das</h4>
-              <p style="margin: 0; font-size: 0.8rem; color: var(--txt3);">Web Developer, TechStart</p>
+          <!-- Review 5 -->
+          <div class="review-card">
+            <div style="display: flex; gap: 0.4rem; margin-bottom: 1rem;">
+              <span style="color: var(--v1); font-size: 1.1rem;">★</span>
+              <span style="color: var(--v1); font-size: 1.1rem;">★</span>
+              <span style="color: var(--v1); font-size: 1.1rem;">★</span>
+              <span style="color: var(--v1); font-size: 1.1rem;">★</span>
+              <span style="color: var(--v1); font-size: 1.1rem;">★</span>
+            </div>
+            <p style="font-size: 0.95rem; color: var(--txt); line-height: 1.7; margin-bottom: 1.5rem; font-style: italic;">"Coming from non-IT background, the beginner-friendly approach helped me transition smoothly. Now working as a junior developer!"</p>
+            <div style="display: flex; align-items: center; gap: 1rem;">
+              <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #a855f7, #9333ea); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 0.9rem;">MD</div>
+              <div>
+                <h4 style="font-family: 'Inter', 'Outfit', sans-serif; margin: 0; font-weight: 700; color: var(--txt); font-size: 0.95rem;">Mohan Das</h4>
+                <p style="margin: 0; font-size: 0.8rem; color: var(--txt3);">Web Developer, TechStart</p>
+              </div>
             </div>
           </div>
-        </div>
 
-        <!-- Review 6 -->
-        <div style="background: var(--panel); border: 1.5px solid var(--border); border-radius: var(--r2); padding: 2.5rem; transition: all 0.3s ease;">
-          <div style="display: flex; gap: 0.4rem; margin-bottom: 1rem;">
-            <span style="color: var(--v1); font-size: 1.1rem;">★</span>
-            <span style="color: var(--v1); font-size: 1.1rem;">★</span>
-            <span style="color: var(--v1); font-size: 1.1rem;">★</span>
-            <span style="color: var(--v1); font-size: 1.1rem;">★</span>
-            <span style="color: var(--v1); font-size: 1.1rem;">★</span>
+          <!-- Review 6 -->
+          <div class="review-card">
+            <div style="display: flex; gap: 0.4rem; margin-bottom: 1rem;">
+              <span style="color: var(--v1); font-size: 1.1rem;">★</span>
+              <span style="color: var(--v1); font-size: 1.1rem;">★</span>
+              <span style="color: var(--v1); font-size: 1.1rem;">★</span>
+              <span style="color: var(--v1); font-size: 1.1rem;">★</span>
+              <span style="color: var(--v1); font-size: 1.1rem;">★</span>
+            </div>
+            <p style="font-size: 0.95rem; color: var(--txt); line-height: 1.7; margin-bottom: 1.5rem; font-style: italic;">"The live mock interviews and resume building sessions were incredibly helpful. Got hired at a Fortune 500 company!"</p>
+            <div style="display: flex; align-items: center; gap: 1rem;">
+              <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #06b6d4, #0891b2); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 0.9rem;">ND</div>
+              <div>
+                <h4 style="font-family: 'Inter', 'Outfit', sans-serif; margin: 0; font-weight: 700; color: var(--txt); font-size: 0.95rem;">Neha Desai</h4>
+                <p style="margin: 0; font-size: 0.8rem; color: var(--txt3);">Senior Software Engineer, MegaCorp</p>
+              </div>
+            </div>
           </div>
-          <p style="font-size: 0.95rem; color: var(--txt); line-height: 1.7; margin-bottom: 1.5rem; font-style: italic;">"The live mock interviews and resume building sessions were incredibly helpful. Got hired at a Fortune 500 company!"</p>
-          <div style="display: flex; align-items: center; gap: 1rem;">
-            <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #06b6d4, #0891b2); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 0.9rem;">ND</div>
-            <div>
-              <h4 style="font-family: 'Inter', 'Outfit', sans-serif; margin: 0; font-weight: 700; color: var(--txt); font-size: 0.95rem;">Neha Desai</h4>
-              <p style="margin: 0; font-size: 0.8rem; color: var(--txt3);">Senior Software Engineer, MegaCorp</p>
+
+          <!-- Duplicate set for infinite loop -->
+          <!-- Review 1 (dup) -->
+          <div class="review-card">
+            <div style="display: flex; gap: 0.4rem; margin-bottom: 1rem;">
+              <span style="color: var(--v1); font-size: 1.1rem;">★</span><span style="color: var(--v1); font-size: 1.1rem;">★</span><span style="color: var(--v1); font-size: 1.1rem;">★</span><span style="color: var(--v1); font-size: 1.1rem;">★</span><span style="color: var(--v1); font-size: 1.1rem;">★</span>
+            </div>
+            <p style="font-size: 0.95rem; color: var(--txt); line-height: 1.7; margin-bottom: 1.5rem; font-style: italic;">"The AWS course was exceptional! Instructors are industry experts with real-world experience. I got placed within 2 months of course completion. Highly recommended!"</p>
+            <div style="display: flex; align-items: center; gap: 1rem;">
+              <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, var(--v1), var(--v2)); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 0.9rem;">RJ</div>
+              <div><h4 style="font-family: 'Inter', 'Outfit', sans-serif; margin: 0; font-weight: 700; color: var(--txt); font-size: 0.95rem;">Rajesh Kumar</h4><p style="margin: 0; font-size: 0.8rem; color: var(--txt3);">Cloud Architect, TechCorp</p></div>
+            </div>
+          </div>
+          <!-- Review 2 (dup) -->
+          <div class="review-card">
+            <div style="display: flex; gap: 0.4rem; margin-bottom: 1rem;">
+              <span style="color: var(--v1); font-size: 1.1rem;">★</span><span style="color: var(--v1); font-size: 1.1rem;">★</span><span style="color: var(--v1); font-size: 1.1rem;">★</span><span style="color: var(--v1); font-size: 1.1rem;">★</span><span style="color: var(--v1); font-size: 1.1rem;">★</span>
+            </div>
+            <p style="font-size: 0.95rem; color: var(--txt); line-height: 1.7; margin-bottom: 1.5rem; font-style: italic;">"Switching to DevOps was the best decision. The hands-on projects and EMI payment option made it accessible. Now earning 40% more!"</p>
+            <div style="display: flex; align-items: center; gap: 1rem;">
+              <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #ff8c5a, #ff6b35); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 0.9rem;">PR</div>
+              <div><h4 style="font-family: 'Inter', 'Outfit', sans-serif; margin: 0; font-weight: 700; color: var(--txt); font-size: 0.95rem;">Priya Sharma</h4><p style="margin: 0; font-size: 0.8rem; color: var(--txt3);">DevOps Engineer, StartupXYZ</p></div>
+            </div>
+          </div>
+          <!-- Review 3 (dup) -->
+          <div class="review-card">
+            <div style="display: flex; gap: 0.4rem; margin-bottom: 1rem;">
+              <span style="color: var(--v1); font-size: 1.1rem;">★</span><span style="color: var(--v1); font-size: 1.1rem;">★</span><span style="color: var(--v1); font-size: 1.1rem;">★</span><span style="color: var(--v1); font-size: 1.1rem;">★</span><span style="color: var(--v1); font-size: 1.1rem;">★</span>
+            </div>
+            <p style="font-size: 0.95rem; color: var(--txt); line-height: 1.7; margin-bottom: 1.5rem; font-style: italic;">"AI/ML course opened doors I never expected. The mentor support and portfolio projects were game-changers. Got offers from 3 companies!"</p>
+            <div style="display: flex; align-items: center; gap: 1rem;">
+              <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #10b981, #059669); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 0.9rem;">AV</div>
+              <div><h4 style="font-family: 'Inter', 'Outfit', sans-serif; margin: 0; font-weight: 700; color: var(--txt); font-size: 0.95rem;">Arjun Verma</h4><p style="margin: 0; font-size: 0.8rem; color: var(--txt3);">ML Engineer, DataCo</p></div>
+            </div>
+          </div>
+          <!-- Review 4 (dup) -->
+          <div class="review-card">
+            <div style="display: flex; gap: 0.4rem; margin-bottom: 1rem;">
+              <span style="color: var(--v1); font-size: 1.1rem;">★</span><span style="color: var(--v1); font-size: 1.1rem;">★</span><span style="color: var(--v1); font-size: 1.1rem;">★</span><span style="color: var(--v1); font-size: 1.1rem;">★</span><span style="color: var(--v1); font-size: 1.1rem;">★</span>
+            </div>
+            <p style="font-size: 0.95rem; color: var(--txt); line-height: 1.7; margin-bottom: 1.5rem; font-style: italic;">"Best investment in my career! The structured curriculum and lifetime course access make it worthwhile. Support team was very responsive."</p>
+            <div style="display: flex; align-items: center; gap: 1rem;">
+              <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #3b82f6, #1d4ed8); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 0.9rem;">SK</div>
+              <div><h4 style="font-family: 'Inter', 'Outfit', sans-serif; margin: 0; font-weight: 700; color: var(--txt); font-size: 0.95rem;">Sanjana Khan</h4><p style="margin: 0; font-size: 0.8rem; color: var(--txt3);">Cybersecurity Analyst, SecureInc</p></div>
+            </div>
+          </div>
+          <!-- Review 5 (dup) -->
+          <div class="review-card">
+            <div style="display: flex; gap: 0.4rem; margin-bottom: 1rem;">
+              <span style="color: var(--v1); font-size: 1.1rem;">★</span><span style="color: var(--v1); font-size: 1.1rem;">★</span><span style="color: var(--v1); font-size: 1.1rem;">★</span><span style="color: var(--v1); font-size: 1.1rem;">★</span><span style="color: var(--v1); font-size: 1.1rem;">★</span>
+            </div>
+            <p style="font-size: 0.95rem; color: var(--txt); line-height: 1.7; margin-bottom: 1.5rem; font-style: italic;">"Coming from non-IT background, the beginner-friendly approach helped me transition smoothly. Now working as a junior developer!"</p>
+            <div style="display: flex; align-items: center; gap: 1rem;">
+              <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #a855f7, #9333ea); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 0.9rem;">MD</div>
+              <div><h4 style="font-family: 'Inter', 'Outfit', sans-serif; margin: 0; font-weight: 700; color: var(--txt); font-size: 0.95rem;">Mohan Das</h4><p style="margin: 0; font-size: 0.8rem; color: var(--txt3);">Web Developer, TechStart</p></div>
+            </div>
+          </div>
+          <!-- Review 6 (dup) -->
+          <div class="review-card">
+            <div style="display: flex; gap: 0.4rem; margin-bottom: 1rem;">
+              <span style="color: var(--v1); font-size: 1.1rem;">★</span><span style="color: var(--v1); font-size: 1.1rem;">★</span><span style="color: var(--v1); font-size: 1.1rem;">★</span><span style="color: var(--v1); font-size: 1.1rem;">★</span><span style="color: var(--v1); font-size: 1.1rem;">★</span>
+            </div>
+            <p style="font-size: 0.95rem; color: var(--txt); line-height: 1.7; margin-bottom: 1.5rem; font-style: italic;">"The live mock interviews and resume building sessions were incredibly helpful. Got hired at a Fortune 500 company!"</p>
+            <div style="display: flex; align-items: center; gap: 1rem;">
+              <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #06b6d4, #0891b2); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 0.9rem;">ND</div>
+              <div><h4 style="font-family: 'Inter', 'Outfit', sans-serif; margin: 0; font-weight: 700; color: var(--txt); font-size: 0.95rem;">Neha Desai</h4><p style="margin: 0; font-size: 0.8rem; color: var(--txt3);">Senior Software Engineer, MegaCorp</p></div>
             </div>
           </div>
         </div>
@@ -568,15 +779,28 @@
 
         <button class="btn-grad" style="width: 100%; padding: 0.95rem;" onclick="submitRegister()">Create My Account</button>
 
-        <div style="display: flex; align-items: center; gap: 1rem; margin: 1.2rem 0; font-size: 0.73rem; color: var(--txt4); font-weight: 600;">
-          <span style="flex: 1; height: 1px; background: var(--border);"></span>
-          or
-          <span style="flex: 1; height: 1px; background: var(--border);"></span>
-        </div>
-
         <div style="text-align: center; font-size: 0.83rem; color: var(--txt3); margin-top: 1rem;">
           Already have an account? <a onclick="switchModalTab('login')" style="color: var(--v2); font-weight: 700; text-decoration: none; cursor: pointer;">Sign in →</a>
         </div>
+      </div>
+
+      <!-- OTP Verification Step (shown after registration) -->
+      <div id="otp-step" style="display:none;">
+        <h3 style="font-family: 'Cormorant Garamond', serif; font-weight: 700; font-size: 1.9rem; color: var(--txt); margin-bottom: 0.4rem; letter-spacing: -0.01em;">Verify Your Email</h3>
+        <p style="font-size: 0.85rem; color: var(--txt3); margin-bottom: 0.5rem; font-weight: 400;">We sent a 6-digit code to</p>
+        <p style="font-size: 0.9rem; font-weight: 700; color: var(--v2); margin-bottom: 1.8rem;" id="otp-email-display"></p>
+
+        <div class="form-group">
+          <label>Enter 6-Digit OTP</label>
+          <input id="otp-input" type="text" inputmode="numeric" maxlength="6" placeholder="0 0 0 0 0 0" style="background: rgba(255,255,255,0.04); border: 1px solid var(--border); color: var(--txt); padding: 1rem 1rem; border-radius: var(--r2); font-size: 1.6rem; letter-spacing: 0.5rem; text-align: center; width: 100%;"/>
+        </div>
+
+        <button id="otp-verify-btn" class="btn-grad" style="width: 100%; padding: 0.95rem; margin-top: 0.5rem;" onclick="submitOTP()">Verify OTP</button>
+
+        <p style="text-align: center; font-size: 0.8rem; color: var(--txt3); margin-top: 1.2rem;">
+          Didn't receive it? Check spam folder or
+          <a onclick="document.getElementById('otp-step').style.display='none'; document.getElementById('rf').style.display='block';" style="color: var(--v2); cursor: pointer; font-weight: 600;">try again</a>
+        </p>
       </div>
     </div>
   </div>
@@ -708,6 +932,47 @@
       }
     }
 
+    // ── EMAILJS CONFIG ──────────────────────────────────────────────────────
+    // 1. Create a free account at https://www.emailjs.com
+    // 2. Add a Gmail service (connect skillupnow@gmail.com or admin@skillupnowadmin.com)
+    // 3. Create an email template (see template HTML in comments below)
+    // 4. Replace the three placeholder values below with your actual IDs
+    const EMAILJS_SERVICE_ID  = 'service_nrucv1s';
+    const EMAILJS_TEMPLATE_ID = 'template_bjqerns';
+    const EMAILJS_PUBLIC_KEY  = '6chiuXaZ_OqXbYyG1';
+
+    /* EmailJS Template HTML (paste this into your EmailJS template editor):
+    ─────────────────────────────────────────────────────────────────────────
+    Subject: OTP SIGN UP - SKILL UP NOW
+
+    <div style="font-family:'DM Sans',Arial,sans-serif;max-width:520px;margin:0 auto;background:#0d0b1a;color:#f0eeff;border-radius:16px;overflow:hidden;">
+      <div style="background:linear-gradient(135deg,#7c5cfc,#3d6bff);padding:28px 32px;text-align:center;">
+        <h1 style="margin:0;font-size:1.6rem;font-weight:800;letter-spacing:-0.01em;">SkillUpNow</h1>
+        <p style="margin:6px 0 0;font-size:0.85rem;opacity:0.85;">Elite IT &amp; Professional Training</p>
+      </div>
+      <div style="padding:32px;">
+        <p style="font-size:1rem;color:#c8bfff;margin-bottom:0.5rem;">Hello <strong>{{to_name}}</strong>,</p>
+        <p style="color:#8b7fc4;font-size:0.9rem;line-height:1.6;margin-bottom:1.5rem;">
+          Welcome to <strong style="color:#9b7dff;">SkillUpNow</strong> — your gateway to world-class IT training in Cloud, DevOps, AI/ML &amp; Cybersecurity.
+          Use the OTP below to verify your email and activate your account.
+        </p>
+        <div style="background:rgba(124,92,252,0.12);border:1px solid rgba(124,92,252,0.3);border-radius:12px;padding:24px;text-align:center;margin-bottom:1.5rem;">
+          <p style="margin:0 0 8px;font-size:0.78rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#8b7fc4;">Your One-Time Password</p>
+          <p style="margin:0;font-size:2.6rem;font-weight:800;letter-spacing:0.35em;color:#9b7dff;">{{otp_code}}</p>
+          <p style="margin:10px 0 0;font-size:0.76rem;color:#564f7a;">Valid for 10 minutes &nbsp;·&nbsp; Do not share this code</p>
+        </div>
+        <p style="color:#564f7a;font-size:0.82rem;line-height:1.6;">
+          Join <strong style="color:#c8bfff;">12,000+</strong> professionals already upskilling with SkillUpNow.<br>
+          Live mentorship · Real-world projects · Flexible no-cost EMI.
+        </p>
+      </div>
+      <div style="background:rgba(255,255,255,0.03);border-top:1px solid rgba(130,100,255,0.18);padding:18px 32px;text-align:center;">
+        <p style="margin:0;font-size:0.76rem;color:#564f7a;">© 2025 SkillUpNow &nbsp;·&nbsp; <a href="https://skillupnowadmin.org" style="color:#7c5cfc;text-decoration:none;">skillupnowadmin.org</a></p>
+        <p style="margin:4px 0 0;font-size:0.72rem;color:#564f7a;">If you did not request this, please ignore this email.</p>
+      </div>
+    </div>
+    ───────────────────────────────────────────────────────────────────────── */
+
     async function submitRegister() {
       const registerForm = document.getElementById('rf');
       const name = registerForm.querySelector('input[type="text"]').value.trim();
@@ -721,71 +986,165 @@
         return;
       }
 
-      // Validate email format
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(email)) {
         if (window.app) window.app.showNotification('Please enter a valid email', 'error');
         return;
       }
 
-      // Validate password length
       if (password.length < 6) {
         if (window.app) window.app.showNotification('Password must be at least 6 characters', 'error');
         return;
       }
 
-      if (!window.supabaseConfig) {
-        console.error('Supabase not initialized');
-        if (window.app) window.app.showNotification('Database connection error', 'error');
-        return;
-      }
-
-      // Show loading state
       const btn = registerForm.querySelector('button.btn-grad');
       const originalText = btn.textContent;
       btn.disabled = true;
-      btn.textContent = 'Creating account...';
+      btn.textContent = 'Sending OTP...';
 
       try {
-        const result = await window.supabaseConfig.signUp(email, password, {
-          full_name: name,
-          email: email,
-          phone_number: phone,
-          learning_interest: interest,
-          experience_level: 'beginner'
-        });
+        // Generate 6-digit OTP and store with 10-min expiry
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        sessionStorage.setItem('_otp_data', JSON.stringify({ otp, email, expiry: Date.now() + 600000 }));
 
-        if (result.success) {
-          console.log('✅ Registration successful');
-          if (window.app) {
-            window.app.showNotification('Account created! Please check your email to verify.', 'success');
-          }
-          
-          // Store user data
-          localStorage.setItem('user_email', email);
-          
-          // Wait and close modal
-          setTimeout(() => {
-            closeModal();
-            // Clear form
-            registerForm.querySelectorAll('input, select').forEach(field => field.value = '');
-          }, 1500);
+        // Store registration data for use after OTP verification
+        window._pendingRegister = { name, email, phone, interest, password, experience_level: 'beginner' };
+
+        // Check if EmailJS is configured; if not, use dev fallback
+        const emailjsReady = EMAILJS_SERVICE_ID !== 'YOUR_SERVICE_ID' &&
+                             EMAILJS_TEMPLATE_ID !== 'YOUR_TEMPLATE_ID' &&
+                             EMAILJS_PUBLIC_KEY  !== 'YOUR_PUBLIC_KEY';
+
+        if (emailjsReady) {
+          // Production: send email via EmailJS (custom address / Gmail)
+          await emailjs.send(
+            EMAILJS_SERVICE_ID,
+            EMAILJS_TEMPLATE_ID,
+            {
+              name:     name,
+              email:    email,
+              otp:      otp,
+              time:     new Date().toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })
+            },
+            EMAILJS_PUBLIC_KEY
+          );
         } else {
-          console.error('Registration failed:', result.error);
-          if (window.app) {
-            window.app.showNotification(result.error || 'Registration failed. Please try again.', 'error');
-          }
+          // Dev fallback: show OTP in notification (remove this once EmailJS is configured)
+          console.warn('⚠️ EmailJS not configured — using dev fallback. OTP:', otp);
+          if (window.app) window.app.showNotification('DEV MODE — Your OTP: ' + otp, 'success');
         }
+
+        // Show OTP verification step
+        registerForm.style.display = 'none';
+        const otpStep = document.getElementById('otp-step');
+        if (otpStep) {
+          otpStep.style.display = 'block';
+          document.getElementById('otp-email-display').textContent = email;
+        }
+        if (emailjsReady && window.app) window.app.showNotification('OTP sent! Check your inbox.', 'success');
+
       } catch (error) {
-        console.error('Registration error:', error);
-        if (window.app) {
-          window.app.showNotification('An error occurred. Please try again.', 'error');
-        }
+        console.error('OTP send error:', error);
+        sessionStorage.removeItem('_otp_data');
+        if (window.app) window.app.showNotification('Failed to send OTP. Please try again.', 'error');
       } finally {
         btn.disabled = false;
         btn.textContent = originalText;
       }
     }
+
+    async function submitOTP() {
+      const otpInput = document.getElementById('otp-input').value.trim();
+      const email = window._pendingRegister?.email;
+
+      if (!otpInput || otpInput.length !== 6) {
+        if (window.app) window.app.showNotification('Please enter the 6-digit OTP code', 'error');
+        return;
+      }
+
+      const btn = document.getElementById('otp-verify-btn');
+      btn.disabled = true;
+      btn.textContent = 'Verifying...';
+
+      try {
+        // Verify OTP from sessionStorage
+        const raw = sessionStorage.getItem('_otp_data');
+        if (!raw) {
+          if (window.app) window.app.showNotification('OTP expired. Please register again.', 'error');
+          return;
+        }
+        const { otp, email: storedEmail, expiry } = JSON.parse(raw);
+
+        if (Date.now() > expiry) {
+          sessionStorage.removeItem('_otp_data');
+          if (window.app) window.app.showNotification('OTP expired. Please request a new one.', 'error');
+          return;
+        }
+        if (otpInput !== otp || email !== storedEmail) {
+          if (window.app) window.app.showNotification('Invalid OTP. Please try again.', 'error');
+          return;
+        }
+
+        // OTP correct — clear it and create Supabase account
+        sessionStorage.removeItem('_otp_data');
+
+        if (!window.supabaseConfig) {
+          if (window.app) window.app.showNotification('Database connection error', 'error');
+          return;
+        }
+
+        const p = window._pendingRegister;
+        const result = await window.supabaseConfig.signUp(p.email, p.password, {
+          full_name: p.name,
+          email: p.email,
+          phone_number: p.phone,
+          learning_interest: p.interest,
+          experience_level: 'beginner'
+        });
+
+        if (result.success) {
+          if (window.app) window.app.showNotification('Account created! You can now sign in.', 'success');
+          localStorage.setItem('user_email', email);
+          window._pendingRegister = null;
+          setTimeout(() => {
+            closeModal();
+            document.getElementById('rf').querySelectorAll('input, select').forEach(f => f.value = '');
+            document.getElementById('otp-input').value = '';
+          }, 1800);
+        } else {
+          if (window.app) window.app.showNotification(result.error || 'Registration failed. Please try again.', 'error');
+        }
+      } catch (error) {
+        console.error('OTP verification error:', error);
+        if (window.app) window.app.showNotification('Verification failed. Please try again.', 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Verify OTP';
+      }
+    }
+
+    // ==================== HERO VISUAL: SCROLL REVEAL + 3D PARALLAX ====================
+    (function() {
+      // Scroll reveal for .sr-r elements (slide from right)
+      const sobs = new IntersectionObserver(function(es) {
+        es.forEach(function(e) { if (e.isIntersecting) e.target.classList.add('vis'); });
+      }, { threshold: 0.1 });
+      document.querySelectorAll('.sr-r').forEach(function(el) { sobs.observe(el); });
+
+      // 3D mouse parallax on the laptop scene
+      const sc = document.getElementById('scene3d');
+      if (!sc) return;
+      document.addEventListener('mousemove', function(e) {
+        const x = (e.clientX / innerWidth  - 0.5) * 16;
+        const y = (e.clientY / innerHeight - 0.5) * -8;
+        sc.style.transform = 'rotateY(' + x + 'deg) rotateX(' + y + 'deg)';
+      });
+      document.addEventListener('mouseleave', function() {
+        sc.style.transition = 'transform .6s ease';
+        sc.style.transform = 'rotateY(0deg) rotateX(0deg)';
+        setTimeout(function() { sc.style.transition = ''; }, 600);
+      });
+    })();
 
     // ==================== CHECK USER SESSION ON PAGE LOAD ====================
     
@@ -806,6 +1165,81 @@
           console.error('Session check error:', error);
         }
       }
+    });
+  </script>
+
+  <!-- Change Password Modal -->
+  <div id="cpw-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:9999; align-items:center; justify-content:center;">
+    <div style="background:var(--panel2,#1a1635); border:1px solid var(--border); border-radius:16px; padding:2rem; width:100%; max-width:420px; margin:1rem; position:relative;">
+      <button onclick="closeCPWModal()" style="position:absolute; top:1rem; right:1rem; background:none; border:none; color:var(--txt3); font-size:1.4rem; cursor:pointer;">×</button>
+      <h3 style="color:var(--txt); margin-bottom:0.5rem;">🔑 Change Password</h3>
+      <p style="color:var(--txt3); font-size:0.88rem; margin-bottom:1.5rem;">We'll send a password reset link to your email address.</p>
+      <div id="cpw-msg" style="display:none; padding:0.8rem 1rem; border-radius:8px; margin-bottom:1rem; font-size:0.88rem;"></div>
+      <button onclick="sendCPWReset()" id="cpw-btn" style="width:100%; padding:0.9rem; background:linear-gradient(135deg,#7c5cfc,#3d6bff); color:white; border:none; border-radius:10px; font-size:0.95rem; font-weight:600; cursor:pointer;">Send Reset Link</button>
+    </div>
+  </div>
+
+  <script>
+    function openChangePasswordModal() {
+      // Close profile dropdown
+      const dd = document.getElementById('profile-dropdown');
+      if (dd) dd.classList.remove('active');
+      const msg = document.getElementById('cpw-msg');
+      if (msg) { msg.style.display = 'none'; msg.textContent = ''; }
+      const modal = document.getElementById('cpw-modal');
+      if (modal) modal.style.display = 'flex';
+    }
+
+    function closeCPWModal() {
+      const modal = document.getElementById('cpw-modal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    async function sendCPWReset() {
+      const btn = document.getElementById('cpw-btn');
+      const msg = document.getElementById('cpw-msg');
+      const user = await window.supabaseConfig?.getCurrentUser();
+      if (!user?.email) {
+        msg.style.display = 'block';
+        msg.style.background = 'rgba(255,107,107,0.15)';
+        msg.style.color = '#ff6b6b';
+        msg.textContent = 'Could not find your email. Please log in again.';
+        return;
+      }
+      btn.textContent = 'Sending…';
+      btn.disabled = true;
+      try {
+        const { error } = await window.supabaseConfig.client.auth.resetPasswordForEmail(user.email, {
+          redirectTo: window.location.origin + '/pages/profile.html'
+        });
+        if (error) throw error;
+        msg.style.display = 'block';
+        msg.style.background = 'rgba(74,222,128,0.15)';
+        msg.style.color = '#4ade80';
+        msg.textContent = `Reset link sent to ${user.email}. Check your inbox.`;
+        btn.textContent = 'Link Sent ✓';
+      } catch (err) {
+        msg.style.display = 'block';
+        msg.style.background = 'rgba(255,107,107,0.15)';
+        msg.style.color = '#ff6b6b';
+        msg.textContent = err.message || 'Failed to send reset link.';
+        btn.textContent = 'Send Reset Link';
+        btn.disabled = false;
+      }
+    }
+
+    async function handleLogout() {
+      if (window.supabaseConfig) {
+        await window.supabaseConfig.client.auth.signOut();
+      }
+      localStorage.clear();
+      sessionStorage.clear();
+      window.location.reload();
+    }
+
+    // Close CPW modal on backdrop click
+    document.getElementById('cpw-modal').addEventListener('click', function(e) {
+      if (e.target === this) closeCPWModal();
     });
   </script>
 </body>

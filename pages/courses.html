@@ -310,6 +310,8 @@
     </div>
   </nav>
 
+  <nav class="breadcrumb"><a href="../index.html">🏠 Home</a><span class="bc-sep">›</span><span class="bc-current">Courses</span></nav>
+
   <section style="padding: 3rem 5vw; min-height: calc(100vh - 200px);">
     <div style="max-width: 1400px; margin: 0 auto;">
       <h1 style="font-family: 'Cormorant Garamond', serif; font-size: 2.5rem; text-align: center; margin-bottom: 1rem;">Our Premium Courses</h1>
@@ -458,6 +460,18 @@
           Already have an account? <a onclick="switchModalTab('login')" style="color: var(--v2); font-weight: 700; text-decoration: none; cursor: pointer;">Sign in →</a>
         </div>
       </div>
+
+      <!-- OTP Verification Step -->
+      <div id="otp-step" style="display:none;">
+        <h3 style="font-family: 'Cormorant Garamond', serif; font-weight: 700; font-size: 1.9rem; color: var(--txt); margin-bottom: 0.4rem;">Verify Your Email</h3>
+        <p style="font-size: 0.85rem; color: var(--txt3); margin-bottom: 1.5rem;">We sent a 6-digit code to <strong id="otp-email-display" style="color:var(--v2);"></strong></p>
+        <div class="form-group">
+          <label>Enter OTP Code</label>
+          <input id="otp-input" type="text" maxlength="6" placeholder="123456" style="background: rgba(255,255,255,0.04); border: 1px solid var(--border); color: var(--txt); padding: 0.8rem 1rem; border-radius: var(--r2); font-size: 1.4rem; letter-spacing: 0.4rem; text-align:center; width:100%;"/>
+        </div>
+        <button id="otp-verify-btn" class="btn-grad" style="width: 100%; padding: 0.95rem;" onclick="submitOTP()">Verify OTP</button>
+        <p style="text-align:center; font-size:0.8rem; color:var(--txt3); margin-top:1rem;">Didn't receive it? Check your spam folder or <a onclick="switchModalTab('register'); document.getElementById('otp-step').style.display='none'; document.getElementById('rf').style.display='block';" style="color:var(--v2); cursor:pointer;">try again</a></p>
+      </div>
     </div>
   </div>
 
@@ -469,30 +483,52 @@
   <script src="../js/main.js"></script>
 
   <script>
-    const courses = [
-      { id: 1, title: 'AWS Solutions Architect Pro', category: 'cloud', level: 'advanced', icon: '☁️', price: 14999, duration: '48 hrs', students: 3200, rating: 4.8, badge: 'Bestseller', desc: 'Comprehensive guide to designing scalable, secure, and reliable AWS solutions.' },
-      { id: 2, title: 'Kubernetes & Docker Mastery', category: 'devops', level: 'intermediate', icon: '🐳', price: 12999, duration: '36 hrs', students: 2800, rating: 4.7, desc: 'Master containerization and orchestration with Docker and Kubernetes.' },
-      { id: 3, title: 'Generative AI with Python', category: 'ai', level: 'advanced', icon: '🤖', price: 16999, duration: '60 hrs', students: 1500, rating: 4.9, badge: 'New Course', desc: 'Build advanced AI applications using ChatGPT, LLMs, and generative models.' },
-      { id: 4, title: 'Cybersecurity Fundamentals', category: 'security', level: 'beginner', icon: '🔒', price: 11999, duration: '40 hrs', students: 4100, rating: 4.6, desc: 'Essential security concepts, threat analysis, and defense mechanisms.' },
-      { id: 5, title: 'Terraform & IaC Engineering', category: 'devops', level: 'intermediate', icon: '🏗️', price: 13999, duration: '32 hrs', students: 1800, rating: 4.8, badge: 'Popular', desc: 'Infrastructure as Code using Terraform, CloudFormation, and CI/CD pipelines.' },
-      { id: 6, title: 'Data Engineering with Spark', category: 'data', level: 'advanced', icon: '⚡', price: 15999, duration: '52 hrs', students: 2100, rating: 4.7, desc: 'Build production-grade data pipelines with Apache Spark and Python.' },
-      { id: 7, title: 'Google Cloud Professional', category: 'cloud', level: 'advanced', icon: '☁️', price: 14999, duration: '48 hrs', students: 1900, rating: 4.8, desc: 'Become a GCP expert with comprehensive cloud architecture and implementation.' },
-      { id: 8, title: 'Microservices Architecture', category: 'devops', level: 'advanced', icon: '🔧', price: 15999, duration: '44 hrs', students: 1200, rating: 4.9, desc: 'Design and build resilient microservices-based applications.' },
-      { id: 9, title: 'Advanced Python Development', category: 'cloud', level: 'intermediate', icon: '🐍', price: 11999, duration: '40 hrs', students: 3500, rating: 4.7, desc: 'Master advanced Python concepts including async, decorators, and metaprogramming.' },
-      { id: 10, title: 'Machine Learning Engineering', category: 'ai', level: 'advanced', icon: '🧠', price: 17999, duration: '64 hrs', students: 980, rating: 4.9, badge: 'Expert', desc: 'Production ML pipeline development, model deployment, and MLOps.' },
-      { id: 11, title: 'Network Security & Ethical Hacking', category: 'security', level: 'advanced', icon: '🛡️', price: 17999, duration: '56 hrs', students: 780, rating: 4.8, desc: 'Penetration testing, vulnerability assessment, and network hardening.' },
-      { id: 12, title: 'Azure Cloud Fundamentals', category: 'cloud', level: 'beginner', icon: '☁️', price: 10999, duration: '32 hrs', students: 2400, rating: 4.6, desc: 'Introduction to Microsoft Azure cloud services and cloud computing concepts.' }
+    // Static fallback courses (shown if DB has no courses yet)
+    const fallbackCourses = [
+      { id: 'c1', title: 'AWS Solutions Architect Pro', category: 'cloud', level: 'advanced', icon: '☁️', price: 14999, duration: '48 hrs', students_count: 3200, rating: 4.8, badge: 'Bestseller', description: 'Comprehensive guide to designing scalable, secure, and reliable AWS solutions.' },
+      { id: 'c2', title: 'Kubernetes & Docker Mastery', category: 'devops', level: 'intermediate', icon: '🐳', price: 12999, duration: '36 hrs', students_count: 2800, rating: 4.7, description: 'Master containerization and orchestration with Docker and Kubernetes.' },
+      { id: 'c3', title: 'Generative AI with Python', category: 'ai', level: 'advanced', icon: '🤖', price: 16999, duration: '60 hrs', students_count: 1500, rating: 4.9, badge: 'New Course', description: 'Build advanced AI applications using ChatGPT, LLMs, and generative models.' },
+      { id: 'c4', title: 'Cybersecurity Fundamentals', category: 'security', level: 'beginner', icon: '🔒', price: 11999, duration: '40 hrs', students_count: 4100, rating: 4.6, description: 'Essential security concepts, threat analysis, and defense mechanisms.' },
+      { id: 'c5', title: 'Terraform & IaC Engineering', category: 'devops', level: 'intermediate', icon: '🏗️', price: 13999, duration: '32 hrs', students_count: 1800, rating: 4.8, badge: 'Popular', description: 'Infrastructure as Code using Terraform, CloudFormation, and CI/CD pipelines.' },
+      { id: 'c6', title: 'Data Engineering with Spark', category: 'data', level: 'advanced', icon: '⚡', price: 15999, duration: '52 hrs', students_count: 2100, rating: 4.7, description: 'Build production-grade data pipelines with Apache Spark and Python.' },
+      { id: 'c7', title: 'Google Cloud Professional', category: 'cloud', level: 'advanced', icon: '☁️', price: 14999, duration: '48 hrs', students_count: 1900, rating: 4.8, description: 'Become a GCP expert with comprehensive cloud architecture and implementation.' },
+      { id: 'c8', title: 'Microservices Architecture', category: 'devops', level: 'advanced', icon: '🔧', price: 15999, duration: '44 hrs', students_count: 1200, rating: 4.9, description: 'Design and build resilient microservices-based applications.' },
+      { id: 'c9', title: 'Advanced Python Development', category: 'cloud', level: 'intermediate', icon: '🐍', price: 11999, duration: '40 hrs', students_count: 3500, rating: 4.7, description: 'Master advanced Python concepts including async, decorators, and metaprogramming.' },
+      { id: 'c10', title: 'Machine Learning Engineering', category: 'ai', level: 'advanced', icon: '🧠', price: 17999, duration: '64 hrs', students_count: 980, rating: 4.9, badge: 'Expert', description: 'Production ML pipeline development, model deployment, and MLOps.' },
+      { id: 'c11', title: 'Network Security & Ethical Hacking', category: 'security', level: 'advanced', icon: '🛡️', price: 17999, duration: '56 hrs', students_count: 780, rating: 4.8, description: 'Penetration testing, vulnerability assessment, and network hardening.' },
+      { id: 'c12', title: 'Azure Cloud Fundamentals', category: 'cloud', level: 'beginner', icon: '☁️', price: 10999, duration: '32 hrs', students_count: 2400, rating: 4.6, description: 'Introduction to Microsoft Azure cloud services and cloud computing concepts.' }
     ];
 
+    let courses = [...fallbackCourses];
     let filteredCourses = [...courses];
     let currentSort = 'popular';
 
+    // Load courses from database on page load
+    async function loadCoursesFromDB() {
+      try {
+        if (!window.supabaseConfig) return;
+        const result = await window.supabaseConfig.getAllCourses();
+        if (result.success && result.data && result.data.length > 0) {
+          courses = result.data;
+          filteredCourses = [...courses];
+          applySort();
+        }
+      } catch (e) {
+        console.warn('Could not load courses from DB, using fallback.', e);
+      }
+    }
+
     function renderCourses(coursesToRender) {
       const grid = document.getElementById('coursesGrid');
+      if (!coursesToRender || coursesToRender.length === 0) {
+        grid.innerHTML = '<p style="color:var(--txt3); text-align:center; padding:3rem;">No courses match your filters.</p>';
+        document.getElementById('courseCount').textContent = 'Showing 0 courses';
+        return;
+      }
       grid.innerHTML = coursesToRender.map(course => `
         <div class="course-card reveal">
           <div class="course-header">
-            <div class="course-icon">${course.icon}</div>
+            <div class="course-icon">${course.icon || '📚'}</div>
             <div>
               <h3 class="course-title">${course.title}</h3>
               <span class="course-badge">${course.level}</span>
@@ -501,14 +537,15 @@
           </div>
           <div class="course-body">
             <div class="course-meta">
-              <div class="meta-item">⏱️ ${course.duration}</div>
-              <div class="meta-item">👥 ${course.students} students</div>
-              <div class="meta-item">⭐ ${course.rating}</div>
+              <div class="meta-item">⏱️ ${course.duration || 'N/A'}</div>
+              <div class="meta-item">👥 ${course.students_count || 0} students</div>
+              <div class="meta-item">⭐ ${course.rating || 'N/A'}</div>
             </div>
-            <p class="course-desc">${course.desc}</p>
+            <p class="course-desc">${course.description || ''}</p>
           </div>
           <div class="course-footer">
-            <button class="btn-grad" onclick="enrollCourse(${course.id}, '${course.title}')">Enroll Now</button>
+            <span class="course-price">₹${Number(course.price || 0).toLocaleString('en-IN')}</span>
+            <button class="btn-grad" onclick="enrollCourse('${course.id}', '${course.title.replace(/'/g,"\\'")}')">Enroll Now</button>
           </div>
         </div>
       `).join('');
@@ -525,26 +562,27 @@
       const searchTerm = document.getElementById('searchBox').value.toLowerCase();
       const selectedCategories = Array.from(document.querySelectorAll('[id^="cat-"]:checked')).map(el => el.value);
       const selectedLevels = Array.from(document.querySelectorAll('[id^="level-"]:checked')).map(el => el.value);
-      const selectedPrices = Array.from(document.querySelectorAll('[id^="price-"]:checked')).map(el => el.value);
 
       filteredCourses = courses.filter(course => {
-        const matchesSearch = course.title.toLowerCase().includes(searchTerm) || course.desc.toLowerCase().includes(searchTerm);
+        const desc = course.description || '';
+        const matchesSearch = !searchTerm ||
+          course.title.toLowerCase().includes(searchTerm) ||
+          desc.toLowerCase().includes(searchTerm);
         const matchesCategory = selectedCategories.length === 0 || selectedCategories.includes(course.category);
         const matchesLevel = selectedLevels.length === 0 || selectedLevels.includes(course.level);
-        
-        let matchesPrice = selectedPrices.length === 0;
-        if (!matchesPrice) {
-          matchesPrice = selectedPrices.some(range => {
+        return matchesSearch && matchesCategory && matchesLevel;
+      });
 
-        return matchesSearch && matchesCategory && matchesLevel
+      applySort();
+    }
 
     function applySort() {
       currentSort = document.getElementById('sortBy').value;
       let sorted = [...filteredCourses];
 
-      if (currentSort === 'rating') sorted.sort((a, b) => b.rating - a.rating);
-      else if (currentSort === 'newest') sorted.reverse();
-      else sorted.sort((a, b) => b.students - a.students); // popular
+      if (currentSort === 'rating') sorted.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+      else if (currentSort === 'newest') sorted.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+      else sorted.sort((a, b) => (b.students_count || 0) - (a.students_count || 0)); // popular
 
       renderCourses(sorted);
     }
@@ -720,6 +758,9 @@
       btn.disabled = true;
       btn.textContent = 'Creating account...';
 
+      // Store user data for OTP step
+      window._pendingRegister = { name, email, phone, interest };
+
       window.supabaseConfig.signUp(email, password, {
         full_name: name,
         email: email,
@@ -728,12 +769,11 @@
         experience_level: 'beginner'
       }).then(result => {
         if (result.success) {
-          if (window.app) window.app.showNotification('Account created! Check your email.', 'success');
-          localStorage.setItem('user_email', email);
-          setTimeout(() => {
-            closeModal();
-            registerForm.querySelectorAll('input, select').forEach(field => field.value = '');
-          }, 1000);
+          // Show OTP step
+          registerForm.style.display = 'none';
+          document.getElementById('otp-step').style.display = 'block';
+          document.getElementById('otp-email-display').textContent = email;
+          if (window.app) window.app.showNotification('OTP sent to your email!', 'success');
         } else {
           if (window.app) window.app.showNotification(result.error || 'Registration failed', 'error');
         }
@@ -747,17 +787,46 @@
       });
     }
 
+    async function submitOTP() {
+      const otp = document.getElementById('otp-input').value.trim();
+      const email = window._pendingRegister?.email;
+      if (!otp || otp.length !== 6) {
+        if (window.app) window.app.showNotification('Please enter the 6-digit OTP', 'error');
+        return;
+      }
+      const btn = document.getElementById('otp-verify-btn');
+      btn.disabled = true;
+      btn.textContent = 'Verifying...';
+      try {
+        const result = await window.supabaseConfig.verifyEmailOTP(email, otp, window._pendingRegister || {});
+        if (result.success) {
+          if (window.app) window.app.showNotification('Email verified! Account is ready.', 'success');
+          localStorage.setItem('user_email', email);
+          window._pendingRegister = null;
+          setTimeout(() => { closeModal(); }, 1500);
+        } else {
+          if (window.app) window.app.showNotification(result.error || 'Invalid OTP. Please try again.', 'error');
+        }
+      } catch (err) {
+        if (window.app) window.app.showNotification('Verification failed', 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Verify OTP';
+      }
+    }
+
     document.getElementById('searchBox').addEventListener('input', applyFilters);
 
     // Initialize
-    setTimeout(() => {
-      const themeManager = new ThemeManager();
-      themeManager.init();
-      const app = new SkillUpNowApp();
-      app.init();
-      window.app = app;
-      renderCourses(courses);
-    }, 100);
+    document.addEventListener('DOMContentLoaded', async () => {
+      await loadCoursesFromDB();
+      applySort();
+    });
+
+    // Fallback init if DOMContentLoaded already fired
+    if (document.readyState !== 'loading') {
+      loadCoursesFromDB().then(() => applySort());
+    }
   </script>
 
   <!-- Footer -->

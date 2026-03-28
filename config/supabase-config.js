@@ -40,13 +40,39 @@ class SupabaseConfig {
       });
 
       if (error) throw error;
-      
-      // Create user profile
-      await this.createUserProfile(data.user.id, userData);
-      
-      return { success: true, data, message: 'Signup successful! Please verify your email.' };
+
+      // Create user profile immediately after signup (requires email confirmation disabled in Supabase)
+      if (data.user) {
+        await this.createUserProfile(data.user.id, { ...userData, email });
+        await this.logAuditEvent(data.user.id, 'register', 'user', data.user.id);
+      }
+
+      return { success: true, data, message: 'Account created successfully!' };
     } catch (error) {
       console.error('Sign up error:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  async verifyEmailOTP(email, token, userData) {
+    try {
+      const { data, error } = await this.client.auth.verifyOtp({
+        email,
+        token,
+        type: 'signup'
+      });
+
+      if (error) throw error;
+
+      // Now create the user profile after confirmed OTP
+      if (data.user) {
+        await this.createUserProfile(data.user.id, { ...userData, email });
+        await this.logAuditEvent(data.user.id, 'register', 'user', data.user.id);
+      }
+
+      return { success: true, data, message: 'Email verified! Your account is ready.' };
+    } catch (error) {
+      console.error('OTP verification error:', error);
       return { success: false, error: error.message };
     }
   }
@@ -522,25 +548,19 @@ class SupabaseConfig {
 
   async getUserStats(userId) {
     try {
-      // Get courses count
-      const { data: courses } = await this.client
+      const { data: allCourses } = await this.client
         .from('course_registrations')
-        .select('id')
-        .eq('user_id', userId)
-        .eq('status', 'completed');
+        .select('id, status, certificate_issued')
+        .eq('user_id', userId);
 
-      // Get payments count
-      const { data: payments } = await this.client
-        .from('payments')
-        .select('id')
-        .eq('user_id', userId)
-        .eq('payment_status', 'completed');
+      const completed = (allCourses || []).filter(c => c.status === 'completed');
+      const certs = (allCourses || []).filter(c => c.certificate_issued === true);
 
       return {
-        courses_enrolled: courses?.length || 0,
-        courses_completed: courses?.length || 0,
-        certificates_earned: Math.floor((courses?.length || 0) * 0.8),
-        hours_learned: (courses?.length || 0) * 25
+        courses_enrolled: allCourses?.length || 0,
+        courses_completed: completed.length,
+        certificates_earned: certs.length,
+        hours_learned: completed.length * 25
       };
     } catch (error) {
       console.error('Error fetching user stats:', error);
@@ -552,19 +572,49 @@ class SupabaseConfig {
     try {
       const { data, error } = await this.client
         .from('course_registrations')
-        .select('course_id, course_name, registration_date')
+        .select('id, course_title, completion_date, registration_date')
         .eq('user_id', userId)
-        .eq('status', 'completed')
-        .order('registration_date', { ascending: false });
+        .eq('certificate_issued', true)
+        .order('completion_date', { ascending: false });
 
       if (error) throw error;
-      return (data || []).map((cert, idx) => ({
-        id: cert.course_id || idx,
-        course_name: cert.course_name,
-        earned_date: cert.registration_date
+      return (data || []).map(cert => ({
+        id: cert.id,
+        course_name: cert.course_title,
+        earned_date: cert.completion_date || cert.registration_date
       }));
     } catch (error) {
       console.error('Error fetching certificates:', error);
+      return [];
+    }
+  }
+
+  async getUserPayments(userId) {
+    try {
+      const { data, error } = await this.client
+        .from('payments')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      console.error('Error fetching payments:', error);
+      return [];
+    }
+  }
+
+  async getUserEMIApplications(userId) {
+    try {
+      const { data, error } = await this.client
+        .from('emi_applications')
+        .select('*')
+        .eq('user_id', userId)
+        .order('applied_at', { ascending: false });
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      console.error('Error fetching EMI applications:', error);
       return [];
     }
   }
@@ -608,33 +658,62 @@ class SupabaseConfig {
   }
 
   // ==================== ADMIN COURSE MANAGEMENT ====================
-  
+
   async getAllCourses() {
     try {
       const { data, error } = await this.client
-        .from('course_registrations')
-        .select('course_id, course_name, course_category, course_level')
-        .order('course_name', { ascending: true });
+        .from('courses')
+        .select('*')
+        .eq('is_active', true)
+        .order('created_at', { ascending: false });
 
       if (error) throw error;
-      
-      // Deduplicate courses
-      const uniqueCourses = Array.from(new Map(
-        (data || []).map(item => [item.course_id, item])
-      ).values());
-      
-      return uniqueCourses;
+      return { success: true, data: data || [] };
     } catch (error) {
       console.error('Error fetching all courses:', error);
-      return [];
+      return { success: false, data: [], error: error.message };
     }
   }
 
-  async createCourse(courseData) {
+  async getAllCoursesAdmin() {
     try {
-      // Courses are typically managed in a separate table
-      // For now, we'll store course info in course_registrations
-      return { success: true, message: 'Course creation feature coming soon' };
+      const { data, error } = await this.client
+        .from('courses')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return { success: true, data: data || [] };
+    } catch (error) {
+      console.error('Error fetching all courses (admin):', error);
+      return { success: false, data: [], error: error.message };
+    }
+  }
+
+  async createCourse(courseData, adminUserId) {
+    try {
+      const { data, error } = await this.client
+        .from('courses')
+        .insert([{
+          title: courseData.title,
+          category: courseData.category,
+          level: courseData.level,
+          description: courseData.description || '',
+          icon: courseData.icon || '📚',
+          price: parseFloat(courseData.price) || 0,
+          duration: courseData.duration || '',
+          instructor: courseData.instructor || '',
+          badge: courseData.badge || null,
+          students_count: 0,
+          rating: 0,
+          is_active: true,
+          created_by: adminUserId
+        }])
+        .select()
+        .single();
+
+      if (error) throw error;
+      return { success: true, data, message: 'Course created successfully!' };
     } catch (error) {
       console.error('Error creating course:', error);
       return { success: false, error: error.message };
@@ -643,8 +722,16 @@ class SupabaseConfig {
 
   async updateCourse(courseId, updates) {
     try {
-      // Update course logic
-      return { success: true, message: 'Course updated successfully' };
+      updates.updated_at = new Date().toISOString();
+      const { data, error } = await this.client
+        .from('courses')
+        .update(updates)
+        .eq('id', courseId)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return { success: true, data, message: 'Course updated successfully!' };
     } catch (error) {
       console.error('Error updating course:', error);
       return { success: false, error: error.message };
@@ -653,8 +740,13 @@ class SupabaseConfig {
 
   async deleteCourse(courseId) {
     try {
-      // Delete course logic
-      return { success: true, message: 'Course deleted successfully' };
+      const { error } = await this.client
+        .from('courses')
+        .update({ is_active: false, updated_at: new Date().toISOString() })
+        .eq('id', courseId);
+
+      if (error) throw error;
+      return { success: true, message: 'Course removed successfully!' };
     } catch (error) {
       console.error('Error deleting course:', error);
       return { success: false, error: error.message };
@@ -774,4 +866,6 @@ const supabaseConfig = new SupabaseConfig();
 
 // Make it globally available
 window.supabaseConfig = supabaseConfig;
+// Expose the raw Supabase client so admin dashboard can call .from() directly
+window.supabaseConfig.supabase = supabaseConfig.client;
 window.supabase = typeof supabase !== 'undefined' ? supabase : null;

@@ -4,7 +4,7 @@
 
 class ThemeManager {
   constructor() {
-    this.currentTheme = localStorage.getItem('theme') || 'dark';
+    this.currentTheme = localStorage.getItem('theme') || 'light';
     this.root = document.documentElement;
     this.toggleButton = null;
     this.init();

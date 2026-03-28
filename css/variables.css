@@ -80,41 +80,41 @@
   --r4: 40px;
 }
 
-/* Default theme is dark */
+/* Default theme is light */
 :root {
-  --bg: #0d0b1a;
-  --bg2: #120f24;
-  --bg-secondary: #1a1630;
-  
-  --txt: #f0eeff;
-  --txt2: #c8bfff;
-  --txt3: #8b7fc4;
-  --txt4: #564f7a;
-  
-  --panel: rgba(255, 255, 255, 0.04);
-  --panel2: rgba(255, 255, 255, 0.07);
-  --glass: rgba(255, 255, 255, 0.06);
-  --border: rgba(130, 100, 255, 0.18);
-  --border2: rgba(130, 100, 255, 0.32);
-  
-  --v1: #7c5cfc;
-  --v2: #9b7dff;
-  --v3: #b8a0ff;
-  --v4: #d4c8ff;
-  --v5: rgba(124, 92, 252, 0.12);
-  
-  --b1: #3d6bff;
-  --b2: #5f87ff;
-  --b3: #90aeff;
-  
-  --grad: linear-gradient(135deg, #7c5cfc 0%, #3d6bff 100%);
-  --grad2: linear-gradient(135deg, #9b7dff 0%, #5f87ff 100%);
-  --grad-shine: linear-gradient(105deg, #7c5cfc, #5b8def, #9b7dff, #7c5cfc);
-  
-  --shadow-card: 0 24px 60px rgba(0, 0, 0, 0.4), 0 1px 0 rgba(255, 255, 255, 0.06) inset;
-  --shadow-glow: 0 0 40px rgba(124, 92, 252, 0.3);
-  --shadow-btn: 0 8px 32px rgba(124, 92, 252, 0.45);
-  
+  --bg: #ffffff;
+  --bg2: #f5f6f8;
+  --bg-secondary: #eff0f4;
+
+  --txt: #0d1117;
+  --txt2: #24292f;
+  --txt3: #57606a;
+  --txt4: #848d97;
+
+  --panel: #f0f1f6;
+  --panel2: #e8e9f1;
+  --glass: rgba(255, 255, 255, 0.98);
+  --border: #d5d6e8;
+  --border2: #c9cadd;
+
+  --v1: #5c3fb8;
+  --v2: #6b3fd8;
+  --v3: #8b5dd8;
+  --v4: #c8b8ff;
+  --v5: rgba(107, 63, 216, 0.12);
+
+  --b1: #1f5ce0;
+  --b2: #3561ff;
+  --b3: #6a8aff;
+
+  --grad: linear-gradient(135deg, #5c3fb8 0%, #1f5ce0 100%);
+  --grad2: linear-gradient(135deg, #6b3fd8 0%, #3561ff 100%);
+  --grad-shine: linear-gradient(105deg, #5c3fb8, #1f5ce0, #6b3fd8, #5c3fb8);
+
+  --shadow-card: 0 2px 8px rgba(107, 63, 216, 0.08);
+  --shadow-glow: 0 0 20px rgba(107, 63, 216, 0.1);
+  --shadow-btn: 0 4px 16px rgba(107, 63, 216, 0.15);
+
   --r1: 14px;
   --r2: 20px;
   --r3: 28px;

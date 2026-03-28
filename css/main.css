@@ -152,6 +152,26 @@ body:has(button:hover) #cursor-ring {
   border-color: rgba(155, 125, 255, 0.6);
 }
 
+/* Dark cursor for light mode */
+:root[data-theme="light"] #cursor {
+  background: #1a1630;
+  mix-blend-mode: normal;
+}
+
+:root[data-theme="light"] #cursor-ring {
+  border-color: rgba(26, 22, 48, 0.35);
+}
+
+:root[data-theme="light"] body:has(a:hover) #cursor,
+:root[data-theme="light"] body:has(button:hover) #cursor {
+  background: #3d1fa8;
+}
+
+:root[data-theme="light"] body:has(a:hover) #cursor-ring,
+:root[data-theme="light"] body:has(button:hover) #cursor-ring {
+  border-color: rgba(61, 31, 168, 0.5);
+}
+
 /* Navigation */
 nav {
   display: flex;
@@ -589,8 +609,153 @@ a[href*="pages/"]:hover {
     height: auto;
     padding: 1rem 3vw;
   }
-  
+
   .nav-logo {
     font-size: 1rem;
   }
+}
+
+/* ── Profile Dropdown ─────────────────────────── */
+.profile-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 240px;
+  background: var(--glass);
+  backdrop-filter: blur(20px);
+  border: 1.5px solid var(--border);
+  border-radius: var(--r2);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-8px);
+  transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
+  z-index: 1000;
+  overflow: hidden;
+}
+.profile-dropdown.active {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+.profile-icon-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--grad);
+  color: white;
+  font-weight: 700;
+  font-size: 1rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.25s;
+  box-shadow: var(--shadow-btn);
+}
+.profile-icon-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 8px 28px rgba(124,92,252,0.5);
+}
+
+/* ── Breadcrumbs ──────────────────────────────── */
+.breadcrumb {
+  padding: 0.75rem 5vw;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.82rem;
+  color: var(--txt4);
+  border-bottom: 1px solid var(--border);
+  background: rgba(255,255,255,0.02);
+  position: relative;
+  z-index: 10;
+  flex-wrap: wrap;
+}
+.breadcrumb a {
+  color: var(--v2);
+  text-decoration: none;
+  transition: color 0.2s;
+  font-weight: 500;
+}
+.breadcrumb a:hover { color: var(--v1); }
+.breadcrumb .bc-sep { color: var(--txt4); font-size: 0.75rem; }
+.breadcrumb .bc-current { color: var(--txt3); font-weight: 600; }
+
+/* ── Reviews Scrolling Track ──────────────────── */
+.reviews-track-wrap {
+  overflow: hidden;
+  position: relative;
+  mask-image: linear-gradient(90deg, transparent, black 10%, black 90%, transparent);
+  -webkit-mask-image: linear-gradient(90deg, transparent, black 10%, black 90%, transparent);
+}
+.reviews-track {
+  display: flex;
+  gap: 2rem;
+  width: max-content;
+  animation: scrollTrack 40s linear infinite;
+}
+.reviews-track:hover { animation-play-state: paused; }
+@keyframes scrollTrack {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.review-card {
+  min-width: 340px;
+  max-width: 340px;
+  flex-shrink: 0;
+  background: var(--panel);
+  border: 1.5px solid var(--border);
+  border-radius: var(--r2);
+  padding: 2rem;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.review-card:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 20px 60px rgba(124,92,252,0.2);
+}
+
+/* ── Platform Cards & Icons Animation ────────── */
+.platform-card {
+  text-decoration: none;
+  display: flex;
+  flex-direction: column;
+  background: var(--panel);
+  border: 1.5px solid var(--border);
+  border-radius: var(--r2);
+  padding: 2rem;
+  transition: all 0.35s cubic-bezier(0.4,0,0.2,1);
+  position: relative;
+  overflow: hidden;
+}
+.platform-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 24px 64px rgba(124,92,252,0.2);
+  border-color: var(--v2);
+}
+.platform-card:hover .platform-icon {
+  animation: iconBounce 0.5s cubic-bezier(0.36,0.07,0.19,0.97) both;
+}
+.platform-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--r1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  margin-bottom: 1.5rem;
+  transition: transform 0.35s ease;
+  animation: iconFloat 3s ease-in-out infinite;
+}
+@keyframes iconFloat {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  25% { transform: translateY(-4px) rotate(-3deg); }
+  75% { transform: translateY(-2px) rotate(3deg); }
+}
+@keyframes iconBounce {
+  0%   { transform: scale(1); }
+  20%  { transform: scale(1.3) rotate(-10deg); }
+  40%  { transform: scale(0.9) rotate(5deg); }
+  60%  { transform: scale(1.15) rotate(-5deg); }
+  80%  { transform: scale(0.97) rotate(2deg); }
+  100% { transform: scale(1) rotate(0deg); }
 }

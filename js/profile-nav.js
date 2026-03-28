@@ -17,7 +17,7 @@ class ProfileNavigationManager {
   async checkUserSession() {
     try {
       if (!window.supabaseConfig) return;
-      
+
       const user = await window.supabaseConfig.getCurrentUser();
       if (user) {
         this.currentUser = user;
@@ -88,11 +88,11 @@ class ProfileNavigationManager {
   checkAdminStatus() {
     try {
       if (!window.supabaseConfig || !this.currentUser) return;
-      
-      // Check if user is admin and redirect dashboard if needed
+
       window.supabaseConfig.isAdmin(this.currentUser.id).then(isAdmin => {
-        if (isAdmin && window.location.pathname.includes('pages/') && !window.location.pathname.includes('admin')) {
-          // Could redirect to admin dashboard if needed
+        if (isAdmin) {
+          const adminLink = document.getElementById('dd-admin-link');
+          if (adminLink) adminLink.style.display = 'flex';
         }
       });
     } catch (error) {
@@ -103,11 +103,31 @@ class ProfileNavigationManager {
   setupEventListeners() {
     const profileBtn = document.getElementById('profile-btn');
     const profileDropdown = document.getElementById('profile-dropdown');
+    const profileSection = document.getElementById('profile-section');
+    let hideTimeout;
 
     if (profileBtn) {
       profileBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         this.toggleProfileDropdown();
+      });
+    }
+
+    // Hover behavior: show on mouseenter, hide with delay on mouseleave
+    if (profileSection) {
+      profileSection.addEventListener('mouseenter', () => {
+        clearTimeout(hideTimeout);
+        profileDropdown?.classList.add('active');
+      });
+      profileSection.addEventListener('mouseleave', () => {
+        hideTimeout = setTimeout(() => profileDropdown?.classList.remove('active'), 200);
+      });
+    }
+
+    if (profileDropdown) {
+      profileDropdown.addEventListener('mouseenter', () => clearTimeout(hideTimeout));
+      profileDropdown.addEventListener('mouseleave', () => {
+        hideTimeout = setTimeout(() => profileDropdown.classList.remove('active'), 200);
       });
     }
 

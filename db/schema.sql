@@ -334,3 +334,49 @@ GRANT SELECT, INSERT ON public.contact_enquiries TO authenticated;
 GRANT INSERT ON public.user_profiles TO anon;
 GRANT INSERT ON public.contact_enquiries TO anon;
 GRANT INSERT ON public.feedback TO anon;
+
+-- ==========================================
+-- 9. COURSES TABLE (Admin-managed catalog)
+-- ==========================================
+CREATE TABLE IF NOT EXISTS public.courses (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  title VARCHAR(255) NOT NULL,
+  category VARCHAR(100) NOT NULL DEFAULT 'general', -- cloud, devops, ai, security, data, general
+  level VARCHAR(50) NOT NULL DEFAULT 'beginner',    -- beginner, intermediate, advanced
+  description TEXT,
+  icon VARCHAR(10) DEFAULT '📚',
+  price DECIMAL(10, 2) NOT NULL DEFAULT 0,
+  duration VARCHAR(50),       -- e.g. "40 hrs"
+  instructor VARCHAR(255),
+  badge VARCHAR(50),          -- Bestseller, New Course, Popular, Expert
+  students_count INTEGER DEFAULT 0,
+  rating DECIMAL(3, 1) DEFAULT 0,
+  is_active BOOLEAN DEFAULT TRUE,
+  created_by UUID REFERENCES auth.users(id),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX idx_courses_category ON public.courses(category);
+CREATE INDEX idx_courses_level ON public.courses(level);
+CREATE INDEX idx_courses_is_active ON public.courses(is_active);
+
+ALTER TABLE public.courses ENABLE ROW LEVEL SECURITY;
+
+-- Anyone can view active courses
+CREATE POLICY "Anyone can view active courses"
+  ON public.courses FOR SELECT
+  USING (is_active = TRUE OR EXISTS (
+    SELECT 1 FROM public.admin_users WHERE id = auth.uid()
+  ));
+
+-- Only admins can insert/update/delete courses
+CREATE POLICY "Admins can manage courses"
+  ON public.courses FOR ALL
+  USING (EXISTS (
+    SELECT 1 FROM public.admin_users WHERE id = auth.uid()
+  ));
+
+GRANT SELECT ON public.courses TO anon;
+GRANT SELECT ON public.courses TO authenticated;
+GRANT INSERT, UPDATE, DELETE ON public.courses TO authenticated;

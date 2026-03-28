@@ -88,8 +88,10 @@ class SkillUpNowApp {
   switchModalTab(tab) {
     const loginForm = document.getElementById('lf');
     const registerForm = document.getElementById('rf');
+    const otpStep = document.getElementById('otp-step');
 
     if (loginForm && registerForm) {
+      if (otpStep) otpStep.style.display = 'none';
       if (tab === 'login') {
         loginForm.style.display = 'block';
         registerForm.style.display = 'none';

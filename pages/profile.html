@@ -1,695 +1,748 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="User Profile - SkillUpNow">
-  <title>My Profile - SkillUpNow</title>
-  
-  <!-- CSS Files -->
-  <link rel="stylesheet" href="../css/variables.css">
-  <link rel="stylesheet" href="../css/animations.css">
-  <link rel="stylesheet" href="../css/main.css">
-  <link rel="stylesheet" href="../css/forms.css">
-  <link rel="stylesheet" href="../css/responsive.css">
-
+  <title>My Profile — SkillUpNow</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
-    /* Profile Wrapper */
-    .profile-wrapper {
-      min-height: 100vh;
-      padding: 2rem 5vw;
-      max-width: 1200px;
-      margin: 0 auto;
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #0d0b1a;
+      --bg2:      #13102a;
+      --card:     #1a1635;
+      --card2:    #201c3d;
+      --border:   rgba(130,100,255,0.18);
+      --border2:  rgba(130,100,255,0.32);
+      --txt:      #f0eeff;
+      --txt2:     #c8bfff;
+      --txt3:     #8b7fc4;
+      --txt4:     #564f7a;
+      --accent:   #7c5cfc;
+      --accent2:  #9b7dff;
+      --blue:     #3d6bff;
+      --grad:     linear-gradient(135deg, #7c5cfc 0%, #3d6bff 100%);
+      --shadow:   0 8px 32px rgba(0,0,0,0.4);
+      --r1: 10px; --r2: 16px; --r3: 22px;
+    }
+    [data-theme="light"] {
+      --bg:       #f4f3ff;
+      --bg2:      #ebe9ff;
+      --card:     #ffffff;
+      --card2:    #f0eeff;
+      --border:   rgba(107,63,216,0.15);
+      --border2:  rgba(107,63,216,0.28);
+      --txt:      #0d0b1a;
+      --txt2:     #3d2f7a;
+      --txt3:     #6a5aaa;
+      --txt4:     #9a8cc8;
+      --accent:   #5c3fb8;
+      --accent2:  #6b3fd8;
+      --blue:     #1f5ce0;
+      --grad:     linear-gradient(135deg, #5c3fb8 0%, #1f5ce0 100%);
+      --shadow:   0 4px 20px rgba(107,63,216,0.12);
     }
 
-    /* Header Section */
-    .profile-header {
-      display: flex;
-      align-items: center;
-      gap: 2rem;
-      background: var(--panel);
-      border: 1px solid var(--border);
-      padding: 2.5rem;
-      border-radius: var(--r3);
-      margin-bottom: 3rem;
-      box-shadow: var(--shadow-card);
-    }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--txt); min-height: 100vh; transition: background .3s, color .3s; }
 
-    .profile-avatar {
-      width: 120px;
-      height: 120px;
-      border-radius: 50%;
-      background: var(--grad);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 3rem;
-      color: white;
-      flex-shrink: 0;
-      box-shadow: var(--shadow-btn);
+    /* ── TOPBAR ─────────────────────────────── */
+    .topbar {
+      position: sticky; top: 0; z-index: 50;
+      background: var(--bg); border-bottom: 1px solid var(--border);
+      padding: .85rem 5vw; display: flex; align-items: center; gap: 1rem;
     }
-
-    .profile-info h2 {
-      margin-bottom: 0.5rem;
-      font-size: 1.8rem;
+    .back-btn {
+      display: inline-flex; align-items: center; gap: .4rem;
+      padding: .4rem .9rem; border-radius: 50px; border: 1px solid var(--border);
+      color: var(--txt3); font-size: .8rem; font-weight: 600; text-decoration: none;
+      background: transparent; cursor: pointer; transition: .2s;
     }
-
-    .profile-info p {
-      color: var(--txt3);
-      margin-bottom: 0.3rem;
+    .back-btn:hover { border-color: var(--accent2); color: var(--accent2); background: rgba(124,92,252,.08); }
+    .breadcrumb { flex: 1; display: flex; align-items: center; gap: .4rem; font-size: .8rem; color: var(--txt4); }
+    .breadcrumb a { color: var(--txt3); text-decoration: none; transition: .2s; }
+    .breadcrumb a:hover { color: var(--accent2); }
+    .breadcrumb span { color: var(--txt4); }
+    .bc-cur { color: var(--txt2); font-weight: 600; }
+    .topbar-right { display: flex; align-items: center; gap: .7rem; }
+    .theme-toggler {
+      width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--border);
+      background: transparent; color: var(--txt3); font-size: 1rem; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; transition: .2s;
     }
-
-    .profile-actions {
-      display: flex;
-      gap: 1rem;
-      margin-top: 1rem;
+    .theme-toggler:hover { border-color: var(--accent2); color: var(--accent2); }
+    .logout-btn {
+      padding: .4rem 1rem; border-radius: 50px; border: 1px solid rgba(239,68,68,.3);
+      background: rgba(239,68,68,.08); color: #f87171; font-size: .8rem; font-weight: 600;
+      cursor: pointer; transition: .2s;
     }
+    .logout-btn:hover { background: rgba(239,68,68,.18); }
 
-    /* Tab Navigation */
-    .profile-tabs {
-      display: flex;
-      gap: 1rem;
-      border-bottom: 2px solid var(--border);
-      margin-bottom: 2rem;
-      overflow-x: auto;
-      padding-bottom: 1rem;
+    /* ── PAGE WRAPPER ───────────────────────── */
+    .page { max-width: 1080px; margin: 0 auto; padding: 2rem 5vw 5rem; }
+
+    /* ── PROFILE HEADER ─────────────────────── */
+    .profile-card {
+      background: linear-gradient(145deg, #1e1a42, #181438);
+      border: 1px solid var(--border2);
+      border-radius: var(--r3); padding: 2rem 2.5rem;
+      margin-bottom: 1.8rem; box-shadow: var(--shadow);
+      display: flex; gap: 2rem; align-items: flex-start; flex-wrap: wrap;
+      position: relative; overflow: hidden;
     }
-
-    .profile-tab {
-      padding: 1rem 1.5rem;
-      background: transparent;
-      border: 2px solid transparent;
-      border-bottom: 3px solid transparent;
-      cursor: pointer;
-      font-family: 'Plus Jakarta Sans', 'Poppins', sans-serif;
-      font-weight: 600;
-      color: var(--txt3);
-      transition: all 0.3s;
-      white-space: nowrap;
+    .profile-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, #7c5cfc, #3d6bff, transparent);
+    }
+    .avatar-ring {
+      width: 96px; height: 96px; border-radius: 50%;
+      background: var(--grad); display: flex; align-items: center; justify-content: center;
+      font-size: 2.4rem; font-weight: 800; color: white; flex-shrink: 0;
+      box-shadow: 0 0 0 4px rgba(124,92,252,.25), 0 8px 24px rgba(0,0,0,.4);
       position: relative;
     }
-
-    .profile-tab:hover {
-      color: var(--txt2);
+    .online-dot {
+      position: absolute; bottom: 4px; right: 4px;
+      width: 16px; height: 16px; background: #4ade80;
+      border-radius: 50%; border: 2px solid #1e1a42;
     }
-
-    .profile-tab.active {
-      color: var(--v2);
-      border-bottom-color: var(--v2);
+    .pinfo { flex: 1; min-width: 0; }
+    .pinfo-name { font-size: 1.7rem; font-weight: 800; color: #f0eeff; margin-bottom: .3rem; letter-spacing: -.02em; }
+    .pinfo-email { font-size: .88rem; color: #8b7fc4; margin-bottom: .9rem; }
+    .tags { display: flex; flex-wrap: wrap; gap: .45rem; margin-bottom: 1.1rem; }
+    .tag {
+      padding: .25rem .8rem; border-radius: 50px; font-size: .72rem; font-weight: 600;
+      background: rgba(124,92,252,.14); color: #a89eff; border: 1px solid rgba(124,92,252,.28);
     }
-
-    /* Tab Content */
-    .profile-content {
-      display: none;
+    .tag.g { background: rgba(74,222,128,.1); color: #4ade80; border-color: rgba(74,222,128,.22); }
+    .tag.b { background: rgba(61,107,255,.12); color: #7ba4ff; border-color: rgba(61,107,255,.25); }
+    .tag.y { background: rgba(251,191,36,.1); color: #fbbf24; border-color: rgba(251,191,36,.22); }
+    .pactions { display: flex; gap: .7rem; flex-wrap: wrap; }
+    .pbtn {
+      padding: .55rem 1.3rem; border-radius: 50px; font-size: .82rem; font-weight: 700;
+      cursor: pointer; transition: .2s; border: none;
     }
+    .pbtn-p { background: var(--grad); color: white; box-shadow: 0 4px 16px rgba(124,92,252,.4); }
+    .pbtn-p:hover { filter: brightness(1.12); transform: translateY(-1px); }
+    .pbtn-s { background: rgba(255,255,255,.06); color: #c8bfff; border: 1px solid var(--border); }
+    .pbtn-s:hover { border-color: var(--accent2); color: var(--accent2); background: rgba(124,92,252,.1); }
 
-    .profile-content.active {
-      display: block;
-      animation: fadeIn 0.3s ease;
+    /* ── TABS ───────────────────────────────── */
+    .tabs-bar {
+      display: flex; gap: .25rem; overflow-x: auto; scrollbar-width: none;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 14px; padding: .3rem; margin-bottom: 1.6rem;
     }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
+    .tabs-bar::-webkit-scrollbar { display: none; }
+    .tab-btn {
+      padding: .6rem 1.15rem; border-radius: 10px; font-size: .82rem; font-weight: 600;
+      cursor: pointer; white-space: nowrap; border: none;
+      background: transparent; color: var(--txt3); transition: .2s;
     }
+    .tab-btn:hover { background: rgba(124,92,252,.08); color: var(--txt2); }
+    .tab-btn.on { background: var(--grad); color: #fff; box-shadow: 0 2px 12px rgba(124,92,252,.4); }
 
-    /* Courses Grid */
-    .courses-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 2rem;
+    /* ── TAB PANELS ─────────────────────────── */
+    .panel { display: none; }
+    .panel.on { display: block; animation: up .3s ease; }
+    @keyframes up { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+
+    .sec-hd { font-size: .95rem; font-weight: 700; color: var(--txt2); margin-bottom: 1.1rem; display: flex; align-items: center; gap: .5rem; }
+
+    /* ── COURSES GRID ───────────────────────── */
+    .grid-courses { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 1.1rem; }
+    .c-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--r2); padding: 1.3rem; transition: .25s; }
+    .c-card:hover { border-color: var(--border2); transform: translateY(-3px); box-shadow: 0 8px 28px rgba(124,92,252,.18); }
+    .c-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: .8rem; }
+    .c-title { font-weight: 700; font-size: .92rem; color: var(--txt); line-height: 1.3; flex: 1; margin-right: .6rem; }
+    .c-badge { padding: .2rem .65rem; border-radius: 50px; font-size: .68rem; font-weight: 700; text-transform: uppercase; flex-shrink: 0; }
+    .c-badge.active { background: rgba(124,92,252,.18); color: #a89eff; }
+    .c-badge.completed { background: rgba(74,222,128,.14); color: #4ade80; }
+    .c-badge.dropped { background: rgba(239,68,68,.12); color: #f87171; }
+    .c-badge.paused { background: rgba(251,191,36,.12); color: #fbbf24; }
+    .c-cat { font-size: .75rem; color: var(--txt4); margin-bottom: .9rem; }
+    .pbar { height: 4px; background: rgba(255,255,255,.08); border-radius: 4px; overflow: hidden; margin-bottom: .45rem; }
+    .pfill { height: 100%; background: var(--grad); border-radius: 4px; transition: width .6s; }
+    .c-meta { display: flex; justify-content: space-between; font-size: .73rem; color: var(--txt4); margin-bottom: 1rem; }
+    .c-go { width: 100%; padding: .6rem; border-radius: 50px; background: var(--grad); color: white; border: none; font-size: .8rem; font-weight: 700; cursor: pointer; transition: .2s; }
+    .c-go:hover { filter: brightness(1.1); }
+
+    /* ── STATUS GRID ────────────────────────── */
+    .grid-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1rem; }
+    .s-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--r2); padding: 1.5rem; text-align: center; }
+    .s-ico { font-size: 1.7rem; margin-bottom: .5rem; }
+    .s-val { font-size: 2.1rem; font-weight: 800; background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1; margin-bottom: .3rem; }
+    .s-lbl { font-size: .78rem; color: var(--txt3); font-weight: 500; }
+
+    /* ── TABLE ──────────────────────────────── */
+    .tbl-wrap { background: var(--card); border: 1px solid var(--border); border-radius: var(--r2); overflow: hidden; }
+    .tbl-scroll { overflow-x: auto; }
+    .dtbl { width: 100%; border-collapse: collapse; min-width: 500px; }
+    .dtbl th { padding: .85rem 1rem; text-align: left; font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--txt4); background: rgba(255,255,255,.03); border-bottom: 1px solid var(--border); }
+    .dtbl td { padding: .8rem 1rem; font-size: .84rem; color: var(--txt2); border-bottom: 1px solid var(--border); }
+    .dtbl tbody tr:last-child td { border-bottom: none; }
+    .dtbl tbody tr:hover { background: rgba(124,92,252,.05); }
+    .tbdg { display: inline-block; padding: .2rem .65rem; border-radius: 50px; font-size: .68rem; font-weight: 700; text-transform: uppercase; }
+    .tbdg.pending { background: rgba(251,191,36,.12); color: #fbbf24; }
+    .tbdg.completed { background: rgba(74,222,128,.14); color: #4ade80; }
+    .tbdg.approved { background: rgba(74,222,128,.14); color: #4ade80; }
+    .tbdg.rejected { background: rgba(239,68,68,.12); color: #f87171; }
+    .tbdg.processing { background: rgba(61,107,255,.12); color: #7ba4ff; }
+    .tbdg.active { background: rgba(124,92,252,.14); color: #a89eff; }
+    .tbdg.failed { background: rgba(239,68,68,.12); color: #f87171; }
+
+    /* ── CERTIFICATES ───────────────────────── */
+    .certs { display: flex; flex-direction: column; gap: .9rem; }
+    .cert { background: var(--card); border: 1px solid var(--border); border-radius: var(--r2); padding: 1.2rem 1.4rem; display: flex; align-items: center; gap: 1.1rem; transition: .25s; }
+    .cert:hover { border-color: var(--border2); transform: translateX(4px); }
+    .cert-ico { width: 48px; height: 48px; border-radius: 12px; background: var(--grad); display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex-shrink: 0; }
+    .cert-info { flex: 1; }
+    .cert-name { font-weight: 700; font-size: .9rem; color: var(--txt); margin-bottom: .3rem; }
+    .cert-date { font-size: .75rem; color: var(--txt4); }
+    .cert-dl { padding: .45rem 1rem; border-radius: 50px; background: var(--grad); color: white; border: none; font-size: .76rem; font-weight: 700; cursor: pointer; transition: .2s; }
+    .cert-dl:hover { filter: brightness(1.1); }
+
+    /* ── LEARNING PATHS ─────────────────────── */
+    .grid-paths { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1.1rem; }
+    .path { background: var(--card); border: 1px solid var(--border); border-radius: var(--r2); padding: 1.3rem; transition: .25s; }
+    .path:hover { border-color: var(--border2); transform: translateY(-3px); }
+    .path-top { display: flex; align-items: center; gap: .85rem; margin-bottom: .9rem; }
+    .path-ico { width: 44px; height: 44px; border-radius: 10px; background: var(--grad); display: flex; align-items: center; justify-content: center; font-size: 1.25rem; flex-shrink: 0; }
+    .path-nm { font-weight: 700; font-size: .9rem; color: var(--txt); }
+    .path-pc { font-size: .75rem; color: var(--txt4); }
+    .path-desc { font-size: .8rem; color: var(--txt3); margin-bottom: .9rem; line-height: 1.5; }
+    .path-ft { display: flex; justify-content: space-between; align-items: center; padding-top: .85rem; border-top: 1px solid var(--border); }
+    .path-count { font-size: .77rem; color: var(--txt4); }
+    .path-go { padding: .4rem .9rem; border-radius: 50px; background: var(--grad); color: white; border: none; font-size: .76rem; font-weight: 700; cursor: pointer; }
+
+    /* ── EMPTY / LOADING ────────────────────── */
+    .empty { text-align: center; padding: 3rem 2rem; background: var(--card); border: 2px dashed var(--border); border-radius: var(--r2); }
+    .empty-ico { font-size: 2.2rem; margin-bottom: .8rem; }
+    .empty h3 { font-size: 1rem; color: var(--txt2); margin-bottom: .4rem; }
+    .empty p { font-size: .83rem; color: var(--txt4); }
+    .empty-link { display: inline-block; margin-top: .9rem; padding: .55rem 1.3rem; background: var(--grad); color: white; border-radius: 50px; font-size: .8rem; font-weight: 700; text-decoration: none; }
+    .loading { display: flex; align-items: center; justify-content: center; gap: .6rem; padding: 2.5rem; color: var(--txt4); font-size: .88rem; }
+    .spin { width: 18px; height: 18px; border: 2px solid var(--border); border-top-color: var(--accent2); border-radius: 50%; animation: rot .6s linear infinite; flex-shrink: 0; }
+    @keyframes rot { to { transform: rotate(360deg); } }
+
+    /* ── MODALS ─────────────────────────────── */
+    .moverlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,.65);
+      backdrop-filter: blur(8px); z-index: 200;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; visibility: hidden; transition: .3s;
     }
-
-    .course-card {
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: var(--r2);
-      padding: 1.5rem;
-      transition: all 0.3s;
-      box-shadow: var(--shadow-card);
+    .moverlay.open { opacity: 1; visibility: visible; }
+    .mbox {
+      background: #1a1635; border: 1px solid var(--border2);
+      border-radius: var(--r3); padding: 2rem; width: 90vw;
+      max-width: 480px; max-height: 88vh; overflow-y: auto;
+      transform: scale(.94); transition: .3s;
+      box-shadow: 0 30px 60px rgba(0,0,0,.6);
     }
-
-    .course-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 12px 40px rgba(124, 92, 252, 0.2);
-      border-color: var(--v3);
+    .moverlay.open .mbox { transform: scale(1); }
+    .mhd { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.4rem; }
+    .mhd h3 { font-size: 1.2rem; font-weight: 800; color: #f0eeff; }
+    .mcls {
+      width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--border);
+      background: rgba(255,255,255,.06); color: var(--txt3); font-size: .9rem;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
     }
-
-    .course-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: start;
-      margin-bottom: 1rem;
+    .mcls:hover { background: rgba(255,255,255,.12); color: #fff; }
+    .fg { margin-bottom: 1rem; }
+    .fg label { display: block; font-size: .75rem; font-weight: 700; color: var(--txt3); margin-bottom: .4rem; text-transform: uppercase; letter-spacing: .04em; }
+    .fg input, .fg select, .fg textarea {
+      width: 100%; padding: .72rem .95rem; background: rgba(255,255,255,.06);
+      border: 1px solid var(--border); border-radius: var(--r1); color: #f0eeff;
+      font-size: .88rem; font-family: inherit; transition: .2s; outline: none;
     }
-
-    .course-badge {
-      display: inline-block;
-      padding: 0.4rem 0.8rem;
-      background: rgba(107, 63, 216, 0.2);
-      color: var(--v2);
-      border-radius: 20px;
-      font-size: 0.75rem;
-      font-weight: 700;
+    .fg input:focus, .fg select:focus, .fg textarea:focus { border-color: var(--accent2); box-shadow: 0 0 0 3px rgba(124,92,252,.18); }
+    .fg select option { background: #1a1635; }
+    .fg textarea { resize: vertical; min-height: 75px; }
+    .frow { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .msave {
+      width: 100%; padding: .82rem; border-radius: 50px; background: var(--grad);
+      color: white; border: none; font-size: .88rem; font-weight: 700;
+      cursor: pointer; margin-top: .4rem; transition: .2s;
+      box-shadow: 0 4px 16px rgba(124,92,252,.4);
     }
+    .msave:hover { filter: brightness(1.1); }
+    .msave:disabled { opacity: .55; cursor: not-allowed; }
 
-    .course-progress {
-      width: 100%;
-      height: 6px;
-      background: var(--panel2);
-      border-radius: 10px;
-      overflow: hidden;
-      margin: 1rem 0;
+    /* ── TOAST ──────────────────────────────── */
+    .toast {
+      position: fixed; bottom: 1.4rem; right: 1.4rem; z-index: 999;
+      padding: .85rem 1.3rem; border-radius: 12px; font-size: .86rem; font-weight: 600;
+      display: flex; align-items: center; gap: .5rem;
+      transform: translateY(70px); opacity: 0; transition: .35s; pointer-events: none;
     }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast.ok { background: rgba(74,222,128,.15); border: 1px solid rgba(74,222,128,.35); color: #4ade80; }
+    .toast.err { background: rgba(239,68,68,.13); border: 1px solid rgba(239,68,68,.3); color: #f87171; }
 
-    .course-progress-bar {
-      height: 100%;
-      background: var(--grad);
-      border-radius: 10px;
-      transition: width 0.3s ease;
-    }
-
-    /* Status Section */
-    .status-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 1.5rem;
-    }
-
-    .status-card {
-      background: var(--panel);
-      border: 1px solid var(--border);
-      padding: 1.5rem;
-      border-radius: var(--r2);
-      text-align: center;
-    }
-
-    .status-value {
-      font-size: 2rem;
-      font-weight: 800;
-      background: var(--grad);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      margin: 0.5rem 0;
-    }
-
-    .status-label {
-      color: var(--txt3);
-      font-size: 0.9rem;
-    }
-
-    /* Certificates Section */
-    .certificates-list {
-      display: grid;
-      gap: 1.5rem;
-    }
-
-    .cert-item {
-      background: var(--panel);
-      border: 1px solid var(--border);
-      padding: 1.5rem;
-      border-radius: var(--r2);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      transition: all 0.3s;
-    }
-
-    .cert-item:hover {
-      transform: translateX(5px);
-      border-color: var(--v3);
-    }
-
-    .cert-details h4 {
-      margin-bottom: 0.5rem;
-      font-size: 1.1rem;
-    }
-
-    .cert-date {
-      color: var(--txt3);
-      font-size: 0.85rem;
-    }
-
-    .cert-actions {
-      display: flex;
-      gap: 0.8rem;
-    }
-
-    .cert-btn {
-      padding: 0.6rem 1rem;
-      background: var(--grad);
-      color: white;
-      border: none;
-      border-radius: var(--r4);
-      cursor: pointer;
-      font-size: 0.85rem;
-      font-weight: 600;
-      transition: all 0.3s;
-    }
-
-    .cert-btn:hover {
-      transform: scale(1.05);
-      box-shadow: var(--shadow-btn);
-    }
-
-    /* Learning Paths */
-    .paths-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 1.5rem;
-    }
-
-    .path-card {
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: var(--r2);
-      padding: 1.5rem;
-      transition: all 0.3s;
-    }
-
-    .path-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 12px 40px rgba(124, 92, 252, 0.2);
-    }
-
-    .path-header {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      margin-bottom: 1rem;
-    }
-
-    .path-icon {
-      width: 50px;
-      height: 50px;
-      border-radius: 10px;
-      background: var(--grad);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.5rem;
-      color: white;
-    }
-
-    .path-title {
-      font-weight: 700;
-      font-size: 1rem;
-    }
-
-    .path-progress {
-      color: var(--txt3);
-      font-size: 0.85rem;
-    }
-
-    .path-courses {
-      color: var(--txt3);
-      font-size: 0.85rem;
-      margin: 1rem 0;
-    }
-
-    .path-footer {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding-top: 1rem;
-      border-top: 1px solid var(--border);
-    }
-
-    /* Empty State */
-    .empty-state {
-      text-align: center;
-      padding: 3rem 2rem;
-      background: var(--panel);
-      border: 2px dashed var(--border);
-      border-radius: var(--r3);
-    }
-
-    .empty-state-icon {
-      font-size: 3rem;
-      margin-bottom: 1rem;
-    }
-
-    .empty-state h3 {
-      margin-bottom: 0.5rem;
-    }
-
-    .empty-state p {
-      color: var(--txt3);
-    }
-
-    /* Alert/Loading */
-    .loading {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-      color: var(--txt3);
-    }
-
-    .loading-spinner {
-      width: 16px;
-      height: 16px;
-      border: 2px solid var(--border);
-      border-top-color: var(--v2);
-      border-radius: 50%;
-      animation: spin 0.6s linear infinite;
-    }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
+    /* ── RESPONSIVE ─────────────────────────── */
+    @media (max-width: 600px) {
+      .profile-card { flex-direction: column; align-items: center; text-align: center; padding: 1.5rem; }
+      .tags { justify-content: center; }
+      .pactions { justify-content: center; }
+      .frow { grid-template-columns: 1fr; }
+      .topbar { padding: .7rem 4vw; }
+      .page { padding: 1.2rem 4vw 4rem; }
     }
   </style>
 </head>
 <body>
-  <!-- Mesh Background -->
-  <div class="mesh-bg"></div>
-  <div class="orb orb1"></div>
-  <div class="orb orb2"></div>
-  <div class="orb orb3"></div>
 
-  <!-- Navigation -->
-  <nav>
-    <a href="../index.html" class="nav-logo">
-      <div class="logo-icon" style="background: var(--grad);">⚡</div>
-      SkillUpNow
-    </a>
-    <div class="nav-actions">
-      <button class="theme-toggle" id="theme-toggle-btn">
-        <div class="theme-toggle-btn">🌙</div>
-      </button>
-      <button class="nav-cta" onclick="logout()">Logout</button>
+  <!-- TOP BAR with back + breadcrumb -->
+  <div class="topbar">
+    <a class="back-btn" href="../index.html">← Back</a>
+    <div class="breadcrumb">
+      <a href="../index.html">🏠 Home</a>
+      <span class="bc-sep">›</span>
+      <span class="bc-current">My Profile</span>
     </div>
-  </nav>
+    <div class="topbar-right">
+      <button class="theme-toggler" id="thm-btn" onclick="toggleTheme()" title="Toggle theme">🌙</button>
+      <button class="logout-btn" onclick="doLogout()">🚪 Logout</button>
+    </div>
+  </div>
 
-  <!-- Profile Container -->
-  <div class="profile-wrapper">
-    <!-- Profile Header -->
-    <div class="profile-header" id="profile-header">
-      <div class="profile-avatar" id="profile-avatar">👤</div>
-      <div class="profile-info">
-        <h2 id="profile-name">Loading...</h2>
-        <p id="profile-email">Email</p>
-        <p id="profile-status">Status: Active</p>
-        <div class="profile-actions">
-          <button class="btn-grad" onclick="editProfile()">Edit Profile</button>
-          <button class="btn-outline" onclick="changePassword()">Change Password</button>
+  <!-- PAGE -->
+  <div class="page">
+
+    <!-- Profile Card -->
+    <div class="profile-card">
+      <div class="avatar-ring" id="avatar">?</div>
+      <div class="online-dot"></div>
+      <div class="pinfo">
+        <div class="pinfo-name" id="p-name">Loading…</div>
+        <div class="pinfo-email" id="p-email"></div>
+        <div class="tags" id="p-tags">
+          <span class="tag">✨ SkillUpNow Learner</span>
+        </div>
+        <div class="pactions">
+          <button class="pbtn pbtn-p" onclick="openEdit()">✏️ Edit Profile</button>
+          <button class="pbtn pbtn-s" onclick="openPass()">🔑 Change Password</button>
         </div>
       </div>
     </div>
 
-    <!-- Tab Navigation -->
-    <div class="profile-tabs">
-      <button class="profile-tab active" data-tab="courses">📚 My Courses</button>
-      <button class="profile-tab" data-tab="status">📊 My Status</button>
-      <button class="profile-tab" data-tab="certificates">🏆 Certificates</button>
-      <button class="profile-tab" data-tab="paths">🎯 Learning Paths</button>
+    <!-- Tabs -->
+    <div class="tabs-bar" id="tabs-bar">
+      <button class="tab-btn on" data-tab="courses">📚 My Courses</button>
+      <button class="tab-btn" data-tab="status">📊 Status</button>
+      <button class="tab-btn" data-tab="payments">💳 Payments</button>
+      <button class="tab-btn" data-tab="emi">💰 EMI</button>
+      <button class="tab-btn" data-tab="certs">🏆 Certificates</button>
+      <button class="tab-btn" data-tab="paths">🎯 Learning Paths</button>
     </div>
 
-    <!-- Tab Contents -->
     <!-- My Courses -->
-    <div class="profile-content active" id="courses-content">
-      <div id="courses-list" class="courses-grid"></div>
+    <div class="panel on" id="panel-courses">
+      <div class="sec-hd">📚 Enrolled Courses</div>
+      <div class="grid-courses" id="courses-grid">
+        <div style="grid-column:1/-1" class="loading"><div class="spin"></div> Loading courses…</div>
+      </div>
     </div>
 
-    <!-- My Status -->
-    <div class="profile-content" id="status-content">
-      <div class="status-grid" id="status-grid"></div>
+    <!-- Status -->
+    <div class="panel" id="panel-status">
+      <div class="sec-hd">📊 Learning Statistics</div>
+      <div class="grid-stats" id="stats-grid">
+        <div class="loading"><div class="spin"></div> Loading…</div>
+      </div>
+    </div>
+
+    <!-- Payments -->
+    <div class="panel" id="panel-payments">
+      <div class="sec-hd">💳 Payment History</div>
+      <div class="tbl-wrap">
+        <div class="tbl-scroll">
+          <table class="dtbl">
+            <thead><tr><th>Course</th><th>Amount</th><th>Method</th><th>Status</th><th>Date</th><th>Txn ID</th></tr></thead>
+            <tbody id="pay-body"><tr><td colspan="6"><div class="loading"><div class="spin"></div> Loading…</div></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMI -->
+    <div class="panel" id="panel-emi">
+      <div class="sec-hd">💰 EMI Applications</div>
+      <div class="tbl-wrap">
+        <div class="tbl-scroll">
+          <table class="dtbl">
+            <thead><tr><th>Course</th><th>Price</th><th>Duration</th><th>Monthly</th><th>Status</th><th>Applied</th></tr></thead>
+            <tbody id="emi-body"><tr><td colspan="6"><div class="loading"><div class="spin"></div> Loading…</div></td></tr></tbody>
+          </table>
+        </div>
+      </div>
     </div>
 
     <!-- Certificates -->
-    <div class="profile-content" id="certificates-content">
-      <div id="certificates-list" class="certificates-list"></div>
+    <div class="panel" id="panel-certs">
+      <div class="sec-hd">🏆 My Certificates</div>
+      <div class="certs" id="certs-list">
+        <div class="loading"><div class="spin"></div> Loading…</div>
+      </div>
     </div>
 
     <!-- Learning Paths -->
-    <div class="profile-content" id="paths-content">
-      <div class="paths-grid" id="paths-grid"></div>
+    <div class="panel" id="panel-paths">
+      <div class="sec-hd">🎯 Learning Paths</div>
+      <div class="grid-paths" id="paths-grid">
+        <div class="loading"><div class="spin"></div> Loading…</div>
+      </div>
+    </div>
+
+  </div><!-- /page -->
+
+  <!-- EDIT PROFILE MODAL -->
+  <div class="moverlay" id="edit-modal" onclick="if(event.target===this)closeEdit()">
+    <div class="mbox">
+      <div class="mhd">
+        <h3>✏️ Edit Profile</h3>
+        <button class="mcls" onclick="closeEdit()">✕</button>
+      </div>
+      <div class="frow">
+        <div class="fg"><label>Full Name</label><input id="ep-name" type="text" placeholder="Your full name"></div>
+        <div class="fg"><label>Phone</label><input id="ep-phone" type="tel" placeholder="+91 98765 43210"></div>
+        <div class="fg"><label>Job Title</label><input id="ep-job" type="text" placeholder="e.g. Software Engineer"></div>
+        <div class="fg"><label>Company / College</label><input id="ep-co" type="text" placeholder="Organisation name"></div>
+        <div class="fg">
+          <label>Learning Interest</label>
+          <select id="ep-int">
+            <option>Cloud Computing</option><option>DevOps &amp; CI/CD</option>
+            <option>AI / Machine Learning</option><option>Cybersecurity</option>
+            <option>Data Engineering</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label>Experience Level</label>
+          <select id="ep-lvl">
+            <option value="beginner">Beginner</option>
+            <option value="intermediate">Intermediate</option>
+            <option value="advanced">Advanced</option>
+          </select>
+        </div>
+      </div>
+      <div class="fg"><label>Bio</label><textarea id="ep-bio" placeholder="A short bio about yourself…"></textarea></div>
+      <button class="msave" id="save-btn" onclick="saveProfile()">💾 Save Changes</button>
     </div>
   </div>
 
-  <!-- Scripts -->
+  <!-- CHANGE PASSWORD MODAL -->
+  <div class="moverlay" id="pass-modal" onclick="if(event.target===this)closePass()">
+    <div class="mbox">
+      <div class="mhd">
+        <h3>🔑 Change Password</h3>
+        <button class="mcls" onclick="closePass()">✕</button>
+      </div>
+      <p style="font-size:.85rem;color:#8b7fc4;margin-bottom:1.3rem;line-height:1.6;">
+        A password reset link will be sent to your registered email. Click the link to set a new password.
+      </p>
+      <div class="fg"><label>Registered Email</label><input id="reset-em" type="email" readonly style="opacity:.65;"></div>
+      <button class="msave" id="reset-btn" onclick="sendReset()">📧 Send Reset Email</button>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="../config/supabase-config.js"></script>
-  <script src="../js/theme.js"></script>
-
   <script>
-    let currentUser = null;
+    /* ── STATE ─────────────────────────────────────────────────── */
+    let CU = null;   // currentUser
+    let UP = {};     // userProfile
 
-    // Initialize on page load
+    /* ── THEME ─────────────────────────────────────────────────── */
+    (function() {
+      const t = localStorage.getItem('theme') || 'dark';
+      document.documentElement.setAttribute('data-theme', t);
+      const btn = document.getElementById('thm-btn');
+      if (btn) btn.textContent = t === 'dark' ? '🌙' : '☀️';
+    })();
+
+    function toggleTheme() {
+      const html = document.documentElement;
+      const now = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', now);
+      localStorage.setItem('theme', now);
+      document.getElementById('thm-btn').textContent = now === 'dark' ? '🌙' : '☀️';
+    }
+
+    /* ── INIT ──────────────────────────────────────────────────── */
     document.addEventListener('DOMContentLoaded', async () => {
-      await initProfile();
-      setupTabNavigation();
-      setupTheme();
+      await init();
+      setupTabs();
+      handleUrlTab();
     });
 
-    // Setup Tab Navigation
-    function setupTabNavigation() {
-      const tabs = document.querySelectorAll('.profile-tab');
-      tabs.forEach(tab => {
-        tab.addEventListener('click', () => {
-          tabs.forEach(t => t.classList.remove('active'));
-          document.querySelectorAll('.profile-content').forEach(c => c.classList.remove('active'));
-          
-          tab.classList.add('active');
-          const tabId = tab.getAttribute('data-tab');
-          document.getElementById(`${tabId}-content`).classList.add('active');
-          
-          // Load content when tab is clicked
-          if (tabId === 'courses') loadMyCourses();
-          if (tabId === 'status') loadMyStatus();
-          if (tabId === 'certificates') loadCertificates();
-          if (tabId === 'paths') loadLearningPaths();
+    async function init() {
+      try {
+        if (!window.supabaseConfig) { showToast('Supabase not loaded', 'err'); return; }
+
+        CU = await window.supabaseConfig.getCurrentUser();
+        if (!CU) {
+          // Try localStorage fallback
+          const em = localStorage.getItem('user_email');
+          if (!em) { window.location.href = '../index.html'; return; }
+          renderHeader({ email: em, id: localStorage.getItem('user_id') }, {});
+          return;
+        }
+
+        // Redirect admin
+        const ac = await window.supabaseConfig.checkAdminAccess(CU.id);
+        if (ac.isAdmin) { window.location.href = 'admin-dashboard.html'; return; }
+
+        // Load profile
+        const pr = await window.supabaseConfig.getUserProfile(CU.id);
+        UP = pr.data || {};
+        renderHeader(CU, UP);
+        await loadCourses();
+
+      } catch (err) {
+        console.error('Init error:', err);
+        const em = localStorage.getItem('user_email');
+        if (em) renderHeader({ email: em }, {});
+        else showToast('Session error — please sign in again', 'err');
+      }
+    }
+
+    function renderHeader(user, profile) {
+      const email = user.email || '';
+      const name = profile.full_name || email.split('@')[0] || 'Learner';
+      const initial = name.charAt(0).toUpperCase();
+
+      document.getElementById('avatar').textContent = initial;
+      document.getElementById('p-name').textContent = name;
+      document.getElementById('p-email').textContent = '✉️ ' + email;
+
+      const tags = [];
+      if (profile.phone_number) tags.push(`<span class="tag b">📞 ${profile.phone_number}</span>`);
+      if (profile.job_title && profile.company_name) tags.push(`<span class="tag">💼 ${profile.job_title} @ ${profile.company_name}</span>`);
+      else if (profile.job_title) tags.push(`<span class="tag">💼 ${profile.job_title}</span>`);
+      else if (profile.company_name) tags.push(`<span class="tag">🏢 ${profile.company_name}</span>`);
+      if (profile.learning_interest) tags.push(`<span class="tag">🎯 ${profile.learning_interest}</span>`);
+      if (profile.experience_level) tags.push(`<span class="tag y">📈 ${profile.experience_level.charAt(0).toUpperCase()+profile.experience_level.slice(1)}</span>`);
+      if (!tags.length) tags.push('<span class="tag">✨ SkillUpNow Learner</span>');
+      document.getElementById('p-tags').innerHTML = tags.join('');
+
+      // Pre-fill edit form
+      document.getElementById('ep-name').value  = profile.full_name || '';
+      document.getElementById('ep-phone').value  = profile.phone_number || '';
+      document.getElementById('ep-job').value    = profile.job_title || '';
+      document.getElementById('ep-co').value     = profile.company_name || '';
+      document.getElementById('ep-int').value    = profile.learning_interest || 'Cloud Computing';
+      document.getElementById('ep-lvl').value    = profile.experience_level || 'beginner';
+      document.getElementById('ep-bio').value    = profile.bio || '';
+      document.getElementById('reset-em').value  = email;
+    }
+
+    /* ── TABS ──────────────────────────────────────────────────── */
+    function setupTabs() {
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('on'));
+          document.querySelectorAll('.panel').forEach(p => p.classList.remove('on'));
+          btn.classList.add('on');
+          const id = btn.dataset.tab;
+          document.getElementById('panel-' + id).classList.add('on');
+          if (id === 'courses')  await loadCourses();
+          if (id === 'status')   await loadStatus();
+          if (id === 'payments') await loadPayments();
+          if (id === 'emi')      await loadEMI();
+          if (id === 'certs')    await loadCerts();
+          if (id === 'paths')    loadPaths();
         });
       });
     }
 
-    // Initialize Profile
-    async function initProfile() {
+    function handleUrlTab() {
+      const p = new URLSearchParams(location.search).get('tab');
+      if (!p) return;
+      const btn = document.querySelector(`.tab-btn[data-tab="${p}"]`);
+      if (btn) btn.click();
+    }
+
+    /* ── COURSES ───────────────────────────────────────────────── */
+    async function loadCourses() {
+      const el = document.getElementById('courses-grid');
+      el.innerHTML = '<div style="grid-column:1/-1" class="loading"><div class="spin"></div> Loading…</div>';
+      if (!CU) { el.innerHTML = '<div style="grid-column:1/-1"><div class="empty"><div class="empty-ico">🔒</div><h3>Not signed in</h3><p>Please sign in to see your courses</p></div></div>'; return; }
       try {
-        currentUser = await window.supabaseConfig.getCurrentUser();
-        if (!currentUser) {
-          window.location.href = '../index.html';
+        const data = await window.supabaseConfig.getUserCourses(CU.id);
+        if (!data.length) {
+          el.innerHTML = '<div style="grid-column:1/-1"><div class="empty"><div class="empty-ico">📚</div><h3>No Courses Yet</h3><p>Enroll in a course to start learning</p><a href="courses.html" class="empty-link">Browse Courses →</a></div></div>';
           return;
         }
-
-        // Check if user is admin
-        const isAdmin = await window.supabaseConfig.checkAdminAccess(currentUser.id);
-        if (isAdmin.isAdmin) {
-          window.location.href = './admin-dashboard.html';
-          return;
-        }
-
-        // Load profile info
-        const profile = await window.supabaseConfig.getUserProfile(currentUser.id);
-        displayProfileInfo(profile);
-        
-        // Load initial content
-        await loadMyCourses();
-      } catch (error) {
-        console.error('Profile init error:', error);
-        window.location.href = '../index.html';
-      }
+        el.innerHTML = data.map(c => {
+          const pct = c.progress_percentage || 0;
+          const st = c.status || 'active';
+          return `<div class="c-card">
+            <div class="c-top"><span class="c-title">${c.course_title || 'Course'}</span><span class="c-badge ${st}">${st}</span></div>
+            <div class="c-cat">${c.course_category || ''}${c.course_level ? ' · ' + c.course_level : ''}</div>
+            <div class="pbar"><div class="pfill" style="width:${pct}%"></div></div>
+            <div class="c-meta"><span>${pct}% complete</span><span>${new Date(c.registration_date).toLocaleDateString('en-IN')}</span></div>
+            <button class="c-go" onclick="location.href='courses.html'">Continue Learning →</button>
+          </div>`;
+        }).join('');
+      } catch (e) { el.innerHTML = '<div style="grid-column:1/-1"><div class="empty"><div class="empty-ico">⚠️</div><h3>Error loading courses</h3><p>' + e.message + '</p></div></div>'; }
     }
 
-    // Display Profile Info
-    function displayProfileInfo(profile) {
-      const email = currentUser?.email || 'user@example.com';
-      const name = profile?.full_name || 'User';
-      const avatar = name.charAt(0).toUpperCase();
-      
-      document.getElementById('profile-avatar').textContent = avatar;
-      document.getElementById('profile-name').textContent = name;
-      document.getElementById('profile-email').textContent = `Email: ${email}`;
-      document.getElementById('profile-status').textContent = 'Status: Active Learner ✓';
-    }
-
-    // Load My Courses
-    async function loadMyCourses() {
-      const container = document.getElementById('courses-list');
-      container.innerHTML = '<div class="loading"><div class="loading-spinner"></div> Loading courses...</div>';
-      
+    /* ── STATUS ────────────────────────────────────────────────── */
+    async function loadStatus() {
+      const el = document.getElementById('stats-grid');
+      el.innerHTML = '<div class="loading"><div class="spin"></div> Loading…</div>';
+      if (!CU) { el.innerHTML = '<div class="empty"><div class="empty-ico">🔒</div><h3>Not signed in</h3></div>'; return; }
       try {
-        const courses = await window.supabaseConfig.getUserCourses(currentUser.id);
-        
-        if (courses.length === 0) {
-          container.innerHTML = `
-            <div style="grid-column: 1/-1;">
-              <div class="empty-state">
-                <div class="empty-state-icon">📚</div>
-                <h3>No Courses Yet</h3>
-                <p>Start learning by exploring our course catalog</p>
-                <a href="../pages/courses.html" class="btn-grad" style="display: inline-block; margin-top: 1rem;">Browse Courses</a>
-              </div>
-            </div>
-          `;
-          return;
-        }
-
-        container.innerHTML = courses.map(course => `
-          <div class="course-card">
-            <div class="course-header">
-              <h4>${course.course_name}</h4>
-              <span class="course-badge">${course.status}</span>
-            </div>
-            <p style="color: var(--txt3); font-size: 0.9rem; margin-bottom: 1rem;">${course.instructor || 'Expert Instructor'}</p>
-            <div class="course-progress">
-              <div class="course-progress-bar" style="width: ${course.progress || 0}%"></div>
-            </div>
-            <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--txt3);">
-              <span>Progress: ${course.progress || 0}%</span>
-              <span>${course.modules_completed || 0}/${course.total_modules || 10} modules</span>
-            </div>
-            <button class="btn-grad" style="width: 100%; margin-top: 1rem; padding: 0.7rem;">Continue Learning</button>
-          </div>
-        `).join('');
-      } catch (error) {
-        console.error('Load courses error:', error);
-        container.innerHTML = '<div style="grid-column: 1/-1;"><p style="color: var(--txt3);">Error loading courses</p></div>';
-      }
+        const s = await window.supabaseConfig.getUserStats(CU.id);
+        el.innerHTML = `
+          <div class="s-card"><div class="s-ico">📚</div><div class="s-val">${s.courses_enrolled}</div><div class="s-lbl">Courses Enrolled</div></div>
+          <div class="s-card"><div class="s-ico">✅</div><div class="s-val">${s.courses_completed}</div><div class="s-lbl">Completed</div></div>
+          <div class="s-card"><div class="s-ico">🏆</div><div class="s-val">${s.certificates_earned}</div><div class="s-lbl">Certificates</div></div>
+          <div class="s-card"><div class="s-ico">⏱️</div><div class="s-val">${s.hours_learned}<span style="font-size:1rem">h</span></div><div class="s-lbl">Hours Learned</div></div>`;
+      } catch (e) { el.innerHTML = '<div class="empty"><div class="empty-ico">⚠️</div><h3>Error</h3><p>' + e.message + '</p></div>'; }
     }
 
-    // Load My Status
-    async function loadMyStatus() {
-      const container = document.getElementById('status-grid');
-      container.innerHTML = '<div style="grid-column: 1/-1;" class="loading"><div class="loading-spinner"></div> Loading stats...</div>';
-      
+    /* ── PAYMENTS ──────────────────────────────────────────────── */
+    async function loadPayments() {
+      const tb = document.getElementById('pay-body');
+      tb.innerHTML = '<tr><td colspan="6"><div class="loading"><div class="spin"></div> Loading…</div></td></tr>';
+      if (!CU) { tb.innerHTML = '<tr><td colspan="6"><div class="empty"><div class="empty-ico">🔒</div><h3>Not signed in</h3></div></td></tr>'; return; }
       try {
-        const stats = await window.supabaseConfig.getUserStats(currentUser.id);
-        
-        container.innerHTML = `
-          <div class="status-card">
-            <span style="font-size: 1.5rem;">📚</span>
-            <div class="status-value">${stats.courses_enrolled || 0}</div>
-            <div class="status-label">Courses Enrolled</div>
-          </div>
-          <div class="status-card">
-            <span style="font-size: 1.5rem;">✅</span>
-            <div class="status-value">${stats.courses_completed || 0}</div>
-            <div class="status-label">Courses Completed</div>
-          </div>
-          <div class="status-card">
-            <span style="font-size: 1.5rem;">🏆</span>
-            <div class="status-value">${stats.certificates_earned || 0}</div>
-            <div class="status-label">Certificates</div>
-          </div>
-          <div class="status-card">
-            <span style="font-size: 1.5rem;">⏱️</span>
-            <div class="status-value">${stats.hours_learned || 0}h</div>
-            <div class="status-label">Hours Learned</div>
-          </div>
-        `;
-      } catch (error) {
-        console.error('Load status error:', error);
-        container.innerHTML = '<div style="grid-column: 1/-1;"><p style="color: var(--txt3);">Error loading stats</p></div>';
-      }
+        const d = await window.supabaseConfig.getUserPayments(CU.id);
+        if (!d.length) { tb.innerHTML = '<tr><td colspan="6"><div class="empty"><div class="empty-ico">💳</div><h3>No Payments Yet</h3><p>Payment records will appear here</p></div></td></tr>'; return; }
+        tb.innerHTML = d.map(p => `<tr>
+          <td>${p.course_title || '—'}</td>
+          <td>₹${(p.amount||0).toLocaleString('en-IN')}</td>
+          <td>${p.payment_method || '—'}</td>
+          <td><span class="tbdg ${p.payment_status||'pending'}">${p.payment_status||'pending'}</span></td>
+          <td>${new Date(p.created_at).toLocaleDateString('en-IN')}</td>
+          <td style="font-size:.73rem;color:#564f7a;">${p.transaction_id||'—'}</td>
+        </tr>`).join('');
+      } catch (e) { tb.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:2rem;color:#564f7a;">Error: ${e.message}</td></tr>`; }
     }
 
-    // Load Certificates
-    async function loadCertificates() {
-      const container = document.getElementById('certificates-list');
-      container.innerHTML = '<div class="loading"><div class="loading-spinner"></div> Loading certificates...</div>';
-      
+    /* ── EMI ───────────────────────────────────────────────────── */
+    async function loadEMI() {
+      const tb = document.getElementById('emi-body');
+      tb.innerHTML = '<tr><td colspan="6"><div class="loading"><div class="spin"></div> Loading…</div></td></tr>';
+      if (!CU) { tb.innerHTML = '<tr><td colspan="6"><div class="empty"><div class="empty-ico">🔒</div><h3>Not signed in</h3></div></td></tr>'; return; }
       try {
-        const certs = await window.supabaseConfig.getUserCertificates(currentUser.id);
-        
-        if (certs.length === 0) {
-          container.innerHTML = `
-            <div class="empty-state">
-              <div class="empty-state-icon">🏆</div>
-              <h3>No Certificates Yet</h3>
-              <p>Complete courses to earn certificates and showcase your skills</p>
-            </div>
-          `;
-          return;
-        }
-
-        container.innerHTML = certs.map(cert => `
-          <div class="cert-item">
-            <div class="cert-details">
-              <h4>${cert.course_name}</h4>
-              <p class="cert-date">Earned on ${new Date(cert.earned_date).toLocaleDateString()}</p>
-            </div>
-            <div class="cert-actions">
-              <button class="cert-btn" onclick="viewCertificate('${cert.id}')">View</button>
-              <button class="cert-btn" onclick="downloadCertificate('${cert.id}')">Download</button>
-            </div>
-          </div>
-        `).join('');
-      } catch (error) {
-        console.error('Load certificates error:', error);
-        container.innerHTML = '<p style="color: var(--txt3); text-align: center;">Error loading certificates</p>';
-      }
+        const d = await window.supabaseConfig.getUserEMIApplications(CU.id);
+        if (!d.length) { tb.innerHTML = '<tr><td colspan="6"><div class="empty"><div class="empty-ico">💰</div><h3>No EMI Applications</h3><p>Apply for EMI to split your course fee</p></div></td></tr>'; return; }
+        tb.innerHTML = d.map(e => `<tr>
+          <td>${e.course_title||'—'}</td>
+          <td>₹${(e.course_price||0).toLocaleString('en-IN')}</td>
+          <td>${e.preferred_duration ? e.preferred_duration.replace('_',' ') : '—'}</td>
+          <td>₹${(e.monthly_amount||0).toLocaleString('en-IN')}</td>
+          <td><span class="tbdg ${e.application_status||'pending'}">${e.application_status||'pending'}</span></td>
+          <td>${new Date(e.applied_at).toLocaleDateString('en-IN')}</td>
+        </tr>`).join('');
+      } catch (e) { tb.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:2rem;color:#564f7a;">Error: ${e.message}</td></tr>`; }
     }
 
-    // Load Learning Paths
-    async function loadLearningPaths() {
-      const container = document.getElementById('paths-grid');
-      container.innerHTML = '<div class="loading"><div class="loading-spinner"></div> Loading paths...</div>';
-      
+    /* ── CERTIFICATES ──────────────────────────────────────────── */
+    async function loadCerts() {
+      const el = document.getElementById('certs-list');
+      el.innerHTML = '<div class="loading"><div class="spin"></div> Loading…</div>';
+      if (!CU) { el.innerHTML = '<div class="empty"><div class="empty-ico">🔒</div><h3>Not signed in</h3></div>'; return; }
       try {
-        const paths = await window.supabaseConfig.getUserLearningPaths(currentUser.id);
-        
-        if (paths.length === 0) {
-          container.innerHTML = `
-            <div style="grid-column: 1/-1;">
-              <div class="empty-state">
-                <div class="empty-state-icon">🎯</div>
-                <h3>No Learning Paths</h3>
-                <p>Start a structured learning path to master new skills</p>
-              </div>
-            </div>
-          `;
-          return;
-        }
-
-        container.innerHTML = paths.map(path => `
-          <div class="path-card">
-            <div class="path-header">
-              <div class="path-icon" style="background: var(--grad);">${path.icon || '🎓'}</div>
-              <div>
-                <div class="path-title">${path.path_name}</div>
-                <div class="path-progress">${path.progress || 0}% Complete</div>
-              </div>
-            </div>
-            <p style="color: var(--txt3); font-size: 0.85rem;">${path.description || 'Complete this learning path'}</p>
-            <div class="path-courses">📚 ${path.total_courses || 0} Courses</div>
-            <div class="path-footer">
-              <div style="font-size: 0.85rem; color: var(--txt3);">
-                <strong>${path.courses_completed || 0}/${path.total_courses || 0}</strong> done
-              </div>
-              <button class="cert-btn" style="background: var(--v2);">Continue Path</button>
-            </div>
+        const d = await window.supabaseConfig.getUserCertificates(CU.id);
+        if (!d.length) { el.innerHTML = '<div class="empty"><div class="empty-ico">🏆</div><h3>No Certificates Yet</h3><p>Complete courses to earn certificates</p></div>'; return; }
+        el.innerHTML = d.map(c => `<div class="cert">
+          <div class="cert-ico">🏆</div>
+          <div class="cert-info">
+            <div class="cert-name">${c.course_name}</div>
+            <div class="cert-date">Earned ${new Date(c.earned_date).toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'})}</div>
           </div>
-        `).join('');
-      } catch (error) {
-        console.error('Load paths error:', error);
-        container.innerHTML = '<div style="grid-column: 1/-1;"><p style="color: var(--txt3); text-align: center;">Error loading learning paths</p></div>';
-      }
+          <button class="cert-dl" onclick="showToast('Download coming soon!','ok')">⬇ Download</button>
+        </div>`).join('');
+      } catch (e) { el.innerHTML = '<div class="empty"><div class="empty-ico">⚠️</div><h3>Error loading certificates</h3></div>'; }
     }
 
-    // Action Functions
-    function editProfile() {
-      alert('Edit profile feature coming soon!');
+    /* ── LEARNING PATHS ────────────────────────────────────────── */
+    async function loadPaths() {
+      const el = document.getElementById('paths-grid');
+      el.innerHTML = '<div class="loading"><div class="spin"></div> Loading…</div>';
+      try {
+        const d = CU ? await window.supabaseConfig.getUserLearningPaths(CU.id) : [];
+        if (!d.length) { el.innerHTML = '<div style="grid-column:1/-1"><div class="empty"><div class="empty-ico">🎯</div><h3>No Learning Paths</h3><p>Structured paths coming soon</p></div></div>'; return; }
+        el.innerHTML = d.map(p => `<div class="path">
+          <div class="path-top"><div class="path-ico">${p.icon||'🎓'}</div><div><div class="path-nm">${p.path_name}</div><div class="path-pc">${p.progress||0}% Complete</div></div></div>
+          <p class="path-desc">${p.description||''}</p>
+          <div class="pbar"><div class="pfill" style="width:${p.progress||0}%"></div></div>
+          <div class="path-ft"><span class="path-count">📚 ${p.courses_completed||0}/${p.total_courses||0} done</span><button class="path-go" onclick="location.href='courses.html'">Continue</button></div>
+        </div>`).join('');
+      } catch (e) { el.innerHTML = '<div style="grid-column:1/-1"><div class="empty"><div class="empty-ico">⚠️</div><h3>Error</h3></div></div>'; }
     }
 
-    function changePassword() {
-      alert('Change password feature coming soon!');
+    /* ── EDIT PROFILE ──────────────────────────────────────────── */
+    function openEdit() { document.getElementById('edit-modal').classList.add('open'); }
+    function closeEdit() { document.getElementById('edit-modal').classList.remove('open'); }
+
+    async function saveProfile() {
+      if (!CU) { showToast('Not signed in', 'err'); return; }
+      const btn = document.getElementById('save-btn');
+      btn.disabled = true; btn.textContent = 'Saving…';
+      try {
+        const updates = {
+          full_name:         document.getElementById('ep-name').value.trim(),
+          phone_number:      document.getElementById('ep-phone').value.trim(),
+          job_title:         document.getElementById('ep-job').value.trim(),
+          company_name:      document.getElementById('ep-co').value.trim(),
+          learning_interest: document.getElementById('ep-int').value,
+          experience_level:  document.getElementById('ep-lvl').value,
+          bio:               document.getElementById('ep-bio').value.trim()
+        };
+        const r = await window.supabaseConfig.updateUserProfile(CU.id, updates);
+        if (r.success) {
+          UP = { ...UP, ...updates };
+          renderHeader(CU, UP);
+          closeEdit();
+          showToast('Profile updated!', 'ok');
+        } else {
+          showToast(r.error || 'Update failed', 'err');
+        }
+      } catch (e) { showToast('Error: ' + e.message, 'err'); }
+      finally { btn.disabled = false; btn.textContent = '💾 Save Changes'; }
     }
 
-    function viewCertificate(certId) {
-      alert('View certificate feature coming soon!');
+    /* ── CHANGE PASSWORD ───────────────────────────────────────── */
+    function openPass() { document.getElementById('pass-modal').classList.add('open'); }
+    function closePass() { document.getElementById('pass-modal').classList.remove('open'); }
+
+    async function sendReset() {
+      const btn = document.getElementById('reset-btn');
+      const email = document.getElementById('reset-em').value;
+      if (!email) { showToast('No email found', 'err'); return; }
+      btn.disabled = true; btn.textContent = 'Sending…';
+      try {
+        const { error } = await window.supabaseConfig.client.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin });
+        if (error) throw error;
+        closePass();
+        showToast('Reset email sent! Check your inbox.', 'ok');
+      } catch (e) { showToast('Error: ' + e.message, 'err'); }
+      finally { btn.disabled = false; btn.textContent = '📧 Send Reset Email'; }
     }
 
-    function downloadCertificate(certId) {
-      alert('Download certificate feature coming soon!');
+    /* ── LOGOUT ────────────────────────────────────────────────── */
+    async function doLogout() {
+      if (window.supabaseConfig) await window.supabaseConfig.signOut();
+      localStorage.removeItem('user_id');
+      localStorage.removeItem('user_email');
+      window.location.href = '../index.html';
     }
 
-    // Logout
-    async function logout() {
-      const result = await window.supabaseConfig.signOut();
-      if (result.success) {
-        window.location.href = '../index.html';
-      }
+    /* ── TOAST ─────────────────────────────────────────────────── */
+    function showToast(msg, type) {
+      const t = document.getElementById('toast');
+      t.textContent = (type === 'ok' ? '✅ ' : '❌ ') + msg;
+      t.className = 'toast ' + type + ' show';
+      setTimeout(() => t.classList.remove('show'), 3500);
     }
   </script>
 </body>
