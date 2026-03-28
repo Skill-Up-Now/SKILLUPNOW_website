@@ -211,6 +211,8 @@
   </footer>
 
   <script src="../js/validations.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../config/supabase-config.js"></script>
   <script src="../js/theme.js"></script>
   <script src="../js/profile-nav.js"></script>
   <script src="../js/emi-calculator.js"></script>
@@ -219,12 +221,12 @@
 
   <script>
     const courseData = {
-      aws: { price: '₹14,999', duration: '48 hours', name: 'AWS Solutions Architect' },
-      k8s: { price: '₹12,999', duration: '36 hours', name: 'Kubernetes & Docker' },
-      ai: { price: '₹16,999', duration: '60 hours', name: 'Generative AI Python' },
-      cyber: { price: '₹11,999', duration: '40 hours', name: 'Cybersecurity' },
-      terraform: { price: '₹13,999', duration: '32 hours', name: 'Terraform & IaC' },
-      spark: { price: '₹15,999', duration: '52 hours', name: 'Data Engineering' }
+      aws: { price: '₹14,999', duration: '48 hours', name: 'AWS Solutions Architect', category: 'Cloud', level: 'Professional', id: 'aws' },
+      k8s: { price: '₹12,999', duration: '36 hours', name: 'Kubernetes & Docker', category: 'DevOps', level: 'Intermediate', id: 'k8s' },
+      ai: { price: '₹16,999', duration: '60 hours', name: 'Generative AI with Python', category: 'AI', level: 'Advanced', id: 'ai' },
+      cyber: { price: '₹11,999', duration: '40 hours', name: 'Cybersecurity Fundamentals', category: 'Security', level: 'Beginner', id: 'cyber' },
+      terraform: { price: '₹13,999', duration: '32 hours', name: 'Terraform & IaC Engineering', category: 'DevOps', level: 'Intermediate', id: 'terraform' },
+      spark: { price: '₹15,999', duration: '52 hours', name: 'Data Engineering with Spark', category: 'Data', level: 'Advanced', id: 'spark' }
     };
 
     function updateCourseDetails() {
@@ -238,7 +240,7 @@
     const form = document.getElementById('courseRegForm');
     const validator = new FormValidator(form);
 
-    function submitCourseRegistration(e) {
+    async function submitCourseRegistration(e) {
       e.preventDefault();
 
       if (!validator.validateAll()) {
@@ -246,13 +248,61 @@
         return;
       }
 
-      setTimeout(() => {
-        form.style.display = 'none';
-        document.getElementById('successMessage').style.display = 'block';
-        if (window.app) {
-          window.app.showNotification('Course registration successful!', 'success');
+      if (!window.supabaseConfig) {
+        if (window.app) window.app.showNotification('Supabase is not initialized. Refresh and try again.', 'error');
+        return;
+      }
+
+      const formData = new FormData(form);
+      const firstName = formData.get('firstName').trim();
+      const lastName = formData.get('lastName').trim();
+      const email = formData.get('email').trim();
+      const phone = formData.get('phone').trim();
+      const password = formData.get('password').trim();
+      const courseKey = formData.get('course');
+      const experience = formData.get('experience');
+      const goals = formData.get('goals').trim();
+      const currentRole = formData.get('currentRole').trim();
+      const schedule = formData.get('schedule');
+
+      if (!courseKey || !courseData[courseKey]) {
+        if (window.app) window.app.showNotification('Please select a course to continue.', 'error');
+        return;
+      }
+
+      const courseInfo = courseData[courseKey];
+
+      try {
+        const result = await window.supabaseConfig.signUp(email, password, {
+          full_name: `${firstName} ${lastName}`,
+          email,
+          phone_number: phone,
+          learning_interest: courseInfo.name,
+          experience_level: experience,
+          current_role: currentRole,
+          schedule_preference: schedule,
+          learning_goals: goals
+        });
+
+        if (!result.success) {
+          if (window.app) window.app.showNotification(result.error || 'Registration failed. Please try again.', 'error');
+          return;
         }
-      }, 500);
+
+        await window.supabaseConfig.enrollCourse(result.data.user.id, courseInfo);
+
+        setTimeout(() => {
+          form.style.display = 'none';
+          document.getElementById('successMessage').style.display = 'block';
+          if (window.app) {
+            window.app.showNotification('Course registration successful!', 'success');
+          }
+        }, 500);
+      } catch (error) {
+        if (window.app) {
+          window.app.showNotification(error.message || 'Registration failed. Please try again.', 'error');
+        }
+      }
     }
   </script>
 </body>

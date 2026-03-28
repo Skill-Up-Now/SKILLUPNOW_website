@@ -66,9 +66,9 @@ class ThemeManager {
     }
 
     if (this.currentTheme === 'light') {
-      metaThemeColor.content = '#ffffff';
+      metaThemeColor.content = '#42A5F5';
     } else {
-      metaThemeColor.content = '#0d0b1a';
+      metaThemeColor.content = '#64B5F6';
     }
   }
 

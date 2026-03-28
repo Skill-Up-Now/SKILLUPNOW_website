@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Quick Registration - SkillUpNow">
+  <title>Quick Registration - SkillUpNow</title>
+  <link rel="stylesheet" href="../css/variables.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="stylesheet" href="../css/forms.css">
+  <link rel="stylesheet" href="../css/responsive.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div id="cursor"></div>
+  <div id="cursor-ring"></div>
+  <div class="mesh-bg"></div>
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+  <div class="orb orb3"></div>
+
+  <nav>
+    <a href="../index.html" class="nav-logo">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      SkillUpNow
+    </a>
+
+    <ul class="nav-links">
+      <li><a href="courses.html">Courses</a></li>
+      <li><a href="../index.html#why">Why Us</a></li>
+      <li><a href="contact-enquiry.html">Fee Enquiry</a></li>
+      <li><a href="feedback.html">Reviews</a></li>
+    </ul>
+
+    <div class="nav-actions">
+      <div class="theme-toggle" role="button" tabindex="0" aria-pressed="false">
+        <div class="theme-toggle-btn">🌙</div>
+      </div>
+      <div id="profile-section" style="display: flex; align-items: center; gap: 1rem; position: relative;">
+        <button id="profile-btn" class="profile-icon-btn" title="View Profile">👤</button>
+        <div id="profile-dropdown" class="profile-dropdown">
+          <a href="profile.html" style="display: flex; align-items: center; gap: 0.8rem; padding: 1rem; text-decoration: none; color: var(--txt2); border-bottom: 1px solid var(--border); transition: all 0.25s;">
+            <span style="font-size: 1.2rem;">👤</span>
+            <div><div style="font-weight: 600; color: var(--txt);">My Profile</div></div>
+          </a>
+          <button onclick="window.profileNav.logout()" style="width: 100%; text-align: left; padding: 1rem; border: none; background: transparent; cursor: pointer; display: flex; align-items: center; gap: 0.8rem;">
+            <span style="font-size: 1.2rem;">🚪</span>
+            <div><div style="font-weight: 600; color: var(--txt);">Logout</div></div>
+          </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <section style="padding: 4rem 5vw; min-height: calc(100vh - 220px);">
+    <div style="max-width: 780px; margin: 0 auto;">
+      <h1 style="font-family: 'Cormorant Garamond', serif; font-size: 3rem; text-align: center; margin-bottom: 0.8rem;">Quick Registration</h1>
+      <p style="text-align: center; color: var(--txt3); margin-bottom: 2.5rem; font-size: 1.05rem;">Register fast with your contact details and password. Submit the form to start your course enrollment.</p>
+
+      <form class="form-container" id="quickRegForm" onsubmit="submitQuickRegistration(event)">
+        <div class="form-row">
+          <div class="form-group">
+            <label>First Name *</label>
+            <input type="text" name="firstName" required />
+          </div>
+          <div class="form-group">
+            <label>Last Name *</label>
+            <input type="text" name="lastName" required />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Phone Number *</label>
+            <input type="tel" name="phone" required pattern="[0-9+\-() ]{7,20}" placeholder="e.g. +91 98765 43210" />
+          </div>
+          <div class="form-group">
+            <label>Email ID *</label>
+            <input type="email" name="email" required placeholder="name@example.com" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Password *</label>
+          <input type="password" name="password" required minlength="6" placeholder="Enter a secure password" />
+        </div>
+
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; margin-top: 1rem;">
+          <button type="submit" class="btn-grad" style="flex: 1; min-width: 180px;">Submit Registration</button>
+          <button type="reset" class="btn-outline" style="flex: 1; min-width: 180px; border: 1.5px solid var(--border2);">Reset</button>
+        </div>
+      </form>
+
+      <div id="quickRegStatus" style="display: none; margin-top: 1rem; padding: 1rem; border-radius: var(--r2); background: rgba(249,250,251,0.9); color: var(--txt); font-size: 0.95rem;"></div>
+
+      <div id="quickSuccess" style="display: none; margin-top: 2rem;">
+        <div style="background: rgba(16,185,129,0.1); border-left: 4px solid #10b981; padding: 2rem; border-radius: 0 var(--r2) var(--r2) 0; text-align: center;">
+          <h3 style="color: #10b981; font-size: 1.5rem; margin-bottom: 1rem;">Registration Submitted!</h3>
+          <p style="color: var(--txt3); margin-bottom: 1rem;">Thank you for registering. We will contact you with next steps shortly.</p>
+          <a href="../index.html" class="btn-grad">Back to Home</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer style="background: rgba(8,6,18,0.95); border-top: 1px solid var(--border); padding: 3rem 5vw; text-align: center; margin-top: 4rem;">
+    <p style="color: var(--txt4); font-size: 0.9rem;">© 2025 SkillUpNow. Start learning today!</p>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../config/supabase-config.js"></script>
+  <script src="../js/theme.js"></script>
+  <script src="../js/profile-nav.js"></script>
+  <script>
+    const quickRegForm = document.getElementById('quickRegForm');
+    const quickRegStatus = document.getElementById('quickRegStatus');
+
+    function setQuickRegStatus(message, type = 'info') {
+      quickRegStatus.textContent = message;
+      quickRegStatus.style.display = 'block';
+      quickRegStatus.style.background = type === 'error' ? 'rgba(254,226,226,0.9)' : 'rgba(220,252,231,0.9)';
+      quickRegStatus.style.color = type === 'error' ? '#991b1b' : '#166534';
+      quickRegStatus.style.border = type === 'error' ? '1px solid rgba(239,68,68,0.25)' : '1px solid rgba(34,197,94,0.25)';
+    }
+
+    async function submitQuickRegistration(event) {
+      event.preventDefault();
+
+      if (!window.supabaseConfig) {
+        setQuickRegStatus('Supabase is not initialized. Please refresh the page.', 'error');
+        return;
+      }
+
+      const formData = new FormData(quickRegForm);
+      const firstName = formData.get('firstName').trim();
+      const lastName = formData.get('lastName').trim();
+      const phone = formData.get('phone').trim();
+      const email = formData.get('email').trim();
+      const password = formData.get('password').trim();
+
+      if (!firstName || !lastName || !phone || !email || !password) {
+        setQuickRegStatus('Please fill in all required fields.', 'error');
+        return;
+      }
+
+      setQuickRegStatus('Submitting registration...');
+
+      try {
+        const result = await window.supabaseConfig.signUp(email, password, {
+          full_name: `${firstName} ${lastName}`,
+          email,
+          phone_number: phone,
+          learning_interest: 'Quick Registration'
+        });
+
+        if (!result.success) {
+          setQuickRegStatus(result.error || 'Unable to register. Please try again.', 'error');
+          return;
+        }
+
+        quickRegForm.style.display = 'none';
+        quickRegStatus.style.display = 'none';
+        document.getElementById('quickSuccess').style.display = 'block';
+      } catch (error) {
+        setQuickRegStatus(error.message || 'Registration failed. Please try again.', 'error');
+      }
+    }
+  </script>
+</body>
+</html>
