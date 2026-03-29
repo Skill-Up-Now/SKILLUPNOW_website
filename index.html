@@ -541,33 +541,41 @@
       <!-- 3D floating scene (mouse parallax applied via JS) -->
       <div class="scene" id="scene3d">
 
-        <!-- Floating stat cards -->
+        <!-- Floating stat cards — live Supabase data -->
         <div class="f-card">
-          <span class="fc-icon">🎯</span>
+          <span class="fc-icon">
+            <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          </span>
           <div>
-            <span class="fc-val">87% Complete</span>
-            <span class="fc-lbl">Course Progress</span>
+            <span class="fc-val" id="fc-students">—</span>
+            <span class="fc-lbl">Total Learners</span>
           </div>
         </div>
         <div class="f-card">
-          <span class="fc-icon">⚡</span>
+          <span class="fc-icon">
+            <svg viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+          </span>
           <div>
-            <span class="fc-val">+340 XP</span>
-            <span class="fc-lbl">Points Earned</span>
+            <span class="fc-val" id="fc-enrollments">—</span>
+            <span class="fc-lbl">Enrollments</span>
           </div>
         </div>
         <div class="f-card">
-          <span class="fc-icon">🏆</span>
+          <span class="fc-icon">
+            <svg viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2z"/></svg>
+          </span>
           <div>
-            <span class="fc-val">Top 5%</span>
-            <span class="fc-lbl">Global Rank</span>
+            <span class="fc-val" id="fc-completions">—</span>
+            <span class="fc-lbl">Completions</span>
           </div>
         </div>
         <div class="f-card">
-          <span class="fc-icon">🎓</span>
+          <span class="fc-icon">
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          </span>
           <div>
-            <span class="fc-val">Certified</span>
-            <span class="fc-lbl">Industry Ready</span>
+            <span class="fc-val" id="fc-feedback">—</span>
+            <span class="fc-lbl">Reviews</span>
           </div>
         </div>
 
@@ -1607,10 +1615,52 @@
       `).join('');
     }
 
+    // ==================== HERO STATS (REAL SUPABASE DATA) ====================
+    async function loadHeroStats() {
+      if (!window.supabaseConfig) return;
+      const client = window.supabaseConfig.getClient();
+      if (!client) return;
+
+      function countUp(id, target) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        if (target === 0) { el.textContent = '0'; el.classList.add('updated'); return; }
+        const duration = 1400;
+        const start = Date.now();
+        const tick = () => {
+          const p = Math.min((Date.now() - start) / duration, 1);
+          const ease = 1 - Math.pow(1 - p, 3);
+          el.textContent = Math.floor(ease * target).toLocaleString('en-IN') + '+';
+          if (p < 1) requestAnimationFrame(tick);
+          else { el.textContent = target.toLocaleString('en-IN') + '+'; el.classList.add('updated'); }
+        };
+        requestAnimationFrame(tick);
+      }
+
+      try {
+        const [usersRes, enrollRes, completedRes, feedbackRes] = await Promise.all([
+          client.from('user_profiles').select('id', { count: 'exact', head: true }),
+          client.from('course_registrations').select('id', { count: 'exact', head: true }),
+          client.from('course_registrations').select('id', { count: 'exact', head: true }).eq('status', 'completed'),
+          client.from('feedback').select('id', { count: 'exact', head: true })
+        ]);
+        countUp('fc-students',    usersRes.count    || 0);
+        countUp('fc-enrollments', enrollRes.count   || 0);
+        countUp('fc-completions', completedRes.count || 0);
+        countUp('fc-feedback',    feedbackRes.count  || 0);
+      } catch(e) {
+        ['fc-students','fc-enrollments','fc-completions','fc-feedback'].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.textContent = '—';
+        });
+      }
+    }
+
     // Render on load
     document.addEventListener('DOMContentLoaded', function() {
       renderHomeMeetings();
       renderHomeRecordings();
+      loadHeroStats();
     });
 
     // ==================== ANIMATED HERO WORDS ====================
