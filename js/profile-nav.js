@@ -152,11 +152,13 @@ class ProfileNavigationManager {
       if (result.success) {
         this.currentUser = null;
         this.showLoggedOutUI();
-        window.location.href = 'index.html';
+        const inPages = window.location.pathname.includes('/pages/');
+        window.location.href = inPages ? '../index.html' : 'index.html';
       }
     } catch (error) {
       console.error('Logout error:', error);
-      window.location.href = 'index.html';
+      const inPages = window.location.pathname.includes('/pages/');
+      window.location.href = inPages ? '../index.html' : 'index.html';
     }
   }
 }

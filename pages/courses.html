@@ -254,6 +254,12 @@
       color: var(--txt4);
     }
   </style>
+  <script>
+    if (window.location.protocol !== 'file:') {
+      var p = window.location.pathname;
+      if (p.endsWith('.html')) history.replaceState(null, '', p.replace(/\.html$/, ''));
+    }
+  </script>
 </head>
 <body>
   <div id="cursor"></div>
@@ -310,7 +316,7 @@
     </div>
   </nav>
 
-  <nav class="breadcrumb"><a href="../index.html">🏠 Home</a><span class="bc-sep">›</span><span class="bc-current">Courses</span></nav>
+  <nav class="breadcrumb"><button onclick="history.back()" class="back-btn">← Back</button><a href="../index.html">🏠 Home</a><span class="bc-sep">›</span><span class="bc-current">Courses</span><div class="bc-right"><button class="bc-logout-btn" onclick="window.profileNav && window.profileNav.logout()">🚪 Logout</button></div></nav>
 
   <section style="padding: 3rem 5vw; min-height: calc(100vh - 200px);">
     <div style="max-width: 1400px; margin: 0 auto;">

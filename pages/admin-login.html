@@ -219,6 +219,12 @@
       }
     }
   </style>
+  <script>
+    if (window.location.protocol !== 'file:') {
+      var p = window.location.pathname;
+      if (p.endsWith('.html')) history.replaceState(null, '', p.replace(/\.html$/, ''));
+    }
+  </script>
 </head>
 <body>
   <!-- Theme Toggle -->

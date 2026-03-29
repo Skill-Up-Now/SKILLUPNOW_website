@@ -243,13 +243,8 @@ class SkillUpNowApp {
     if (profileSection) {
       profileSection.style.display = 'flex';
       
-      // Add click handler to profile button
+      // Show profile initial
       if (profileBtn) {
-        profileBtn.addEventListener('click', () => {
-          window.location.href = 'pages/profile.html';
-        });
-        
-        // Show profile initial
         const name = this.currentUser.email?.split('@')[0] || 'User';
         profileBtn.textContent = name.charAt(0).toUpperCase();
       }
@@ -262,6 +257,15 @@ class SkillUpNowApp {
       ctaBtn.onclick = () => window.location.href = 'pages/courses.html';
       ctaBtn.style.background = 'var(--v2)';
     }
+
+    // Show admin link in dropdown if user is admin
+    try {
+      const adminCheck = await window.supabaseConfig.checkAdminAccess(this.currentUser.id);
+      if (adminCheck && adminCheck.isAdmin) {
+        const adminLink = document.getElementById('dd-admin-link');
+        if (adminLink) adminLink.style.display = 'flex';
+      }
+    } catch(e) { /* not admin */ }
   }
 
   // ==================== SHOPPING CART ====================

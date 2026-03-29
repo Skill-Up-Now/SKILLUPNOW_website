@@ -657,6 +657,16 @@ a[href*="pages/"]:hover {
 }
 
 /* ── Breadcrumbs ──────────────────────────────── */
+/* ── Breadcrumb Topbar ─────────────────────────── */
+@keyframes bc-slide-in {
+  from { opacity: 0; transform: translateY(-10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes bc-item-in {
+  from { opacity: 0; transform: translateX(-8px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
 .breadcrumb {
   padding: 0.75rem 5vw;
   display: flex;
@@ -665,20 +675,101 @@ a[href*="pages/"]:hover {
   font-size: 0.82rem;
   color: var(--txt4);
   border-bottom: 1px solid var(--border);
-  background: rgba(255,255,255,0.02);
-  position: relative;
-  z-index: 10;
+  background: var(--bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  position: sticky;
+  top: 0;
+  z-index: 40;
   flex-wrap: wrap;
+  animation: bc-slide-in 0.35s cubic-bezier(0.4, 0, 0.2, 1) both;
+  transition: background 0.3s, border-color 0.3s;
 }
+
 .breadcrumb a {
-  color: var(--v2);
+  color: var(--txt3);
   text-decoration: none;
   transition: color 0.2s;
   font-weight: 500;
+  animation: bc-item-in 0.4s ease both 0.1s;
 }
 .breadcrumb a:hover { color: var(--v1); }
-.breadcrumb .bc-sep { color: var(--txt4); font-size: 0.75rem; }
-.breadcrumb .bc-current { color: var(--txt3); font-weight: 600; }
+.breadcrumb .bc-sep {
+  color: var(--txt4);
+  font-size: 0.75rem;
+  animation: bc-item-in 0.4s ease both 0.15s;
+}
+.breadcrumb .bc-current {
+  color: var(--txt2);
+  font-weight: 600;
+  animation: bc-item-in 0.4s ease both 0.2s;
+}
+
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.38rem 0.85rem;
+  border-radius: 50px;
+  border: 1px solid var(--border);
+  color: var(--txt3);
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-decoration: none;
+  background: transparent;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s, background 0.2s, transform 0.2s, box-shadow 0.2s;
+  margin-right: 0.3rem;
+  animation: bc-item-in 0.4s ease both 0.05s;
+}
+.back-btn:hover {
+  border-color: var(--v1);
+  color: var(--v1);
+  background: var(--v5);
+  transform: translateX(-2px);
+  box-shadow: 0 2px 12px rgba(124, 92, 252, 0.18);
+}
+
+/* ── Breadcrumb Right Section ────────────────── */
+.bc-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.bc-logout-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.38rem 1rem;
+  border-radius: 50px;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  background: rgba(239, 68, 68, 0.08);
+  color: #f87171;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+.bc-logout-btn:hover {
+  background: rgba(239, 68, 68, 0.18);
+  border-color: rgba(239, 68, 68, 0.5);
+}
+.bc-theme-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--txt3);
+  font-size: 0.95rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.2s, color 0.2s;
+}
+.bc-theme-btn:hover { border-color: var(--v1); color: var(--v1); }
 
 /* ── Reviews Scrolling Track ──────────────────── */
 .reviews-track-wrap {

@@ -381,6 +381,12 @@
       animation-delay: 0.2s;
     }
   </style>
+  <script>
+    if (window.location.protocol !== 'file:') {
+      var p = window.location.pathname;
+      if (p.endsWith('.html')) history.replaceState(null, '', p.replace(/\.html$/, ''));
+    }
+  </script>
 </head>
 <body>
   <!-- Cursor Elements -->
@@ -430,7 +436,7 @@
       </div>    </div>
   </nav>
 
-  <nav class="breadcrumb"><a href="../index.html">🏠 Home</a><span class="bc-sep">›</span><span class="bc-current">Fee Enquiry</span></nav>
+  <nav class="breadcrumb"><button onclick="history.back()" class="back-btn">← Back</button><a href="../index.html">🏠 Home</a><span class="bc-sep">›</span><span class="bc-current">Fee Enquiry</span><div class="bc-right"><button class="bc-logout-btn" onclick="window.profileNav && window.profileNav.logout()">🚪 Logout</button></div></nav>
 
   <!-- Hero Section -->
   <section class="enquiry-hero">

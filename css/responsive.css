@@ -420,6 +420,13 @@
   }
 }
 
+/* Meetings & Recordings section responsive */
+@media (max-width: 768px) {
+  #sec-events > div > div {
+    grid-template-columns: 1fr !important;
+  }
+}
+
 /* Touch Device Optimizations */
 @media (hover: none) and (pointer: coarse) {
   button, a, .clickable {
