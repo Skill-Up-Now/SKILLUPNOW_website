@@ -331,36 +331,48 @@ nav {
   position: relative;
   cursor: pointer;
   margin-right: 1rem;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0.2, 0.2, 1);
   display: flex;
   align-items: center;
   padding: 2px;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.theme-toggle:hover {
+  border-color: rgba(124, 92, 252, 0.5);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1), 0 0 12px rgba(124, 92, 252, 0.2);
 }
 
 .theme-toggle.light {
-  background: rgba(107, 63, 216, 0.15);
-  border-color: rgba(107, 63, 216, 0.3);
+  background: rgba(255, 215, 0, 0.12);
+  border-color: rgba(255, 215, 0, 0.3);
+}
+
+.theme-toggle.light:hover {
+  border-color: rgba(255, 215, 0, 0.5);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05), 0 0 12px rgba(255, 215, 0, 0.15);
 }
 
 .theme-toggle-btn {
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
   background: white;
   position: absolute;
   left: 2px;
-  transition: all 0.3s ease;
+  transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 12px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+  z-index: 2;
 }
 
 .theme-toggle.light .theme-toggle-btn {
-  left: 26px;
+  left: 24px;
   background: #ffd700;
-  box-shadow: 0 2px 6px rgba(255, 215, 0, 0.4);
+  box-shadow: 0 3px 12px rgba(255, 215, 0, 0.5);
 }
 
 /* Base Buttons */
@@ -450,10 +462,26 @@ textarea::placeholder {
 }
 
 .text-gradient {
-  background: var(--grad);
+  background: linear-gradient(135deg, #7c5cfc 0%, #3d6bff 50%, #00cfee 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  background-size: 200% 200%;
+  animation: gradientShift 3s ease infinite;
+}
+
+@keyframes gradientShift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+:root[data-theme="light"] .text-gradient {
+  background: linear-gradient(135deg, #5c3fb8 0%, #1f5ce0 50%, #00a8cc 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  background-size: 200% 200%;
+  animation: gradientShift 3s ease infinite;
 }
 
 /* Platform Cards Hover Effect */
@@ -657,7 +685,7 @@ a[href*="pages/"]:hover {
 }
 
 /* ── Breadcrumbs ──────────────────────────────── */
-/* ── Breadcrumb Topbar ─────────────────────────── */
+/* ── New Breadcrumb Design ─────────────────────── */
 @keyframes bc-slide-in {
   from { opacity: 0; transform: translateY(-10px); }
   to   { opacity: 1; transform: translateY(0); }
@@ -668,66 +696,68 @@ a[href*="pages/"]:hover {
 }
 
 .breadcrumb {
-  padding: 0.75rem 5vw;
+  padding: 1rem 5vw;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  font-size: 0.82rem;
-  color: var(--txt4);
-  border-bottom: 1px solid var(--border);
-  background: var(--bg);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  position: sticky;
-  top: 0;
-  z-index: 40;
-  flex-wrap: wrap;
+  gap: 1rem;
+  font-size: 0.95rem;
+  background: linear-gradient(135deg, #7c5cfc 0%, #3d6bff 100%);
+  border-radius: 16px;
+  margin: 1.5rem 5vw;
+  box-shadow: 0 8px 32px rgba(124, 92, 252, 0.25);
   animation: bc-slide-in 0.35s cubic-bezier(0.4, 0, 0.2, 1) both;
-  transition: background 0.3s, border-color 0.3s;
+  transition: all 0.3s;
+  flex-wrap: wrap;
+}
+
+:root[data-theme="light"] .breadcrumb {
+  background: white;
+  border: 1px solid rgba(107, 63, 216, 0.15);
+  box-shadow: 0 4px 16px rgba(107, 63, 216, 0.1);
 }
 
 .breadcrumb a {
-  color: var(--txt3);
+  color: white;
   text-decoration: none;
-  transition: color 0.2s;
+  transition: all 0.2s;
   font-weight: 500;
   animation: bc-item-in 0.4s ease both 0.1s;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
-.breadcrumb a:hover { color: var(--v1); }
+
+:root[data-theme="light"] .breadcrumb a {
+  color: #3d2f7a;
+}
+
+.breadcrumb a:hover { 
+  transform: translateX(2px);
+  filter: brightness(1.1);
+}
+
 .breadcrumb .bc-sep {
-  color: var(--txt4);
-  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 1rem;
   animation: bc-item-in 0.4s ease both 0.15s;
 }
+
+:root[data-theme="light"] .breadcrumb .bc-sep {
+  color: rgba(61, 47, 122, 0.5);
+}
+
 .breadcrumb .bc-current {
-  color: var(--txt2);
+  color: white;
   font-weight: 600;
   animation: bc-item-in 0.4s ease both 0.2s;
 }
 
-.back-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0.38rem 0.85rem;
-  border-radius: 50px;
-  border: 1px solid var(--border);
-  color: var(--txt3);
-  font-size: 0.8rem;
-  font-weight: 600;
-  text-decoration: none;
-  background: transparent;
-  cursor: pointer;
-  transition: border-color 0.2s, color 0.2s, background 0.2s, transform 0.2s, box-shadow 0.2s;
-  margin-right: 0.3rem;
-  animation: bc-item-in 0.4s ease both 0.05s;
+:root[data-theme="light"] .breadcrumb .bc-current {
+  color: #1a1630;
 }
-.back-btn:hover {
-  border-color: var(--v1);
-  color: var(--v1);
-  background: var(--v5);
-  transform: translateX(-2px);
-  box-shadow: 0 2px 12px rgba(124, 92, 252, 0.18);
+
+.back-btn {
+  display: none;
 }
 
 /* ── Breadcrumb Right Section ────────────────── */

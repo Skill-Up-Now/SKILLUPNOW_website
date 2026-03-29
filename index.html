@@ -207,7 +207,7 @@
     }
 
     /* ── HERO VISUAL: Laptop Mockup ── */
-    .laptop { position: absolute; bottom: 40px; left: 10px; transform: none; width: 385px; z-index: 4; }
+    .laptop { position: absolute; bottom: 40px; left: 10px; transform: none; width: 385px; z-index: 1; }
     .lp-lid {
       height: 215px; width: 100%;
       background: linear-gradient(150deg, #16162a, #1d1d3e);
@@ -273,7 +273,7 @@
       backdrop-filter: blur(10px);
       font-size: .78rem; font-weight: 600;
       display: flex; align-items: center; gap: .65rem;
-      z-index: 2; white-space: nowrap;
+      z-index: 5; white-space: nowrap;
       transition: transform .3s cubic-bezier(.34,1.56,.64,1), box-shadow .3s ease, border-color .3s ease;
     }
     .f-card:hover { transform: scale(1.08) translateY(-5px); box-shadow: 0 18px 48px rgba(124,92,252,.5); border-color: rgba(124,92,252,.55); }
@@ -452,11 +452,11 @@
   </nav>
 
   <!-- Hero Section -->
-  <section class="hero" style="padding: 5rem 5vw 4rem; display: grid; grid-template-columns: 1fr 1.15fr; align-items: center; gap: 2rem; overflow: visible;">
+  <section class="hero" style="padding: 5rem 5vw 4rem; display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 2rem; overflow: visible;">
     <div class="hero-content">
       <div class="hero-eyebrow" style="display: inline-flex; align-items: center; gap: 0.6rem; background: rgba(124,92,252,0.1); border: 1px solid var(--border2); padding: 0.45rem 1.1rem; border-radius: var(--r4); font-size: 0.74rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--v2); margin-bottom: 1.8rem; animation: fadeUp 0.7s ease both;">
         <span class="live-dot" style="width: 7px; height: 7px; border-radius: 50%; background: #4ade80; box-shadow: 0 0 8px rgba(74,222,128,0.7); animation: livePulse 1.6s ease infinite;"></span>
-        12,000+ Professionals Enrolled
+        12,000+ Leaders Empowered
       </div>
 
       <style>
@@ -470,6 +470,12 @@
         .hero-word {
           display: inline-block;
           animation: wordFadeIn 0.55s cubic-bezier(0.4,0,0.2,1) both;
+          background: linear-gradient(135deg, #7c5cfc 0%, #3d6bff 50%, #00cfee 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          background-size: 200% 200%;
+          animation: wordFadeIn 0.55s cubic-bezier(0.4,0,0.2,1) both, gradientShift 3s ease infinite;
         }
         .hero-word.exit {
           animation: wordFadeOut 0.45s cubic-bezier(0.4,0,0.2,1) both;
@@ -482,17 +488,24 @@
           from { opacity: 1; transform: translateY(0)     scale(1); }
           to   { opacity: 0; transform: translateY(-60%)  scale(0.88); }
         }
+        :root[data-theme="light"] .hero-word {
+          background: linear-gradient(135deg, #5c3fb8 0%, #1f5ce0 50%, #00a8cc 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          background-size: 200% 200%;
+        }
       </style>
       <h1 style="font-family: 'Cormorant Garamond', serif; font-weight: 700; font-size: clamp(3rem, 5.5vw, 5.2rem); line-height: 1.04; letter-spacing: -0.02em; color: var(--txt); margin-bottom: 1.5rem; animation: fadeUp 0.7s 0.1s ease both;">
-        Master the <span class="text-gradient hero-word-wrap"><span id="hero-word" class="hero-word">Skills</span></span><br/>That <span class="text-gradient">Define</span><br/>Your Future
+        Master Soft Skills, <span class="text-gradient hero-word-wrap"><span id="hero-word" class="hero-word">Communication</span></span><br/>with <span class="text-gradient">Unwavering</span><br/>Confidence
       </h1>
-
+<!-- 
       <p class="hero-desc" style="font-size: 1.06rem; color: var(--txt3); line-height: 1.8; max-width: 500px; font-weight: 400; margin-bottom: 2.4rem; animation: fadeUp 0.7s 0.2s ease both;">
-        World-class IT training in Cloud, DevOps, AI/ML & Cybersecurity — with live mentorship, real-world projects and flexible no-cost EMI.
-      </p>
+        Unlock personal growth and leadership by mastering communication, emotional intelligence, and teamwork. Build adaptability and confidence to excel in any professional environment
+      </p> -->
 
       <div class="hero-actions" style="display: flex; gap: 1rem; flex-wrap: wrap; animation: fadeUp 0.7s 0.3s ease both;">
-        <a href="pages/courses.html" class="btn-grad">Explore Courses</a>
+        <a href="pages/courses.html" class="btn-grad">Explore Programs</a>
         <a href="pages/contact-enquiry.html" class="btn-outline">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
           Get Fee Quote
@@ -501,16 +514,16 @@
 
       <div style="display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 2.4rem;">
         <div class="feat-pill" style="animation-delay: 0.5s;">
-          <span class="pill-check">✔</span> Live Mentor Sessions
+          <span class="pill-check">✔</span> Build Confidence
         </div>
         <div class="feat-pill" style="animation-delay: 0.65s;">
-          <span class="pill-check">✔</span> Real-World Projects
+          <span class="pill-check">✔</span> Enhance Communication
         </div>
         <div class="feat-pill" style="animation-delay: 0.8s;">
-          <span class="pill-check">✔</span> Job Placement Support
+          <span class="pill-check">✔</span> Foster Teamwork
         </div>
         <div class="feat-pill" style="animation-delay: 0.95s;">
-          <span class="pill-check">✔</span> Zero-Cost EMI
+          <span class="pill-check">✔</span> Drive Leadership
         </div>
       </div>
 
@@ -1602,7 +1615,7 @@
 
     // ==================== ANIMATED HERO WORDS ====================
     (function() {
-      const words = ['Skills', 'Expertise', 'Knowledge', 'Career', 'Potential', 'Mastery', 'Abilities'];
+      const words = ['Communication', 'Leadership', 'Emotional Intelligence', 'Teamwork', 'Adaptability', 'Confidence', 'Growth'];
       let idx = 0;
       const el = document.getElementById('hero-word');
       if (!el) return;
