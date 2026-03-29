@@ -33,24 +33,17 @@ class ProfileNavigationManager {
 
   showLoggedInUI() {
     const profileSection = document.getElementById('profile-section');
-    const ctaBtn = document.getElementById('cta-btn');
     const signInBtn = document.getElementById('signin-btn');
+    const ctaBtn = document.getElementById('cta-btn');
 
-    // Show profile section
-    if (profileSection) {
-      profileSection.style.display = 'flex';
-    }
+    // Show profile section only
+    if (profileSection) profileSection.style.display = 'flex';
 
-    // Hide auth buttons
+    // Hide both auth buttons completely
     if (signInBtn) signInBtn.style.display = 'none';
+    if (ctaBtn) ctaBtn.style.display = 'none';
 
-    // Update CTA button
-    if (ctaBtn) {
-      ctaBtn.textContent = 'Explore Courses';
-      ctaBtn.onclick = () => window.location.href = 'pages/courses.html';
-    }
-
-    // Update profile button
+    // Update profile button with user initial
     const profileBtn = document.getElementById('profile-btn');
     if (profileBtn) {
       const name = this.currentUser.email?.split('@')[0] || 'User';
@@ -69,19 +62,14 @@ class ProfileNavigationManager {
     const ctaBtn = document.getElementById('cta-btn');
 
     // Hide profile section
-    if (profileSection) {
-      profileSection.style.display = 'none';
-    }
+    if (profileSection) profileSection.style.display = 'none';
 
-    // Show auth buttons
-    if (signInBtn) {
-      signInBtn.style.display = 'flex';
-    }
-
-    // Reset CTA button
+    // Show both auth buttons
+    if (signInBtn) signInBtn.style.display = '';
     if (ctaBtn) {
+      ctaBtn.style.display = '';
       ctaBtn.textContent = 'Get Started';
-      ctaBtn.onclick = () => openModal?.('register') || window.location.href = '#';
+      ctaBtn.onclick = () => openModal?.('register');
     }
   }
 

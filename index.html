@@ -117,8 +117,8 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      height: 500px;
-      width: 500px;
+      height: 600px;
+      width: 600px;
     }
     .orbit-wrap {
       position: absolute;
@@ -133,17 +133,70 @@
       border-radius: 50%;
       border: 1px dashed rgba(124,92,252,.18);
     }
-    .orbit-a { width: 320px; height: 320px; animation: orb-spin 22s linear infinite; }
-    .orbit-b { width: 460px; height: 460px; animation: orb-spin 35s linear infinite reverse; border-color: rgba(0,207,238,.1); }
+    .orbit-a { width: 380px; height: 380px; animation: orb-spin 22s linear infinite; }
+    .orbit-b { width: 540px; height: 540px; animation: orb-spin 35s linear infinite reverse; border-color: rgba(0,207,238,.12); }
+    .orbit-c { width: 200px; height: 200px; animation: orb-spin 14s linear infinite; border-color: rgba(74,222,128,.12); border-style: solid; }
     @keyframes orb-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
     .orb-dot { position: absolute; width: 8px; height: 8px; border-radius: 50%; top: -4px; left: 50%; margin-left: -4px; }
     .orbit-a .orb-dot { background: var(--v2); box-shadow: 0 0 10px var(--v2); }
     .orbit-b .orb-dot { background: #00cfee; box-shadow: 0 0 10px #00cfee; }
+    .orbit-c .orb-dot { background: #4ade80; box-shadow: 0 0 10px #4ade80; }
+
+    /* ── HERO VISUAL: Orbiting Icon Badges ── */
+    .icon-orbit-wrap {
+      position: absolute;
+      inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      pointer-events: none;
+      z-index: 3;
+    }
+    .icon-ring {
+      position: absolute;
+      border-radius: 50%;
+      border: 1px dashed rgba(124,92,252,.1);
+    }
+    .icon-ring-a {
+      width: 490px; height: 490px;
+      animation: orb-spin 16s linear infinite;
+    }
+    .icon-ring-b {
+      width: 570px; height: 570px;
+      animation: orb-spin 24s linear infinite reverse;
+    }
+    /* Badge positions on each ring */
+    .ib-top    { position: absolute; top: -23px;    left: calc(50% - 23px); }
+    .ib-bottom { position: absolute; bottom: -23px; left: calc(50% - 23px); }
+    .ib-right  { position: absolute; right: -23px;  top: calc(50% - 23px); }
+    .ib-left   { position: absolute; left: -23px;   top: calc(50% - 23px); }
+    /* The badge itself */
+    .tech-badge {
+      width: 46px; height: 46px;
+      background: var(--panel);
+      border: 1px solid var(--border2);
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem;
+      box-shadow: 0 6px 20px rgba(0,0,0,.4), 0 0 0 1px rgba(124,92,252,.15);
+      backdrop-filter: blur(14px);
+      pointer-events: all;
+      cursor: default;
+    }
+    .tech-badge span { display: block; transition: transform .35s ease; }
+    .tech-badge:hover span { transform: scale(1.35) rotate(-8deg); }
+    /* Counter-rotate badges so they stay upright while ring spins */
+    .icon-ring-a .tech-badge { animation: badge-ccw-a 16s linear infinite; }
+    .icon-ring-b .tech-badge { animation: badge-cw-b  24s linear infinite; }
+    @keyframes badge-ccw-a { from { transform: rotate(0deg);    } to { transform: rotate(-360deg); } }
+    @keyframes badge-cw-b  { from { transform: rotate(0deg);    } to { transform: rotate(360deg);  } }
+    /* Pause orbit on hover */
+    .tech-badge:hover, .icon-ring:has(.tech-badge:hover) {
+      animation-play-state: paused;
+    }
 
     /* ── HERO VISUAL: 3D Scene ── */
     .scene {
       position: relative;
-      width: 340px; height: 340px;
+      width: 420px; height: 420px;
       transform-style: preserve-3d;
       perspective: 1200px;
       animation: float-s 6s ease-in-out infinite;
@@ -154,32 +207,57 @@
     }
 
     /* ── HERO VISUAL: Laptop Mockup ── */
-    .laptop { position: absolute; bottom: 50px; left: 50%; transform: translateX(-50%); width: 268px; }
+    .laptop { position: absolute; bottom: 40px; left: 10px; transform: none; width: 385px; }
     .lp-lid {
-      height: 170px; width: 100%;
+      height: 215px; width: 100%;
       background: linear-gradient(150deg, #16162a, #1d1d3e);
       border-radius: 10px 10px 3px 3px;
       border: 1px solid rgba(255,255,255,.09);
       box-shadow: 0 18px 50px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.07);
-      overflow: hidden; padding: 10px;
+      overflow: hidden; padding: 12px;
     }
     .lp-screen { height: 100%; border-radius: 5px; background: linear-gradient(140deg, #0c0c20 0%, #161635 100%); position: relative; overflow: hidden; }
-    .lp-glow { position: absolute; inset: 0; background: linear-gradient(135deg, rgba(124,92,252,.14), rgba(0,207,238,.09)); animation: scr-pulse 3s ease-in-out infinite; }
-    @keyframes scr-pulse { 0%, 100% { opacity: 1; } 50% { opacity: .65; } }
-    .lp-scr-content { position: relative; z-index: 1; padding: 8px; display: flex; flex-direction: column; gap: 5px; }
+    .lp-glow { position: absolute; inset: 0; background: linear-gradient(135deg, rgba(124,92,252,.16), rgba(0,207,238,.1)); animation: scr-pulse 3s ease-in-out infinite; }
+    @keyframes scr-pulse { 0%, 100% { opacity: 1; } 50% { opacity: .6; } }
+    .lp-scr-content { position: relative; z-index: 1; padding: 10px; display: flex; flex-direction: column; gap: 6px; }
+    /* header row */
+    .scr-header { display: flex; align-items: center; gap: 5px; margin-bottom: 4px; }
+    .scr-dot { width: 7px; height: 7px; border-radius: 50%; }
+    .scr-dot:nth-child(1) { background: #ff5f57; }
+    .scr-dot:nth-child(2) { background: #febc2e; }
+    .scr-dot:nth-child(3) { background: #28c840; }
+    .scr-title { margin-left: auto; font-size: .55rem; color: rgba(255,255,255,.3); font-family: monospace; }
+    /* progress bar rows */
     .s-bar { height: 4px; border-radius: 2px; animation: bar-anim 2.5s ease-in-out infinite alternate; }
-    .s-bar:nth-child(1) { width: 75%; background: linear-gradient(90deg, var(--v2), #00cfee); animation-delay: 0s; }
-    .s-bar:nth-child(2) { width: 55%; background: rgba(255,255,255,.12); animation-delay: .18s; }
-    .s-bar:nth-child(3) { width: 65%; background: rgba(255,255,255,.08); animation-delay: .36s; }
-    .s-bar:nth-child(4) { width: 42%; background: rgba(124,92,252,.35); animation-delay: .54s; }
-    @keyframes bar-anim { from { transform: scaleX(.82); opacity: .6; } to { transform: scaleX(1); opacity: 1; } }
-    .s-code-block { margin-top: 6px; padding: 5px 6px; background: rgba(124,92,252,.1); border-left: 2px solid var(--v2); border-radius: 3px; }
-    .s-code-line { height: 3px; border-radius: 2px; margin-bottom: 3px; }
-    .s-code-line:nth-child(1) { width: 60%; background: rgba(0,207,238,.4); }
-    .s-code-line:nth-child(2) { width: 80%; background: rgba(255,255,255,.15); }
-    .s-code-line:nth-child(3) { width: 45%; background: rgba(124,92,252,.5); }
-    .lp-base { width: 290px; height: 9px; margin: 0 auto; background: linear-gradient(150deg, #1e1e40, #17172e); border-radius: 0 0 7px 7px; border: 1px solid rgba(255,255,255,.06); border-top: none; }
-    .lp-foot { width: 272px; height: 11px; margin: 0 auto; background: linear-gradient(150deg, #101020, #0d0d1c); border-radius: 5px; box-shadow: 0 8px 28px rgba(0,0,0,.5); }
+    .s-bar:nth-child(1) { width: 80%; background: linear-gradient(90deg, var(--v2), #00cfee); animation-delay: 0s; }
+    .s-bar:nth-child(2) { width: 58%; background: rgba(255,255,255,.13); animation-delay: .18s; }
+    .s-bar:nth-child(3) { width: 70%; background: rgba(0,207,238,.25); animation-delay: .36s; }
+    .s-bar:nth-child(4) { width: 45%; background: rgba(124,92,252,.38); animation-delay: .54s; }
+    .s-bar:nth-child(5) { width: 62%; background: rgba(74,222,128,.25); animation-delay: .72s; }
+    @keyframes bar-anim { from { transform: scaleX(.8); opacity: .55; } to { transform: scaleX(1); opacity: 1; } }
+    /* code block */
+    .s-code-block { margin-top: 5px; padding: 6px 8px; background: rgba(124,92,252,.1); border-left: 2px solid var(--v2); border-radius: 3px; }
+    .s-code-line { height: 3px; border-radius: 2px; margin-bottom: 4px; }
+    .s-code-line:nth-child(1) { width: 60%; background: rgba(0,207,238,.45); }
+    .s-code-line:nth-child(2) { width: 85%; background: rgba(255,255,255,.16); }
+    .s-code-line:nth-child(3) { width: 48%; background: rgba(124,92,252,.55); }
+    .s-code-line:nth-child(4) { width: 72%; background: rgba(74,222,128,.35); }
+    /* mini chart */
+    .scr-chart { display: flex; align-items: flex-end; gap: 3px; height: 28px; margin-top: 6px; }
+    .chart-bar { border-radius: 2px 2px 0 0; animation: chart-grow 1.8s ease-out forwards; flex: 1; }
+    .chart-bar:nth-child(1) { height: 45%; background: rgba(124,92,252,.6); animation-delay: .1s; }
+    .chart-bar:nth-child(2) { height: 70%; background: rgba(124,92,252,.75); animation-delay: .2s; }
+    .chart-bar:nth-child(3) { height: 55%; background: rgba(0,207,238,.5); animation-delay: .3s; }
+    .chart-bar:nth-child(4) { height: 85%; background: rgba(124,92,252,.9); animation-delay: .4s; }
+    .chart-bar:nth-child(5) { height: 65%; background: rgba(0,207,238,.6); animation-delay: .5s; }
+    .chart-bar:nth-child(6) { height: 90%; background: linear-gradient(180deg,#7c5cfc,#00cfee); animation-delay: .6s; }
+    @keyframes chart-grow { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+    /* status pill */
+    .scr-status { display: inline-flex; align-items: center; gap: 4px; background: rgba(74,222,128,.12); border: 1px solid rgba(74,222,128,.25); border-radius: 20px; padding: 2px 8px; font-size: .5rem; color: #4ade80; font-family: monospace; margin-top: 4px; }
+    .scr-status-dot { width: 5px; height: 5px; border-radius: 50%; background: #4ade80; animation: livePulse 1.4s ease infinite; }
+    /* laptop base */
+    .lp-base { width: 410px; height: 9px; margin: 0 auto; background: linear-gradient(150deg, #1e1e40, #17172e); border-radius: 0 0 7px 7px; border: 1px solid rgba(255,255,255,.06); border-top: none; }
+    .lp-foot { width: 390px; height: 11px; margin: 0 auto; background: linear-gradient(150deg, #101020, #0d0d1c); border-radius: 5px; box-shadow: 0 8px 28px rgba(0,0,0,.5); }
 
     /* ── HERO VISUAL: Floating Stat Cards ── */
     .f-card {
@@ -187,25 +265,68 @@
       background: var(--panel);
       border: 1px solid var(--border);
       border-radius: var(--r1);
-      padding: .65rem 1rem;
+      padding: .75rem 1.1rem;
       box-shadow: 0 8px 28px rgba(0,0,0,.28), var(--shadow-glow);
       backdrop-filter: blur(10px);
-      font-size: .72rem; font-weight: 600;
-      display: flex; align-items: center; gap: .5rem;
+      font-size: .78rem; font-weight: 600;
+      display: flex; align-items: center; gap: .6rem;
       z-index: 2; white-space: nowrap;
+      transition: transform .3s ease, box-shadow .3s ease;
     }
-    .f-card:nth-child(1) { top: 18px;    left: -18px;  animation: fc-float 4.2s ease-in-out infinite; }
-    .f-card:nth-child(2) { top: 44%;     right: -24px; animation: fc-float 4.8s ease-in-out infinite .7s; }
-    .f-card:nth-child(3) { bottom: 90px; left: -24px;  animation: fc-float 5.2s ease-in-out infinite 1.3s; }
+    .f-card:hover { transform: scale(1.06); box-shadow: 0 12px 36px rgba(124,92,252,.35); }
+    .f-card:nth-child(1) { top: 18px;    left: -24px;  animation: fc-float 4.2s ease-in-out infinite; }
+    .f-card:nth-child(2) { top: 38%;     right: -30px; animation: fc-float 4.8s ease-in-out infinite .7s; }
+    .f-card:nth-child(3) { bottom: 110px; left: -30px; animation: fc-float 5.2s ease-in-out infinite 1.3s; }
+    .f-card:nth-child(4) { bottom: 20px; right: -30px; animation: fc-float 4.5s ease-in-out infinite 1.8s; }
     @keyframes fc-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-    .fc-val { color: var(--v2); }
-    .fc-lbl { color: var(--txt3); font-weight: 400; font-size: .68rem; display: block; margin-top: 1px; }
+    .fc-icon { font-size: 1.3rem; }
+    .fc-val { color: var(--v2); font-size: .82rem; }
+    .fc-lbl { color: var(--txt3); font-weight: 700; font-size: .7rem; display: block; margin-top: 1px; }
 
     /* ── HERO VISUAL: AI Brain Badge ── */
-    .ai-badge { position: absolute; top: 16px; right: 16px; font-size: 2.2rem; animation: brain-glow 2.5s ease-in-out infinite; z-index: 2; }
+    .ai-badge { position: absolute; top: 16px; right: 16px; font-size: 2.4rem; animation: brain-glow 2.5s ease-in-out infinite; z-index: 2; }
     @keyframes brain-glow {
       0%, 100% { filter: drop-shadow(0 0 8px rgba(124,92,252,.8)); }
       50%       { filter: drop-shadow(0 0 22px rgba(124,92,252,1)) drop-shadow(0 0 38px rgba(0,207,238,.4)); }
+    }
+
+    /* ── FEATURE PILLS ── */
+    .feat-pill {
+      display: flex; align-items: center; gap: 0.5rem;
+      background: rgba(124,92,252,0.08);
+      border: 1px solid rgba(124,92,252,0.2);
+      border-radius: 50px;
+      padding: 0.45rem 1rem;
+      font-size: 0.78rem; font-weight: 600; color: var(--txt2);
+      cursor: default;
+      opacity: 0;
+      transform: translateY(16px);
+      animation: pill-in 0.55s ease forwards;
+      transition: background 0.3s ease, border-color 0.3s ease,
+                  transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .feat-pill:hover {
+      background: rgba(124,92,252,0.18);
+      border-color: rgba(124,92,252,0.55);
+      transform: translateY(-3px) scale(1.04);
+      box-shadow: 0 6px 22px rgba(124,92,252,0.25);
+    }
+    .feat-pill .pill-check {
+      color: #4ade80;
+      font-size: 0.9rem;
+      transition: transform 0.3s ease;
+    }
+    .feat-pill:hover .pill-check {
+      transform: scale(1.35) rotate(-10deg);
+    }
+    @keyframes pill-in {
+      0%   { opacity: 0; transform: translateY(16px) scale(0.92); }
+      60%  { opacity: 1; transform: translateY(-4px) scale(1.03); }
+      100% { opacity: 1; transform: translateY(0)   scale(1); }
+    }
+    @keyframes pill-shimmer {
+      0%   { background-position: -200% center; }
+      100% { background-position:  200% center; }
     }
 
     /* ── SCROLL REVEAL: slide from right ── */
@@ -213,17 +334,20 @@
     .sr-r.vis { opacity: 1; transform: translateX(0); }
 
     @media (max-width: 520px) {
-      .hero-visual { width: 340px; height: 420px; }
-      .orbit-a { width: 240px; height: 240px; }
-      .orbit-b { width: 340px; height: 340px; }
-      .scene   { width: 260px; height: 260px; }
-      .laptop  { width: 200px; bottom: 30px; }
-      .lp-lid  { height: 130px; }
-      .lp-base { width: 220px; }
-      .lp-foot { width: 206px; }
+      .hero-visual { width: 360px; height: 440px; }
+      .orbit-a { width: 260px; height: 260px; }
+      .orbit-b { width: 360px; height: 360px; }
+      .orbit-c { width: 140px; height: 140px; }
+      .scene   { width: 290px; height: 290px; }
+      .laptop  { width: 260px; bottom: 30px; left: 5px; transform: none; }
+      .lp-lid  { height: 150px; }
+      .lp-base { width: 280px; }
+      .lp-foot { width: 265px; }
       .f-card:nth-child(1) { left: -6px; }
       .f-card:nth-child(2) { right: -10px; }
       .f-card:nth-child(3) { left: -6px; }
+      .f-card:nth-child(4) { right: -10px; }
+      .tech-badge { width: 36px; height: 36px; font-size: 1.1rem; }
     }
   </style>
   
@@ -273,7 +397,7 @@
       <div class="theme-toggle" role="button" tabindex="0" aria-pressed="false">
         <div class="theme-toggle-btn">🌙</div>
       </div>
-      <div id="profile-section" style="display: none; display: flex; align-items: center; gap: 1rem; position: relative;">
+      <div id="profile-section" style="display: none; align-items: center; gap: 1rem; position: relative;">
         <button id="profile-btn" class="profile-icon-btn" title="View Profile">👤</button>
         <div id="profile-dropdown" class="profile-dropdown">
           <a href="pages/profile.html?edit=1" style="display: flex; align-items: center; gap: 0.8rem; padding: 1rem; text-decoration: none; color: var(--txt2); border-bottom: 1px solid var(--border); transition: all 0.25s;" onmouseover="this.style.background='rgba(124,92,252,0.08)'" onmouseout="this.style.background=''">
@@ -314,7 +438,7 @@
   <nav class="breadcrumb"><a href="index.html">🏠 Home</a></nav>
 
   <!-- Hero Section -->
-  <section class="hero" style="padding: 5rem 5vw 4rem; display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 4rem; overflow: hidden;">
+  <section class="hero" style="padding: 5rem 5vw 4rem; display: grid; grid-template-columns: 1fr 1.15fr; align-items: center; gap: 2rem; overflow: hidden;">
     <div class="hero-content">
       <div class="hero-eyebrow" style="display: inline-flex; align-items: center; gap: 0.6rem; background: rgba(124,92,252,0.1); border: 1px solid var(--border2); padding: 0.45rem 1.1rem; border-radius: var(--r4); font-size: 0.74rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--v2); margin-bottom: 1.8rem; animation: fadeUp 0.7s ease both;">
         <span class="live-dot" style="width: 7px; height: 7px; border-radius: 50%; background: #4ade80; box-shadow: 0 0 8px rgba(74,222,128,0.7); animation: livePulse 1.6s ease infinite;"></span>
@@ -337,12 +461,21 @@
         </a>
       </div>
 
-      <div class="hero-stats" style="display: flex; gap: 2.5rem; margin-top: 3.2rem; animation: fadeUp 0.7s 0.42s ease both; padding-top: 2rem; border-top: 1px solid var(--border); flex-wrap: wrap;">
-        <div><span class="stat-number">12K+</span><span class="stat-label">Students</span></div>
-        <div><span class="stat-number">48</span><span class="stat-label">Courses</span></div>
-        <div><span class="stat-number">4.9★</span><span class="stat-label">Rating</span></div>
-        <div><span class="stat-number">96%</span><span class="stat-label">Placement</span></div>
+      <div style="display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 2.4rem;">
+        <div class="feat-pill" style="animation-delay: 0.5s;">
+          <span class="pill-check">✔</span> Live Mentor Sessions
+        </div>
+        <div class="feat-pill" style="animation-delay: 0.65s;">
+          <span class="pill-check">✔</span> Real-World Projects
+        </div>
+        <div class="feat-pill" style="animation-delay: 0.8s;">
+          <span class="pill-check">✔</span> Job Placement Support
+        </div>
+        <div class="feat-pill" style="animation-delay: 0.95s;">
+          <span class="pill-check">✔</span> Zero-Cost EMI
+        </div>
       </div>
+
     </div>
 
     <div class="hero-visual sr-r">
@@ -351,6 +484,7 @@
       <div class="orbit-wrap">
         <div class="orbit orbit-a"><div class="orb-dot"></div></div>
         <div class="orbit orbit-b"><div class="orb-dot"></div></div>
+        <div class="orbit orbit-c"><div class="orb-dot"></div></div>
       </div>
 
       <!-- 3D floating scene (mouse parallax applied via JS) -->
@@ -358,24 +492,31 @@
 
         <!-- Floating stat cards -->
         <div class="f-card">
-          <span style="font-size:1.1rem">🎯</span>
+          <span class="fc-icon">🎯</span>
           <div>
             <span class="fc-val">87% Complete</span>
             <span class="fc-lbl">Course Progress</span>
           </div>
         </div>
         <div class="f-card">
-          <span style="font-size:1.1rem">⚡</span>
+          <span class="fc-icon">⚡</span>
           <div>
             <span class="fc-val">+340 XP</span>
             <span class="fc-lbl">Points Earned</span>
           </div>
         </div>
         <div class="f-card">
-          <span style="font-size:1.1rem">🏆</span>
+          <span class="fc-icon">🏆</span>
           <div>
             <span class="fc-val">Top 5%</span>
             <span class="fc-lbl">Global Rank</span>
+          </div>
+        </div>
+        <div class="f-card">
+          <span class="fc-icon">🎓</span>
+          <div>
+            <span class="fc-val">Certified</span>
+            <span class="fc-lbl">Industry Ready</span>
           </div>
         </div>
 
@@ -385,14 +526,38 @@
             <div class="lp-screen">
               <div class="lp-glow"></div>
               <div class="lp-scr-content">
+                <!-- window dots -->
+                <div class="scr-header">
+                  <div class="scr-dot"></div>
+                  <div class="scr-dot"></div>
+                  <div class="scr-dot"></div>
+                  <span class="scr-title">skillupnow — dashboard</span>
+                </div>
+                <!-- progress bars -->
                 <div class="s-bar"></div>
                 <div class="s-bar"></div>
                 <div class="s-bar"></div>
                 <div class="s-bar"></div>
+                <div class="s-bar"></div>
+                <!-- code block -->
                 <div class="s-code-block">
                   <div class="s-code-line"></div>
                   <div class="s-code-line"></div>
                   <div class="s-code-line"></div>
+                  <div class="s-code-line"></div>
+                </div>
+                <!-- mini chart -->
+                <div class="scr-chart">
+                  <div class="chart-bar"></div>
+                  <div class="chart-bar"></div>
+                  <div class="chart-bar"></div>
+                  <div class="chart-bar"></div>
+                  <div class="chart-bar"></div>
+                  <div class="chart-bar"></div>
+                </div>
+                <!-- live status -->
+                <div class="scr-status">
+                  <div class="scr-status-dot"></div> Live Session Active
                 </div>
               </div>
             </div>
@@ -403,6 +568,20 @@
 
         <!-- AI brain badge -->
         <div class="ai-badge">🧠</div>
+
+        <!-- Orbiting tech icon badges -->
+        <div class="icon-orbit-wrap">
+          <!-- Inner ring: Cloud (top) + DevOps (bottom) -->
+          <div class="icon-ring icon-ring-a">
+            <div class="ib-top"><div class="tech-badge" title="Cloud Computing"><span>☁️</span></div></div>
+            <div class="ib-bottom"><div class="tech-badge" title="DevOps"><span>⚙️</span></div></div>
+          </div>
+          <!-- Outer ring: Security (right) + AI/ML (left) -->
+          <div class="icon-ring icon-ring-b">
+            <div class="ib-right"><div class="tech-badge" title="Cybersecurity"><span>🔒</span></div></div>
+            <div class="ib-left"><div class="tech-badge" title="AI / ML"><span>🤖</span></div></div>
+          </div>
+        </div>
 
       </div><!-- /.scene -->
     </div><!-- /.hero-visual -->
