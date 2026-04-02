@@ -102,6 +102,29 @@
       animation: fadeUp 0.5s ease backwards;
     }
 
+    /* Light/Dark mode: override hardcoded inline backgrounds in modal */
+    .modal-box input,
+    .modal-box select,
+    .modal-box textarea {
+      background: var(--panel) !important;
+      color: var(--txt) !important;
+      border-color: var(--border) !important;
+    }
+    :root[data-theme="light"] .modal-box input,
+    :root[data-theme="light"] .modal-box select,
+    :root[data-theme="light"] .modal-box textarea {
+      background: var(--bg2) !important;
+      border-color: var(--border2) !important;
+    }
+    .modal-box select option {
+      background: var(--bg2);
+      color: var(--txt);
+    }
+    :root[data-theme="light"] .modal-box select option {
+      background: #ffffff;
+      color: #0d1117;
+    }
+
     .modal-box .form-group:nth-child(n+2) {
       animation-delay: 0.1s;
     }
@@ -343,21 +366,25 @@
     .sr-r { opacity: 0; transform: translateX(28px); transition: opacity .7s ease, transform .7s ease; }
     .sr-r.vis { opacity: 1; transform: translateX(0); }
 
-    @media (max-width: 520px) {
-      .hero-visual { width: 360px; height: 440px; }
-      .orbit-a { width: 260px; height: 260px; }
-      .orbit-b { width: 360px; height: 360px; }
-      .orbit-c { width: 140px; height: 140px; }
-      .scene   { width: 290px; height: 290px; }
-      .laptop  { width: 260px; bottom: 30px; left: 5px; transform: none; }
-      .lp-lid  { height: 150px; }
-      .lp-base { width: 280px; }
-      .lp-foot { width: 265px; }
+    @media (max-width: 599px) {
+      .hero-visual { width: 320px; height: 320px; overflow: visible; }
+      .orbit-a { width: 220px; height: 220px; }
+      .orbit-b { width: 300px; height: 300px; }
+      .orbit-c { width: 120px; height: 120px; }
+      .scene   { width: 240px; height: 240px; }
+      .laptop  { width: 220px; bottom: 20px; left: 5px; transform: none; }
+      .lp-lid  { height: 130px; }
+      .lp-base { width: 236px; }
+      .lp-foot { width: 222px; }
+      .f-card  { font-size: 0.7rem; padding: 0.55rem 0.75rem; }
       .f-card:nth-child(1) { left: -6px; }
       .f-card:nth-child(2) { right: -10px; }
       .f-card:nth-child(3) { left: -6px; }
       .f-card:nth-child(4) { right: -10px; }
-      .tech-badge { width: 36px; height: 36px; font-size: 1.1rem; }
+      .tech-badge { width: 32px; height: 32px; font-size: 0.95rem; }
+      .icon-orbit-wrap { display: none; }
+      /* Hero visual scroll-reveal: always show on mobile (no JS observer needed) */
+      .hero-visual.sr-r { opacity: 1 !important; transform: none !important; }
     }
   </style>
   
@@ -404,6 +431,7 @@
 
     <ul class="nav-links">
       <li><a href="pages/courses.html">Courses</a></li>
+      
       <li><a href="pages/contact-enquiry.html">Fee Enquiry</a></li>
       <li><a href="pages/feedback.html">Reviews</a></li>
     </ul>
@@ -411,38 +439,9 @@
     <div class="nav-actions">
       <div id="profile-section" style="display: none; align-items: center; gap: 1rem; position: relative;">
         <button id="profile-btn" class="profile-icon-btn" title="View Profile">👤</button>
-        <div id="profile-dropdown" class="profile-dropdown">
-          <a href="pages/profile.html?edit=1" style="display: flex; align-items: center; gap: 0.8rem; padding: 1rem; text-decoration: none; color: var(--txt2); border-bottom: 1px solid var(--border); transition: all 0.25s;" onmouseover="this.style.background='rgba(124,92,252,0.08)'" onmouseout="this.style.background=''">
-            <span style="font-size: 1.2rem;">✏️</span>
-            <div>
-              <div style="font-weight: 600; color: var(--txt);">Edit Profile</div>
-              <div style="font-size: 0.75rem; color: var(--txt4);">Update your info</div>
-            </div>
-          </a>
-          <a href="pages/profile.html#learning-paths" style="display: flex; align-items: center; gap: 0.8rem; padding: 1rem; text-decoration: none; color: var(--txt2); border-bottom: 1px solid var(--border); transition: all 0.25s;" onmouseover="this.style.background='rgba(124,92,252,0.08)'" onmouseout="this.style.background=''">
-            <span style="font-size: 1.2rem;">🗺️</span>
-            <div>
-              <div style="font-weight: 600; color: var(--txt);">My Learning Path</div>
-              <div style="font-size: 0.75rem; color: var(--txt4);">Track your journey</div>
-            </div>
-          </a>
-          <a id="dd-admin-link" href="pages/admin-dashboard.html" style="display: none; align-items: center; gap: 0.8rem; padding: 1rem; text-decoration: none; color: var(--txt2); border-bottom: 1px solid var(--border); transition: all 0.25s;" onmouseover="this.style.background='rgba(124,92,252,0.08)'" onmouseout="this.style.background=''">
-            <span style="font-size: 1.2rem;">⚙️</span>
-            <div>
-              <div style="font-weight: 600; color: var(--txt);">Admin Panel</div>
-              <div style="font-size: 0.75rem; color: var(--txt4);">Manage platform</div>
-            </div>
-          </a>
-          <button onclick="showLogoutConfirm()" style="width: 100%; text-align: left; padding: 1rem; border: none; background: transparent; color: var(--txt2); cursor: pointer; display: flex; align-items: center; gap: 0.8rem; transition: all 0.25s;" onmouseover="this.style.background='rgba(255,107,107,0.08)'" onmouseout="this.style.background=''">
-            <span style="font-size: 1.2rem;">🚪</span>
-            <div>
-              <div style="font-weight: 600; color: #ff6b6b;">Logout</div>
-              <div style="font-size: 0.75rem; color: var(--txt4);">Sign out safely</div>
-            </div>
-          </button>
-        </div>
+        <!-- Dropdown injected by profile-nav.js buildDropdown() -->
+        <div id="profile-dropdown" class="profile-dropdown"></div>
       </div>
-      <button class="theme-icon-btn" id="theme-btn" onclick="if(window.themeManager)window.themeManager.toggleTheme();this.classList.add('spinning');setTimeout(()=>this.classList.remove('spinning'),400)" title="Toggle theme" aria-label="Toggle theme">☀️</button>
       <button class="nav-signin" id="signin-btn" onclick="openModal('login')">Sign In</button>
       <button class="nav-cta" id="cta-btn" onclick="openModal('register')">Get Started</button>
     </div>
@@ -502,7 +501,7 @@
       </p> 
 
       <div class="hero-actions" style="display: flex; gap: 1rem; flex-wrap: wrap; animation: fadeUp 0.7s 0.3s ease both;">
-        <a href="pages/courses.html" class="btn-grad">Explore Programs</a>
+        <a href="pages/courses.html" class="btn-grad">Explore Courses</a>
         <a href="pages/contact-enquiry.html" class="btn-outline">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
           Get Fee Quote
@@ -538,32 +537,14 @@
       <!-- 3D floating scene (mouse parallax applied via JS) -->
       <div class="scene" id="scene3d">
 
-        <!-- Floating stat cards — live Supabase data -->
+        <!-- Floating stat cards — curated success metrics -->
         <div class="f-card">
           <span class="fc-icon">
-            <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
           </span>
           <div>
-            <span class="fc-val" id="fc-students">—</span>
-            <span class="fc-lbl">Total Learners</span>
-          </div>
-        </div>
-        <div class="f-card">
-          <span class="fc-icon">
-            <svg viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
-          </span>
-          <div>
-            <span class="fc-val" id="fc-enrollments">—</span>
-            <span class="fc-lbl">Enrollments</span>
-          </div>
-        </div>
-        <div class="f-card">
-          <span class="fc-icon">
-            <svg viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2z"/></svg>
-          </span>
-          <div>
-            <span class="fc-val" id="fc-completions">—</span>
-            <span class="fc-lbl">Completions</span>
+            <span class="fc-val">48+</span>
+            <span class="fc-lbl">Courses Available</span>
           </div>
         </div>
         <div class="f-card">
@@ -571,8 +552,26 @@
             <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
           </span>
           <div>
-            <span class="fc-val" id="fc-feedback">—</span>
-            <span class="fc-lbl">Reviews</span>
+            <span class="fc-val">4.9★</span>
+            <span class="fc-lbl">Average Rating</span>
+          </div>
+        </div>
+        <div class="f-card">
+          <span class="fc-icon">
+            <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </span>
+          <div>
+            <span class="fc-val">12K+</span>
+            <span class="fc-lbl">Alumni Network</span>
+          </div>
+        </div>
+        <div class="f-card">
+          <span class="fc-icon">
+            <svg viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+          </span>
+          <div>
+            <span class="fc-val" style="display:flex;align-items:center;gap:4px;"><span class="scr-status-dot" style="width:6px;height:6px;flex-shrink:0;"></span>Live</span>
+            <span class="fc-lbl">Sessions Daily</span>
           </div>
         </div>
 
@@ -825,13 +824,9 @@
 
         <div style="display: flex; align-items: center; gap: 1rem; margin: 1.2rem 0; font-size: 0.73rem; color: var(--txt4); font-weight: 600;">
           <span style="flex: 1; height: 1px; background: var(--border);"></span>
-          or
+          or continue with
           <span style="flex: 1; height: 1px; background: var(--border);"></span>
         </div>
-
-        <a href="pages/admin-login.html" style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; width: 100%; padding: 0.85rem; border: 1px solid var(--border); border-radius: var(--r2); color: var(--txt3); text-decoration: none; font-size: 0.88rem; font-weight: 600; background: rgba(255,255,255,0.03); transition: all 0.25s;" onmouseover="this.style.borderColor='var(--v2)';this.style.color='var(--v2)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--txt3)'">
-          ⚙️ Admin Login
-        </a>
 
         <div style="text-align: center; font-size: 0.83rem; color: var(--txt3); margin-top: 1rem;">
           No account yet? <a onclick="switchModalTab('register')" style="color: var(--v2); font-weight: 700; text-decoration: none; cursor: pointer;">Create one free →</a>
@@ -1340,19 +1335,6 @@
     });
   </script>
 
-  <!-- Logout Confirmation Modal -->
-  <div id="logout-confirm-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:9999; align-items:center; justify-content:center;" onclick="if(event.target===this) closeLogoutModal()">
-    <div style="background:var(--panel2,#1a1635); border:1px solid var(--border); border-radius:16px; padding:2rem; width:100%; max-width:380px; margin:1rem; position:relative; text-align:center;">
-      <div style="font-size:2.5rem; margin-bottom:1rem;">🚪</div>
-      <h3 style="color:var(--txt); margin-bottom:0.5rem;">Sign Out?</h3>
-      <p style="color:var(--txt3); font-size:0.88rem; margin-bottom:1.5rem;">You will be signed out of your account.</p>
-      <div style="display:flex; gap:0.75rem; justify-content:center;">
-        <button onclick="closeLogoutModal()" style="flex:1; padding:0.8rem; background:var(--panel); border:1px solid var(--border); color:var(--txt3); border-radius:10px; font-size:0.9rem; cursor:pointer;">Cancel</button>
-        <button onclick="handleLogout()" style="flex:1; padding:0.8rem; background:rgba(255,107,107,0.15); border:1px solid rgba(255,107,107,0.4); color:#ff6b6b; border-radius:10px; font-size:0.9rem; font-weight:600; cursor:pointer;">Sign Out</button>
-      </div>
-    </div>
-  </div>
-
   <!-- Change Password Modal -->
   <div id="cpw-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:9999; align-items:center; justify-content:center;">
     <div style="background:var(--panel2,#1a1635); border:1px solid var(--border); border-radius:16px; padding:2rem; width:100%; max-width:420px; margin:1rem; position:relative;">
@@ -1422,18 +1404,6 @@
       window.location.reload();
     }
 
-    function showLogoutConfirm() {
-      const dd = document.getElementById('profile-dropdown');
-      if (dd) dd.classList.remove('active');
-      const modal = document.getElementById('logout-confirm-modal');
-      if (modal) modal.style.display = 'flex';
-    }
-
-    function closeLogoutModal() {
-      const modal = document.getElementById('logout-confirm-modal');
-      if (modal) modal.style.display = 'none';
-    }
-
     // Close CPW modal on backdrop click
     document.getElementById('cpw-modal').addEventListener('click', function(e) {
       if (e.target === this) closeCPWModal();
@@ -1445,7 +1415,7 @@
       if (!el) return;
       const meets = JSON.parse(localStorage.getItem('adminMeets') || '[]');
       const upcoming = meets
-        .filter(m => m.date && new Date(m.date + (m.time ? 'T' + m.time : '')) >= new Date())
+        .filter(m => m.date && new Date(m.date + (m.time ? 'T' + m.time : '')) >= new Date() && m.published !== false)
         .sort((a,b) => new Date(a.date) - new Date(b.date))
         .slice(0, 4);
       if (!upcoming.length) {
@@ -1527,45 +1497,12 @@
       `).join('');
     }
 
-    // ==================== HERO STATS (REAL SUPABASE DATA) ====================
-    async function loadHeroStats() {
-      if (!window.supabaseConfig) return;
-      const client = window.supabaseConfig.getClient();
-      if (!client) return;
-
-      function countUp(id, target) {
-        const el = document.getElementById(id);
-        if (!el) return;
-        if (target === 0) { el.textContent = '0'; el.classList.add('updated'); return; }
-        const duration = 1400;
-        const start = Date.now();
-        const tick = () => {
-          const p = Math.min((Date.now() - start) / duration, 1);
-          const ease = 1 - Math.pow(1 - p, 3);
-          el.textContent = Math.floor(ease * target).toLocaleString('en-IN') + '+';
-          if (p < 1) requestAnimationFrame(tick);
-          else { el.textContent = target.toLocaleString('en-IN') + '+'; el.classList.add('updated'); }
-        };
-        requestAnimationFrame(tick);
-      }
-
-      try {
-        const [usersRes, enrollRes, completedRes, feedbackRes] = await Promise.all([
-          client.from('user_profiles').select('id', { count: 'exact', head: true }),
-          client.from('course_registrations').select('id', { count: 'exact', head: true }),
-          client.from('course_registrations').select('id', { count: 'exact', head: true }).eq('status', 'completed'),
-          client.from('feedback').select('id', { count: 'exact', head: true })
-        ]);
-        countUp('fc-students',    usersRes.count    || 0);
-        countUp('fc-enrollments', enrollRes.count   || 0);
-        countUp('fc-completions', completedRes.count || 0);
-        countUp('fc-feedback',    feedbackRes.count  || 0);
-      } catch(e) {
-        ['fc-students','fc-enrollments','fc-completions','fc-feedback'].forEach(id => {
-          const el = document.getElementById(id);
-          if (el) el.textContent = '—';
-        });
-      }
+    // ==================== HERO STAT CARDS — STATIC PULSE ANIMATION ====================
+    function loadHeroStats() {
+      // Static values — add pulse animation on load for visual engagement
+      document.querySelectorAll('.f-card .fc-val').forEach((el, i) => {
+        setTimeout(() => el.classList.add('updated'), 400 + i * 150);
+      });
     }
 
     // ==================== TESTIMONIALS (REAL SUPABASE DATA) ====================

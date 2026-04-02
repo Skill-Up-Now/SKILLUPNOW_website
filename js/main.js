@@ -23,25 +23,49 @@ class SkillUpNowApp {
 
   // ==================== CUSTOM CURSOR ====================
   setupCursor() {
+    // Skip on touch devices
+    if (window.matchMedia('(hover: none) and (pointer: coarse)').matches) return;
+
     const cursor = document.getElementById('cursor');
     const cursorRing = document.getElementById('cursor-ring');
+    if (!cursor || !cursorRing) return;
 
-    if (cursor && cursorRing) {
-      document.addEventListener('mousemove', (e) => {
-        cursor.style.left = e.clientX + 'px';
-        cursor.style.top = e.clientY + 'px';
-        cursorRing.style.left = e.clientX + 'px';
-        cursorRing.style.top = e.clientY + 'px';
-      });
+    let mx = 0, my = 0;
+    let rx = 0, ry = 0;
 
-      document.addEventListener('mousedown', () => {
-        cursor.style.transform = 'translate(-50%, -50%) scale(0.8)';
-      });
+    document.addEventListener('mousemove', (e) => {
+      mx = e.clientX;
+      my = e.clientY;
+      cursor.style.left = mx + 'px';
+      cursor.style.top  = my + 'px';
+    });
 
-      document.addEventListener('mouseup', () => {
-        cursor.style.transform = 'translate(-50%, -50%) scale(1)';
-      });
-    }
+    // Ring follows with smooth lag via rAF
+    const animateRing = () => {
+      rx += (mx - rx) * 0.15;
+      ry += (my - ry) * 0.15;
+      cursorRing.style.left = rx + 'px';
+      cursorRing.style.top  = ry + 'px';
+      requestAnimationFrame(animateRing);
+    };
+    animateRing();
+
+    // Hover detection for interactive elements
+    document.addEventListener('mouseover', (e) => {
+      if (e.target.closest('a, button, [role="button"], input, select, textarea, label, .btn-grad, .course-card, .nav-item')) {
+        document.body.classList.add('cursor-hover');
+      }
+    });
+    document.addEventListener('mouseout', (e) => {
+      if (e.target.closest('a, button, [role="button"], input, select, textarea, label, .btn-grad, .course-card, .nav-item')) {
+        document.body.classList.remove('cursor-hover');
+      }
+    });
+
+    document.addEventListener('mousedown', () => document.body.classList.add('cursor-click'));
+    document.addEventListener('mouseup',   () => document.body.classList.remove('cursor-click'));
+    document.addEventListener('mouseleave', () => { cursor.style.opacity = '0'; cursorRing.style.opacity = '0'; });
+    document.addEventListener('mouseenter', () => { cursor.style.opacity = '1'; cursorRing.style.opacity = '1'; });
   }
 
   // ==================== MODAL FUNCTIONALITY ====================

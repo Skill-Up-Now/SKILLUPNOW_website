@@ -889,12 +889,15 @@
     <div class="section" id="sec-meets">
       <div class="grid-2" style="gap: 1.5rem;">
         <div class="panel">
-          <div class="panel-header"><div class="panel-title">Schedule a Google Meet</div></div>
+          <div class="panel-header">
+            <div class="panel-title">Schedule a Google Meet</div>
+            <button class="btn btn-outline btn-sm" onclick="autoFillAgenda()" title="Auto-generate agenda from title & course">✨ Auto-Agenda</button>
+          </div>
           <div class="panel-body">
             <div class="form-grid">
               <div class="form-group">
                 <label>Meeting Title</label>
-                <input type="text" id="meetTitle" placeholder="e.g. AWS Live Q&A Session">
+                <input type="text" id="meetTitle" placeholder="e.g. AWS Live Q&A Session" oninput="clearMeetError()">
               </div>
               <div class="form-group">
                 <label>Related Course</label>
@@ -920,18 +923,27 @@
                 </select>
               </div>
               <div class="form-group">
-                <label>Meet Link (Google Meet URL)</label>
-                <input type="url" id="meetLink" placeholder="https://meet.google.com/xxx-xxxx-xxx">
+                <label>Google Meet Link</label>
+                <input type="url" id="meetLink" placeholder="https://meet.google.com/xxx-xxxx-xxx" oninput="validateMeetLink(this)">
+                <span id="meetLinkStatus" style="font-size:0.75rem;margin-top:0.25rem;display:none;"></span>
               </div>
             </div>
             <div class="form-group" style="margin-bottom: 1rem;">
               <label>Participants (emails, comma separated)</label>
-              <textarea id="meetParticipants" placeholder="student1@gmail.com, student2@gmail.com…"></textarea>
+              <textarea id="meetParticipants" placeholder="student1@gmail.com, student2@gmail.com…" style="min-height:60px;"></textarea>
             </div>
             <div class="form-group" style="margin-bottom: 1rem;">
-              <label>Notes / Agenda</label>
-              <textarea id="meetNotes" placeholder="Topics to be covered…"></textarea>
+              <label style="display:flex;justify-content:space-between;align-items:center;">
+                Agenda <span style="font-size:0.72rem;color:var(--txt3);font-weight:400;">(auto-generated or manual)</span>
+              </label>
+              <textarea id="meetNotes" placeholder="Click ✨ Auto-Agenda to generate, or type manually…" style="min-height:80px;"></textarea>
             </div>
+            <!-- Publish toggle -->
+            <label style="display:flex;align-items:center;gap:0.6rem;margin-bottom:1.2rem;cursor:pointer;font-size:0.88rem;font-weight:600;color:var(--txt2);">
+              <input type="checkbox" id="meetPublish" style="width:16px;height:16px;accent-color:var(--v1);">
+              Publish to website (visible to students)
+            </label>
+            <div id="meetError" style="display:none;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:8px;padding:0.6rem 1rem;font-size:0.82rem;color:#f87171;margin-bottom:1rem;"></div>
             <button class="btn btn-primary" onclick="saveMeet()">📅 Schedule Meet</button>
           </div>
         </div>
@@ -943,9 +955,9 @@
           </div>
           <div class="tbl-wrap">
             <table>
-              <thead><tr><th>Title</th><th>Date & Time</th><th>Duration</th><th>Actions</th></tr></thead>
+              <thead><tr><th>Title</th><th>Date & Time</th><th>Duration</th><th>Published</th><th>Actions</th></tr></thead>
               <tbody id="meetsTbl">
-                <tr><td colspan="4"><div class="loading-row"><div class="spin"></div> Loading…</div></td></tr>
+                <tr><td colspan="5"><div class="loading-row"><div class="spin"></div> Loading…</div></td></tr>
               </tbody>
             </table>
           </div>
@@ -955,31 +967,87 @@
 
     <!-- ══ SECTION: Reports ══ -->
     <div class="section" id="sec-reports">
+
+      <!-- Quick Report Cards -->
       <div class="grid-3" style="margin-bottom: 1.5rem;">
-        <div class="panel" style="padding: 1.5rem;">
-          <div style="font-size: 2rem; margin-bottom: 0.75rem;">📈</div>
-          <div style="font-weight: 700; margin-bottom: 0.4rem;">Revenue Report</div>
-          <div style="font-size: 0.82rem; color: var(--txt4); margin-bottom: 1rem;">Monthly breakdown of all payments and EMIs</div>
-          <button class="btn btn-primary btn-sm" onclick="generateReport('revenue')">Generate & Export</button>
+        <div class="panel" style="padding: 1.5rem; cursor: pointer;" onclick="showReportPreview('revenue')">
+          <div style="font-size: 1.8rem; margin-bottom: 0.6rem;">📈</div>
+          <div style="font-weight: 700; margin-bottom: 0.3rem; color: var(--txt);">Revenue Report</div>
+          <div style="font-size: 0.8rem; color: var(--txt4); margin-bottom: 1rem; line-height: 1.5;">Monthly breakdown of all payments and EMIs</div>
+          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            <button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); showReportPreview('revenue')">👁 Preview</button>
+            <button class="btn btn-outline btn-sm" onclick="event.stopPropagation(); generateReport('revenue')">⬇ Export</button>
+          </div>
         </div>
-        <div class="panel" style="padding: 1.5rem;">
-          <div style="font-size: 2rem; margin-bottom: 0.75rem;">👥</div>
-          <div style="font-weight: 700; margin-bottom: 0.4rem;">User Activity</div>
-          <div style="font-size: 0.82rem; color: var(--txt4); margin-bottom: 1rem;">Registrations, logins, and engagement stats</div>
-          <button class="btn btn-primary btn-sm" onclick="generateReport('users')">Generate & Export</button>
+        <div class="panel" style="padding: 1.5rem; cursor: pointer;" onclick="showReportPreview('users')">
+          <div style="font-size: 1.8rem; margin-bottom: 0.6rem;">👥</div>
+          <div style="font-weight: 700; margin-bottom: 0.3rem; color: var(--txt);">User Activity</div>
+          <div style="font-size: 0.8rem; color: var(--txt4); margin-bottom: 1rem; line-height: 1.5;">Registrations, logins, and engagement stats</div>
+          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            <button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); showReportPreview('users')">👁 Preview</button>
+            <button class="btn btn-outline btn-sm" onclick="event.stopPropagation(); generateReport('users')">⬇ Export</button>
+          </div>
         </div>
-        <div class="panel" style="padding: 1.5rem;">
-          <div style="font-size: 2rem; margin-bottom: 0.75rem;">📚</div>
-          <div style="font-weight: 700; margin-bottom: 0.4rem;">Course Completion</div>
-          <div style="font-size: 0.82rem; color: var(--txt4); margin-bottom: 1rem;">Enrollment and completion rates per course</div>
-          <button class="btn btn-primary btn-sm" onclick="generateReport('courses')">Generate & Export</button>
+        <div class="panel" style="padding: 1.5rem; cursor: pointer;" onclick="showReportPreview('courses')">
+          <div style="font-size: 1.8rem; margin-bottom: 0.6rem;">📚</div>
+          <div style="font-weight: 700; margin-bottom: 0.3rem; color: var(--txt);">Course Completion</div>
+          <div style="font-size: 0.8rem; color: var(--txt4); margin-bottom: 1rem; line-height: 1.5;">Enrollment and completion rates per course</div>
+          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            <button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); showReportPreview('courses')">👁 Preview</button>
+            <button class="btn btn-outline btn-sm" onclick="event.stopPropagation(); generateReport('courses')">⬇ Export</button>
+          </div>
+        </div>
+        <div class="panel" style="padding: 1.5rem; cursor: pointer;" onclick="showReportPreview('transactions')">
+          <div style="font-size: 1.8rem; margin-bottom: 0.6rem;">💳</div>
+          <div style="font-weight: 700; margin-bottom: 0.3rem; color: var(--txt);">Transactions</div>
+          <div style="font-size: 0.8rem; color: var(--txt4); margin-bottom: 1rem; line-height: 1.5;">Full payment history with status breakdown</div>
+          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            <button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); showReportPreview('transactions')">👁 Preview</button>
+            <button class="btn btn-outline btn-sm" onclick="event.stopPropagation(); exportTransactionsCSV()">⬇ Export</button>
+          </div>
+        </div>
+        <div class="panel" style="padding: 1.5rem; cursor: pointer;" onclick="showReportPreview('meets')">
+          <div style="font-size: 1.8rem; margin-bottom: 0.6rem;">📅</div>
+          <div style="font-weight: 700; margin-bottom: 0.3rem; color: var(--txt);">Google Meet Report</div>
+          <div style="font-size: 0.8rem; color: var(--txt4); margin-bottom: 1rem; line-height: 1.5;">Scheduled sessions, attendance, and publishing status</div>
+          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            <button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); showReportPreview('meets')">👁 Preview</button>
+            <button class="btn btn-outline btn-sm" onclick="event.stopPropagation(); generateReport('meets')">⬇ Export</button>
+          </div>
+        </div>
+        <div class="panel" style="padding: 1.5rem; cursor: pointer;" onclick="showReportPreview('emi')">
+          <div style="font-size: 1.8rem; margin-bottom: 0.6rem;">⏳</div>
+          <div style="font-weight: 700; margin-bottom: 0.3rem; color: var(--txt);">EMI & Fee Enquiries</div>
+          <div style="font-size: 0.8rem; color: var(--txt4); margin-bottom: 1rem; line-height: 1.5;">EMI applications and fee enquiry pipeline</div>
+          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            <button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); showReportPreview('emi')">👁 Preview</button>
+            <button class="btn btn-outline btn-sm" onclick="event.stopPropagation(); generateReport('emi')">⬇ Export</button>
+          </div>
         </div>
       </div>
 
+      <!-- Inline Report Preview Panel -->
+      <div class="panel" id="reportPreviewPanel" style="display: none; margin-bottom: 1.5rem;">
+        <div class="panel-header">
+          <div class="panel-title" id="reportPreviewTitle">Report Preview</div>
+          <div style="display: flex; gap: 0.5rem;">
+            <button class="btn btn-primary btn-sm" id="reportExportBtn" onclick="generateReport(currentReportType)">⬇ Export CSV</button>
+            <button class="btn btn-outline btn-sm" onclick="document.getElementById('reportPreviewPanel').style.display='none'">✕ Close</button>
+          </div>
+        </div>
+        <div class="tbl-wrap">
+          <table id="reportPreviewTable">
+            <thead id="reportPreviewHead"></thead>
+            <tbody id="reportPreviewBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Custom Export -->
       <div class="panel">
         <div class="panel-header">
-          <div class="panel-title">Report Filters</div>
-          <button class="btn btn-primary btn-sm" onclick="generateReport('custom')">Export Filtered CSV</button>
+          <div class="panel-title">Custom Date-Range Export</div>
+          <button class="btn btn-primary btn-sm" onclick="generateReport('custom')">⬇ Export Filtered CSV</button>
         </div>
         <div class="panel-body">
           <div class="form-grid">
@@ -989,8 +1057,10 @@
                 <option value="revenue">Revenue</option>
                 <option value="users">User Activity</option>
                 <option value="courses">Course Completion</option>
+                <option value="transactions">Transactions</option>
                 <option value="emi">EMI Applications</option>
                 <option value="enquiries">Fee Enquiries</option>
+                <option value="meets">Google Meets</option>
               </select>
             </div>
             <div class="form-group">
@@ -1009,8 +1079,8 @@
               </select>
             </div>
           </div>
-          <div style="padding: 1rem; background: rgba(124,92,252,0.06); border-radius: var(--r1); font-size: 0.82rem; color: var(--txt3);">
-            ℹ️ Reports will be downloaded as files. Data is pulled from your Supabase tables.
+          <div style="padding: 0.9rem 1rem; background: rgba(124,92,252,0.06); border-radius: var(--r1); font-size: 0.82rem; color: var(--txt3);">
+            ℹ️ Data is pulled from Supabase. Demo data used when DB is unavailable.
           </div>
         </div>
       </div>
@@ -1159,6 +1229,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../config/supabase-config.js"></script>
+<script src="../js/google-meet.js"></script>
 <script>
 /* ── Globals ── */
 const sb = window.supabaseConfig;
@@ -1856,71 +1927,126 @@ function exportTransactionsCSV() {
 
 /* ── Google Meet ── */
 function loadMeets() {
-  const meets = JSON.parse(localStorage.getItem('adminMeets') || '[]');
+  const meets = window.GoogleMeetModule ? window.GoogleMeetModule.loadAllMeets() : JSON.parse(localStorage.getItem('adminMeets') || '[]');
   const el = document.getElementById('meetsTbl');
   if (!el) return;
-  if (!meets.length) { el.innerHTML = `<tr><td colspan="4" style="text-align:center;padding:2rem;color:var(--txt4)">No meets scheduled yet</td></tr>`; return; }
+  if (!meets.length) { el.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--txt4)">No meets scheduled yet</td></tr>`; return; }
   el.innerHTML = meets.map((m, i) => `
     <tr>
       <td>
         <strong style="color:var(--txt);">${m.title}</strong>
-        ${m.link ? `<br><a href="${m.link}" target="_blank" style="font-size:0.75rem; color:var(--v2);">${m.link.substring(0,40)}…</a>` : ''}
+        ${m.course ? `<br><span style="font-size:0.75rem;color:var(--txt3);">${m.course}</span>` : ''}
+        ${m.link ? `<br><a href="${m.link}" target="_blank" style="font-size:0.75rem;color:var(--v2);">🎥 Join Meet</a>` : ''}
       </td>
-      <td>${m.date} at ${m.time}</td>
+      <td>${m.date} at ${m.time || '—'}</td>
       <td>${m.duration} min</td>
-      <td style="display:flex;gap:0.4rem;">
-        ${m.link ? `<a href="${m.link}" target="_blank" class="btn btn-primary btn-sm">▶ Join</a>` : ''}
-        <button class="btn btn-danger btn-sm" onclick="deleteMeet(${i})">🗑</button>
+      <td>
+        <label style="display:flex;align-items:center;gap:0.4rem;cursor:pointer;">
+          <input type="checkbox" ${m.published ? 'checked' : ''} onchange="toggleMeetPublish(${i})" style="accent-color:var(--v1);">
+          <span style="font-size:0.75rem;color:${m.published ? '#4ade80' : 'var(--txt4)'};">${m.published ? 'Live' : 'Draft'}</span>
+        </label>
       </td>
+      <td><button class="btn btn-danger btn-sm" onclick="deleteMeet(${i})" title="Delete">🗑</button></td>
     </tr>
   `).join('');
 
   // Update dashboard meets count
-  const futureMeets = meets.filter(m => new Date(m.date + ' ' + m.time) >= new Date()).length;
+  const now = new Date();
+  const futureMeets = meets.filter(m => new Date(m.date + 'T' + (m.time || '00:00')) >= now).length;
   const statEl = document.getElementById('stat-meets');
   if (statEl) statEl.textContent = futureMeets;
 }
 
+/* ── Auto-fill agenda from title + course + date ── */
+function autoFillAgenda() {
+  const title  = document.getElementById('meetTitle')?.value.trim();
+  const courseEl = document.getElementById('meetCourse');
+  const course = courseEl?.options[courseEl.selectedIndex]?.text || '';
+  const date   = document.getElementById('meetDate')?.value;
+  if (!title && !course) { showToast('Enter a title or select a course first', 'err'); return; }
+  const agenda = window.GoogleMeetModule.generateAgenda(title, course, date);
+  const notesEl = document.getElementById('meetNotes');
+  if (notesEl) { notesEl.value = agenda; notesEl.style.borderColor = 'var(--v1)'; setTimeout(() => notesEl.style.borderColor = '', 1500); }
+  showToast('Agenda generated!', 'ok');
+}
+
+/* ── Validate Meet URL inline ── */
+function validateMeetLink(input) {
+  const status = document.getElementById('meetLinkStatus');
+  if (!status) return;
+  const val = input.value.trim();
+  if (!val) { status.style.display = 'none'; return; }
+  const meetId = window.GoogleMeetModule.parseMeetUrl(val);
+  if (meetId) {
+    status.style.display = 'block';
+    status.style.color = '#4ade80';
+    status.textContent = '✓ Valid Meet link · ID: ' + meetId;
+  } else {
+    status.style.display = 'block';
+    status.style.color = '#f87171';
+    status.textContent = '✗ Paste a valid https://meet.google.com/xxx-xxxx-xxx link';
+  }
+}
+
+function clearMeetError() {
+  const el = document.getElementById('meetError');
+  if (el) el.style.display = 'none';
+}
+
 function saveMeet() {
   const title = document.getElementById('meetTitle')?.value.trim();
-  const date = document.getElementById('meetDate')?.value;
-  const time = document.getElementById('meetTime')?.value;
-  if (!title || !date || !time) { showToast('Title, date and time are required', 'err'); return; }
+  const date  = document.getElementById('meetDate')?.value;
+  const time  = document.getElementById('meetTime')?.value;
+
+  const errEl = document.getElementById('meetError');
+  if (!title || !date || !time) {
+    if (errEl) { errEl.textContent = 'Meeting title, date and time are required.'; errEl.style.display = 'block'; }
+    return;
+  }
+  if (errEl) errEl.style.display = 'none';
 
   const courseEl = document.getElementById('meetCourse');
-  const meet = {
+  const link = document.getElementById('meetLink')?.value.trim() || '';
+
+  const meetData = {
     title,
     course: courseEl?.options[courseEl.selectedIndex]?.text || '',
     date,
     time,
     duration: document.getElementById('meetDuration')?.value || 60,
-    link: document.getElementById('meetLink')?.value.trim() || '',
+    link,
     participants: document.getElementById('meetParticipants')?.value.trim() || '',
     notes: document.getElementById('meetNotes')?.value.trim() || '',
-    created: new Date().toISOString(),
+    publishToWebsite: document.getElementById('meetPublish')?.checked || false,
   };
 
-  const meets = JSON.parse(localStorage.getItem('adminMeets') || '[]');
-  meets.unshift(meet);
-  localStorage.setItem('adminMeets', JSON.stringify(meets));
-  showToast('Meet scheduled!', 'ok');
+  window.GoogleMeetModule.saveMeet(meetData);
+  showToast('Meet scheduled' + (meetData.publishToWebsite ? ' and published!' : '!'), 'ok');
 
   // Reset form
   ['meetTitle', 'meetDate', 'meetTime', 'meetLink', 'meetParticipants', 'meetNotes'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.value = '';
   });
+  const publishEl = document.getElementById('meetPublish');
+  if (publishEl) publishEl.checked = false;
+  const linkStatus = document.getElementById('meetLinkStatus');
+  if (linkStatus) linkStatus.style.display = 'none';
   setDefaultDates();
   loadMeets();
 }
 
 function deleteMeet(idx) {
   if (!confirm('Remove this meet?')) return;
-  const meets = JSON.parse(localStorage.getItem('adminMeets') || '[]');
-  meets.splice(idx, 1);
-  localStorage.setItem('adminMeets', JSON.stringify(meets));
+  window.GoogleMeetModule.deleteMeet(idx);
   loadMeets();
   showToast('Meet removed', 'ok');
+}
+
+function toggleMeetPublish(idx) {
+  const isPublished = window.GoogleMeetModule.togglePublish(idx);
+  loadMeets();
+  showToast(isPublished ? 'Published to website!' : 'Unpublished from website', 'ok');
 }
 
 /* ── Reports ── */

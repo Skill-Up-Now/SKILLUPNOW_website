@@ -73,32 +73,46 @@
     max-width: 540px;
     margin: 0 auto;
   }
-  
+
   section {
     padding: 3rem 3vw;
   }
-  
+
   h1 {
     font-size: clamp(1.5rem, 3.5vw, 2.5rem) !important;
   }
-  
+
   h2 {
     font-size: clamp(1.2rem, 2.5vw, 2rem) !important;
   }
-  
+
   .form-row,
   .grid-2,
   .grid-3,
   .grid-4 {
     grid-template-columns: 1fr !important;
   }
-  
+
   .flex-row,
   .flex-wrap {
     flex-direction: column !important;
   }
-  
+
   .nav-links {
+    display: none !important;
+  }
+
+  .mobile-menu-toggle {
+    display: flex !important;
+  }
+}
+
+/* Show hamburger on tablets too */
+@media (min-width: 768px) and (max-width: 991px) {
+  .mobile-menu-toggle {
+    display: flex !important;
+  }
+  .nav-links:not(.mobile-open) {
     display: none !important;
   }
 }
@@ -141,24 +155,34 @@
   
   /* Navigation */
   nav {
-    padding: 0.8rem 1rem !important;
-    height: auto !important;
-    flex-wrap: wrap;
+    padding: 0 1rem !important;
+    height: 60px !important;
+    flex-wrap: nowrap !important;
   }
-  
+
   .nav-logo {
     font-size: 1rem !important;
-    width: 100%;
-    margin-bottom: 0.5rem;
+    flex: 1 !important;
   }
-  
+
   .nav-links {
     display: none !important;
   }
-  
+
   .nav-actions {
-    width: 100%;
-    gap: 0.4rem !important;
+    gap: 0.35rem !important;
+  }
+
+  .mobile-menu-toggle {
+    display: flex !important;
+  }
+
+  .nav-links.mobile-open {
+    top: 60px !important;
+  }
+
+  .breadcrumb-bar {
+    top: 60px !important;
   }
   
   .hero-stats {
@@ -174,14 +198,23 @@
     font-size: 0.65rem !important;
   }
   
+  /* Animation (visual) comes FIRST on mobile, buttons below */
   .hero-visual {
-    display: none !important;
+    display: flex !important;
+    width: 320px !important;
+    height: 320px !important;
+    margin: 0 auto !important;
+    order: 1 !important;
   }
 
   .hero {
     grid-template-columns: 1fr !important;
     gap: 2rem !important;
     padding: 2rem 1rem !important;
+  }
+
+  .hero-content {
+    order: 2 !important;
   }
 
   .hero-actions {

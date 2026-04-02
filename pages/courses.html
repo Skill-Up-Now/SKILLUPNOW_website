@@ -259,7 +259,7 @@
     }
   </script>
 </head>
-<body>
+<body data-breadcrumb="Courses">
   <div id="cursor"></div>
   <div id="cursor-ring"></div>
   <div class="mesh-bg"></div>
@@ -286,24 +286,8 @@
     <div class="nav-actions">
       <div id="profile-section" style="display: none; align-items: center; gap: 1rem; position: relative;">
         <button id="profile-btn" class="profile-icon-btn" title="View Profile">👤</button>
-        <div id="profile-dropdown" class="profile-dropdown">
-          <a href="profile.html" style="display: flex; align-items: center; gap: 0.8rem; padding: 1rem; text-decoration: none; color: var(--txt2); border-bottom: 1px solid var(--border); transition: all 0.25s;">
-            <span style="font-size: 1.2rem;">👤</span>
-            <div><div style="font-weight: 600; color: var(--txt);">My Profile</div><div style="font-size: 0.75rem; color: var(--txt4);">Manage account</div></div>
-          </a>
-          <a href="courses.html" style="display: flex; align-items: center; gap: 0.8rem; padding: 1rem; text-decoration: none; color: var(--txt2); border-bottom: 1px solid var(--border); transition: all 0.25s;">
-            <span style="font-size: 1.2rem;">📚</span>
-            <div><div style="font-weight: 600; color: var(--txt);">My Courses</div><div style="font-size: 0.75rem; color: var(--txt4);">Continue learning</div></div>
-          </a>
-          <a href="payment.html" style="display: flex; align-items: center; gap: 0.8rem; padding: 1rem; text-decoration: none; color: var(--txt2); border-bottom: 1px solid var(--border); transition: all 0.25s;">
-            <span style="font-size: 1.2rem;">💳</span>
-            <div><div style="font-weight: 600; color: var(--txt);">Payments</div><div style="font-size: 0.75rem; color: var(--txt4);">Track transactions</div></div>
-          </a>
-          <button onclick="window.profileNav.logout()" style="width: 100%; text-align: left; padding: 1rem; border: none; background: transparent; color: var(--txt2); cursor: pointer; display: flex; align-items: center; gap: 0.8rem; transition: all 0.25s;">
-            <span style="font-size: 1.2rem;">🚪</span>
-            <div><div style="font-weight: 600; color: var(--txt);">Logout</div><div style="font-size: 0.75rem; color: var(--txt4);">Sign out</div></div>
-          </button>
-        </div>
+        <!-- Dropdown injected by profile-nav.js -->
+        <div id="profile-dropdown" class="profile-dropdown"></div>
       </div>
       <button class="theme-icon-btn" id="theme-btn" onclick="if(window.themeManager)window.themeManager.toggleTheme();this.classList.add('spinning');setTimeout(()=>this.classList.remove('spinning'),400)" title="Toggle theme" aria-label="Toggle theme">☀️</button>
       <button class="nav-signin" id="signin-btn" onclick="openModal('login')">Sign In</button>
@@ -317,36 +301,14 @@
       <p style="text-align: center; color: var(--txt3); margin-bottom: 2rem; font-size: 1.05rem;">Choose from 48+ expertly-designed courses covering cloud, DevOps, AI, security, and more.</p>
 
       <div style="display: grid; grid-template-columns: 1fr 3fr; gap: 2rem; margin-bottom: 3rem;">
-        <!-- Sidebar Filters -->
+        <!-- Vertical Filter Bar -->
         <div class="filter-sidebar">
-          <h3 style="margin-top: 0;">Filters</h3>
+          <h3 style="margin-top: 0; font-size: 0.95rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--txt3); margin-bottom: 1.5rem;">Filters</h3>
 
           <!-- Search -->
-          <input type="text" id="searchBox" class="search-box" placeholder="Search courses...">
-
-          <!-- Category Filter -->
-          <div class="filter-group">
-            <h4>Category</h4>
-            <div class="filter-option">
-              <input type="checkbox" id="cat-cloud" value="cloud" onchange="applyFilters()">
-              <label for="cat-cloud">Cloud Computing</label>
-            </div>
-            <div class="filter-option">
-              <input type="checkbox" id="cat-devops" value="devops" onchange="applyFilters()">
-              <label for="cat-devops">DevOps & Containers</label>
-            </div>
-            <div class="filter-option">
-              <input type="checkbox" id="cat-ai" value="ai" onchange="applyFilters()">
-              <label for="cat-ai">AI & Machine Learning</label>
-            </div>
-            <div class="filter-option">
-              <input type="checkbox" id="cat-security" value="security" onchange="applyFilters()">
-              <label for="cat-security">Cybersecurity</label>
-            </div>
-            <div class="filter-option">
-              <input type="checkbox" id="cat-data" value="data" onchange="applyFilters()">
-              <label for="cat-data">Data Engineering</label>
-            </div>
+          <div style="position:relative; margin-bottom: 1.5rem;">
+            <span style="position:absolute;left:0.9rem;top:50%;transform:translateY(-50%);color:var(--txt4);font-size:0.9rem;">🔍</span>
+            <input type="text" id="searchBox" class="search-box" placeholder="Search courses..." style="padding-left: 2.4rem; margin-bottom: 0;" oninput="applyFilters()">
           </div>
 
           <!-- Level Filter -->
@@ -366,18 +328,52 @@
             </div>
           </div>
 
-          <button class="btn-outline" onclick="resetFilters()" style="width: 100%; margin-top: 1rem; border: 1.5px solid var(--border2);">Reset Filters</button>
+          <!-- Duration Filter -->
+          <div class="filter-group">
+            <h4>Duration</h4>
+            <div class="filter-option">
+              <input type="checkbox" id="dur-short" value="short" onchange="applyFilters()">
+              <label for="dur-short">Under 2 months</label>
+            </div>
+            <div class="filter-option">
+              <input type="checkbox" id="dur-med" value="medium" onchange="applyFilters()">
+              <label for="dur-med">2–4 months</label>
+            </div>
+            <div class="filter-option">
+              <input type="checkbox" id="dur-long" value="long" onchange="applyFilters()">
+              <label for="dur-long">5+ months</label>
+            </div>
+          </div>
+
+          <!-- Price Filter -->
+          <div class="filter-group">
+            <h4>Price Range</h4>
+            <div class="filter-option">
+              <input type="checkbox" id="price-low" value="low" onchange="applyFilters()">
+              <label for="price-low">Under ₹20,000</label>
+            </div>
+            <div class="filter-option">
+              <input type="checkbox" id="price-mid" value="mid" onchange="applyFilters()">
+              <label for="price-mid">₹20,000 – ₹30,000</label>
+            </div>
+            <div class="filter-option">
+              <input type="checkbox" id="price-high" value="high" onchange="applyFilters()">
+              <label for="price-high">Above ₹30,000</label>
+            </div>
+          </div>
+
+          <button class="btn-outline" onclick="resetFilters()" style="width: 100%; margin-top: 0.5rem; border: 1.5px solid var(--border2);">↺ Reset</button>
         </div>
 
         <!-- Courses Grid -->
         <div>
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-            <p id="courseCount" style="color: var(--txt3); margin: 0;">Showing 12 courses</p>
-            <select id="sortBy" onchange="applySort()" style="background: var(--panel); border: 1.5px solid var(--border); color: var(--txt); padding: 0.7rem 1rem; border-radius: var(--r1);">
-              <option value="popular">Most Popular</option>
-              <option value="newest">Newest</option>
-              <option value="rating">Top Rated</option>
-            </select>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 0.75rem;">
+            <p id="courseCount" style="color: var(--txt3); margin: 0; font-size: 0.88rem;">Loading courses…</p>
+            <div style="display: flex; gap: 0.5rem;">
+              <button onclick="setSortAndRender('popular')" id="sort-popular" class="sort-chip sort-chip-active" style="padding:0.4rem 0.9rem;border-radius:50px;border:1px solid var(--border2);background:rgba(124,92,252,0.15);color:var(--v2);font-size:0.78rem;font-weight:600;cursor:pointer;transition:all 0.2s;">Popular</button>
+              <button onclick="setSortAndRender('newest')" id="sort-newest" class="sort-chip" style="padding:0.4rem 0.9rem;border-radius:50px;border:1px solid var(--border);background:transparent;color:var(--txt3);font-size:0.78rem;font-weight:600;cursor:pointer;transition:all 0.2s;">Newest</button>
+              <button onclick="setSortAndRender('rating')" id="sort-rating" class="sort-chip" style="padding:0.4rem 0.9rem;border-radius:50px;border:1px solid var(--border);background:transparent;color:var(--txt3);font-size:0.78rem;font-weight:600;cursor:pointer;transition:all 0.2s;">Top Rated</button>
+            </div>
           </div>
 
           <div class="courses-grid" id="coursesGrid">
@@ -565,42 +561,58 @@
       }
     }
 
+    function setSortAndRender(sort) {
+      currentSort = sort;
+      // Update chip states
+      document.querySelectorAll('.sort-chip').forEach(btn => {
+        const isActive = btn.id === 'sort-' + sort;
+        btn.style.background = isActive ? 'rgba(124,92,252,0.15)' : 'transparent';
+        btn.style.color = isActive ? 'var(--v2)' : 'var(--txt3)';
+        btn.style.borderColor = isActive ? 'var(--border2)' : 'var(--border)';
+      });
+      applyFilters();
+    }
+
     function applyFilters() {
       const searchTerm = document.getElementById('searchBox').value.toLowerCase();
-      const selectedCategories = Array.from(document.querySelectorAll('[id^="cat-"]:checked')).map(el => el.value);
       const selectedLevels = Array.from(document.querySelectorAll('[id^="level-"]:checked')).map(el => el.value);
+      const selectedDurations = Array.from(document.querySelectorAll('[id^="dur-"]:checked')).map(el => el.value);
+      const selectedPrices = Array.from(document.querySelectorAll('[id^="price-"]:checked')).map(el => el.value);
 
       filteredCourses = courses.filter(course => {
-        const desc = course.description || '';
         const courseName = (course.name || '').toLowerCase();
-        const matchesSearch = !searchTerm ||
-          courseName.includes(searchTerm) ||
-          desc.toLowerCase().includes(searchTerm);
-        const matchesCategory = selectedCategories.length === 0 || selectedCategories.includes(course.category);
-        const matchesLevel = selectedLevels.length === 0 || selectedLevels.includes(course.level);
-        return matchesSearch && matchesCategory && matchesLevel;
+        const desc = (course.description || '').toLowerCase();
+        const matchesSearch = !searchTerm || courseName.includes(searchTerm) || desc.includes(searchTerm);
+        const matchesLevel = selectedLevels.length === 0 || selectedLevels.includes((course.level || '').toLowerCase());
+        const dur = course.duration_months || 0;
+        const matchesDuration = selectedDurations.length === 0 || (
+          (selectedDurations.includes('short') && dur > 0 && dur < 2) ||
+          (selectedDurations.includes('medium') && dur >= 2 && dur <= 4) ||
+          (selectedDurations.includes('long') && dur > 4)
+        );
+        const price = Number(course.price || 0);
+        const matchesPrice = selectedPrices.length === 0 || (
+          (selectedPrices.includes('low') && price < 20000) ||
+          (selectedPrices.includes('mid') && price >= 20000 && price <= 30000) ||
+          (selectedPrices.includes('high') && price > 30000)
+        );
+        return matchesSearch && matchesLevel && matchesDuration && matchesPrice;
       });
 
-      applySort();
-    }
-
-    function applySort() {
-      currentSort = document.getElementById('sortBy').value;
       let sorted = [...filteredCourses];
-
       if (currentSort === 'rating') sorted.sort((a, b) => (b.rating || 0) - (a.rating || 0));
       else if (currentSort === 'newest') sorted.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
-      else sorted.sort((a, b) => (b.total_enrolled || 0) - (a.total_enrolled || 0)); // popular
-
+      else sorted.sort((a, b) => (b.total_enrolled || 0) - (a.total_enrolled || 0));
       renderCourses(sorted);
     }
+
+    function applySort() { applyFilters(); }
 
     function resetFilters() {
       document.querySelectorAll('input[type="checkbox"]').forEach(el => el.checked = false);
       document.getElementById('searchBox').value = '';
-      document.getElementById('sortBy').value = 'popular';
       filteredCourses = [...courses];
-      applySort();
+      setSortAndRender('popular');
     }
 
     async function enrollCourse(courseId, courseTitle) {

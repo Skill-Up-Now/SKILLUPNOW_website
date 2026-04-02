@@ -108,68 +108,199 @@ section, nav, footer {
   z-index: 1;
 }
 
-/* Custom Cursor */
-*, a, button {
+/* ── Custom Cursor ── */
+*, a, button, input, select, textarea, label {
   cursor: none !important;
 }
 
 #cursor {
-  width: 12px;
-  height: 12px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   background: var(--v1);
   position: fixed;
   pointer-events: none;
-  z-index: 9999;
+  z-index: 10001;
   transform: translate(-50%, -50%);
-  transition: width 0.2s, height 0.2s, background 0.2s;
+  transition: width 0.18s ease, height 0.18s ease, background 0.18s ease, opacity 0.2s;
   mix-blend-mode: screen;
+  will-change: left, top;
 }
 
 #cursor-ring {
-  width: 36px;
-  height: 36px;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
   border: 1.5px solid rgba(124, 92, 252, 0.5);
   position: fixed;
   pointer-events: none;
-  z-index: 9998;
+  z-index: 10000;
   transform: translate(-50%, -50%);
-  transition: all 0.12s ease;
+  transition: width 0.22s ease, height 0.22s ease, border-color 0.22s ease, opacity 0.2s;
+  will-change: left, top;
 }
 
-body:has(a:hover) #cursor,
-body:has(button:hover) #cursor {
-  width: 20px;
-  height: 20px;
+/* Hover: expand ring, enlarge dot */
+body.cursor-hover #cursor {
+  width: 14px;
+  height: 14px;
   background: var(--v2);
+  mix-blend-mode: screen;
+}
+body.cursor-hover #cursor-ring {
+  width: 48px;
+  height: 48px;
+  border-color: rgba(155, 125, 255, 0.65);
 }
 
-body:has(a:hover) #cursor-ring,
-body:has(button:hover) #cursor-ring {
-  width: 50px;
-  height: 50px;
-  border-color: rgba(155, 125, 255, 0.6);
+/* Click: shrink */
+body.cursor-click #cursor {
+  width: 5px;
+  height: 5px;
+}
+body.cursor-click #cursor-ring {
+  width: 26px;
+  height: 26px;
+  border-color: rgba(255, 255, 255, 0.6);
 }
 
-/* Dark cursor for light mode */
+/* Light mode */
 :root[data-theme="light"] #cursor {
-  background: #1a1630;
+  background: var(--accent, #5c3fb8);
   mix-blend-mode: normal;
 }
-
 :root[data-theme="light"] #cursor-ring {
-  border-color: rgba(26, 22, 48, 0.35);
+  border-color: rgba(92, 63, 184, 0.4);
+}
+:root[data-theme="light"] body.cursor-hover #cursor {
+  background: var(--accent2, #6b3fd8);
+}
+:root[data-theme="light"] body.cursor-hover #cursor-ring {
+  border-color: rgba(107, 63, 216, 0.55);
 }
 
-:root[data-theme="light"] body:has(a:hover) #cursor,
-:root[data-theme="light"] body:has(button:hover) #cursor {
-  background: #3d1fa8;
+/* Hide on touch devices */
+@media (hover: none) and (pointer: coarse) {
+  #cursor, #cursor-ring { display: none !important; }
+  *, a, button, input, select, textarea, label { cursor: auto !important; }
 }
 
-:root[data-theme="light"] body:has(a:hover) #cursor-ring,
-:root[data-theme="light"] body:has(button:hover) #cursor-ring {
-  border-color: rgba(61, 31, 168, 0.5);
+/* ── Hamburger Menu ── */
+.mobile-menu-toggle {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 36px;
+  height: 36px;
+  padding: 7px 6px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+  order: 99;
+}
+.mobile-menu-toggle:hover {
+  background: var(--panel);
+  border-color: var(--border2);
+}
+.mobile-menu-toggle span {
+  display: block;
+  width: 18px;
+  height: 2px;
+  background: var(--txt2);
+  border-radius: 2px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: center;
+}
+.mobile-menu-toggle.open span:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+.mobile-menu-toggle.open span:nth-child(2) {
+  opacity: 0;
+  transform: scaleX(0);
+}
+.mobile-menu-toggle.open span:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
+/* Mobile nav panel */
+.nav-links.mobile-open {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0 !important;
+  position: fixed !important;
+  top: 78px !important;
+  left: 0 !important;
+  right: 0 !important;
+  background: rgba(13, 11, 26, 0.97) !important;
+  backdrop-filter: blur(24px) !important;
+  border-bottom: 1px solid var(--border) !important;
+  padding: 0.5rem 5vw 1rem !important;
+  z-index: 98 !important;
+  animation: fadeDown 0.22s ease !important;
+}
+:root[data-theme="light"] .nav-links.mobile-open {
+  background: rgba(255, 255, 255, 0.97) !important;
+}
+.nav-links.mobile-open li {
+  list-style: none !important;
+  border-bottom: 1px solid var(--border) !important;
+}
+.nav-links.mobile-open li:last-child {
+  border-bottom: none !important;
+}
+.nav-links.mobile-open a {
+  display: block !important;
+  padding: 0.85rem 0 !important;
+  font-size: 0.95rem !important;
+  font-weight: 500 !important;
+  color: var(--txt2) !important;
+  letter-spacing: 0 !important;
+}
+.nav-links.mobile-open a::after { display: none !important; }
+.nav-links.mobile-open a:hover { color: var(--v2) !important; }
+
+/* ── Breadcrumb Bar ── */
+.breadcrumb-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.55rem 5vw;
+  background: rgba(13, 11, 26, 0.4);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(124, 92, 252, 0.07);
+  font-size: 0.75rem;
+  animation: fadeDown 0.3s ease;
+  position: sticky;
+  top: 78px;
+  z-index: 90;
+}
+:root[data-theme="light"] .breadcrumb-bar {
+  background: rgba(248, 246, 255, 0.8);
+  border-bottom-color: rgba(107, 63, 216, 0.08);
+}
+.bc-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.28rem;
+  color: var(--txt4);
+  text-decoration: none;
+  transition: color 0.2s;
+  font-weight: 500;
+}
+.bc-home:hover { color: var(--v2); }
+.bc-sep {
+  color: var(--txt4);
+  display: inline-flex;
+  align-items: center;
+  opacity: 0.45;
+}
+.bc-current {
+  color: var(--txt2);
+  font-weight: 600;
 }
 
 /* Navigation */
@@ -433,7 +564,10 @@ nav {
 
 .btn-grad:hover {
   transform: translateY(-3px);
-  box-shadow: 0 16px 48px rgba(124, 92, 252, 0.55);
+  box-shadow: 0 16px 48px rgba(124, 92, 252, 0.6), 0 0 0 2px rgba(124, 92, 252, 0.18), 0 0 28px rgba(124, 92, 252, 0.25);
+}
+.btn-grad:active {
+  transform: translateY(-1px);
 }
 
 .btn-outline {
