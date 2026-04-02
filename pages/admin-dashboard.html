@@ -496,19 +496,28 @@
       transition: all 0.12s ease;
     }
 
-    body:has(a:hover) #cursor,
-    body:has(button:hover) #cursor {
+    body.cursor-hover #cursor {
       width: 20px;
       height: 20px;
       background: #9b7dff;
     }
-
-    body:has(a:hover) #cursor-ring,
-    body:has(button:hover) #cursor-ring {
+    body.cursor-hover #cursor-ring {
       width: 50px;
       height: 50px;
       border-color: rgba(155, 125, 255, 0.6);
     }
+    body.cursor-hover #cursor-ring::after {
+      content: '';
+      position: absolute;
+      inset: -3px;
+      border-radius: 50%;
+      background: conic-gradient(rgba(124,92,252,0.5), transparent 60%, rgba(61,107,255,0.5), transparent);
+      animation: cursor-ring-rotate 2.4s linear infinite;
+      opacity: 1;
+    }
+    @keyframes cursor-ring-rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    body.cursor-click #cursor { width: 7px; height: 7px; }
+    body.cursor-click #cursor-ring { width: 28px; height: 28px; }
   </style>
   <script>
     if (window.location.protocol !== 'file:') {
@@ -720,22 +729,31 @@
 
     <!-- ══ SECTION: Courses ══ -->
     <div class="section" id="sec-courses">
+      <div class="stats-grid" id="course-stats-row" style="margin-bottom:1.5rem;">
+        <div class="stat-card"><div class="stat-icon">📚</div><div class="stat-val" id="cs-total">—</div><div class="stat-label">Total Courses</div></div>
+        <div class="stat-card"><div class="stat-icon">✅</div><div class="stat-val" id="cs-active">—</div><div class="stat-label">Active</div></div>
+        <div class="stat-card"><div class="stat-icon">⏸</div><div class="stat-val" id="cs-inactive">—</div><div class="stat-label">Inactive</div></div>
+        <div class="stat-card"><div class="stat-icon">💰</div><div class="stat-val" id="cs-avg-price">—</div><div class="stat-label">Avg Price</div></div>
+      </div>
       <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
         <div class="search-bar" style="flex: 1; max-width: 360px;">
           <span>🔍</span>
           <input type="text" placeholder="Search courses…" id="courseSearch" oninput="filterCourses()">
         </div>
-        <button class="btn btn-primary" onclick="openCourseModal()">+ Add Course</button>
+        <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+          <button class="btn btn-outline btn-sm" onclick="exportSectionCSV('courses')">⬇ Export CSV</button>
+          <button class="btn btn-primary" onclick="openCourseModal()">+ Add Course</button>
+        </div>
       </div>
 
       <div class="panel">
         <div class="tbl-wrap">
           <table>
             <thead>
-              <tr><th>Title</th><th>Category</th><th>Price</th><th>Duration</th><th>Status</th><th>Actions</th></tr>
+              <tr><th>Title</th><th>Category</th><th>Price</th><th>Duration</th><th>Level</th><th>Status</th><th>Actions</th></tr>
             </thead>
             <tbody id="coursesTbl">
-              <tr><td colspan="6"><div class="loading-row"><div class="spin"></div> Loading courses…</div></td></tr>
+              <tr><td colspan="7"><div class="loading-row"><div class="spin"></div> Loading courses…</div></td></tr>
             </tbody>
           </table>
         </div>
@@ -785,12 +803,18 @@
       </div>
 
       <div class="panel">
-        <div class="panel-header"><div class="panel-title">All Recordings</div></div>
+        <div class="panel-header">
+          <div class="panel-title">All Recordings</div>
+          <div style="display:flex;gap:0.5rem;">
+            <button class="btn btn-outline btn-sm" onclick="exportSectionCSV('recordings')">⬇ Export</button>
+            <button class="btn btn-outline btn-sm" onclick="loadRecordings()">↻ Refresh</button>
+          </div>
+        </div>
         <div class="tbl-wrap">
           <table>
-            <thead><tr><th>Title</th><th>Course</th><th>Type</th><th>Added</th><th>Actions</th></tr></thead>
+            <thead><tr><th>Title</th><th>Course</th><th>Type</th><th>Description</th><th>Added</th><th>Actions</th></tr></thead>
             <tbody id="recordingsTbl">
-              <tr><td colspan="5"><div class="loading-row"><div class="spin"></div> Loading…</div></td></tr>
+              <tr><td colspan="6"><div class="loading-row"><div class="spin"></div> Loading…</div></td></tr>
             </tbody>
           </table>
         </div>
@@ -799,17 +823,28 @@
 
     <!-- ══ SECTION: Users ══ -->
     <div class="section" id="sec-users">
+      <div class="stats-grid" style="margin-bottom:1.5rem;">
+        <div class="stat-card"><div class="stat-icon">👥</div><div class="stat-val" id="u-total">—</div><div class="stat-label">Total Users</div></div>
+        <div class="stat-card"><div class="stat-icon">🎓</div><div class="stat-val" id="u-students">—</div><div class="stat-label">Students</div></div>
+        <div class="stat-card"><div class="stat-icon">👩‍🏫</div><div class="stat-val" id="u-instructors">—</div><div class="stat-label">Instructors</div></div>
+        <div class="stat-card"><div class="stat-icon">⚙️</div><div class="stat-val" id="u-admins">—</div><div class="stat-label">Admins</div></div>
+      </div>
       <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
-        <div class="search-bar" style="flex: 1; max-width: 360px;">
-          <span>🔍</span>
-          <input type="text" placeholder="Search users…" id="userSearch" oninput="filterUsers()">
+        <div style="display:flex;gap:0.75rem;flex:1;flex-wrap:wrap;">
+          <div class="search-bar" style="flex: 1; max-width: 300px;">
+            <span>🔍</span>
+            <input type="text" placeholder="Search users…" id="userSearch" oninput="filterUsers()">
+          </div>
+          <select id="userRoleFilter" onchange="filterUsers()" style="background: var(--card); border: 1px solid var(--border); color: var(--txt2); padding: 0.55rem 0.9rem; border-radius: var(--r1); font-size: 0.85rem; cursor: pointer;">
+            <option value="">All Roles</option>
+            <option value="student">Student</option>
+            <option value="instructor">Instructor</option>
+            <option value="admin">Admin</option>
+          </select>
+          <input type="date" id="userDateFrom" onchange="filterUsers()" style="background: var(--card); border: 1px solid var(--border); color: var(--txt2); padding: 0.55rem 0.9rem; border-radius: var(--r1); font-size: 0.82rem;" title="Joined from">
+          <input type="date" id="userDateTo" onchange="filterUsers()" style="background: var(--card); border: 1px solid var(--border); color: var(--txt2); padding: 0.55rem 0.9rem; border-radius: var(--r1); font-size: 0.82rem;" title="Joined to">
         </div>
-        <select id="userRoleFilter" onchange="filterUsers()" style="background: var(--card); border: 1px solid var(--border); color: var(--txt2); padding: 0.55rem 0.9rem; border-radius: var(--r1); font-size: 0.85rem; cursor: pointer;">
-          <option value="">All Roles</option>
-          <option value="student">Student</option>
-          <option value="instructor">Instructor</option>
-          <option value="admin">Admin</option>
-        </select>
+        <button class="btn btn-outline btn-sm" onclick="exportSectionCSV('users')">⬇ Export CSV</button>
       </div>
       <div class="panel">
         <div class="tbl-wrap">
@@ -830,6 +865,12 @@
         <div class="stat-card"><div class="stat-icon">⏳</div><div class="stat-val" id="stat-pending-emi">—</div><div class="stat-label">Pending EMI</div></div>
         <div class="stat-card"><div class="stat-icon">✅</div><div class="stat-val" id="stat-approved-emi">—</div><div class="stat-label">Approved EMI</div></div>
         <div class="stat-card"><div class="stat-icon">❌</div><div class="stat-val" id="stat-rejected-emi">—</div><div class="stat-label">Rejected EMI</div></div>
+      </div>
+      <div style="display:flex;gap:0.75rem;align-items:center;flex-wrap:wrap;margin-bottom:1.5rem;">
+        <input type="date" id="feeFrom" onchange="loadFees()" style="background:var(--card);border:1px solid var(--border);color:var(--txt2);padding:0.5rem 0.85rem;border-radius:var(--r1);font-size:0.82rem;" title="From date">
+        <input type="date" id="feeTo" onchange="loadFees()" style="background:var(--card);border:1px solid var(--border);color:var(--txt2);padding:0.5rem 0.85rem;border-radius:var(--r1);font-size:0.82rem;" title="To date">
+        <button class="btn btn-outline btn-sm" onclick="exportSectionCSV('fees')">⬇ Export Fee Enquiries</button>
+        <button class="btn btn-outline btn-sm" onclick="exportSectionCSV('emi')">⬇ Export EMI</button>
       </div>
 
       <div class="panel" style="margin-bottom: 1.5rem;">
@@ -859,18 +900,28 @@
 
     <!-- ══ SECTION: Transactions ══ -->
     <div class="section" id="sec-transactions">
+      <div class="stats-grid" style="margin-bottom:1.5rem;">
+        <div class="stat-card"><div class="stat-icon">💳</div><div class="stat-val" id="tx-total-count">—</div><div class="stat-label">Total Transactions</div></div>
+        <div class="stat-card"><div class="stat-icon">✅</div><div class="stat-val" id="tx-completed">—</div><div class="stat-label">Completed</div></div>
+        <div class="stat-card"><div class="stat-icon">⏳</div><div class="stat-val" id="tx-pending">—</div><div class="stat-label">Pending</div></div>
+        <div class="stat-card"><div class="stat-icon">💰</div><div class="stat-val" id="tx-revenue">—</div><div class="stat-label">Total Collected</div></div>
+      </div>
       <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
-        <div class="search-bar" style="flex: 1; max-width: 360px;">
-          <span>🔍</span>
-          <input type="text" placeholder="Search by name, course…" id="txSearch" oninput="filterTransactions()">
+        <div style="display:flex;gap:0.75rem;flex:1;flex-wrap:wrap;">
+          <div class="search-bar" style="flex: 1; max-width: 280px;">
+            <span>🔍</span>
+            <input type="text" placeholder="Search by name, course…" id="txSearch" oninput="filterTransactions()">
+          </div>
+          <select id="txStatusFilter" onchange="filterTransactions()" style="background: var(--card); border: 1px solid var(--border); color: var(--txt2); padding: 0.55rem 0.9rem; border-radius: var(--r1); font-size: 0.85rem;">
+            <option value="">All Status</option>
+            <option value="completed">Completed</option>
+            <option value="pending">Pending</option>
+            <option value="failed">Failed</option>
+            <option value="refunded">Refunded</option>
+          </select>
+          <input type="date" id="txFrom" onchange="filterTransactions()" style="background:var(--card);border:1px solid var(--border);color:var(--txt2);padding:0.5rem 0.8rem;border-radius:var(--r1);font-size:0.82rem;" title="From">
+          <input type="date" id="txTo" onchange="filterTransactions()" style="background:var(--card);border:1px solid var(--border);color:var(--txt2);padding:0.5rem 0.8rem;border-radius:var(--r1);font-size:0.82rem;" title="To">
         </div>
-        <select id="txStatusFilter" onchange="filterTransactions()" style="background: var(--card); border: 1px solid var(--border); color: var(--txt2); padding: 0.55rem 0.9rem; border-radius: var(--r1); font-size: 0.85rem;">
-          <option value="">All Status</option>
-          <option value="completed">Completed</option>
-          <option value="pending">Pending</option>
-          <option value="failed">Failed</option>
-          <option value="refunded">Refunded</option>
-        </select>
         <button class="btn btn-outline btn-sm" onclick="exportTransactionsCSV()">⬇ Export CSV</button>
       </div>
       <div class="panel">
@@ -951,13 +1002,16 @@
         <div class="panel">
           <div class="panel-header">
             <div class="panel-title">Scheduled Meets</div>
-            <button class="btn btn-outline btn-sm" onclick="loadMeets()">↻ Refresh</button>
+            <div style="display:flex;gap:0.5rem;">
+              <button class="btn btn-outline btn-sm" onclick="exportSectionCSV('meets')">⬇ Export</button>
+              <button class="btn btn-outline btn-sm" onclick="loadMeets()">↻ Refresh</button>
+            </div>
           </div>
           <div class="tbl-wrap">
             <table>
-              <thead><tr><th>Title</th><th>Date & Time</th><th>Duration</th><th>Published</th><th>Actions</th></tr></thead>
+              <thead><tr><th>Title</th><th>Course</th><th>Date & Time</th><th>Duration</th><th>Meet Link</th><th>Published</th><th>Actions</th></tr></thead>
               <tbody id="meetsTbl">
-                <tr><td colspan="5"><div class="loading-row"><div class="spin"></div> Loading…</div></td></tr>
+                <tr><td colspan="7"><div class="loading-row"><div class="spin"></div> Loading…</div></td></tr>
               </tbody>
             </table>
           </div>
@@ -1509,16 +1563,24 @@ async function loadCourses() {
 function renderCourses(courses) {
   const el = document.getElementById('coursesTbl');
   if (!el) return;
-  if (!courses.length) { el.innerHTML = `<tr><td colspan="6" style="text-align:center; padding: 2rem; color: var(--txt4);">No courses found</td></tr>`; return; }
+  if (!courses.length) { el.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 2rem; color: var(--txt4);">No courses found</td></tr>`; return; }
+  // Update stat cards
+  const active = courses.filter(c => c.is_active !== false).length;
+  const avgPrice = courses.length ? Math.round(courses.reduce((s,c) => s + Number(c.price||0), 0) / courses.length) : 0;
+  const se = (id, v) => { const e = document.getElementById(id); if(e) e.textContent = v; };
+  se('cs-total', courses.length); se('cs-active', active); se('cs-inactive', courses.length - active);
+  se('cs-avg-price', '₹' + avgPrice.toLocaleString('en-IN'));
+
   el.innerHTML = courses.map(c => {
     const duration = c.duration_months ? c.duration_months + ' months' : (c.duration_hours ? c.duration_hours + ' hrs' : '—');
-    const statusLabel = c.is_active ? 'active' : 'inactive';
-    const statusColor = c.is_active ? 'green' : 'red';
+    const statusLabel = c.is_active !== false ? 'active' : 'inactive';
+    const statusColor = c.is_active !== false ? 'green' : 'red';
     return `<tr>
       <td><strong style="color: var(--txt);">${c.name || 'Untitled'}</strong></td>
       <td><span class="badge badge-purple">${c.category || '—'}</span></td>
-      <td>₹${Number(c.price || 0).toLocaleString()}</td>
+      <td>₹${Number(c.price || 0).toLocaleString('en-IN')}</td>
       <td>${duration}</td>
+      <td><span class="badge badge-blue">${c.level || '—'}</span></td>
       <td><span class="badge badge-${statusColor}">${statusLabel}</span></td>
       <td style="display: flex; gap: 0.4rem; flex-wrap: wrap;">
         <button class="btn btn-outline btn-sm" onclick="editCourse('${c.id}')">✏️ Edit</button>
@@ -1644,12 +1706,13 @@ async function loadRecordings() {
 function renderRecordings(recs) {
   const el = document.getElementById('recordingsTbl');
   if (!el) return;
-  if (!recs.length) { el.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:2rem; color:var(--txt4)">No recordings yet. Add one above.</td></tr>`; return; }
+  if (!recs.length) { el.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:2rem; color:var(--txt4)">No recordings yet. Add one above.</td></tr>`; return; }
   el.innerHTML = recs.map((r, i) => `
     <tr>
       <td><strong style="color: var(--txt);">${r.title}</strong></td>
       <td>${r.course || '—'}</td>
       <td><span class="badge badge-blue">${r.type || 'youtube'}</span></td>
+      <td style="max-width:200px;color:var(--txt3);font-size:0.8rem;">${r.desc ? r.desc.substring(0,80) + (r.desc.length > 80 ? '…' : '') : '—'}</td>
       <td>${r.date || '—'}</td>
       <td style="display:flex;gap:0.4rem;">
         <a href="${r.url}" target="_blank" class="btn btn-outline btn-sm">▶ View</a>
@@ -1659,20 +1722,50 @@ function renderRecordings(recs) {
   `).join('');
 }
 
-function saveRecording() {
+async function saveRecording() {
   const title = document.getElementById('recTitle')?.value.trim();
   const url = document.getElementById('recUrl')?.value.trim();
   if (!title || !url) { showToast('Title and URL are required', 'err'); return; }
   const courseEl = document.getElementById('recCourse');
+  const courseId = courseEl?.value || null;
   const courseText = courseEl?.options[courseEl.selectedIndex]?.text || '';
+  const recType = document.getElementById('recType')?.value || 'youtube';
+  const desc = document.getElementById('recDesc')?.value.trim() || '';
+  const dateStr = new Date().toLocaleDateString('en-IN');
+
   const rec = {
     title,
     course: courseText !== 'Select course…' ? courseText : '',
-    type: document.getElementById('recType')?.value || 'youtube',
+    course_id: courseId || null,
+    type: recType,
     url,
-    desc: document.getElementById('recDesc')?.value.trim() || '',
-    date: new Date().toLocaleDateString('en-IN'),
+    desc,
+    date: dateStr,
   };
+
+  // Try to save to Supabase
+  if (sb) {
+    try {
+      const { error } = await sb.getClient().from('recordings').insert([{
+        title,
+        video_url: url,
+        video_type: recType,
+        description: desc,
+        course_id: courseId || null,
+        created_at: new Date().toISOString(),
+      }]);
+      if (!error) {
+        showToast('Recording saved to database!', 'ok');
+      } else {
+        // DB error — fall through to localStorage
+        console.warn('DB save failed, using localStorage:', error.message);
+      }
+    } catch(e) {
+      console.warn('Recordings table may not exist, saving locally:', e.message);
+    }
+  }
+
+  // Always persist in localStorage as fallback
   allRecordings.unshift(rec);
   localStorage.setItem('adminRecordings', JSON.stringify(allRecordings));
   renderRecordings(allRecordings);
@@ -1723,6 +1816,13 @@ async function loadUsers() {
 function renderUsers(users) {
   const el = document.getElementById('usersTbl');
   if (!el) return;
+  // Update stat cards
+  const se = (id, v) => { const e = document.getElementById(id); if(e) e.textContent = v; };
+  se('u-total', users.length);
+  se('u-students', users.filter(u => (u.role||'student') === 'student').length);
+  se('u-instructors', users.filter(u => u.role === 'instructor').length);
+  se('u-admins', users.filter(u => u.role === 'admin').length);
+
   if (!users.length) { el.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--txt4)">No users found</td></tr>`; return; }
   el.innerHTML = users.map(u => `
     <tr>
@@ -1734,7 +1834,7 @@ function renderUsers(users) {
       <td>${u.created_at ? new Date(u.created_at).toLocaleDateString('en-IN') : '—'}</td>
       <td>${u.courses_count || 0}</td>
       <td>
-        <button class="btn btn-outline btn-sm" onclick="openUserModal('${u.id}', '${u.full_name || u.email}', '${u.role || 'student'}')">🔑 Role</button>
+        <button class="btn btn-outline btn-sm" onclick="openUserModal('${u.id}', '${(u.full_name || u.email || '').replace(/'/g,"\\'")}', '${u.role || 'student'}')">🔑 Role</button>
       </td>
     </tr>
   `).join('');
@@ -1743,10 +1843,16 @@ function renderUsers(users) {
 function filterUsers() {
   const q = (document.getElementById('userSearch')?.value || '').toLowerCase();
   const role = document.getElementById('userRoleFilter')?.value || '';
-  renderUsers(allUsers.filter(u =>
-    (u.full_name || '').toLowerCase().includes(q) || (u.email || '').toLowerCase().includes(q)
-    && (!role || u.role === role)
-  ));
+  const from = document.getElementById('userDateFrom')?.value || '';
+  const to = document.getElementById('userDateTo')?.value || '';
+  renderUsers(allUsers.filter(u => {
+    const nameMatch = (u.full_name || '').toLowerCase().includes(q) || (u.email || '').toLowerCase().includes(q);
+    const roleMatch = !role || u.role === role;
+    const joined = u.created_at ? u.created_at.substring(0,10) : '';
+    const fromMatch = !from || joined >= from;
+    const toMatch = !to || joined <= to;
+    return nameMatch && roleMatch && fromMatch && toMatch;
+  }));
 }
 
 function openUserModal(id, name, role) {
@@ -1805,6 +1911,11 @@ async function loadFeeEnquiries() {
     ];
   }
 
+  const feeFrom = document.getElementById('feeFrom')?.value;
+  const feeTo = document.getElementById('feeTo')?.value;
+  if (feeFrom) data = data.filter(d => d.created_at && d.created_at >= feeFrom);
+  if (feeTo) data = data.filter(d => d.created_at && d.created_at <= feeTo);
+
   document.getElementById('stat-total-fees').textContent = data.length;
   document.getElementById('stat-pending-emi').textContent = data.filter(d => d.status === 'pending').length;
 
@@ -1837,11 +1948,16 @@ async function loadEmiApplications() {
 
   if (!data.length) {
     data = [
-      { id: 1, applicant: 'Priya Sharma', course: 'AWS Solutions Architect', amount: 29999, tenure: '6 months', status: 'pending' },
-      { id: 2, applicant: 'Arjun Verma', course: 'DevOps', amount: 24999, tenure: '3 months', status: 'approved' },
-      { id: 3, applicant: 'Neha Desai', course: 'Cybersecurity', amount: 27999, tenure: '12 months', status: 'rejected' },
+      { id: 1, applicant: 'Priya Sharma', course: 'AWS Solutions Architect', amount: 29999, tenure: '6 months', status: 'pending', created_at: '2026-03-25' },
+      { id: 2, applicant: 'Arjun Verma', course: 'DevOps', amount: 24999, tenure: '3 months', status: 'approved', created_at: '2026-03-24' },
+      { id: 3, applicant: 'Neha Desai', course: 'Cybersecurity', amount: 27999, tenure: '12 months', status: 'rejected', created_at: '2026-03-22' },
     ];
   }
+
+  const feeFrom = document.getElementById('feeFrom')?.value;
+  const feeTo = document.getElementById('feeTo')?.value;
+  if (feeFrom) data = data.filter(d => d.created_at && d.created_at >= feeFrom);
+  if (feeTo) data = data.filter(d => d.created_at && d.created_at <= feeTo);
 
   document.getElementById('stat-approved-emi').textContent = data.filter(d => d.status === 'approved').length;
   document.getElementById('stat-rejected-emi').textContent = data.filter(d => d.status === 'rejected').length;
@@ -1895,13 +2011,22 @@ async function loadTransactions() {
 function renderTransactions(txns) {
   const el = document.getElementById('txTbl');
   if (!el) return;
+  // Update stat cards
+  const se = (id, v) => { const e = document.getElementById(id); if(e) e.textContent = v; };
+  const completed = txns.filter(t => t.status === 'completed');
+  const totalRev = completed.reduce((s, t) => s + Number(t.amount || 0), 0);
+  se('tx-total-count', txns.length);
+  se('tx-completed', completed.length);
+  se('tx-pending', txns.filter(t => t.status === 'pending').length);
+  se('tx-revenue', totalRev >= 100000 ? '₹' + (totalRev/100000).toFixed(1) + 'L' : '₹' + totalRev.toLocaleString('en-IN'));
+
   if (!txns.length) { el.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--txt4)">No transactions found</td></tr>`; return; }
   el.innerHTML = txns.map(t => `
     <tr>
       <td style="font-family:monospace;font-size:0.8rem;color:var(--v2);">${t.id}</td>
       <td>${t.student || t.name || '—'}</td>
       <td>${t.course || '—'}</td>
-      <td>₹${Number(t.amount || 0).toLocaleString()}</td>
+      <td>₹${Number(t.amount || 0).toLocaleString('en-IN')}</td>
       <td><span class="badge badge-blue">${t.method || '—'}</span></td>
       <td>${t.created_at ? new Date(t.created_at).toLocaleDateString('en-IN') : '—'}</td>
       <td><span class="badge badge-${t.status === 'completed' ? 'green' : t.status === 'failed' ? 'red' : t.status === 'refunded' ? 'purple' : 'yellow'}">${t.status}</span></td>
@@ -1912,17 +2037,81 @@ function renderTransactions(txns) {
 function filterTransactions() {
   const q = (document.getElementById('txSearch')?.value || '').toLowerCase();
   const status = document.getElementById('txStatusFilter')?.value || '';
-  renderTransactions(allTransactions.filter(t =>
-    ((t.student || t.name || '') + (t.course || '')).toLowerCase().includes(q)
-    && (!status || t.status === status)
-  ));
+  const from = document.getElementById('txFrom')?.value || '';
+  const to = document.getElementById('txTo')?.value || '';
+  renderTransactions(allTransactions.filter(t => {
+    const textMatch = ((t.student || t.name || '') + (t.course || '')).toLowerCase().includes(q);
+    const statusMatch = !status || t.status === status;
+    const dateStr = t.created_at ? t.created_at.substring(0,10) : '';
+    const fromMatch = !from || dateStr >= from;
+    const toMatch = !to || dateStr <= to;
+    return textMatch && statusMatch && fromMatch && toMatch;
+  }));
 }
 
 function exportTransactionsCSV() {
-  const headers = ['TX ID', 'Student', 'Course', 'Amount', 'Method', 'Date', 'Status'];
-  const rows = allTransactions.map(t => [t.id, t.student || t.name, t.course, t.amount, t.method, t.created_at, t.status]);
-  downloadCSV('transactions.csv', [headers, ...rows]);
-  showToast('Transactions exported!', 'ok');
+  exportSectionCSV('transactions');
+}
+
+/* ── Section-level CSV Export ── */
+function exportSectionCSV(section) {
+  const today = new Date().toISOString().split('T')[0];
+  let headers, rows, filename;
+  switch (section) {
+    case 'courses':
+      headers = ['Name', 'Category', 'Price (₹)', 'Duration', 'Level', 'Status', 'Enrolled'];
+      rows = allCourses.map(c => [
+        c.name || '', c.category || '', c.price || 0,
+        c.duration_months ? c.duration_months + ' months' : (c.duration_hours ? c.duration_hours + ' hrs' : ''),
+        c.level || '', c.is_active !== false ? 'Active' : 'Inactive', c.total_enrolled || 0
+      ]);
+      filename = `courses-report-${today}.csv`;
+      break;
+    case 'users':
+      headers = ['Name', 'Email', 'Role', 'Joined', 'Courses Enrolled'];
+      rows = allUsers.map(u => [u.full_name || '', u.email || '', u.role || 'student', u.created_at || '', u.courses_count || 0]);
+      filename = `users-report-${today}.csv`;
+      break;
+    case 'transactions':
+      headers = ['TX ID', 'Student', 'Course', 'Amount (₹)', 'Method', 'Date', 'Status'];
+      rows = allTransactions.map(t => [t.id, t.student || t.name || '', t.course || '', t.amount || 0, t.method || '', t.created_at || '', t.status || '']);
+      filename = `transactions-report-${today}.csv`;
+      break;
+    case 'recordings':
+      headers = ['Title', 'Course', 'Type', 'URL', 'Description', 'Date Added'];
+      rows = allRecordings.map(r => [r.title || '', r.course || '', r.type || '', r.url || '', r.desc || '', r.date || '']);
+      filename = `recordings-report-${today}.csv`;
+      break;
+    case 'meets':
+      const meets = window.GoogleMeetModule ? window.GoogleMeetModule.loadAllMeets() : JSON.parse(localStorage.getItem('adminMeets') || '[]');
+      headers = ['Title', 'Course', 'Date', 'Time', 'Duration (min)', 'Meet Link', 'Participants', 'Published', 'Agenda'];
+      rows = meets.map(m => [m.title || '', m.course || '', m.date || '', m.time || '', m.duration || '', m.link || '', m.participants || '', m.publishToWebsite ? 'Yes' : 'No', m.notes || '']);
+      filename = `meets-report-${today}.csv`;
+      break;
+    case 'fees':
+      headers = ['Name', 'Email', 'Course Interest', 'Date', 'Status'];
+      rows = [];
+      document.querySelectorAll('#feeTbl tr').forEach(tr => {
+        const tds = tr.querySelectorAll('td');
+        if (tds.length > 1) rows.push([tds[0]?.textContent.trim(), tds[1]?.textContent.trim(), tds[2]?.textContent.trim(), tds[3]?.textContent.trim(), tds[4]?.textContent.trim()]);
+      });
+      filename = `fee-enquiries-${today}.csv`;
+      break;
+    case 'emi':
+      headers = ['Applicant', 'Course', 'Amount (₹)', 'Tenure', 'Status'];
+      rows = [];
+      document.querySelectorAll('#emiTbl tr').forEach(tr => {
+        const tds = tr.querySelectorAll('td');
+        if (tds.length > 1) rows.push([tds[0]?.textContent.trim(), tds[1]?.textContent.trim(), tds[2]?.textContent.trim(), tds[3]?.textContent.trim(), tds[4]?.textContent.trim()]);
+      });
+      filename = `emi-applications-${today}.csv`;
+      break;
+    default:
+      showToast('Unknown section', 'err'); return;
+  }
+  if (!rows || !rows.length) { showToast('No data to export', 'err'); return; }
+  downloadCSV(filename, [headers, ...rows]);
+  showToast(`${section} report exported!`, 'ok');
 }
 
 /* ── Google Meet ── */
@@ -1930,16 +2119,14 @@ function loadMeets() {
   const meets = window.GoogleMeetModule ? window.GoogleMeetModule.loadAllMeets() : JSON.parse(localStorage.getItem('adminMeets') || '[]');
   const el = document.getElementById('meetsTbl');
   if (!el) return;
-  if (!meets.length) { el.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--txt4)">No meets scheduled yet</td></tr>`; return; }
+  if (!meets.length) { el.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--txt4)">No meets scheduled yet</td></tr>`; return; }
   el.innerHTML = meets.map((m, i) => `
     <tr>
-      <td>
-        <strong style="color:var(--txt);">${m.title}</strong>
-        ${m.course ? `<br><span style="font-size:0.75rem;color:var(--txt3);">${m.course}</span>` : ''}
-        ${m.link ? `<br><a href="${m.link}" target="_blank" style="font-size:0.75rem;color:var(--v2);">🎥 Join Meet</a>` : ''}
-      </td>
+      <td><strong style="color:var(--txt);">${m.title}</strong></td>
+      <td>${m.course || '—'}</td>
       <td>${m.date} at ${m.time || '—'}</td>
       <td>${m.duration} min</td>
+      <td>${m.link ? `<a href="${m.link}" target="_blank" style="color:var(--v2);font-size:0.82rem;">🎥 Join</a>` : '<span style="color:var(--txt4);font-size:0.8rem;">—</span>'}</td>
       <td>
         <label style="display:flex;align-items:center;gap:0.4rem;cursor:pointer;">
           <input type="checkbox" ${m.published ? 'checked' : ''} onchange="toggleMeetPublish(${i})" style="accent-color:var(--v1);">
@@ -2050,12 +2237,82 @@ function toggleMeetPublish(idx) {
 }
 
 /* ── Reports ── */
+let currentReportType = 'revenue';
+
+function showReportPreview(type) {
+  currentReportType = type;
+  const panel = document.getElementById('reportPreviewPanel');
+  const title = document.getElementById('reportPreviewTitle');
+  const thead = document.getElementById('reportPreviewHead');
+  const tbody = document.getElementById('reportPreviewBody');
+  if (!panel || !thead || !tbody) return;
+
+  const titles = { revenue: 'Revenue Report', users: 'User Activity', courses: 'Course Completion', transactions: 'Transactions', meets: 'Google Meet Report', emi: 'EMI & Fee Enquiries' };
+  if (title) title.textContent = titles[type] || type;
+
+  // Pull live data where available
+  let headers = [], rows = [];
+  switch(type) {
+    case 'courses':
+      headers = ['Course Name', 'Category', 'Price', 'Level', 'Enrolled', 'Status'];
+      rows = allCourses.map(c => [c.name||'', c.category||'', '₹'+(c.price||0).toLocaleString('en-IN'), c.level||'', c.total_enrolled||0, c.is_active!==false?'Active':'Inactive']);
+      break;
+    case 'users':
+      headers = ['Name', 'Email', 'Role', 'Joined'];
+      rows = allUsers.map(u => [u.full_name||'', u.email||'', u.role||'student', u.created_at ? new Date(u.created_at).toLocaleDateString('en-IN') : '']);
+      break;
+    case 'transactions':
+      headers = ['TX ID', 'Student', 'Course', 'Amount', 'Method', 'Date', 'Status'];
+      rows = allTransactions.map(t => [t.id||'', t.student||t.name||'', t.course||'', '₹'+(t.amount||0).toLocaleString('en-IN'), t.method||'', t.created_at ? new Date(t.created_at).toLocaleDateString('en-IN') : '', t.status||'']);
+      break;
+    case 'meets':
+      const meets = window.GoogleMeetModule ? window.GoogleMeetModule.loadAllMeets() : JSON.parse(localStorage.getItem('adminMeets')||'[]');
+      headers = ['Title', 'Course', 'Date', 'Time', 'Duration', 'Meet Link', 'Published'];
+      rows = meets.map(m => [m.title||'', m.course||'', m.date||'', m.time||'', (m.duration||60)+' min', m.link||'—', m.publishToWebsite?'Yes':'No']);
+      break;
+    case 'revenue':
+      headers = ['Month', 'Total Revenue', 'EMI Revenue', 'Direct Payment'];
+      rows = [['Oct 2025','₹3,80,000','₹1,20,000','₹2,60,000'],['Nov 2025','₹4,20,000','₹1,40,000','₹2,80,000'],['Dec 2025','₹3,90,000','₹1,10,000','₹2,80,000'],['Jan 2026','₹4,50,000','₹1,60,000','₹2,90,000'],['Feb 2026','₹4,10,000','₹1,30,000','₹2,80,000'],['Mar 2026','₹4,80,000','₹1,70,000','₹3,10,000']];
+      break;
+    default:
+      headers = ['Type', 'Count', 'Status'];
+      rows = [['No data available','—','—']];
+  }
+
+  thead.innerHTML = '<tr>' + headers.map(h => `<th>${h}</th>`).join('') + '</tr>';
+  tbody.innerHTML = rows.length ? rows.map(r => '<tr>' + r.map(c => `<td>${c}</td>`).join('') + '</tr>').join('') : '<tr><td colspan="'+headers.length+'" style="text-align:center;padding:2rem;color:var(--txt4)">No data available</td></tr>';
+  panel.style.display = '';
+  panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
 function generateReport(type) {
   const reportType = type === 'custom' ? document.getElementById('reportType')?.value : type;
   const start = document.getElementById('reportStart')?.value || '';
   const end = document.getElementById('reportEnd')?.value || '';
+  const today = new Date().toISOString().split('T')[0];
 
-  const reportData = {
+  // Use live in-memory data where available
+  if (reportType === 'courses' && allCourses.length) {
+    exportSectionCSV('courses'); return;
+  }
+  if (reportType === 'users' && allUsers.length) {
+    exportSectionCSV('users'); return;
+  }
+  if (reportType === 'transactions' && allTransactions.length) {
+    exportSectionCSV('transactions'); return;
+  }
+  if (reportType === 'meets') {
+    exportSectionCSV('meets'); return;
+  }
+  if (reportType === 'emi') {
+    exportSectionCSV('emi'); return;
+  }
+  if (reportType === 'enquiries') {
+    exportSectionCSV('fees'); return;
+  }
+
+  // Fallback summary data for revenue
+  const fallbackData = {
     revenue: [
       ['Month', 'Total Revenue', 'EMI Revenue', 'Direct Payment'],
       ['October 2025', '380000', '120000', '260000'],
@@ -2065,31 +2322,10 @@ function generateReport(type) {
       ['February 2026', '410000', '130000', '280000'],
       ['March 2026', '480000', '170000', '310000'],
     ],
-    users: [
-      ['Date', 'New Registrations', 'Active Users', 'Logins'],
-      ['2026-01-01', '12', '87', '234'],
-      ['2026-02-01', '18', '102', '312'],
-      ['2026-03-01', '24', '134', '421'],
-    ],
-    courses: [
-      ['Course', 'Enrollments', 'Completions', 'Completion Rate'],
-      ['AWS Solutions Architect', '89', '67', '75%'],
-      ['DevOps with Kubernetes', '72', '54', '75%'],
-      ['AI/ML Foundations', '61', '40', '66%'],
-    ],
-    emi: [
-      ['Applicant', 'Course', 'Amount', 'Tenure', 'Status'],
-      ['Priya Sharma', 'AWS', '29999', '6 months', 'approved'],
-      ['Arjun Verma', 'DevOps', '24999', '3 months', 'approved'],
-    ],
-    enquiries: [
-      ['Name', 'Email', 'Course Interest', 'Date', 'Status'],
-      ['Rajesh Kumar', 'rajesh@ex.com', 'AWS', '2026-03-25', 'pending'],
-    ],
   };
 
-  const data = reportData[reportType] || reportData.revenue;
-  downloadCSV(`${reportType}-report-${start || 'all'}-to-${end || 'today'}.csv`, data);
+  const data = fallbackData[reportType] || fallbackData.revenue;
+  downloadCSV(`${reportType}-report-${start || 'all'}-to-${end || today}.csv`, data);
   showToast(`${reportType} report exported!`, 'ok');
 }
 
@@ -2126,17 +2362,30 @@ async function doLogout() {
   window.location.href = '../index.html';
 }
 
-// Custom cursor
+// Custom cursor with lagged ring
 (function() {
+  if (window.matchMedia('(hover: none) and (pointer: coarse)').matches) return;
   const cur = document.getElementById('cursor');
   const ring = document.getElementById('cursor-ring');
   if (!cur || !ring) return;
+  let mx = 0, my = 0, rx = 0, ry = 0;
   document.addEventListener('mousemove', function(e) {
-    cur.style.left  = e.clientX + 'px';
-    cur.style.top   = e.clientY + 'px';
-    ring.style.left = e.clientX + 'px';
-    ring.style.top  = e.clientY + 'px';
+    mx = e.clientX; my = e.clientY;
+    cur.style.left = mx + 'px'; cur.style.top = my + 'px';
   });
+  (function animRing() {
+    rx += (mx - rx) * 0.15; ry += (my - ry) * 0.15;
+    ring.style.left = rx + 'px'; ring.style.top = ry + 'px';
+    requestAnimationFrame(animRing);
+  })();
+  document.addEventListener('mouseover', e => {
+    if (e.target.closest('a, button, [role="button"], input, select')) document.body.classList.add('cursor-hover');
+  });
+  document.addEventListener('mouseout', e => {
+    if (e.target.closest('a, button, [role="button"], input, select')) document.body.classList.remove('cursor-hover');
+  });
+  document.addEventListener('mousedown', () => document.body.classList.add('cursor-click'));
+  document.addEventListener('mouseup', () => document.body.classList.remove('cursor-click'));
 })();
 
 // Close modals on overlay click

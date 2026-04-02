@@ -16,6 +16,8 @@ class ProfileNavigationManager {
       this.injectHamburger();
       this.injectBreadcrumb();
     }
+    this.injectThemeBtn();
+    this.injectAuthButtons();
     await this.checkUserSession();
     this.setupEventListeners();
     this.setupResponsiveMenu();
@@ -25,15 +27,24 @@ class ProfileNavigationManager {
   injectHamburger() {
     const nav = document.querySelector('nav');
     if (!nav || nav.querySelector('.mobile-menu-toggle')) return;
+
+    // Ensure nav-links has a Home link on mobile
+    const navLinks = nav.querySelector('.nav-links');
+    if (navLinks && !navLinks.querySelector('.nav-home-link')) {
+      const homeLi = document.createElement('li');
+      homeLi.innerHTML = `<a href="../index.html" class="nav-home-link">Home</a>`;
+      navLinks.insertBefore(homeLi, navLinks.firstChild);
+    }
+
     const btn = document.createElement('button');
     btn.className = 'mobile-menu-toggle';
     btn.setAttribute('aria-label', 'Toggle navigation');
     btn.innerHTML = '<span></span><span></span><span></span>';
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
-      const navLinks = nav.querySelector('.nav-links');
-      if (!navLinks) return;
-      navLinks.classList.toggle('mobile-open');
+      const links = nav.querySelector('.nav-links');
+      if (!links) return;
+      links.classList.toggle('mobile-open');
       btn.classList.toggle('open');
     });
     // Close when clicking outside
@@ -72,6 +83,77 @@ class ProfileNavigationManager {
 
     const nav = document.querySelector('nav');
     if (nav) nav.after(bc);
+  }
+
+  /* ── Inject theme button if missing ── */
+  injectThemeBtn() {
+    if (document.getElementById('theme-btn')) return;
+    const navActions = document.querySelector('nav .nav-actions');
+    if (!navActions) return;
+    const btn = document.createElement('button');
+    btn.id = 'theme-btn';
+    btn.className = 'theme-icon-btn';
+    btn.title = 'Toggle theme';
+    btn.setAttribute('aria-label', 'Toggle theme');
+    btn.textContent = '☀️';
+    btn.addEventListener('click', function() {
+      if (window.themeManager) window.themeManager.toggleTheme();
+      this.classList.add('spinning');
+      setTimeout(() => this.classList.remove('spinning'), 400);
+    });
+    // Insert before first child (so it's leftmost in nav-actions)
+    navActions.insertBefore(btn, navActions.firstChild);
+  }
+
+  /* ── Inject sign-in + admin login buttons if missing ── */
+  injectAuthButtons() {
+    const navActions = document.querySelector('nav .nav-actions');
+    if (!navActions) return;
+
+    // Admin login link
+    if (!document.getElementById('admin-nav-link')) {
+      const adminLink = document.createElement('a');
+      adminLink.id = 'admin-nav-link';
+      adminLink.href = this.inPages ? 'admin-login.html' : 'pages/admin-login.html';
+      adminLink.className = 'nav-admin-link';
+      adminLink.title = 'Admin Login';
+      adminLink.textContent = 'Admin';
+      navActions.appendChild(adminLink);
+    }
+
+    // User sign-in button
+    if (!document.getElementById('signin-btn')) {
+      const btn = document.createElement('button');
+      btn.id = 'signin-btn';
+      btn.className = 'nav-signin';
+      btn.textContent = 'Sign In';
+      btn.addEventListener('click', () => {
+        if (typeof openModal === 'function') {
+          openModal('login');
+        } else {
+          const base = this.inPages ? '../index.html' : 'index.html';
+          window.location.href = base;
+        }
+      });
+      navActions.appendChild(btn);
+    }
+
+    // Get-started / register button
+    if (!document.getElementById('cta-btn')) {
+      const btn = document.createElement('button');
+      btn.id = 'cta-btn';
+      btn.className = 'nav-cta';
+      btn.textContent = 'Get Started';
+      btn.addEventListener('click', () => {
+        if (typeof openModal === 'function') {
+          openModal('register');
+        } else {
+          const base = this.inPages ? '../index.html' : 'index.html';
+          window.location.href = base;
+        }
+      });
+      navActions.appendChild(btn);
+    }
   }
 
   /* Build standardized dropdown HTML — consistent across all pages */
@@ -132,15 +214,13 @@ class ProfileNavigationManager {
     const profileSection = document.getElementById('profile-section');
     const signInBtn = document.getElementById('signin-btn');
     const ctaBtn = document.getElementById('cta-btn');
+    const adminNavLink = document.getElementById('admin-nav-link');
 
-    // Show profile section only
     if (profileSection) profileSection.style.display = 'flex';
-
-    // Hide both auth buttons completely
     if (signInBtn) signInBtn.style.display = 'none';
     if (ctaBtn) ctaBtn.style.display = 'none';
+    if (adminNavLink) adminNavLink.style.display = 'none';
 
-    // Update profile button with user initial
     const profileBtn = document.getElementById('profile-btn');
     if (profileBtn) {
       const name = this.currentUser.email?.split('@')[0] || 'User';
@@ -149,7 +229,6 @@ class ProfileNavigationManager {
       profileBtn.title = `Profile: ${this.currentUser.email}`;
     }
 
-    // Check if admin
     this.checkAdminStatus();
   }
 
@@ -157,17 +236,15 @@ class ProfileNavigationManager {
     const profileSection = document.getElementById('profile-section');
     const signInBtn = document.getElementById('signin-btn');
     const ctaBtn = document.getElementById('cta-btn');
+    const adminNavLink = document.getElementById('admin-nav-link');
 
-    // Hide profile section
     if (profileSection) profileSection.style.display = 'none';
-
-    // Show both auth buttons
     if (signInBtn) signInBtn.style.display = '';
     if (ctaBtn) {
       ctaBtn.style.display = '';
       ctaBtn.textContent = 'Get Started';
-      ctaBtn.onclick = () => openModal?.('register');
     }
+    if (adminNavLink) adminNavLink.style.display = '';
   }
 
   checkAdminStatus() {
@@ -198,7 +275,6 @@ class ProfileNavigationManager {
       });
     }
 
-    // Hover behavior: show on mouseenter, hide with delay on mouseleave
     if (profileSection) {
       profileSection.addEventListener('mouseenter', () => {
         clearTimeout(hideTimeout);
@@ -216,7 +292,6 @@ class ProfileNavigationManager {
       });
     }
 
-    // Close dropdown when clicking outside
     document.addEventListener('click', (e) => {
       if (profileDropdown && !profileDropdown.contains(e.target) && !profileBtn?.contains(e.target)) {
         profileDropdown.classList.remove('active');

@@ -442,6 +442,8 @@
         <!-- Dropdown injected by profile-nav.js buildDropdown() -->
         <div id="profile-dropdown" class="profile-dropdown"></div>
       </div>
+      <button class="theme-icon-btn" id="theme-btn" onclick="if(window.themeManager)window.themeManager.toggleTheme();this.classList.add('spinning');setTimeout(()=>this.classList.remove('spinning'),400)" title="Toggle theme" aria-label="Toggle theme">☀️</button>
+      <a href="pages/admin-login.html" id="admin-nav-link" class="nav-admin-link" title="Admin Login">Admin</a>
       <button class="nav-signin" id="signin-btn" onclick="openModal('login')">Sign In</button>
       <button class="nav-cta" id="cta-btn" onclick="openModal('register')">Get Started</button>
     </div>

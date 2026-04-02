@@ -201,16 +201,19 @@
   /* Animation (visual) comes FIRST on mobile, buttons below */
   .hero-visual {
     display: flex !important;
-    width: 320px !important;
-    height: 320px !important;
+    width: 280px !important;
+    height: 280px !important;
     margin: 0 auto !important;
+    margin-right: 0 !important;
     order: 1 !important;
+    overflow: hidden !important;
   }
 
   .hero {
     grid-template-columns: 1fr !important;
-    gap: 2rem !important;
+    gap: 1.5rem !important;
     padding: 2rem 1rem !important;
+    overflow: hidden !important;
   }
 
   .hero-content {
@@ -219,13 +222,21 @@
 
   .hero-actions {
     flex-direction: column !important;
-    gap: 0.6rem !important;
+    gap: 0.75rem !important;
   }
 
   .hero-actions a,
   .hero-actions button {
     width: 100% !important;
     text-align: center !important;
+    justify-content: center !important;
+  }
+
+  /* Highlight key CTA buttons on mobile */
+  .hero-actions .btn-grad {
+    font-size: 1rem !important;
+    padding: 0.95rem 1.5rem !important;
+    box-shadow: 0 8px 32px rgba(124,92,252,0.5) !important;
   }
 
   .profile-dropdown {
