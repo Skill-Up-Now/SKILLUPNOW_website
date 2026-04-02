@@ -375,6 +375,31 @@ nav {
   box-shadow: 0 3px 12px rgba(255, 215, 0, 0.5);
 }
 
+/* Icon-only theme toggle */
+.theme-icon-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--panel2);
+  color: var(--txt2);
+  font-size: 1.05rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  flex-shrink: 0;
+}
+.theme-icon-btn:hover {
+  border-color: var(--border2);
+  background: var(--panel);
+  transform: scale(1.12) rotate(20deg);
+  box-shadow: 0 0 12px rgba(124,92,252,0.2);
+}
+@keyframes theme-spin { from { transform: rotate(0deg) scale(1); } 50% { transform: rotate(180deg) scale(1.18); } to { transform: rotate(360deg) scale(1); } }
+.theme-icon-btn.spinning { animation: theme-spin 0.4s ease; }
+
 /* Base Buttons */
 .btn-grad {
   background: var(--grad);

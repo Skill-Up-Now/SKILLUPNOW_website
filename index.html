@@ -404,7 +404,6 @@
 
     <ul class="nav-links">
       <li><a href="pages/courses.html">Courses</a></li>
-      <li><a href="#why">Why Us</a></li>
       <li><a href="pages/contact-enquiry.html">Fee Enquiry</a></li>
       <li><a href="pages/feedback.html">Reviews</a></li>
     </ul>
@@ -443,6 +442,7 @@
           </button>
         </div>
       </div>
+      <button class="theme-icon-btn" id="theme-btn" onclick="if(window.themeManager)window.themeManager.toggleTheme();this.classList.add('spinning');setTimeout(()=>this.classList.remove('spinning'),400)" title="Toggle theme" aria-label="Toggle theme">☀️</button>
       <button class="nav-signin" id="signin-btn" onclick="openModal('login')">Sign In</button>
       <button class="nav-cta" id="cta-btn" onclick="openModal('register')">Get Started</button>
     </div>

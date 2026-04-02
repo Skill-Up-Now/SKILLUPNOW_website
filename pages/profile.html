@@ -54,20 +54,50 @@
     .topbar {
       position: sticky; top: 0; z-index: 50;
       background: var(--bg);
-      padding: 1.2rem 5vw; display: flex; align-items: center; gap: 1.5rem;
-      flex-wrap: wrap;
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 5vw; display: flex; align-items: center; justify-content: space-between; gap: 1rem;
     }
+    .topbar-logo {
+      display: flex; align-items: center; gap: .5rem;
+      font-weight: 800; font-size: 1rem; color: var(--txt2);
+      text-decoration: none; letter-spacing: -.01em;
+    }
+    .topbar-logo svg { color: var(--accent2); }
+    .topbar-right { display: flex; align-items: center; gap: .65rem; }
+    .theme-icon-btn {
+      width: 36px; height: 36px; border-radius: 50%;
+      border: 1px solid var(--border2);
+      background: rgba(124,92,252,.06); color: var(--txt2);
+      font-size: 1.1rem; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all .3s ease; flex-shrink: 0;
+    }
+    .theme-icon-btn:hover {
+      border-color: var(--accent2); background: rgba(124,92,252,.15);
+      transform: scale(1.1) rotate(20deg);
+    }
+    @keyframes spin-once { from { transform: rotate(0deg) scale(1); } 50% { transform: rotate(180deg) scale(1.2); } to { transform: rotate(360deg) scale(1); } }
+    .theme-icon-btn.spinning { animation: spin-once .4s ease; }
     .back-btn {
-      display: none;
+      display: inline-flex; align-items: center; gap: .45rem;
+      padding: .45rem 1.1rem; border-radius: 50px;
+      border: 1px solid var(--border2); color: var(--txt3);
+      background: rgba(124,92,252,.06); font-size: .82rem; font-weight: 600;
+      text-decoration: none; transition: all .22s ease; cursor: pointer;
     }
-    .back-btn:hover { border-color: var(--accent2); color: var(--accent2); background: rgba(124,92,252,.08); }
-    .topbar-right { display: flex; align-items: center; gap: .7rem; }
+    .back-btn:hover {
+      border-color: var(--accent2); color: var(--accent2);
+      background: rgba(124,92,252,.13); transform: translateX(-3px);
+    }
     .logout-btn {
-      padding: .4rem 1rem; border-radius: 50px; border: 1px solid rgba(239,68,68,.3);
-      background: rgba(239,68,68,.08); color: #f87171; font-size: .8rem; font-weight: 600;
-      cursor: pointer; transition: .2s;
+      display: inline-flex; align-items: center; gap: .45rem;
+      padding: .45rem 1.1rem; border-radius: 50px;
+      border: 1px solid rgba(239,68,68,.3);
+      background: rgba(239,68,68,.08); color: #f87171;
+      font-size: .82rem; font-weight: 600;
+      cursor: pointer; transition: all .22s ease;
     }
-    .logout-btn:hover { background: rgba(239,68,68,.18); }
+    .logout-btn:hover { background: rgba(239,68,68,.18); transform: translateX(-2px); }
 
     /* ── PAGE WRAPPER ───────────────────────── */
     .page { max-width: 1080px; margin: 0 auto; padding: 2rem 5vw 5rem; }
@@ -336,13 +366,27 @@
     }
 
     /* ── RESPONSIVE ─────────────────────────── */
+    @media (max-width: 768px) {
+      .grid-courses { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+      .grid-stats { grid-template-columns: repeat(2, 1fr); }
+      .grid-paths { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+      .topbar { padding: .8rem 4vw; }
+      .page { padding: 1.5rem 4vw 4rem; }
+      .pinfo-name { font-size: 1.4rem; }
+    }
     @media (max-width: 600px) {
       .profile-card { flex-direction: column; align-items: center; text-align: center; padding: 1.5rem; }
       .tags { justify-content: center; }
       .pactions { justify-content: center; }
       .frow { grid-template-columns: 1fr; }
-      .topbar { padding: .7rem 4vw; }
+      .topbar { padding: .7rem 4vw; gap: .5rem; }
+      .topbar-right { gap: .4rem; }
+      .topbar-logo span { display: none; }
+      .back-btn { padding: .4rem .75rem; font-size: .78rem; }
+      .logout-btn { padding: .4rem .75rem; font-size: .78rem; }
       .page { padding: 1.2rem 4vw 4rem; }
+      .grid-stats { grid-template-columns: repeat(2, 1fr); }
+      .pinfo-name { font-size: 1.2rem; }
     }
   </style>
   <script>
@@ -358,8 +402,14 @@
 
   <!-- TOP BAR with Navigation -->
   <div class="topbar">
+    <a href="../index.html" class="topbar-logo">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span>SkillUpNow</span>
+    </a>
     <div class="topbar-right">
-      <button class="logout-btn" onclick="doLogout()">🚪 Logout</button>
+      <button class="theme-icon-btn" id="theme-btn" onclick="toggleProfileTheme()" title="Toggle theme" aria-label="Toggle theme">☀️</button>
+      <a href="../index.html" class="back-btn">← Back</a>
+      <button class="logout-btn" onclick="showLogoutConfirm()">🚪 Logout</button>
     </div>
   </div>
 
@@ -502,6 +552,19 @@
     </div>
   </div>
 
+  <!-- Logout Confirmation Modal -->
+  <div class="moverlay" id="logout-modal" onclick="if(event.target===this)closeLogoutModal()">
+    <div class="mbox" style="max-width:360px;text-align:center;">
+      <div style="font-size:2.4rem;margin-bottom:.8rem;">🚪</div>
+      <h3 style="color:var(--txt);margin-bottom:.4rem;font-size:1.15rem;">Sign Out?</h3>
+      <p style="color:var(--txt3);font-size:.85rem;margin-bottom:1.5rem;line-height:1.6;">You will be signed out of your account.</p>
+      <div style="display:flex;gap:.75rem;">
+        <button onclick="closeLogoutModal()" style="flex:1;padding:.8rem;background:var(--card2);border:1px solid var(--border);color:var(--txt3);border-radius:50px;font-size:.88rem;font-weight:600;cursor:pointer;transition:.2s;">Cancel</button>
+        <button onclick="doLogout()" style="flex:1;padding:.8rem;background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.4);color:#f87171;border-radius:50px;font-size:.88rem;font-weight:700;cursor:pointer;transition:.2s;">Sign Out</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast -->
   <div class="toast" id="toast"></div>
 
@@ -518,8 +581,23 @@
       document.documentElement.setAttribute('data-theme', t);
     })();
 
+    function toggleProfileTheme() {
+      const html = document.documentElement;
+      const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+      updateThemeBtn(next);
+      const btn = document.getElementById('theme-btn');
+      if (btn) { btn.classList.add('spinning'); setTimeout(() => btn.classList.remove('spinning'), 400); }
+    }
+    function updateThemeBtn(theme) {
+      const btn = document.getElementById('theme-btn');
+      if (btn) btn.textContent = theme === 'dark' ? '☀️' : '🌙';
+    }
+
     /* ── INIT ──────────────────────────────────────────────────── */
     document.addEventListener('DOMContentLoaded', async () => {
+      updateThemeBtn(localStorage.getItem('theme') || 'dark');
       await init();
       setupTabs();
       handleUrlTab();
@@ -565,8 +643,9 @@
       document.getElementById('p-name').textContent = name;
       document.getElementById('p-email').textContent = '✉️ ' + email;
 
+      const phone = profile.phone || profile.phone_number || '';
       const tags = [];
-      if (profile.phone_number) tags.push(`<span class="tag b">📞 ${profile.phone_number}</span>`);
+      if (phone) tags.push(`<span class="tag b">📞 ${phone}</span>`);
       if (profile.job_title && profile.company_name) tags.push(`<span class="tag">💼 ${profile.job_title} @ ${profile.company_name}</span>`);
       else if (profile.job_title) tags.push(`<span class="tag">💼 ${profile.job_title}</span>`);
       else if (profile.company_name) tags.push(`<span class="tag">🏢 ${profile.company_name}</span>`);
@@ -577,7 +656,7 @@
 
       // Pre-fill edit form
       document.getElementById('ep-name').value  = profile.full_name || '';
-      document.getElementById('ep-phone').value  = profile.phone_number || '';
+      document.getElementById('ep-phone').value  = phone;
       document.getElementById('ep-job').value    = profile.job_title || '';
       document.getElementById('ep-co').value     = profile.company_name || '';
       document.getElementById('ep-int').value    = profile.learning_interest || 'Cloud Computing';
@@ -726,7 +805,18 @@
     }
 
     /* ── EDIT PROFILE ──────────────────────────────────────────── */
-    function openEdit() { document.getElementById('edit-modal').classList.add('open'); }
+    function openEdit() {
+      document.getElementById('ep-name').value = UP.full_name || '';
+      document.getElementById('ep-phone').value = UP.phone || UP.phone_number || '';
+      document.getElementById('ep-job').value = UP.job_title || '';
+      document.getElementById('ep-co').value = UP.company_name || '';
+      const intEl = document.getElementById('ep-int');
+      if (UP.learning_interest) intEl.value = UP.learning_interest;
+      const lvlEl = document.getElementById('ep-lvl');
+      if (UP.experience_level) lvlEl.value = UP.experience_level;
+      document.getElementById('ep-bio').value = UP.bio || '';
+      document.getElementById('edit-modal').classList.add('open');
+    }
     function closeEdit() { document.getElementById('edit-modal').classList.remove('open'); }
 
     async function saveProfile() {
@@ -736,22 +826,23 @@
       try {
         const updates = {
           full_name:         document.getElementById('ep-name').value.trim(),
-          phone_number:      document.getElementById('ep-phone').value.trim(),
+          phone:             document.getElementById('ep-phone').value.trim(),
           job_title:         document.getElementById('ep-job').value.trim(),
           company_name:      document.getElementById('ep-co').value.trim(),
           learning_interest: document.getElementById('ep-int').value,
           experience_level:  document.getElementById('ep-lvl').value,
-          bio:               document.getElementById('ep-bio').value.trim()
+          bio:               document.getElementById('ep-bio').value.trim(),
+          updated_at:        new Date().toISOString()
         };
-        const r = await window.supabaseConfig.updateUserProfile(CU.id, updates);
-        if (r.success) {
-          UP = { ...UP, ...updates };
-          renderHeader(CU, UP);
-          closeEdit();
-          showToast('Profile updated!', 'ok');
-        } else {
-          showToast(r.error || 'Update failed', 'err');
-        }
+        // Try update first; if no row exists, upsert it
+        const { data, error } = await window.supabaseConfig.client
+          .from('user_profiles')
+          .upsert({ id: CU.id, email: CU.email, ...updates }, { onConflict: 'id' });
+        if (error) throw error;
+        UP = { ...UP, ...updates };
+        renderHeader(CU, UP);
+        closeEdit();
+        showToast('Profile updated!', 'ok');
       } catch (e) { showToast('Error: ' + e.message, 'err'); }
       finally { btn.disabled = false; btn.textContent = '💾 Save Changes'; }
     }
@@ -775,7 +866,15 @@
     }
 
     /* ── LOGOUT ────────────────────────────────────────────────── */
+    function showLogoutConfirm() {
+      document.getElementById('logout-modal').classList.add('open');
+    }
+    function closeLogoutModal() {
+      document.getElementById('logout-modal').classList.remove('open');
+    }
+
     async function doLogout() {
+      closeLogoutModal();
       if (window.supabaseConfig) await window.supabaseConfig.signOut();
       localStorage.removeItem('user_id');
       localStorage.removeItem('user_email');

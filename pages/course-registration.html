@@ -40,7 +40,6 @@
 
     <ul class="nav-links">
       <li><a href="courses.html">Courses</a></li>
-      <li><a href="../index.html#why">Why Us</a></li>
       <li><a href="contact-enquiry.html">Fee Enquiry</a></li>
       <li><a href="feedback.html">Reviews</a></li>
     </ul>
@@ -58,7 +57,9 @@
             <div><div style="font-weight: 600; color: var(--txt);">Logout</div></div>
           </button>
         </div>
-      </div>    </div>
+      </div>
+      <button class="theme-icon-btn" id="theme-btn" onclick="if(window.themeManager)window.themeManager.toggleTheme();this.classList.add('spinning');setTimeout(()=>this.classList.remove('spinning'),400)" title="Toggle theme" aria-label="Toggle theme">☀️</button>
+    </div>
   </nav>
 
   <nav class="page-breadcrumb"><a href="../index.html">Home</a><span class="separator">›</span><span class="current">Registration</span></nav>

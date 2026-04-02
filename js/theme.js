@@ -45,15 +45,19 @@ class ThemeManager {
   }
 
   updateToggleButtonUI() {
-    if (!this.toggleButton) return;
-
-    if (this.currentTheme === 'light') {
-      this.toggleButton.classList.add('light');
-      this.toggleButton.setAttribute('aria-pressed', 'true');
-    } else {
-      this.toggleButton.classList.remove('light');
-      this.toggleButton.setAttribute('aria-pressed', 'false');
+    if (this.toggleButton) {
+      if (this.currentTheme === 'light') {
+        this.toggleButton.classList.add('light');
+        this.toggleButton.setAttribute('aria-pressed', 'true');
+      } else {
+        this.toggleButton.classList.remove('light');
+        this.toggleButton.setAttribute('aria-pressed', 'false');
+      }
     }
+    // Update icon-only theme buttons
+    document.querySelectorAll('.theme-icon-btn').forEach(btn => {
+      btn.textContent = this.currentTheme === 'dark' ? '☀️' : '🌙';
+    });
   }
 
   updateMetaThemeColor() {
