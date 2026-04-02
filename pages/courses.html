@@ -577,7 +577,8 @@
             <p class="course-desc">${course.short_description || course.description || ''}</p>
           </div>
           <div class="course-footer">
-            <span class="course-price">₹${Number(course.price || 0).toLocaleString('en-IN')}</span>
+            
+            
             <button class="btn-grad" onclick="enrollCourse('${course.id}', '${safeName}')">Enroll Now</button>
           </div>
           ${(() => {
@@ -596,7 +597,7 @@
 
       document.getElementById('courseCount').textContent = `Showing ${coursesToRender.length} courses`;
 
-      // Trigger animations
+      // Trigger animations <span class="course-price">₹${Number(course.price || 0).toLocaleString('en-IN')}</span>
       if (window.app && window.app.setupScrollReveal) {
         setTimeout(() => window.app.setupScrollReveal(), 100);
       }
