@@ -1806,8 +1806,8 @@ async function loadUsers() {
   allUsers = [
     { id: 'u1', full_name: 'Priya Sharma', email: 'priya@example.com', role: 'student', created_at: '2026-01-15', courses_count: 2 },
     { id: 'u2', full_name: 'Arjun Verma', email: 'arjun@example.com', role: 'student', created_at: '2026-01-20', courses_count: 1 },
-    { id: 'u3', full_name: 'Dr. Rajan', email: 'rajan@example.com', role: 'instructor', created_at: '2025-12-01', courses_count: 5 },
-    { id: 'u4', full_name: 'Admin User', email: 'admin@skillupnow.com', role: 'admin', created_at: '2025-11-01', courses_count: 0 },
+    { id: 'u3', full_name: 'Dr. Rajan', email: 'rajan@example.com', role: 'instructor', created_at: '2026-12-01', courses_count: 5 },
+    { id: 'u4', full_name: 'Admin User', email: 'admin@skillupnow.com', role: 'admin', created_at: '2026-11-01', courses_count: 0 },
     { id: 'u5', full_name: 'Mohan Das', email: 'mohan@example.com', role: 'student', created_at: '2026-02-10', courses_count: 1 },
   ];
   renderUsers(allUsers);
@@ -2272,7 +2272,7 @@ function showReportPreview(type) {
       break;
     case 'revenue':
       headers = ['Month', 'Total Revenue', 'EMI Revenue', 'Direct Payment'];
-      rows = [['Oct 2025','₹3,80,000','₹1,20,000','₹2,60,000'],['Nov 2025','₹4,20,000','₹1,40,000','₹2,80,000'],['Dec 2025','₹3,90,000','₹1,10,000','₹2,80,000'],['Jan 2026','₹4,50,000','₹1,60,000','₹2,90,000'],['Feb 2026','₹4,10,000','₹1,30,000','₹2,80,000'],['Mar 2026','₹4,80,000','₹1,70,000','₹3,10,000']];
+      rows = [['Oct 2026','₹3,80,000','₹1,20,000','₹2,60,000'],['Nov 2026','₹4,20,000','₹1,40,000','₹2,80,000'],['Dec 2026','₹3,90,000','₹1,10,000','₹2,80,000'],['Jan 2026','₹4,50,000','₹1,60,000','₹2,90,000'],['Feb 2026','₹4,10,000','₹1,30,000','₹2,80,000'],['Mar 2026','₹4,80,000','₹1,70,000','₹3,10,000']];
       break;
     default:
       headers = ['Type', 'Count', 'Status'];
@@ -2315,9 +2315,9 @@ function generateReport(type) {
   const fallbackData = {
     revenue: [
       ['Month', 'Total Revenue', 'EMI Revenue', 'Direct Payment'],
-      ['October 2025', '380000', '120000', '260000'],
-      ['November 2025', '420000', '140000', '280000'],
-      ['December 2025', '390000', '110000', '280000'],
+      ['October 2026', '380000', '120000', '260000'],
+      ['November 2026', '420000', '140000', '280000'],
+      ['December 2026', '390000', '110000', '280000'],
       ['January 2026', '450000', '160000', '290000'],
       ['February 2026', '410000', '130000', '280000'],
       ['March 2026', '480000', '170000', '310000'],

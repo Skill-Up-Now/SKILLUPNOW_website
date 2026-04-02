@@ -564,7 +564,7 @@ Built with **Supabase PostgreSQL** with:
 
 ## 📝 License
 
-© 2025 SkillUpNow Platform. All rights reserved.
+© 2026 SkillUpNow Platform. All rights reserved.
 
 ---
 
@@ -613,4 +613,4 @@ Built with **Supabase PostgreSQL** with:
 
 ---
 
-*Last Updated: 2025 | All features tested and production-ready*
+*Last Updated: 2026 | All features tested and production-ready*
