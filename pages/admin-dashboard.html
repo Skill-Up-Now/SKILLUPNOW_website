@@ -942,9 +942,52 @@
         <div class="panel">
           <div class="panel-header">
             <div class="panel-title">Schedule a Google Meet</div>
-            <button class="btn btn-outline btn-sm" onclick="autoFillAgenda()" title="Auto-generate agenda from title & course">✨ Auto-Agenda</button>
+            <div style="display:flex;gap:0.5rem;align-items:center;">
+              <!-- Mode Toggle -->
+              <div id="meetModeToggle" style="display:flex;background:var(--panel2);border:1px solid var(--border);border-radius:8px;overflow:hidden;">
+                <button id="modeAutoBtn" onclick="setMeetMode('auto')"
+                  style="padding:0.3rem 0.75rem;font-size:0.78rem;font-weight:600;border:none;cursor:pointer;background:var(--v1);color:#fff;transition:all 0.2s;">
+                  ⚡ Auto
+                </button>
+                <button id="modeManualBtn" onclick="setMeetMode('manual')"
+                  style="padding:0.3rem 0.75rem;font-size:0.78rem;font-weight:600;border:none;cursor:pointer;background:transparent;color:var(--txt3);transition:all 0.2s;">
+                  ✏️ Manual
+                </button>
+              </div>
+              <button class="btn btn-outline btn-sm" onclick="autoFillAgenda()" title="Auto-generate agenda">✨ Agenda</button>
+            </div>
           </div>
           <div class="panel-body">
+
+            <!-- AUTO MODE: paste link → extract everything -->
+            <div id="meetAutoModePanel" style="margin-bottom:1.25rem;">
+              <div style="background:rgba(124,92,252,0.07);border:1px solid rgba(124,92,252,0.2);border-radius:10px;padding:1rem 1.1rem;margin-bottom:1rem;">
+                <div style="font-size:0.82rem;font-weight:700;color:var(--v2);margin-bottom:0.4rem;">⚡ Automatic Mode</div>
+                <div style="font-size:0.78rem;color:var(--txt3);line-height:1.5;">Paste a Google Meet link below. Meeting ID, title, and agenda will be auto-extracted and populated. Then fill in the date, time, and participants before saving.</div>
+              </div>
+              <div class="form-group" style="margin-bottom:0.75rem;">
+                <label>Paste Google Meet Link</label>
+                <input type="url" id="meetAutoLink"
+                  placeholder="https://meet.google.com/abc-defg-hij"
+                  oninput="autoExtractMeetDetails(this)"
+                  style="font-size:0.9rem;">
+                <span id="meetAutoStatus" style="font-size:0.75rem;margin-top:0.3rem;display:none;"></span>
+              </div>
+              <div id="meetAutoExtracted" style="display:none;background:rgba(74,222,128,0.07);border:1px solid rgba(74,222,128,0.25);border-radius:8px;padding:0.75rem 1rem;font-size:0.8rem;color:var(--txt2);margin-bottom:0.75rem;">
+                <strong style="color:#4ade80;">✓ Meeting detected</strong>
+                <div id="meetAutoExtractedDetails" style="margin-top:0.3rem;color:var(--txt3);"></div>
+              </div>
+            </div>
+
+            <!-- MANUAL MODE: label indicator -->
+            <div id="meetManualModePanel" style="display:none;margin-bottom:1rem;">
+              <div style="background:rgba(61,107,255,0.07);border:1px solid rgba(61,107,255,0.2);border-radius:10px;padding:0.75rem 1rem;margin-bottom:1rem;">
+                <div style="font-size:0.82rem;font-weight:700;color:var(--v2);margin-bottom:0.25rem;">✏️ Manual Mode</div>
+                <div style="font-size:0.78rem;color:var(--txt3);line-height:1.5;">Create the meeting link yourself, fill in all fields manually. Meeting details will be saved, calendar updated, and email invites sent from <strong style="color:var(--v2);">skillupnow.off@gmail.com</strong>.</div>
+              </div>
+            </div>
+
+            <!-- Shared fields -->
             <div class="form-grid">
               <div class="form-group">
                 <label>Meeting Title</label>
@@ -973,21 +1016,21 @@
                   <option value="120">2 hours</option>
                 </select>
               </div>
-              <div class="form-group">
+              <div class="form-group" id="meetLinkGroup">
                 <label>Google Meet Link</label>
                 <input type="url" id="meetLink" placeholder="https://meet.google.com/xxx-xxxx-xxx" oninput="validateMeetLink(this)">
                 <span id="meetLinkStatus" style="font-size:0.75rem;margin-top:0.25rem;display:none;"></span>
               </div>
             </div>
             <div class="form-group" style="margin-bottom: 1rem;">
-              <label>Participants (emails, comma separated)</label>
+              <label>Participants <span style="font-size:0.72rem;font-weight:400;color:var(--txt3);">(emails, comma separated — invites sent from skillupnow.off@gmail.com)</span></label>
               <textarea id="meetParticipants" placeholder="student1@gmail.com, student2@gmail.com…" style="min-height:60px;"></textarea>
             </div>
             <div class="form-group" style="margin-bottom: 1rem;">
               <label style="display:flex;justify-content:space-between;align-items:center;">
                 Agenda <span style="font-size:0.72rem;color:var(--txt3);font-weight:400;">(auto-generated or manual)</span>
               </label>
-              <textarea id="meetNotes" placeholder="Click ✨ Auto-Agenda to generate, or type manually…" style="min-height:80px;"></textarea>
+              <textarea id="meetNotes" placeholder="Click ✨ Agenda to generate, or type manually…" style="min-height:80px;"></textarea>
             </div>
             <!-- Publish toggle -->
             <label style="display:flex;align-items:center;gap:0.6rem;margin-bottom:1.2rem;cursor:pointer;font-size:0.88rem;font-weight:600;color:var(--txt2);">
@@ -995,7 +1038,10 @@
               Publish to website (visible to students)
             </label>
             <div id="meetError" style="display:none;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:8px;padding:0.6rem 1rem;font-size:0.82rem;color:#f87171;margin-bottom:1rem;"></div>
-            <button class="btn btn-primary" onclick="saveMeet()">📅 Schedule Meet</button>
+            <div style="display:flex;gap:0.75rem;flex-wrap:wrap;">
+              <button class="btn btn-primary" onclick="saveMeet()">📅 Schedule Meet</button>
+              <button class="btn btn-outline btn-sm" onclick="sendEmailInvites()" id="sendInvitesBtn" style="display:none;">📧 Send Invites</button>
+            </div>
           </div>
         </div>
 
@@ -1299,6 +1345,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   loadDashboard();
   setDefaultDates();
   generateRevenueBars();
+  setMeetMode('auto'); // default to auto mode
+  // Show send-invites button when participants typed
+  document.getElementById('meetParticipants')?.addEventListener('input', updateSendInvitesVisibility);
 });
 
 async function checkSession() {
@@ -2112,6 +2161,120 @@ function exportSectionCSV(section) {
   if (!rows || !rows.length) { showToast('No data to export', 'err'); return; }
   downloadCSV(filename, [headers, ...rows]);
   showToast(`${section} report exported!`, 'ok');
+}
+
+/* ── Google Meet Mode ── */
+let currentMeetMode = 'auto';
+
+function setMeetMode(mode) {
+  currentMeetMode = mode;
+  const autoBtn   = document.getElementById('modeAutoBtn');
+  const manualBtn = document.getElementById('modeManualBtn');
+  const autoPanel = document.getElementById('meetAutoModePanel');
+  const manualPanel = document.getElementById('meetManualModePanel');
+  const linkGroup = document.getElementById('meetLinkGroup');
+  const sendBtn   = document.getElementById('sendInvitesBtn');
+
+  if (mode === 'auto') {
+    autoBtn.style.background = 'var(--v1)';
+    autoBtn.style.color = '#fff';
+    manualBtn.style.background = 'transparent';
+    manualBtn.style.color = 'var(--txt3)';
+    if (autoPanel)  autoPanel.style.display = '';
+    if (manualPanel) manualPanel.style.display = 'none';
+    if (linkGroup)  linkGroup.style.display = 'none'; // link comes from auto-extract
+  } else {
+    manualBtn.style.background = 'var(--v1)';
+    manualBtn.style.color = '#fff';
+    autoBtn.style.background = 'transparent';
+    autoBtn.style.color = 'var(--txt3)';
+    if (autoPanel)  autoPanel.style.display = 'none';
+    if (manualPanel) manualPanel.style.display = '';
+    if (linkGroup)  linkGroup.style.display = '';
+  }
+  // Show send invites button when participants field has values
+  updateSendInvitesVisibility();
+}
+
+function updateSendInvitesVisibility() {
+  const participants = document.getElementById('meetParticipants')?.value.trim();
+  const sendBtn = document.getElementById('sendInvitesBtn');
+  if (sendBtn) sendBtn.style.display = participants ? '' : 'none';
+}
+
+/* ── Auto-extract meet details from pasted link ── */
+function autoExtractMeetDetails(input) {
+  const val = input.value.trim();
+  const status = document.getElementById('meetAutoStatus');
+  const extracted = document.getElementById('meetAutoExtracted');
+  const extractedDetails = document.getElementById('meetAutoExtractedDetails');
+  const meetLinkInput = document.getElementById('meetLink');
+
+  if (!val) {
+    if (status) status.style.display = 'none';
+    if (extracted) extracted.style.display = 'none';
+    return;
+  }
+
+  const meetId = window.GoogleMeetModule ? window.GoogleMeetModule.parseMeetUrl(val) : null;
+
+  if (!meetId) {
+    if (status) { status.style.display = 'block'; status.style.color = '#f87171'; status.textContent = '✗ Not a valid Google Meet link (expected: https://meet.google.com/xxx-xxxx-xxx)'; }
+    if (extracted) extracted.style.display = 'none';
+    return;
+  }
+
+  // Valid link — populate the hidden meetLink field and show confirmation
+  if (meetLinkInput) meetLinkInput.value = val;
+
+  if (status) { status.style.display = 'block'; status.style.color = '#4ade80'; status.textContent = '✓ Valid Meet link · ID: ' + meetId; }
+
+  // Auto-fill title if empty
+  const titleEl = document.getElementById('meetTitle');
+  if (titleEl && !titleEl.value.trim()) {
+    titleEl.value = 'Google Meet — ' + meetId;
+  }
+
+  // Auto-generate agenda if title + course available
+  const courseEl = document.getElementById('meetCourse');
+  const course = courseEl?.options[courseEl.selectedIndex]?.text || '';
+  const date = document.getElementById('meetDate')?.value || '';
+  const notesEl = document.getElementById('meetNotes');
+  if (notesEl && !notesEl.value.trim() && window.GoogleMeetModule) {
+    notesEl.value = window.GoogleMeetModule.generateAgenda(titleEl?.value || '', course, date);
+  }
+
+  if (extracted) extracted.style.display = 'block';
+  if (extractedDetails) {
+    extractedDetails.innerHTML = `Meeting ID: <strong>${meetId}</strong> · Link populated and ready to save.`;
+  }
+}
+
+/* ── Send Email Invites (simulated — integrates with email service) ── */
+function sendEmailInvites() {
+  const participants = document.getElementById('meetParticipants')?.value.trim();
+  const title = document.getElementById('meetTitle')?.value.trim() || 'Google Meet Session';
+  const date  = document.getElementById('meetDate')?.value || '';
+  const time  = document.getElementById('meetTime')?.value || '';
+  const link  = document.getElementById('meetLink')?.value.trim() || document.getElementById('meetAutoLink')?.value.trim() || '';
+
+  if (!participants) { showToast('Add participant emails first', 'err'); return; }
+  if (!link)         { showToast('A Meet link is required to send invites', 'err'); return; }
+
+  const emails = participants.split(',').map(e => e.trim()).filter(Boolean);
+  if (!emails.length) { showToast('No valid emails found', 'err'); return; }
+
+  // Build mailto: with pre-filled subject & body (opens email client as fallback)
+  const subject = encodeURIComponent(`[SkillUpNow] Invite: ${title}`);
+  const body = encodeURIComponent(
+    `Hi,\n\nYou're invited to a live session on SkillUpNow.\n\n` +
+    `Title: ${title}\nDate: ${date}\nTime: ${time}\nLink: ${link}\n\n` +
+    `Join via Google Meet at the above link.\n\nRegards,\nSkillUpNow Team\nskillupnow.off@gmail.com`
+  );
+  // Open mailto for all participants
+  const mailto = `mailto:${emails.join(',')}?subject=${subject}&body=${body}`;
+  window.open(mailto, '_blank');
+  showToast(`Invite opened for ${emails.length} recipient(s) via skillupnow.off@gmail.com`, 'ok');
 }
 
 /* ── Google Meet ── */

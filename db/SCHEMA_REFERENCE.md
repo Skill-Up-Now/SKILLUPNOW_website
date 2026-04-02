@@ -1,6 +1,6 @@
 # SkillUpNow — Database Schema Reference
 
-**Platform:** skillupnow.org
+**Platform:** skillupnowadmin.org 
 **Database:** Supabase (PostgreSQL 15)
 **Files:** `schema.sql` · `seed.sql`
 

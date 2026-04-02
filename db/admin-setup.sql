@@ -4,7 +4,7 @@
 --
 -- Admin credentials:
 --   Username : skillupnowadmin
---   Email    : skillupnowadmin@skillupnow.org
+--   Email    : skillupnowadmin@skillupnowadmin.org 
 --   Password : Skillupnow@0904
 -- ============================================================
 
@@ -42,7 +42,7 @@ BEGIN
     v_admin_id,
     'authenticated',
     'authenticated',
-    'skillupnowadmin@skillupnow.org',
+    'skillupnowadmin@skillupnowadmin.org ',
     crypt('Skillupnow@0904', gen_salt('bf')),  -- bcrypt-hashed password
     NOW(),                                      -- email pre-confirmed
     '{"provider":"email","providers":["email"]}',
@@ -67,7 +67,7 @@ BEGIN
   VALUES (
     v_admin_id,
     'SkillUpNow Admin',
-    'skillupnowadmin@skillupnow.org',
+    'skillupnowadmin@skillupnowadmin.org ',
     TRUE,
     TRUE,
     NOW()
@@ -101,7 +101,7 @@ BEGIN
         is_active   = TRUE,
         updated_at  = NOW();
 
-  RAISE NOTICE '✅ Admin user created: skillupnowadmin@skillupnow.org (id: %)', v_admin_id;
+  RAISE NOTICE '✅ Admin user created: skillupnowadmin@skillupnowadmin.org  (id: %)', v_admin_id;
 
 END;
 $$;
@@ -119,7 +119,7 @@ SELECT
 FROM auth.users          u
 JOIN public.user_profiles up ON up.id     = u.id
 JOIN public.admin_users   au ON au.user_id = u.id
-WHERE u.email = 'skillupnowadmin@skillupnow.org';
+WHERE u.email = 'skillupnowadmin@skillupnowadmin.org ';
 
 
 -- ============================================================
@@ -132,7 +132,7 @@ WHERE u.email = 'skillupnowadmin@skillupnow.org';
 --   SET encrypted_password = crypt('Skillupnow@0904', gen_salt('bf')),
 --       email_confirmed_at = NOW(),
 --       updated_at         = NOW()
---   WHERE email = 'skillupnowadmin@skillupnow.org';
+--   WHERE email = 'skillupnowadmin@skillupnowadmin.org ';
 --
 -- Then re-run STEP 3 to ensure admin_users row exists.
 --
@@ -143,7 +143,7 @@ WHERE u.email = 'skillupnowadmin@skillupnow.org';
 --    OR directly visits pages/admin-login.html
 --
 -- 2. Enters:
---      Email    : skillupnowadmin@skillupnow.org
+--      Email    : skillupnowadmin@skillupnowadmin.org 
 --      Password : Skillupnow@0904
 --
 -- 3. On successful login, the code calls checkAdminAccess(userId).

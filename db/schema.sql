@@ -1,6 +1,6 @@
 -- ============================================================
 -- SKILLUPNOW — SUPABASE DATABASE SCHEMA
--- Platform: skillupnow.org
+-- Platform: skillupnowadmin.org 
 -- Run this entire file in Supabase SQL Editor (one migration)
 -- ============================================================
 

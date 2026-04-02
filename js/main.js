@@ -52,13 +52,21 @@ class SkillUpNowApp {
 
     // Hover detection for interactive elements
     document.addEventListener('mouseover', (e) => {
-      if (e.target.closest('a, button, [role="button"], input, select, textarea, label, .btn-grad, .course-card, .nav-item')) {
+      const el = e.target.closest('a, button, [role="button"], .btn-grad, .course-card, .nav-item, [onclick], .filter-select, .filter-reset');
+      const inputEl = e.target.closest('input, select, textarea');
+      if (inputEl) {
+        document.body.classList.remove('cursor-hover');
+        document.body.classList.add('cursor-input');
+      } else if (el) {
+        document.body.classList.remove('cursor-input');
         document.body.classList.add('cursor-hover');
       }
     });
     document.addEventListener('mouseout', (e) => {
-      if (e.target.closest('a, button, [role="button"], input, select, textarea, label, .btn-grad, .course-card, .nav-item')) {
+      const el = e.target.closest('a, button, [role="button"], input, select, textarea, .btn-grad, .course-card, .nav-item, [onclick], .filter-select, .filter-reset');
+      if (el) {
         document.body.classList.remove('cursor-hover');
+        document.body.classList.remove('cursor-input');
       }
     });
 

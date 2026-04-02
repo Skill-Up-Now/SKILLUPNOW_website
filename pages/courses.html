@@ -200,63 +200,132 @@
       color: var(--v1);
     }
 
-    .filter-sidebar {
-      background: var(--panel2);
-      padding: 2rem;
-      border-radius: var(--r2);
-      height: fit-content;
-    }
-
-    .filter-group {
-      margin-bottom: 2rem;
-    }
-
-    .filter-group h4 {
-      margin: 0 0 1rem;
-      font-size: 0.95rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--txt2);
-    }
-
-    .filter-option {
+    /* ── Top Filter Bar ── */
+    .filter-topbar {
       display: flex;
       align-items: center;
-      gap: 0.7rem;
-      margin-bottom: 0.7rem;
+      gap: 0.65rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.75rem;
+      padding: 0.9rem 1.25rem;
+      background: var(--panel2);
+      border: 1px solid var(--border);
+      border-radius: var(--r2);
+      position: sticky;
+      top: 78px;
+      z-index: 85;
+      backdrop-filter: blur(16px);
+    }
+    .filter-search-wrap {
+      flex: 1;
+      min-width: 180px;
+      position: relative;
+    }
+    .filter-search-icon {
+      position: absolute;
+      left: 0.85rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--txt4);
+      font-size: 0.88rem;
+      pointer-events: none;
+    }
+    .filter-search {
+      width: 100%;
+      background: var(--panel);
+      border: 1.5px solid var(--border);
+      padding: 0.65rem 1rem 0.65rem 2.3rem;
+      border-radius: var(--r2);
+      color: var(--txt);
+      font-size: 0.9rem;
+      transition: border-color 0.2s;
+      font-family: inherit;
+    }
+    .filter-search:focus { outline: none; border-color: #ff4d9d; }
+    .filter-search::placeholder { color: var(--txt4); }
+
+    .filter-select {
+      background: var(--panel);
+      border: 1.5px solid var(--border);
+      padding: 0.65rem 2.2rem 0.65rem 0.9rem;
+      border-radius: var(--r2);
+      color: var(--txt);
+      font-size: 0.875rem;
+      font-weight: 500;
       cursor: pointer;
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23ff4d9d' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 0.6rem center;
+      background-size: 13px;
+      min-width: 140px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      font-family: inherit;
+    }
+    .filter-select:focus {
+      outline: none;
+      border-color: #ff4d9d;
+      box-shadow: 0 0 0 3px rgba(255, 77, 157, 0.1);
     }
 
-    .filter-option input[type="checkbox"] {
-      cursor: pointer;
+    .filter-divider {
+      width: 1px;
+      height: 24px;
+      background: var(--border);
+      flex-shrink: 0;
     }
 
-    .filter-option label {
+    .filter-reset {
+      padding: 0.65rem 1rem;
+      border: 1.5px solid var(--border);
+      border-radius: var(--r2);
+      background: transparent;
+      color: var(--txt3);
+      font-size: 0.875rem;
+      font-weight: 500;
       cursor: pointer;
-      margin: 0;
-      font-weight: 400;
+      white-space: nowrap;
+      transition: all 0.2s;
+      font-family: inherit;
+      flex-shrink: 0;
+    }
+    .filter-reset:hover {
+      background: rgba(255, 77, 157, 0.08);
+      border-color: #ff4d9d;
+      color: #ff4d9d;
     }
 
+    /* ── Courses Grid ── */
     .courses-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
       gap: 2rem;
     }
 
-    .search-box {
-      background: var(--panel);
-      border: 1.5px solid var(--border);
-      padding: 0.9rem 1.1rem;
-      border-radius: var(--r2);
-      width: 100%;
-      color: var(--txt);
-      font-size: 0.95rem;
-      margin-bottom: 2rem;
+    /* Larger course titles & content */
+    .course-title { font-size: 1.2rem !important; }
+    .course-desc  { font-size: 1rem !important; }
+    .course-price {
+      font-size: 1.5rem !important;
+      font-weight: 800 !important;
     }
-
-    .search-box::placeholder {
+    .course-price-original {
+      font-size: 0.88rem;
       color: var(--txt4);
+      text-decoration: line-through;
+      font-weight: 400;
+      margin-left: 0.3rem;
+    }
+    .course-price-save {
+      display: inline-block;
+      background: rgba(74, 222, 128, 0.15);
+      color: #4ade80;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 0.15rem 0.5rem;
+      border-radius: 2rem;
+      margin-left: 0.4rem;
     }
   </style>
   <script>
@@ -302,92 +371,125 @@
     </div>
   </nav>
 
-  <section style="padding: 3rem 5vw; min-height: calc(100vh - 200px);">
+  <section style="padding: 2rem 5vw 4rem; min-height: calc(100vh - 200px);">
     <div style="max-width: 1400px; margin: 0 auto;">
-      <h1 style="font-family: 'Cormorant Garamond', serif; font-size: 2.5rem; text-align: center; margin-bottom: 1rem;">Our Premium Courses</h1>
-      <p style="text-align: center; color: var(--txt3); margin-bottom: 2rem; font-size: 1.05rem;">Choose from 48+ expertly-designed courses covering cloud, DevOps, AI, security, and more.</p>
 
-      <div style="display: grid; grid-template-columns: 1fr 3fr; gap: 2rem; margin-bottom: 3rem;">
-        <!-- Vertical Filter Bar -->
-        <div class="filter-sidebar">
-          <h3 style="margin-top: 0; font-size: 0.95rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--txt3); margin-bottom: 1.5rem;">Filters</h3>
+      <!-- Page heading -->
+      <h1 style="font-family: 'Cormorant Garamond', serif; font-size: 3rem; text-align: center; margin-bottom: 0.6rem; line-height: 1.15;">Our Premium Courses</h1>
+      <p style="text-align: center; color: var(--txt3); margin-bottom: 2rem; font-size: 1.1rem;">Choose from 48+ expertly-designed courses covering cloud, DevOps, AI, security, and more.</p>
 
-          <!-- Search -->
-          <div style="position:relative; margin-bottom: 1.5rem;">
-            <span style="position:absolute;left:0.9rem;top:50%;transform:translateY(-50%);color:var(--txt4);font-size:0.9rem;">🔍</span>
-            <input type="text" id="searchBox" class="search-box" placeholder="Search courses..." style="padding-left: 2.4rem; margin-bottom: 0;" oninput="applyFilters()">
-          </div>
-
-          <!-- Level Filter -->
-          <div class="filter-group">
-            <h4>Level</h4>
-            <div class="filter-option">
-              <input type="checkbox" id="level-beginner" value="beginner" onchange="applyFilters()">
-              <label for="level-beginner">Beginner</label>
-            </div>
-            <div class="filter-option">
-              <input type="checkbox" id="level-intermediate" value="intermediate" onchange="applyFilters()">
-              <label for="level-intermediate">Intermediate</label>
-            </div>
-            <div class="filter-option">
-              <input type="checkbox" id="level-advanced" value="advanced" onchange="applyFilters()">
-              <label for="level-advanced">Advanced</label>
-            </div>
-          </div>
-
-          <!-- Duration Filter -->
-          <div class="filter-group">
-            <h4>Duration</h4>
-            <div class="filter-option">
-              <input type="checkbox" id="dur-short" value="short" onchange="applyFilters()">
-              <label for="dur-short">Under 2 months</label>
-            </div>
-            <div class="filter-option">
-              <input type="checkbox" id="dur-med" value="medium" onchange="applyFilters()">
-              <label for="dur-med">2–4 months</label>
-            </div>
-            <div class="filter-option">
-              <input type="checkbox" id="dur-long" value="long" onchange="applyFilters()">
-              <label for="dur-long">5+ months</label>
-            </div>
-          </div>
-
-          <!-- Price Filter -->
-          <div class="filter-group">
-            <h4>Price Range</h4>
-            <div class="filter-option">
-              <input type="checkbox" id="price-low" value="low" onchange="applyFilters()">
-              <label for="price-low">Under ₹20,000</label>
-            </div>
-            <div class="filter-option">
-              <input type="checkbox" id="price-mid" value="mid" onchange="applyFilters()">
-              <label for="price-mid">₹20,000 – ₹30,000</label>
-            </div>
-            <div class="filter-option">
-              <input type="checkbox" id="price-high" value="high" onchange="applyFilters()">
-              <label for="price-high">Above ₹30,000</label>
-            </div>
-          </div>
-
-          <button class="btn-outline" onclick="resetFilters()" style="width: 100%; margin-top: 0.5rem; border: 1.5px solid var(--border2);">↺ Reset</button>
+      <!-- Horizontal Filter Bar -->
+      <div class="filter-topbar">
+        <div class="filter-search-wrap">
+          <span class="filter-search-icon">🔍</span>
+          <input type="text" id="searchBox" class="filter-search" placeholder="Search courses..." oninput="applyFilters()">
         </div>
 
-        <!-- Courses Grid -->
-        <div>
-          <div style="margin-bottom: 1.5rem;">
-            <p id="courseCount" style="color: var(--txt3); margin: 0; font-size: 0.88rem;"></p>
-          </div>
+        <div class="filter-divider"></div>
 
-          <div class="courses-grid" id="coursesGrid">
-            <!-- Courses will be populated here -->
-          </div>
-        </div>
+        <select id="levelFilter" class="filter-select" onchange="applyFilters()" title="Filter by level">
+          <option value="">All Levels</option>
+          <option value="beginner">Beginner</option>
+          <option value="intermediate">Intermediate</option>
+          <option value="advanced">Advanced</option>
+        </select>
+
+        <select id="statusFilter" class="filter-select" onchange="applyFilters()" title="Filter by status">
+          <option value="">All Courses</option>
+          <option value="active">Active Courses</option>
+          <option value="closed">Closed Courses</option>
+          <option value="featured">Featured</option>
+        </select>
+
+        <select id="sortFilter" class="filter-select" onchange="setSortFromDropdown(this.value)" title="Sort courses">
+          <option value="popular">Most Popular</option>
+          <option value="trending">Recent Trends</option>
+          <option value="newest">Newest First</option>
+          <option value="rating">Top Rated</option>
+        </select>
+
+        <button class="filter-reset" onclick="resetFilters()">↺ Reset</button>
       </div>
+
+      <!-- Course count -->
+      <p id="courseCount" style="color: var(--txt3); margin: 0 0 1.5rem; font-size: 0.88rem; text-align: center;"></p>
+
+      <!-- Courses Grid (full-width) -->
+      <div class="courses-grid" id="coursesGrid">
+        <!-- Populated by JS -->
+      </div>
+
     </div>
   </section>
 
-  <footer style="background: rgba(8,6,18,0.95); border-top: 1px solid var(--border); padding: 3rem 5vw; text-align: center; margin-top: 4rem;">
-    <p style="color: var(--txt4); font-size: 0.9rem;"> <a href="contact-enquiry.html" style="color: var(--v2); text-decoration: none;">Fee Enquiry</a></p>
+  <footer style="background: rgba(8,6,18,0.97); border-top: 1px solid var(--border); padding: 4rem 5vw 2rem; margin-top: 4rem;">
+    <div style="max-width: 1400px; margin: 0 auto;">
+      <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 3rem; margin-bottom: 3rem;">
+
+        <!-- Brand -->
+        <div>
+          <a href="../index.html" class="nav-logo" style="margin-bottom: 1rem; display: inline-flex;">
+            <div class="logo-icon"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            SkillUpNow
+          </a>
+          <p style="font-size: 0.83rem; color: var(--txt4); line-height: 1.75; max-width: 260px; margin-top: 0.8rem;">Premium IT & professional skills training built for career transformation.</p>
+          <div style="margin-top: 1.2rem; display: flex; flex-direction: column; gap: 0.45rem;">
+            <a href="mailto:skillupnow.off@gmail.com" style="font-size: 0.8rem; color: var(--txt4); text-decoration: none; display: flex; align-items: center; gap: 0.45rem; transition: color 0.2s;" onmouseover="this.style.color='#ff85c0'" onmouseout="this.style.color=''">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+              skillupnow.off@gmail.com
+            </a>
+            <a href="tel:+919876543210" style="font-size: 0.8rem; color: var(--txt4); text-decoration: none; display: flex; align-items: center; gap: 0.45rem; transition: color 0.2s;" onmouseover="this.style.color='#ff85c0'" onmouseout="this.style.color=''">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.17 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.08 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.09 8.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21 16z"/></svg>
+              +91 98765 43210
+            </a>
+          </div>
+        </div>
+
+        <!-- Courses -->
+        <div>
+          <h5 style="font-size: 0.72rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--txt2); margin-bottom: 1.2rem;">Courses</h5>
+          <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.65rem;">
+            <li><a href="courses.html" style="font-size: 0.83rem; color: var(--txt4); text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='#ff85c0'" onmouseout="this.style.color=''">Cloud Computing</a></li>
+            <li><a href="courses.html" style="font-size: 0.83rem; color: var(--txt4); text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='#ff85c0'" onmouseout="this.style.color=''">DevOps & CI/CD</a></li>
+            <li><a href="courses.html" style="font-size: 0.83rem; color: var(--txt4); text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='#ff85c0'" onmouseout="this.style.color=''">AI & Machine Learning</a></li>
+            <li><a href="courses.html" style="font-size: 0.83rem; color: var(--txt4); text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='#ff85c0'" onmouseout="this.style.color=''">Cybersecurity</a></li>
+          </ul>
+        </div>
+
+        <!-- Platform -->
+        <div>
+          <h5 style="font-size: 0.72rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--txt2); margin-bottom: 1.2rem;">Platform</h5>
+          <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.65rem;">
+            <li><a href="../index.html#how-it-works" style="font-size: 0.83rem; color: var(--txt4); text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='#ff85c0'" onmouseout="this.style.color=''">How It Works</a></li>
+            <li><a href="contact-enquiry.html" style="font-size: 0.83rem; color: var(--txt4); text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='#ff85c0'" onmouseout="this.style.color=''">Fee Enquiry</a></li>
+            <li><a href="emi-application.html" style="font-size: 0.83rem; color: var(--txt4); text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='#ff85c0'" onmouseout="this.style.color=''">EMI Options</a></li>
+            <li><a href="feedback.html" style="font-size: 0.83rem; color: var(--txt4); text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='#ff85c0'" onmouseout="this.style.color=''">Reviews</a></li>
+          </ul>
+        </div>
+
+        <!-- Company -->
+        <div>
+          <h5 style="font-size: 0.72rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--txt2); margin-bottom: 1.2rem;">Company</h5>
+          <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.65rem;">
+            <li><a href="../index.html" style="font-size: 0.83rem; color: var(--txt4); text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='#ff85c0'" onmouseout="this.style.color=''">About Us</a></li>
+            <li><a href="#" style="font-size: 0.83rem; color: var(--txt4); text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='#ff85c0'" onmouseout="this.style.color=''">Privacy Policy</a></li>
+            <li><a href="#" style="font-size: 0.83rem; color: var(--txt4); text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='#ff85c0'" onmouseout="this.style.color=''">Terms of Service</a></li>
+            <li><a href="contact-enquiry.html" style="font-size: 0.83rem; color: var(--txt4); text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='#ff85c0'" onmouseout="this.style.color=''">Contact Us</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Bottom bar -->
+      <div style="padding-top: 1.5rem; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <p style="font-size: 0.78rem; color: var(--txt4);">© 2026 SkillUpNow. All rights reserved.</p>
+        <div style="display: flex; gap: 0.65rem;">
+          <a href="#" style="width: 34px; height: 34px; border-radius: var(--r1); border: 1px solid var(--border); background: var(--panel); display: flex; align-items: center; justify-content: center; text-decoration: none; transition: all 0.25s; font-size: 0.9rem;" title="Facebook">📘</a>
+          <a href="#" style="width: 34px; height: 34px; border-radius: var(--r1); border: 1px solid var(--border); background: var(--panel); display: flex; align-items: center; justify-content: center; text-decoration: none; transition: all 0.25s; font-size: 0.9rem;" title="X / Twitter">𝕏</a>
+          <a href="#" style="width: 34px; height: 34px; border-radius: var(--r1); border: 1px solid var(--border); background: var(--panel); display: flex; align-items: center; justify-content: center; text-decoration: none; transition: all 0.25s; font-size: 0.9rem;" title="YouTube">📺</a>
+          <a href="#" style="width: 34px; height: 34px; border-radius: var(--r1); border: 1px solid var(--border); background: var(--panel); display: flex; align-items: center; justify-content: center; text-decoration: none; transition: all 0.25s; font-size: 0.9rem;" title="Instagram">📷</a>
+        </div>
+      </div>
+    </div>
   </footer>
 
   <!-- Modal -->
@@ -577,8 +679,13 @@
             <p class="course-desc">${course.short_description || course.description || ''}</p>
           </div>
           <div class="course-footer">
-            
-            
+            <div>
+              <span class="course-price">₹${Number(course.price || 0).toLocaleString('en-IN')}</span>
+              ${course.discounted_price && course.discounted_price < course.price
+                ? `<span class="course-price-original">₹${Number(course.discounted_price).toLocaleString('en-IN')}</span>
+                   <span class="course-price-save">Save ${Math.round((1 - course.discounted_price / course.price) * 100)}%</span>`
+                : ''}
+            </div>
             <button class="btn-grad" onclick="enrollCourse('${course.id}', '${safeName}')">Enroll Now</button>
           </div>
           ${(() => {
@@ -615,46 +722,55 @@
       applyFilters();
     }
 
+    function setSortFromDropdown(val) {
+      currentSort = val;
+      applyFilters();
+    }
+
     function applyFilters() {
-      const searchTerm = document.getElementById('searchBox').value.toLowerCase();
-      const selectedLevels = Array.from(document.querySelectorAll('[id^="level-"]:checked')).map(el => el.value);
-      const selectedDurations = Array.from(document.querySelectorAll('[id^="dur-"]:checked')).map(el => el.value);
-      const selectedPrices = Array.from(document.querySelectorAll('[id^="price-"]:checked')).map(el => el.value);
+      const searchTerm = (document.getElementById('searchBox')?.value || '').toLowerCase();
+      const levelVal   = document.getElementById('levelFilter')?.value || '';
+      const statusVal  = document.getElementById('statusFilter')?.value || '';
 
       filteredCourses = courses.filter(course => {
         const courseName = (course.name || '').toLowerCase();
-        const desc = (course.description || '').toLowerCase();
+        const desc = (course.description || course.short_description || '').toLowerCase();
         const matchesSearch = !searchTerm || courseName.includes(searchTerm) || desc.includes(searchTerm);
-        const matchesLevel = selectedLevels.length === 0 || selectedLevels.includes((course.level || '').toLowerCase());
-        const dur = course.duration_months || 0;
-        const matchesDuration = selectedDurations.length === 0 || (
-          (selectedDurations.includes('short') && dur > 0 && dur < 2) ||
-          (selectedDurations.includes('medium') && dur >= 2 && dur <= 4) ||
-          (selectedDurations.includes('long') && dur > 4)
-        );
-        const price = Number(course.price || 0);
-        const matchesPrice = selectedPrices.length === 0 || (
-          (selectedPrices.includes('low') && price < 20000) ||
-          (selectedPrices.includes('mid') && price >= 20000 && price <= 30000) ||
-          (selectedPrices.includes('high') && price > 30000)
-        );
-        return matchesSearch && matchesLevel && matchesDuration && matchesPrice;
+        const matchesLevel  = !levelVal || (course.level || '').toLowerCase() === levelVal;
+
+        let matchesStatus = true;
+        if (statusVal === 'active')   matchesStatus = course.is_active !== false && course.status !== 'closed';
+        if (statusVal === 'closed')   matchesStatus = course.status === 'closed' || course.is_active === false;
+        if (statusVal === 'featured') matchesStatus = !!course.is_featured;
+
+        return matchesSearch && matchesLevel && matchesStatus;
       });
 
       let sorted = [...filteredCourses];
-      if (currentSort === 'rating') sorted.sort((a, b) => (b.rating || 0) - (a.rating || 0));
-      else if (currentSort === 'newest') sorted.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
-      else sorted.sort((a, b) => (b.total_enrolled || 0) - (a.total_enrolled || 0));
+      if (currentSort === 'rating' || currentSort === 'trending')
+        sorted.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+      else if (currentSort === 'newest')
+        sorted.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+      else
+        sorted.sort((a, b) => (b.total_enrolled || 0) - (a.total_enrolled || 0));
+
       renderCourses(sorted);
     }
 
     function applySort() { applyFilters(); }
 
     function resetFilters() {
-      document.querySelectorAll('input[type="checkbox"]').forEach(el => el.checked = false);
-      document.getElementById('searchBox').value = '';
+      const sb = document.getElementById('searchBox');
+      const lf = document.getElementById('levelFilter');
+      const sf = document.getElementById('statusFilter');
+      const srt = document.getElementById('sortFilter');
+      if (sb)  sb.value  = '';
+      if (lf)  lf.value  = '';
+      if (sf)  sf.value  = '';
+      if (srt) srt.value = 'popular';
+      currentSort = 'popular';
       filteredCourses = [...courses];
-      setSortAndRender('popular');
+      applyFilters();
     }
 
     async function enrollCourse(courseId, courseTitle) {

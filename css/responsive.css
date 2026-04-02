@@ -507,6 +507,70 @@
   }
 }
 
+/* ── Sign-In Button Centering (All Screens) ── */
+.nav-signin {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* ── Courses Filter Bar Responsive ── */
+@media (max-width: 991px) {
+  .filter-topbar {
+    gap: 0.5rem !important;
+    padding: 0.75rem 1rem !important;
+    position: static !important; /* avoid sticky overlap on small screens */
+  }
+  .filter-search-wrap {
+    min-width: 150px !important;
+  }
+  .filter-select {
+    min-width: 120px !important;
+    font-size: 0.82rem !important;
+  }
+  .filter-divider { display: none !important; }
+  .courses-grid {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)) !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .filter-topbar {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0.6rem !important;
+  }
+  .filter-search-wrap { min-width: 100% !important; }
+  .filter-select { min-width: 100% !important; width: 100% !important; }
+  .filter-reset { width: 100% !important; text-align: center !important; }
+  .courses-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 599px) {
+  /* Nav actions: sign-in button must stay centered/visible */
+  .nav-signin {
+    padding: 0.45rem 0.85rem !important;
+    font-size: 0.78rem !important;
+  }
+  .nav-cta {
+    padding: 0.45rem 0.85rem !important;
+    font-size: 0.78rem !important;
+  }
+  /* Courses footer grid collapse */
+  .courses-footer-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 2rem !important;
+  }
+}
+
+@media (max-width: 479px) {
+  .courses-footer-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
 /* Print Styles */
 @media print {
   nav, footer, .no-print {
