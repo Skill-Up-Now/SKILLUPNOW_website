@@ -77,8 +77,8 @@ class ProfileNavigationManager {
     try {
       if (!window.supabaseConfig || !this.currentUser) return;
 
-      window.supabaseConfig.isAdmin(this.currentUser.id).then(isAdmin => {
-        if (isAdmin) {
+      window.supabaseConfig.checkAdminAccess(this.currentUser.id).then(result => {
+        if (result && result.isAdmin) {
           const adminLink = document.getElementById('dd-admin-link');
           if (adminLink) adminLink.style.display = 'flex';
         }
@@ -148,18 +148,15 @@ class ProfileNavigationManager {
 
   async logout() {
     try {
-      const result = await window.supabaseConfig.signOut();
-      if (result.success) {
-        this.currentUser = null;
-        this.showLoggedOutUI();
-        const inPages = window.location.pathname.includes('/pages/');
-        window.location.href = inPages ? '../index.html' : 'index.html';
-      }
+      if (window.supabaseConfig) await window.supabaseConfig.signOut();
     } catch (error) {
       console.error('Logout error:', error);
-      const inPages = window.location.pathname.includes('/pages/');
-      window.location.href = inPages ? '../index.html' : 'index.html';
     }
+    localStorage.removeItem('user_id');
+    localStorage.removeItem('user_email');
+    sessionStorage.clear();
+    const inPages = window.location.pathname.includes('/pages/');
+    window.location.href = inPages ? '../index.html' : 'index.html';
   }
 }
 

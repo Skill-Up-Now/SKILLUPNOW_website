@@ -167,26 +167,6 @@
       color: var(--v1);
     }
 
-    .theme-toggle {
-      position: fixed;
-      top: 2rem;
-      right: 2rem;
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: 50%;
-      width: 50px;
-      height: 50px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: all 0.3s;
-    }
-
-    .theme-toggle:hover {
-      border-color: var(--v2);
-      box-shadow: var(--shadow-card);
-    }
 
     .nav-logo {
       position: fixed;
@@ -212,8 +192,7 @@
         font-size: 1.5rem;
       }
 
-      .nav-logo,
-      .theme-toggle {
+      .nav-logo {
         position: static;
         margin-bottom: 1rem;
       }
@@ -227,10 +206,6 @@
   </script>
 </head>
 <body>
-  <!-- Theme Toggle -->
-  <button class="theme-toggle" id="theme-toggle-btn" title="Toggle Theme">
-    <span id="theme-icon">🌙</span>
-  </button>
 
   <!-- Main Login Container -->
   <div class="login-container">
@@ -282,6 +257,7 @@
   </div>
 
   <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="../config/supabase-config.js"></script>
   <script src="../js/theme.js"></script>
 

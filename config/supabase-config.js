@@ -35,7 +35,8 @@ class SupabaseConfig {
         email,
         password,
         options: {
-          data: userData
+          data: userData,
+          emailRedirectTo: null
         }
       });
 
@@ -137,9 +138,11 @@ class SupabaseConfig {
           id: userId,
           full_name: userData.full_name || '',
           email: userData.email || '',
-          phone_number: userData.phone_number || '',
-          learning_interest: userData.learning_interest || '',
-          experience_level: userData.experience_level || 'beginner'
+          phone: userData.phone || '',
+          city: userData.city || null,
+          state: userData.state || null,
+          gender: userData.gender || null,
+          is_email_verified: true
         }]);
 
       if (error) throw error;
@@ -441,17 +444,18 @@ class SupabaseConfig {
     try {
       const { data, error } = await this.client
         .from('admin_users')
-        .select('admin_role, permissions')
-        .eq('id', userId)
+        .select('role, permissions')
+        .eq('user_id', userId)
+        .eq('is_active', true)
         .single();
 
       if (error && error.code === 'PGRST116') {
         return { success: false, isAdmin: false };
       }
-      
+
       if (error) throw error;
-      
-      return { success: true, isAdmin: true, role: data.admin_role, permissions: data.permissions };
+
+      return { success: true, isAdmin: true, role: data.role, permissions: data.permissions };
     } catch (error) {
       console.error('Error checking admin access:', error);
       return { success: false, isAdmin: false };
@@ -692,21 +696,31 @@ class SupabaseConfig {
 
   async createCourse(courseData, adminUserId) {
     try {
+      const slug = (courseData.name || courseData.title || '')
+        .toLowerCase().trim()
+        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/\s+/g, '-')
+        + '-' + Date.now();
+
       const { data, error } = await this.client
         .from('courses')
         .insert([{
-          title: courseData.title,
+          name: courseData.name || courseData.title || '',
+          slug: courseData.slug || slug,
           category: courseData.category,
-          level: courseData.level,
+          level: (courseData.level || 'beginner').toLowerCase(),
           description: courseData.description || '',
-          icon: courseData.icon || '📚',
+          short_description: courseData.short_description || '',
           price: parseFloat(courseData.price) || 0,
-          duration: courseData.duration || '',
-          instructor: courseData.instructor || '',
-          badge: courseData.badge || null,
-          students_count: 0,
+          duration_months: parseInt(courseData.duration_months) || null,
+          duration_hours: parseInt(courseData.duration_hours) || null,
+          thumbnail_url: courseData.thumbnail_url || null,
+          instructor_name: courseData.instructor_name || '',
+          is_emi_available: courseData.is_emi_available !== false,
+          is_active: courseData.is_active !== false,
+          is_featured: courseData.is_featured || false,
+          total_enrolled: 0,
           rating: 0,
-          is_active: true,
           created_by: adminUserId
         }])
         .select()

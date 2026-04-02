@@ -14,9 +14,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
-  <!-- Supabase Database Connection -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="../config/supabase-config.js"></script>
+
 
   <!-- Modal Styles -->
   <style>
@@ -287,9 +285,6 @@
     </ul>
 
     <div class="nav-actions">
-      <div class="theme-toggle" role="button" tabindex="0" aria-pressed="false">
-        <div class="theme-toggle-btn">🌙</div>
-      </div>
       <div id="profile-section" style="display: none; align-items: center; gap: 1rem; position: relative;">
         <button id="profile-btn" class="profile-icon-btn" title="View Profile">👤</button>
         <div id="profile-dropdown" class="profile-dropdown">
@@ -425,37 +420,49 @@
 
       <div id="rf" style="display: none;">
         <h3 style="font-family: 'Cormorant Garamond', serif; font-weight: 700; font-size: 1.9rem; color: var(--txt); margin-bottom: 0.4rem; letter-spacing: -0.01em;">Join SkillUpNow</h3>
-        <p class="msub" style="font-size: 0.85rem; color: var(--txt3); margin-bottom: 2rem; font-weight: 400;">Join 12,000+ professionals already upskilling</p>
+        <p class="msub" style="font-size: 0.85rem; color: var(--txt3); margin-bottom: 1.5rem; font-weight: 400;">Create your account to start learning</p>
 
         <div class="form-group">
           <label>Full Name</label>
-          <input type="text" placeholder="Your full name" style="background: rgba(255,255,255,0.04); border: 1px solid var(--border); color: var(--txt); padding: 0.8rem 1rem; border-radius: var(--r2); font-size: 0.9rem;"/>
+          <input id="reg-name" type="text" placeholder="Your full name" style="background: rgba(255,255,255,0.04); border: 1px solid var(--border); color: var(--txt); padding: 0.8rem 1rem; border-radius: var(--r2); font-size: 0.9rem; width:100%;"/>
         </div>
-
         <div class="form-group">
           <label>Email Address</label>
-          <input type="email" placeholder="you@example.com" style="background: rgba(255,255,255,0.04); border: 1px solid var(--border); color: var(--txt); padding: 0.8rem 1rem; border-radius: var(--r2); font-size: 0.9rem;"/>
+          <input id="reg-email" type="email" placeholder="you@example.com" style="background: rgba(255,255,255,0.04); border: 1px solid var(--border); color: var(--txt); padding: 0.8rem 1rem; border-radius: var(--r2); font-size: 0.9rem; width:100%;"/>
         </div>
-
         <div class="form-group">
           <label>Phone Number</label>
-          <input type="tel" placeholder="+91 9876543210" style="background: rgba(255,255,255,0.04); border: 1px solid var(--border); color: var(--txt); padding: 0.8rem 1rem; border-radius: var(--r2); font-size: 0.9rem;"/>
+          <input id="reg-phone" type="tel" placeholder="+91 9876543210" style="background: rgba(255,255,255,0.04); border: 1px solid var(--border); color: var(--txt); padding: 0.8rem 1rem; border-radius: var(--r2); font-size: 0.9rem; width:100%;"/>
         </div>
-
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.8rem;">
+          <div class="form-group">
+            <label>City</label>
+            <input id="reg-city" type="text" placeholder="Chennai" style="background: rgba(255,255,255,0.04); border: 1px solid var(--border); color: var(--txt); padding: 0.8rem 1rem; border-radius: var(--r2); font-size: 0.9rem; width:100%;"/>
+          </div>
+          <div class="form-group">
+            <label>State</label>
+            <select id="reg-state" style="background: rgba(20,15,40,0.95); border: 1px solid var(--border); color: var(--txt); padding: 0.8rem 1rem; border-radius: var(--r2); font-size: 0.9rem; width:100%;">
+              <option value="">Select state</option>
+              <option>Andhra Pradesh</option><option>Assam</option><option>Bihar</option><option>Delhi</option>
+              <option>Gujarat</option><option>Haryana</option><option>Karnataka</option><option>Kerala</option>
+              <option>Madhya Pradesh</option><option>Maharashtra</option><option>Punjab</option>
+              <option>Rajasthan</option><option>Tamil Nadu</option><option>Telangana</option>
+              <option>Uttar Pradesh</option><option>West Bengal</option><option>Other</option>
+            </select>
+          </div>
+        </div>
         <div class="form-group">
-          <label>I want to learn</label>
-          <select style="background: rgba(255,255,255,0.04); border: 1px solid var(--border); color: var(--txt); padding: 0.8rem 1rem; border-radius: var(--r2); font-size: 0.9rem;">
-            <option>Cloud Computing</option>
-            <option>DevOps & CI/CD</option>
-            <option>AI / Machine Learning</option>
-            <option>Cybersecurity</option>
-            <option>Data Engineering</option>
+          <label>Gender</label>
+          <select id="reg-gender" style="background: rgba(20,15,40,0.95); border: 1px solid var(--border); color: var(--txt); padding: 0.8rem 1rem; border-radius: var(--r2); font-size: 0.9rem; width:100%;">
+            <option value="">Prefer not to say</option>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+            <option value="other">Other</option>
           </select>
         </div>
-
         <div class="form-group">
           <label>Password</label>
-          <input type="password" placeholder="Create a strong password" style="background: rgba(255,255,255,0.04); border: 1px solid var(--border); color: var(--txt); padding: 0.8rem 1rem; border-radius: var(--r2); font-size: 0.9rem;"/>
+          <input id="reg-password" type="password" placeholder="Minimum 6 characters" style="background: rgba(255,255,255,0.04); border: 1px solid var(--border); color: var(--txt); padding: 0.8rem 1rem; border-radius: var(--r2); font-size: 0.9rem; width:100%;"/>
         </div>
 
         <button class="btn-grad" style="width: 100%; padding: 0.95rem;" onclick="submitRegister()">Create My Account</button>
@@ -479,6 +486,8 @@
     </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../config/supabase-config.js"></script>
   <script src="../js/validations.js"></script>
   <script src="../js/theme.js"></script>
   <script src="../js/profile-nav.js"></script>
@@ -487,39 +496,28 @@
   <script src="../js/main.js"></script>
 
   <script>
-    // Static fallback courses (shown if DB has no courses yet)
-    const fallbackCourses = [
-      { id: 'c1', title: 'AWS Solutions Architect Pro', category: 'cloud', level: 'advanced', icon: '☁️', price: 14999, duration: '48 hrs', students_count: 3200, rating: 4.8, badge: 'Bestseller', description: 'Comprehensive guide to designing scalable, secure, and reliable AWS solutions.' },
-      { id: 'c2', title: 'Kubernetes & Docker Mastery', category: 'devops', level: 'intermediate', icon: '🐳', price: 12999, duration: '36 hrs', students_count: 2800, rating: 4.7, description: 'Master containerization and orchestration with Docker and Kubernetes.' },
-      { id: 'c3', title: 'Generative AI with Python', category: 'ai', level: 'advanced', icon: '🤖', price: 16999, duration: '60 hrs', students_count: 1500, rating: 4.9, badge: 'New Course', description: 'Build advanced AI applications using ChatGPT, LLMs, and generative models.' },
-      { id: 'c4', title: 'Cybersecurity Fundamentals', category: 'security', level: 'beginner', icon: '🔒', price: 11999, duration: '40 hrs', students_count: 4100, rating: 4.6, description: 'Essential security concepts, threat analysis, and defense mechanisms.' },
-      { id: 'c5', title: 'Terraform & IaC Engineering', category: 'devops', level: 'intermediate', icon: '🏗️', price: 13999, duration: '32 hrs', students_count: 1800, rating: 4.8, badge: 'Popular', description: 'Infrastructure as Code using Terraform, CloudFormation, and CI/CD pipelines.' },
-      { id: 'c6', title: 'Data Engineering with Spark', category: 'data', level: 'advanced', icon: '⚡', price: 15999, duration: '52 hrs', students_count: 2100, rating: 4.7, description: 'Build production-grade data pipelines with Apache Spark and Python.' },
-      { id: 'c7', title: 'Google Cloud Professional', category: 'cloud', level: 'advanced', icon: '☁️', price: 14999, duration: '48 hrs', students_count: 1900, rating: 4.8, description: 'Become a GCP expert with comprehensive cloud architecture and implementation.' },
-      { id: 'c8', title: 'Microservices Architecture', category: 'devops', level: 'advanced', icon: '🔧', price: 15999, duration: '44 hrs', students_count: 1200, rating: 4.9, description: 'Design and build resilient microservices-based applications.' },
-      { id: 'c9', title: 'Advanced Python Development', category: 'cloud', level: 'intermediate', icon: '🐍', price: 11999, duration: '40 hrs', students_count: 3500, rating: 4.7, description: 'Master advanced Python concepts including async, decorators, and metaprogramming.' },
-      { id: 'c10', title: 'Machine Learning Engineering', category: 'ai', level: 'advanced', icon: '🧠', price: 17999, duration: '64 hrs', students_count: 980, rating: 4.9, badge: 'Expert', description: 'Production ML pipeline development, model deployment, and MLOps.' },
-      { id: 'c11', title: 'Network Security & Ethical Hacking', category: 'security', level: 'advanced', icon: '🛡️', price: 17999, duration: '56 hrs', students_count: 780, rating: 4.8, description: 'Penetration testing, vulnerability assessment, and network hardening.' },
-      { id: 'c12', title: 'Azure Cloud Fundamentals', category: 'cloud', level: 'beginner', icon: '☁️', price: 10999, duration: '32 hrs', students_count: 2400, rating: 4.6, description: 'Introduction to Microsoft Azure cloud services and cloud computing concepts.' }
-    ];
-
-    let courses = [...fallbackCourses];
-    let filteredCourses = [...courses];
+    let courses = [];
+    let filteredCourses = [];
     let currentSort = 'popular';
 
     // Load courses from database on page load
     async function loadCoursesFromDB() {
+      const grid = document.getElementById('coursesGrid');
+      if (grid) grid.innerHTML = '<p style="color:var(--txt3);text-align:center;padding:3rem;"><span style="font-size:1.5rem;">⏳</span><br>Loading courses...</p>';
       try {
-        if (!window.supabaseConfig) return;
+        if (!window.supabaseConfig) throw new Error('DB not ready');
         const result = await window.supabaseConfig.getAllCourses();
-        if (result.success && result.data && result.data.length > 0) {
+        if (result.success && result.data) {
           courses = result.data;
           filteredCourses = [...courses];
           applySort();
+          return;
         }
       } catch (e) {
-        console.warn('Could not load courses from DB, using fallback.', e);
+        console.warn('Could not load courses from DB:', e);
       }
+      if (grid) grid.innerHTML = '<p style="color:var(--txt3);text-align:center;padding:3rem;">No courses available yet. Check back soon!</p>';
+      document.getElementById('courseCount').textContent = 'Showing 0 courses';
     }
 
     function renderCourses(coursesToRender) {
@@ -529,30 +527,35 @@
         document.getElementById('courseCount').textContent = 'Showing 0 courses';
         return;
       }
-      grid.innerHTML = coursesToRender.map(course => `
+      const categoryIcons = { 'Cloud':'☁️','DevOps':'🐳','AI/ML':'🤖','Cyber Security':'🔒','Web Development':'💻','Data Science':'📊','Networking':'🌐','Database':'🗄️','IT':'🖥️','Other':'📚' };
+      grid.innerHTML = coursesToRender.map(course => {
+        const courseName = course.name || '';
+        const duration = course.duration_months ? course.duration_months + ' months' : (course.duration_hours ? course.duration_hours + ' hrs' : 'N/A');
+        const safeName = courseName.replace(/'/g, "\\'");
+        return `
         <div class="course-card reveal">
           <div class="course-header">
-            <div class="course-icon">${course.icon || '📚'}</div>
+            <div class="course-icon">${course.thumbnail_url ? `<img src="${course.thumbnail_url}" style="width:40px;height:40px;object-fit:cover;border-radius:8px;" onerror="this.outerHTML='${categoryIcons[course.category]||'📚'}'">` : (categoryIcons[course.category] || '📚')}</div>
             <div>
-              <h3 class="course-title">${course.title}</h3>
-              <span class="course-badge">${course.level}</span>
-              ${course.badge ? `<span class="course-badge" style="margin-left: 0.3rem;">${course.badge}</span>` : ''}
+              <h3 class="course-title">${courseName}</h3>
+              <span class="course-badge">${course.level || ''}</span>
+              ${course.is_featured ? `<span class="course-badge" style="margin-left:0.3rem;background:rgba(255,180,0,0.15);color:#f59e0b;">Featured</span>` : ''}
             </div>
           </div>
           <div class="course-body">
             <div class="course-meta">
-              <div class="meta-item">⏱️ ${course.duration || 'N/A'}</div>
-              <div class="meta-item">👥 ${course.students_count || 0} students</div>
-              <div class="meta-item">⭐ ${course.rating || 'N/A'}</div>
+              <div class="meta-item">⏱️ ${duration}</div>
+              <div class="meta-item">👥 ${course.total_enrolled || 0} students</div>
+              <div class="meta-item">⭐ ${course.rating ? Number(course.rating).toFixed(1) : 'New'}</div>
             </div>
-            <p class="course-desc">${course.description || ''}</p>
+            <p class="course-desc">${course.short_description || course.description || ''}</p>
           </div>
           <div class="course-footer">
             <span class="course-price">₹${Number(course.price || 0).toLocaleString('en-IN')}</span>
-            <button class="btn-grad" onclick="enrollCourse('${course.id}', '${course.title.replace(/'/g,"\\'")}')">Enroll Now</button>
+            <button class="btn-grad" onclick="enrollCourse('${course.id}', '${safeName}')">Enroll Now</button>
           </div>
-        </div>
-      `).join('');
+        </div>`;
+      }).join('');
 
       document.getElementById('courseCount').textContent = `Showing ${coursesToRender.length} courses`;
 
@@ -569,8 +572,9 @@
 
       filteredCourses = courses.filter(course => {
         const desc = course.description || '';
+        const courseName = (course.name || '').toLowerCase();
         const matchesSearch = !searchTerm ||
-          course.title.toLowerCase().includes(searchTerm) ||
+          courseName.includes(searchTerm) ||
           desc.toLowerCase().includes(searchTerm);
         const matchesCategory = selectedCategories.length === 0 || selectedCategories.includes(course.category);
         const matchesLevel = selectedLevels.length === 0 || selectedLevels.includes(course.level);
@@ -586,7 +590,7 @@
 
       if (currentSort === 'rating') sorted.sort((a, b) => (b.rating || 0) - (a.rating || 0));
       else if (currentSort === 'newest') sorted.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
-      else sorted.sort((a, b) => (b.students_count || 0) - (a.students_count || 0)); // popular
+      else sorted.sort((a, b) => (b.total_enrolled || 0) - (a.total_enrolled || 0)); // popular
 
       renderCourses(sorted);
     }
@@ -627,7 +631,7 @@
       try {
         const result = await window.supabaseConfig.enrollCourse(userId, {
           id: course.id,
-          title: course.title,
+          title: course.name,
           category: course.category,
           level: course.level
         });
@@ -728,49 +732,47 @@
     }
 
     function submitRegister() {
-      const registerForm = document.getElementById('rf');
-      const name = registerForm.querySelector('input[type="text"]').value.trim();
-      const email = registerForm.querySelector('input[type="email"]').value.trim();
-      const phone = registerForm.querySelector('input[type="tel"]').value.trim();
-      const interest = registerForm.querySelector('select').value;
-      const password = registerForm.querySelector('input[type="password"]').value;
+      const name     = document.getElementById('reg-name').value.trim();
+      const email    = document.getElementById('reg-email').value.trim();
+      const phone    = document.getElementById('reg-phone').value.trim();
+      const city     = document.getElementById('reg-city').value.trim();
+      const state    = document.getElementById('reg-state').value;
+      const gender   = document.getElementById('reg-gender').value;
+      const password = document.getElementById('reg-password').value;
 
       if (!name || !email || !phone || !password) {
-        if (window.app) window.app.showNotification('Please fill all fields', 'error');
+        if (window.app) window.app.showNotification('Please fill all required fields', 'error');
         return;
       }
-
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(email)) {
         if (window.app) window.app.showNotification('Please enter a valid email', 'error');
         return;
       }
-
       if (password.length < 6) {
         if (window.app) window.app.showNotification('Password must be at least 6 characters', 'error');
         return;
       }
-
       if (!window.supabaseConfig) {
-        console.error('Supabase not initialized');
         if (window.app) window.app.showNotification('Database connection error', 'error');
         return;
       }
 
+      const registerForm = document.getElementById('rf');
       const btn = registerForm.querySelector('button.btn-grad');
       const originalText = btn.textContent;
       btn.disabled = true;
       btn.textContent = 'Creating account...';
 
-      // Store user data for OTP step
-      window._pendingRegister = { name, email, phone, interest };
+      window._pendingRegister = { name, email, phone, city, state, gender };
 
       window.supabaseConfig.signUp(email, password, {
         full_name: name,
-        email: email,
-        phone_number: phone,
-        learning_interest: interest,
-        experience_level: 'beginner'
+        email,
+        phone,
+        city: city || null,
+        state: state || null,
+        gender: gender || null
       }).then(result => {
         if (result.success) {
           // Show OTP step
