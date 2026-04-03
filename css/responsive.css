@@ -115,8 +115,24 @@
   .nav-links:not(.mobile-open) {
     display: none !important;
   }
-  /* Compact auth buttons on tablet */
-  .nav-cta { display: none !important; }
+  /* Hide Get Started on tablet, keep Login */
+  .nav-cta, #cta-btn { display: none !important; }
+
+  /* Login/profile dropdowns on tablet: full-width panels below nav */
+  .login-wrapper,
+  #profile-section { position: static !important; }
+
+  .login-dropdown,
+  .profile-dropdown {
+    position: fixed !important;
+    top: 78px !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    min-width: 100% !important;
+    border-radius: 0 0 var(--r2) var(--r2) !important;
+    z-index: 999 !important;
+  }
 }
 
 /* Mobile Devices (480px to 599px) */
@@ -155,24 +171,18 @@
     line-height: 1.5 !important;
   }
   
-  /* Navigation */
+  /* Navigation — compact 58px height, no wrap, no overflow clipping */
   nav {
-    padding: 0 1rem !important;
-    height: 60px !important;
+    height: 58px !important;
+    padding: 0 0.75rem !important;
     flex-wrap: nowrap !important;
-  }
-
-  .nav-logo {
-    font-size: 1rem !important;
-    flex: 1 !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    overflow: visible !important;
   }
 
   .nav-links {
     display: none !important;
-  }
-
-  .nav-actions {
-    gap: 0.35rem !important;
   }
 
   .mobile-menu-toggle {
@@ -180,11 +190,11 @@
   }
 
   .nav-links.mobile-open {
-    top: 60px !important;
+    top: 58px !important;
   }
 
   .breadcrumb-bar {
-    top: 60px !important;
+    top: 58px !important;
   }
   
   .hero-stats {
@@ -200,26 +210,26 @@
     font-size: 0.65rem !important;
   }
   
-  /* Animation (visual) comes FIRST on mobile, buttons below */
+  /* Hero: hide visual animation entirely on mobile, show text content only */
   .hero-visual {
-    display: flex !important;
-    width: 280px !important;
-    height: 280px !important;
-    margin: 0 auto !important;
-    margin-right: 0 !important;
-    order: 1 !important;
-    overflow: hidden !important;
+    display: none !important;
   }
 
   .hero {
     grid-template-columns: 1fr !important;
-    gap: 1.5rem !important;
-    padding: 2rem 1rem !important;
+    gap: 1rem !important;
+    padding: 2.5rem 1rem 2rem !important;
     overflow: hidden !important;
   }
 
   .hero-content {
-    order: 2 !important;
+    order: 1 !important;
+  }
+
+  /* Hero heading: slightly larger to stand out on mobile */
+  .hero-content h1 {
+    font-size: clamp(2rem, 7vw, 2.8rem) !important;
+    line-height: 1.15 !important;
   }
 
   .hero-actions {
@@ -241,21 +251,31 @@
     box-shadow: 0 8px 32px rgba(124,92,252,0.5) !important;
   }
 
+  /* Profile dropdown: full-width panel below nav on mobile */
+  #profile-section { position: static !important; }
+
   .profile-dropdown {
-    right: -50vw !important;
+    position: fixed !important;
+    top: 58px !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    min-width: 100% !important;
+    border-radius: 0 0 var(--r2) var(--r2) !important;
+    border-left: none !important;
+    border-right: none !important;
+    z-index: 999 !important;
   }
 
   .profile-dropdown.active {
-    right: 0 !important;
-    position: fixed !important;
-    left: 0 !important;
-    top: auto !important;
-    bottom: 0 !important;
-    width: 100% !important;
-    min-width: 100% !important;
-    border-radius: var(--r3) var(--r3) 0 0 !important;
-    max-height: 60vh !important;
-    overflow-y: auto !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: translateY(0) !important;
+  }
+
+  .pd-item {
+    padding: 1rem 1.25rem !important;
+    min-height: 56px !important;
   }
   
   /* Forms */
@@ -409,10 +429,6 @@
   
   p {
     font-size: 0.85rem !important;
-  }
-  
-  nav {
-    padding: 0.6rem 0.8rem !important;
   }
   
   .logo-icon {
@@ -607,11 +623,94 @@
 }
 
 @media (max-width: 599px) {
-  /* On mobile: hide Get Started, keep Login button compact */
-  .nav-cta { display: none !important; }
+  /* ── Mobile nav: tight layout for 360px screens ── */
+  nav {
+    padding: 0 0.75rem !important;
+    height: 58px !important;
+    gap: 0 !important;
+  }
+
+  /* Logo: constrain width so actions don't overflow */
+  .nav-logo {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    max-width: calc(100% - 115px) !important; /* reserve space for login + hamburger */
+    font-size: 1.05rem !important;
+    gap: 0.4rem !important;
+  }
+  .nav-logo-text {
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    max-width: 130px !important;
+  }
+  .logo-icon {
+    width: 30px !important;
+    height: 30px !important;
+    flex-shrink: 0 !important;
+  }
+
+  /* Nav actions: compact, no wrapping */
+  .nav-actions {
+    flex-shrink: 0 !important;
+    gap: 0.3rem !important;
+  }
+
+  /* Hide desktop-only elements */
+  .nav-cta, #cta-btn { display: none !important; }
+  .login-icon { display: none !important; }       /* hide user icon in login btn */
+  .chevron-icon { display: none !important; }     /* no chevron on mobile */
+
+  /* Login button: compact pill */
   .nav-signin, #login-btn {
-    padding: 0.4rem 0.75rem !important;
-    font-size: 0.78rem !important;
+    padding: 0.38rem 0.7rem !important;
+    font-size: 0.8rem !important;
+    gap: 0.2rem !important;
+    min-width: auto !important;
+  }
+
+  /* Hamburger: compact */
+  .mobile-menu-toggle {
+    width: 36px !important;
+    height: 36px !important;
+    flex-shrink: 0 !important;
+  }
+
+  /* Login dropdown on mobile: full-width panel below nav */
+  .login-wrapper { position: static !important; }
+
+  .login-dropdown {
+    position: fixed !important;
+    top: 58px !important;       /* directly below nav */
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    min-width: 100% !important;
+    border-radius: 0 0 var(--r2) var(--r2) !important;
+    border-left: none !important;
+    border-right: none !important;
+    border-top: 1px solid var(--border) !important;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.3) !important;
+    z-index: 999 !important;
+    transform: translateY(-4px) !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    transition: opacity 0.2s ease, transform 0.2s ease !important;
+  }
+
+  .login-dropdown.active {
+    opacity: 1 !important;
+    transform: translateY(0) !important;
+    pointer-events: all !important;
+    visibility: visible !important;
+  }
+
+  /* Dropdown items: bigger touch targets on mobile */
+  .ld-item {
+    padding: 1rem 1.25rem !important;
+    font-size: 0.92rem !important;
+    gap: 0.85rem !important;
+    min-height: 52px !important;
   }
   /* Courses footer grid collapse */
   .courses-footer-grid {

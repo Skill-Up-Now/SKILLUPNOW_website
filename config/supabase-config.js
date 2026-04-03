@@ -661,6 +661,135 @@ class SupabaseConfig {
     }
   }
 
+  // ==================== USER ENROLLMENTS ====================
+
+  async createEnrollment(userId, enrollmentData) {
+    try {
+      const priceNum = parseInt((enrollmentData.price || '0').replace(/[^\d]/g, '')) || 0;
+      const { data, error } = await this.client
+        .from('user_enrollments')
+        .insert([{
+          user_id: userId,
+          course_id: enrollmentData.id,
+          course_name: enrollmentData.name,
+          course_category: enrollmentData.category || null,
+          enrollment_status: 'pending',
+          payment_status: 'pending',
+          payment_type: enrollmentData.payment_type || 'full',
+          total_fee: priceNum,
+          amount_paid: 0,
+          remaining_balance: priceNum,
+          emi_months: enrollmentData.emi_months || null,
+          emi_amount_per_month: enrollmentData.emi_amount_per_month || null,
+          course_access_enabled: false
+        }])
+        .select()
+        .single();
+
+      if (error) throw error;
+      await this.logAuditEvent(userId, 'enrollment_created', 'user_enrollment', data.id);
+      return { success: true, data, message: 'Enrollment created!' };
+    } catch (error) {
+      console.error('Error creating enrollment:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  async getUserEnrollments(userId) {
+    try {
+      const { data, error } = await this.client
+        .from('user_enrollments')
+        .select('*')
+        .eq('user_id', userId)
+        .order('enrollment_date', { ascending: false });
+
+      if (error) throw error;
+      return { success: true, data: data || [] };
+    } catch (error) {
+      console.error('Error fetching user enrollments:', error);
+      return { success: false, data: [], error: error.message };
+    }
+  }
+
+  async getAllEnrollments() {
+    try {
+      const { data, error } = await this.client
+        .from('user_enrollments')
+        .select('*, user_profiles(full_name, email)')
+        .order('enrollment_date', { ascending: false });
+
+      if (error) throw error;
+      return { success: true, data: data || [] };
+    } catch (error) {
+      console.error('Error fetching all enrollments:', error);
+      return { success: false, data: [], error: error.message };
+    }
+  }
+
+  async updateEnrollmentStatus(enrollmentId, status, approvedBy = null) {
+    try {
+      const updates = { enrollment_status: status, updated_at: new Date().toISOString() };
+      if (status === 'active') {
+        updates.approved_by = approvedBy;
+        updates.course_access_enabled = true;
+      } else if (status === 'disabled') {
+        updates.course_access_enabled = false;
+      }
+      const { data, error } = await this.client
+        .from('user_enrollments')
+        .update(updates)
+        .eq('id', enrollmentId)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return { success: true, data };
+    } catch (error) {
+      console.error('Error updating enrollment status:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  async updateEnrollmentPayment(enrollmentId, paymentData) {
+    try {
+      const { data, error } = await this.client
+        .from('user_enrollments')
+        .update({
+          payment_status: paymentData.payment_status,
+          payment_type: paymentData.payment_type || 'full',
+          amount_paid: paymentData.amount_paid,
+          remaining_balance: paymentData.remaining_balance,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', enrollmentId)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return { success: true, data };
+    } catch (error) {
+      console.error('Error updating enrollment payment:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  async toggleCourseAccess(enrollmentId, enabled) {
+    try {
+      const { data, error } = await this.client
+        .from('user_enrollments')
+        .update({ course_access_enabled: enabled, updated_at: new Date().toISOString() })
+        .eq('id', enrollmentId)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return { success: true, data };
+    } catch (error) {
+      console.error('Error toggling course access:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
   // ==================== ADMIN COURSE MANAGEMENT ====================
 
   async getAllCourses() {

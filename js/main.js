@@ -287,15 +287,13 @@ class SkillUpNowApp {
       }
     }
 
-    // Hide sign in and get started buttons
+    // Hide sign in, login wrapper, and get started buttons
     if (signInBtn) signInBtn.style.display = 'none';
-    const loginBtn = document.getElementById('login-btn');
-    if (loginBtn) loginBtn.style.display = 'none';
-    if (ctaBtn) {
-      ctaBtn.textContent = 'My Courses';
-      ctaBtn.onclick = () => window.location.href = 'pages/courses.html';
-      ctaBtn.style.background = 'var(--v2)';
-    }
+    const loginBtn    = document.getElementById('login-btn');
+    const loginWrapper = document.getElementById('login-wrapper');
+    if (loginBtn)     loginBtn.style.display     = 'none';
+    if (loginWrapper) loginWrapper.style.display = 'none';
+    if (ctaBtn)       ctaBtn.style.display       = 'none';
 
     // Show admin link in dropdown if user is admin
     try {
