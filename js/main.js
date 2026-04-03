@@ -23,57 +23,53 @@ class SkillUpNowApp {
 
   // ==================== CUSTOM CURSOR ====================
   setupCursor() {
-    // Skip on touch devices
-    if (window.matchMedia('(hover: none) and (pointer: coarse)').matches) return;
+    const dot  = document.getElementById('cursor');
+    const ring = document.getElementById('cursor-ring');
+    if (!dot || !ring) return;
 
-    const cursor = document.getElementById('cursor');
-    const cursorRing = document.getElementById('cursor-ring');
-    if (!cursor || !cursorRing) return;
+    let mx = -100, my = -100, rx = -100, ry = -100;
+    let raf;
 
-    let mx = 0, my = 0;
-    let rx = 0, ry = 0;
-
-    document.addEventListener('mousemove', (e) => {
+    document.addEventListener('mousemove', e => {
       mx = e.clientX;
       my = e.clientY;
-      cursor.style.left = mx + 'px';
-      cursor.style.top  = my + 'px';
     });
 
-    // Ring follows with smooth lag via rAF
-    const animateRing = () => {
-      rx += (mx - rx) * 0.15;
-      ry += (my - ry) * 0.15;
-      cursorRing.style.left = rx + 'px';
-      cursorRing.style.top  = ry + 'px';
-      requestAnimationFrame(animateRing);
-    };
-    animateRing();
+    // Smooth ring follows dot with lerp
+    const lerp = (a, b, t) => a + (b - a) * t;
+    function animate() {
+      rx = lerp(rx, mx, 0.14);
+      ry = lerp(ry, my, 0.14);
+      dot.style.left  = mx + 'px';
+      dot.style.top   = my + 'px';
+      ring.style.left = rx + 'px';
+      ring.style.top  = ry + 'px';
+      raf = requestAnimationFrame(animate);
+    }
+    animate();
 
-    // Hover detection for interactive elements
-    document.addEventListener('mouseover', (e) => {
-      const el = e.target.closest('a, button, [role="button"], .btn-grad, .course-card, .nav-item, [onclick], .filter-select, .filter-reset');
-      const inputEl = e.target.closest('input, select, textarea');
-      if (inputEl) {
-        document.body.classList.remove('cursor-hover');
-        document.body.classList.add('cursor-input');
-      } else if (el) {
-        document.body.classList.remove('cursor-input');
-        document.body.classList.add('cursor-hover');
-      }
+    // Hover state on interactive elements
+    const hoverSel = 'a, button, [role="button"], input, select, textarea, label, .course-card, .ftab, .hero-cta, .nav-signin, .nav-cta, #login-btn, #cta-btn';
+    document.addEventListener('mouseover', e => {
+      if (e.target.closest(hoverSel)) document.body.classList.add('cursor-hover');
     });
-    document.addEventListener('mouseout', (e) => {
-      const el = e.target.closest('a, button, [role="button"], input, select, textarea, .btn-grad, .course-card, .nav-item, [onclick], .filter-select, .filter-reset');
-      if (el) {
-        document.body.classList.remove('cursor-hover');
-        document.body.classList.remove('cursor-input');
-      }
+    document.addEventListener('mouseout', e => {
+      if (e.target.closest(hoverSel)) document.body.classList.remove('cursor-hover');
     });
 
+    // Input focus state
+    document.addEventListener('focusin',  e => {
+      if (['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName)) document.body.classList.add('cursor-input');
+    });
+    document.addEventListener('focusout', () => document.body.classList.remove('cursor-input'));
+
+    // Click state
     document.addEventListener('mousedown', () => document.body.classList.add('cursor-click'));
     document.addEventListener('mouseup',   () => document.body.classList.remove('cursor-click'));
-    document.addEventListener('mouseleave', () => { cursor.style.opacity = '0'; cursorRing.style.opacity = '0'; });
-    document.addEventListener('mouseenter', () => { cursor.style.opacity = '1'; cursorRing.style.opacity = '1'; });
+
+    // Hide when cursor leaves window
+    document.addEventListener('mouseleave', () => { dot.style.opacity = '0'; ring.style.opacity = '0'; });
+    document.addEventListener('mouseenter', () => { dot.style.opacity = ''; ring.style.opacity = ''; });
   }
 
   // ==================== MODAL FUNCTIONALITY ====================
@@ -121,16 +117,25 @@ class SkillUpNowApp {
     const loginForm = document.getElementById('lf');
     const registerForm = document.getElementById('rf');
     const otpStep = document.getElementById('otp-step');
+    const roleSelect = document.getElementById('rs');
+    const adminForm = document.getElementById('af');
 
-    if (loginForm && registerForm) {
-      if (otpStep) otpStep.style.display = 'none';
-      if (tab === 'login') {
-        loginForm.style.display = 'block';
-        registerForm.style.display = 'none';
-      } else if (tab === 'register') {
-        loginForm.style.display = 'none';
-        registerForm.style.display = 'block';
-      }
+    // Hide all panels
+    [loginForm, registerForm, otpStep, roleSelect, adminForm].forEach(el => {
+      if (el) el.style.display = 'none';
+    });
+
+    if (tab === 'role-select' && roleSelect) {
+      roleSelect.style.display = 'block';
+    } else if (tab === 'login' && loginForm) {
+      loginForm.style.display = 'block';
+    } else if (tab === 'register' && registerForm) {
+      registerForm.style.display = 'block';
+    } else if (tab === 'admin' && adminForm) {
+      adminForm.style.display = 'block';
+    } else if (loginForm) {
+      // Fallback: if role-select doesn't exist, show login
+      if (!roleSelect) loginForm.style.display = 'block';
     }
   }
 
@@ -284,6 +289,8 @@ class SkillUpNowApp {
 
     // Hide sign in and get started buttons
     if (signInBtn) signInBtn.style.display = 'none';
+    const loginBtn = document.getElementById('login-btn');
+    if (loginBtn) loginBtn.style.display = 'none';
     if (ctaBtn) {
       ctaBtn.textContent = 'My Courses';
       ctaBtn.onclick = () => window.location.href = 'pages/courses.html';
@@ -492,6 +499,39 @@ function switchModalTab(tab) {
 
 function addToCart() {
   if (window.app) window.app.addToCart();
+}
+
+// Global admin login function
+async function submitAdminLogin() {
+  const emailEl = document.getElementById('admin-login-email');
+  const passEl = document.getElementById('admin-login-password');
+  const errEl = document.getElementById('admin-login-err');
+  if (!emailEl || !passEl) return;
+  const email = emailEl.value.trim();
+  const pass = passEl.value;
+  if (!email || !pass) {
+    if (errEl) { errEl.textContent = 'Please enter email and password.'; errEl.style.display = 'block'; }
+    return;
+  }
+  const btn = document.getElementById('admin-login-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Signing in…'; }
+  if (errEl) errEl.style.display = 'none';
+  try {
+    if (!window.supabaseConfig) throw new Error('Auth not ready');
+    const result = await window.supabaseConfig.signIn(email, pass);
+    if (!result.success) throw new Error(result.error || 'Login failed');
+    const user = result.user || result.data?.user;
+    if (!user) throw new Error('No user returned');
+    const adminCheck = await window.supabaseConfig.checkAdminAccess(user.id);
+    if (!adminCheck || !adminCheck.isAdmin) {
+      await window.supabaseConfig.signOut();
+      throw new Error('Access denied. Admin privileges required.');
+    }
+    window.location.href = (window.location.pathname.includes('/pages/') ? '' : 'pages/') + 'admin-dashboard.html';
+  } catch (e) {
+    if (errEl) { errEl.textContent = e.message || 'Login failed'; errEl.style.display = 'block'; }
+    if (btn) { btn.disabled = false; btn.textContent = 'Admin Sign In'; }
+  }
 }
 
 window.addEventListener('error', (event) => {

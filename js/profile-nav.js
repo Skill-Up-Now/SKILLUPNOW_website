@@ -11,16 +11,24 @@ class ProfileNavigationManager {
   }
 
   async init() {
+    this.injectCursor();
     this.buildDropdown();
-    if (this.inPages) {
-      this.injectHamburger();
-      this.injectBreadcrumb();
-    }
-    this.injectThemeBtn();
+    this.injectHamburger(); // always inject on all pages
     this.injectAuthButtons();
     await this.checkUserSession();
     this.setupEventListeners();
     this.setupResponsiveMenu();
+  }
+
+  /* ── Inject custom cursor elements into body ── */
+  injectCursor() {
+    if (document.getElementById('cursor')) return; // already present
+    const dot = document.createElement('div');
+    dot.id = 'cursor';
+    const ring = document.createElement('div');
+    ring.id = 'cursor-ring';
+    document.body.prepend(ring);
+    document.body.prepend(dot);
   }
 
   /* ── Inject hamburger button into nav ── */
@@ -28,12 +36,14 @@ class ProfileNavigationManager {
     const nav = document.querySelector('nav');
     if (!nav || nav.querySelector('.mobile-menu-toggle')) return;
 
-    // Ensure nav-links has a Home link on mobile
-    const navLinks = nav.querySelector('.nav-links');
-    if (navLinks && !navLinks.querySelector('.nav-home-link')) {
-      const homeLi = document.createElement('li');
-      homeLi.innerHTML = `<a href="../index.html" class="nav-home-link">Home</a>`;
-      navLinks.insertBefore(homeLi, navLinks.firstChild);
+    // Add Home link to nav-links if missing (only on non-home pages)
+    if (this.inPages) {
+      const navLinks = nav.querySelector('.nav-links');
+      if (navLinks && !navLinks.querySelector('.nav-home-link')) {
+        const homeLi = document.createElement('li');
+        homeLi.innerHTML = `<a href="../index.html" class="nav-home-link">Home</a>`;
+        navLinks.insertBefore(homeLi, navLinks.firstChild);
+      }
     }
 
     const btn = document.createElement('button');
@@ -59,97 +69,39 @@ class ProfileNavigationManager {
     else nav.appendChild(btn);
   }
 
-  /* ── Inject animated breadcrumb below nav ── */
-  injectBreadcrumb() {
-    if (document.getElementById('breadcrumb-bar')) return;
-    const title = document.title || '';
-    const pageLabel = document.body.dataset.breadcrumb
-      || title.split('—')[0].split('-')[0].split('|')[0].trim().replace(/SkillUpNow/i, '').trim();
-    if (!pageLabel) return;
-
-    const bc = document.createElement('nav');
-    bc.id = 'breadcrumb-bar';
-    bc.className = 'breadcrumb-bar';
-    bc.setAttribute('aria-label', 'Breadcrumb');
-    bc.innerHTML = `
-      <a href="../index.html" class="bc-item bc-home">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-        Home
-      </a>
-      <span class="bc-sep" aria-hidden="true">
-        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
-      </span>
-      <span class="bc-item bc-current" aria-current="page">${pageLabel}</span>`;
-
-    const nav = document.querySelector('nav');
-    if (nav) nav.after(bc);
-  }
-
-  /* ── Inject theme button if missing ── */
-  injectThemeBtn() {
-    if (document.getElementById('theme-btn')) return;
-    const navActions = document.querySelector('nav .nav-actions');
-    if (!navActions) return;
-    const btn = document.createElement('button');
-    btn.id = 'theme-btn';
-    btn.className = 'theme-icon-btn';
-    btn.title = 'Toggle theme';
-    btn.setAttribute('aria-label', 'Toggle theme');
-    btn.textContent = '☀️';
-    btn.addEventListener('click', function() {
-      if (window.themeManager) window.themeManager.toggleTheme();
-      this.classList.add('spinning');
-      setTimeout(() => this.classList.remove('spinning'), 400);
-    });
-    // Insert before first child (so it's leftmost in nav-actions)
-    navActions.insertBefore(btn, navActions.firstChild);
-  }
-
-  /* ── Inject sign-in + admin login buttons if missing ── */
+  /* ── Inject combined login button ── */
   injectAuthButtons() {
     const navActions = document.querySelector('nav .nav-actions');
     if (!navActions) return;
 
-    // Admin login link
-    if (!document.getElementById('admin-nav-link')) {
-      const adminLink = document.createElement('a');
-      adminLink.id = 'admin-nav-link';
-      adminLink.href = this.inPages ? 'admin-login.html' : 'pages/admin-login.html';
-      adminLink.className = 'nav-admin-link';
-      adminLink.title = 'Admin Login';
-      adminLink.textContent = 'Admin';
-      navActions.appendChild(adminLink);
-    }
-
-    // User sign-in button
-    if (!document.getElementById('signin-btn')) {
+    // Single combined Login button with icon
+    if (!document.getElementById('login-btn')) {
       const btn = document.createElement('button');
-      btn.id = 'signin-btn';
+      btn.id = 'login-btn';
       btn.className = 'nav-signin';
-      btn.textContent = 'Sign In';
+      btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg> Login`;
       btn.addEventListener('click', () => {
         if (typeof openModal === 'function') {
-          openModal('login');
+          const hasRoleSelect = !!document.getElementById('rs');
+          openModal(hasRoleSelect ? 'role-select' : 'login');
         } else {
-          const base = this.inPages ? '../index.html' : 'index.html';
-          window.location.href = base;
+          window.location.href = (this.inPages ? '../' : '') + 'index.html';
         }
       });
       navActions.appendChild(btn);
     }
 
-    // Get-started / register button
+    // Get-started / register button with arrow icon
     if (!document.getElementById('cta-btn')) {
       const btn = document.createElement('button');
       btn.id = 'cta-btn';
       btn.className = 'nav-cta';
-      btn.textContent = 'Get Started';
+      btn.innerHTML = `Get Started <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M5 12h14M12 5l7 7-7 7"/></svg>`;
       btn.addEventListener('click', () => {
         if (typeof openModal === 'function') {
           openModal('register');
         } else {
-          const base = this.inPages ? '../index.html' : 'index.html';
-          window.location.href = base;
+          window.location.href = (this.inPages ? '../' : '') + 'index.html';
         }
       });
       navActions.appendChild(btn);
@@ -212,14 +164,14 @@ class ProfileNavigationManager {
 
   showLoggedInUI() {
     const profileSection = document.getElementById('profile-section');
-    const signInBtn = document.getElementById('signin-btn');
+    const loginBtn = document.getElementById('login-btn');
+    const signinBtn = document.getElementById('signin-btn');
     const ctaBtn = document.getElementById('cta-btn');
-    const adminNavLink = document.getElementById('admin-nav-link');
 
     if (profileSection) profileSection.style.display = 'flex';
-    if (signInBtn) signInBtn.style.display = 'none';
+    if (loginBtn) loginBtn.style.display = 'none';
+    if (signinBtn) signinBtn.style.display = 'none';
     if (ctaBtn) ctaBtn.style.display = 'none';
-    if (adminNavLink) adminNavLink.style.display = 'none';
 
     const profileBtn = document.getElementById('profile-btn');
     if (profileBtn) {
@@ -234,17 +186,17 @@ class ProfileNavigationManager {
 
   showLoggedOutUI() {
     const profileSection = document.getElementById('profile-section');
-    const signInBtn = document.getElementById('signin-btn');
+    const loginBtn = document.getElementById('login-btn');
+    const signinBtn = document.getElementById('signin-btn');
     const ctaBtn = document.getElementById('cta-btn');
-    const adminNavLink = document.getElementById('admin-nav-link');
 
     if (profileSection) profileSection.style.display = 'none';
-    if (signInBtn) signInBtn.style.display = '';
+    if (loginBtn) loginBtn.style.display = '';
+    if (signinBtn) signinBtn.style.display = '';
     if (ctaBtn) {
       ctaBtn.style.display = '';
       ctaBtn.textContent = 'Get Started';
     }
-    if (adminNavLink) adminNavLink.style.display = '';
   }
 
   checkAdminStatus() {
@@ -306,16 +258,8 @@ class ProfileNavigationManager {
   }
 
   setupResponsiveMenu() {
-    const mobileMenu = document.querySelector('.mobile-menu-toggle');
-    if (mobileMenu) {
-      mobileMenu.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const navLinks = document.querySelector('.nav-links');
-        if (navLinks) {
-          navLinks.classList.toggle('active');
-        }
-      });
-    }
+    // Click listener is already added in injectHamburger() — do not add again
+    // (double listener would toggle mobile-open twice, cancelling out)
   }
 
   async logout() {

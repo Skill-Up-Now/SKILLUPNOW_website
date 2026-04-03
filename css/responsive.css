@@ -107,14 +107,16 @@
   }
 }
 
-/* Show hamburger on tablets too */
-@media (min-width: 768px) and (max-width: 991px) {
+/* Show hamburger on tablets too (all pages) */
+@media (min-width: 600px) and (max-width: 991px) {
   .mobile-menu-toggle {
     display: flex !important;
   }
   .nav-links:not(.mobile-open) {
     display: none !important;
   }
+  /* Compact auth buttons on tablet */
+  .nav-cta { display: none !important; }
 }
 
 /* Mobile Devices (480px to 599px) */
@@ -507,11 +509,67 @@
   }
 }
 
-/* ── Sign-In Button Centering (All Screens) ── */
-.nav-signin {
+/* ── Nav links mobile open — always override display:none ── */
+.nav-links.mobile-open {
   display: flex !important;
+}
+
+/* ── Nav Button Centering (All Screens) ── */
+.nav-signin,
+#login-btn {
+  display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
+  white-space: nowrap !important;
+}
+.nav-cta,
+#cta-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  white-space: nowrap !important;
+}
+
+/* Ensure nav-actions never wraps sign-in button off-screen */
+.nav-actions {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+  flex-shrink: 0 !important;
+}
+
+/* ── Footer Grid Responsive (index.html) ── */
+@media (max-width: 991px) {
+  .footer-grid-main {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 2rem !important;
+  }
+}
+
+@media (max-width: 599px) {
+  .footer-grid-main {
+    grid-template-columns: 1fr !important;
+    gap: 1.5rem !important;
+  }
+  footer {
+    padding: 3rem 1.2rem 2rem !important;
+  }
+  footer > div:last-child {
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+    gap: 1rem !important;
+  }
+}
+
+/* ── Breadcrumb responsive ── */
+@media (max-width: 599px) {
+  .breadcrumb-bar {
+    font-size: 0.78rem !important;
+    padding: 0.4rem 1rem !important;
+  }
+  .bc-item, .bc-page { font-size: 0.78rem !important; }
+  .bc-current { font-size: 0.82rem !important; }
 }
 
 /* ── Courses Filter Bar Responsive ── */
@@ -549,13 +607,10 @@
 }
 
 @media (max-width: 599px) {
-  /* Nav actions: sign-in button must stay centered/visible */
-  .nav-signin {
-    padding: 0.45rem 0.85rem !important;
-    font-size: 0.78rem !important;
-  }
-  .nav-cta {
-    padding: 0.45rem 0.85rem !important;
+  /* On mobile: hide Get Started, keep Login button compact */
+  .nav-cta { display: none !important; }
+  .nav-signin, #login-btn {
+    padding: 0.4rem 0.75rem !important;
     font-size: 0.78rem !important;
   }
   /* Courses footer grid collapse */
