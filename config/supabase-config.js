@@ -755,6 +755,28 @@ class SupabaseConfig {
     }
   }
 
+  // User-initiated cancellation: sets enrollment_status to 'cancelled', disables access
+  async cancelEnrollment(enrollmentId, userId) {
+    try {
+      const { data, error } = await this.client
+        .from('user_enrollments')
+        .update({
+          enrollment_status: 'cancelled',
+          course_access_enabled: false,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', enrollmentId)
+        .eq('user_id', userId) // RLS safety: only own rows
+        .select();
+      if (error) throw error;
+      await this.logAuditEvent(userId, 'course_cancel', 'user_enrollment', enrollmentId);
+      return { success: true, data };
+    } catch (error) {
+      console.error('Error cancelling enrollment:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
   async getUserEMIApplications(userId) {
     try {
       const { data, error } = await this.client

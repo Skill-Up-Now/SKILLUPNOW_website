@@ -620,6 +620,31 @@
     </div>
   </div>
 
+  <!-- ── Dynamic Featured Courses Strip ── -->
+  <section style="padding: 3.5rem 5vw; border-top: 1px solid var(--border);">
+    <div style="max-width: 1400px; margin: 0 auto;">
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-bottom: 2rem;">
+        <div>
+          <span style="display:inline-block;padding:.25rem .9rem;background:rgba(124,92,252,.1);border:1px solid rgba(124,92,252,.25);border-radius:50px;font-size:.72rem;font-weight:700;color:var(--v1);letter-spacing:.07em;text-transform:uppercase;margin-bottom:.7rem;">Live Programmes</span>
+          <h2 style="font-family:'Cormorant Garamond',serif;font-size:clamp(1.8rem,3.5vw,2.6rem);font-weight:700;color:var(--txt);margin:0;line-height:1.15;">Courses <span style="background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Available Now</span></h2>
+        </div>
+        <a href="pages/courses.html" class="btn-outline" style="display:inline-flex;align-items:center;gap:.5rem;white-space:nowrap;">
+          View All
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+      </div>
+
+      <!-- Dynamic course pills grid from DB -->
+      <div id="home-courses-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem;">
+        <div style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--txt4);font-size:.88rem;">
+          <div style="width:28px;height:28px;border:2px solid var(--border);border-top-color:var(--v1);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto .8rem;" id="hc-spin"></div>
+          Loading programmes…
+        </div>
+      </div>
+      <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+    </div>
+  </section>
+
   <!-- Explore Our Platform -->
   <section style="padding: 6rem 5vw; background: linear-gradient(180deg, transparent 0%, rgba(124,92,252,0.03) 100%);">
     <div style="max-width: 1400px; margin: 0 auto;">
@@ -762,6 +787,112 @@
       </div>
     </div>
   </section>
+
+  <!-- ══ ABOUT US SECTION ══ -->
+  <section id="about-us" style="padding: 7rem 5vw; background: linear-gradient(180deg, rgba(124,92,252,0.04) 0%, transparent 100%); border-top: 1px solid var(--border);">
+    <div style="max-width: 1400px; margin: 0 auto;">
+
+      <!-- Heading -->
+      <div style="text-align: center; margin-bottom: 5rem;">
+        <span style="display: inline-block; padding: 0.35rem 1.1rem; background: rgba(124,92,252,0.1); border: 1px solid rgba(124,92,252,0.25); border-radius: 50px; font-size: 0.8rem; font-weight: 700; color: var(--v1); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 1.2rem;">About SkillUpNow</span>
+        <h2 style="font-family: 'Cormorant Garamond', serif; font-size: clamp(2.2rem, 5vw, 3.8rem); font-weight: 700; color: var(--txt); margin-bottom: 1.1rem; letter-spacing: -0.02em;">We Exist to <span style="background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Transform Careers</span></h2>
+        <p style="font-size: 1.1rem; color: var(--txt3); max-width: 680px; margin: 0 auto; line-height: 1.75;">From confident communicators to decisive leaders — we equip professionals with the soft skills that no algorithm can replace.</p>
+      </div>
+
+      <!-- Mission · Vision · Values row -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; margin-bottom: 5rem;">
+
+        <!-- Mission -->
+        <div style="background: var(--panel); border: 1.5px solid var(--border); border-radius: var(--r3); padding: 2.5rem; position: relative; overflow: hidden; transition: border-color 0.3s, transform 0.3s;">
+          <div style="position: absolute; inset: 0; background: linear-gradient(135deg, rgba(124,92,252,0.07), transparent); pointer-events: none;"></div>
+          <div style="position: relative; z-index: 1;">
+            <div style="width: 52px; height: 52px; border-radius: 14px; background: linear-gradient(135deg, #7c5cfc, #3d6bff); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 1.4rem; box-shadow: 0 8px 24px rgba(124,92,252,0.35);">🎯</div>
+            <h3 style="font-family: 'Inter','Outfit',sans-serif; font-size: 1.3rem; font-weight: 800; color: var(--txt); margin-bottom: 0.9rem;">Our Mission</h3>
+            <p style="font-size: 0.96rem; color: var(--txt3); line-height: 1.75;">To democratise world-class soft-skill education by delivering personalised, live, mentor-driven training that unlocks every individual's professional potential — regardless of background or experience level.</p>
+          </div>
+        </div>
+
+        <!-- Vision -->
+        <div style="background: var(--panel); border: 1.5px solid var(--border); border-radius: var(--r3); padding: 2.5rem; position: relative; overflow: hidden; transition: border-color 0.3s, transform 0.3s;">
+          <div style="position: absolute; inset: 0; background: linear-gradient(135deg, rgba(0,207,238,0.06), transparent); pointer-events: none;"></div>
+          <div style="position: relative; z-index: 1;">
+            <div style="width: 52px; height: 52px; border-radius: 14px; background: linear-gradient(135deg, #00cfee, #0090b8); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 1.4rem; box-shadow: 0 8px 24px rgba(0,207,238,0.3);">🔭</div>
+            <h3 style="font-family: 'Inter','Outfit',sans-serif; font-size: 1.3rem; font-weight: 800; color: var(--txt); margin-bottom: 0.9rem;">Our Vision</h3>
+            <p style="font-size: 0.96rem; color: var(--txt3); line-height: 1.75;">A world where every professional communicates with clarity, leads with empathy, and collaborates with confidence — making organisations more human, resilient, and successful.</p>
+          </div>
+        </div>
+
+        <!-- Values -->
+        <div style="background: var(--panel); border: 1.5px solid var(--border); border-radius: var(--r3); padding: 2.5rem; position: relative; overflow: hidden; transition: border-color 0.3s, transform 0.3s;">
+          <div style="position: absolute; inset: 0; background: linear-gradient(135deg, rgba(74,222,128,0.06), transparent); pointer-events: none;"></div>
+          <div style="position: relative; z-index: 1;">
+            <div style="width: 52px; height: 52px; border-radius: 14px; background: linear-gradient(135deg, #4ade80, #16a34a); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 1.4rem; box-shadow: 0 8px 24px rgba(74,222,128,0.3);">💎</div>
+            <h3 style="font-family: 'Inter','Outfit',sans-serif; font-size: 1.3rem; font-weight: 800; color: var(--txt); margin-bottom: 0.9rem;">Our Values</h3>
+            <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.65rem; padding: 0; margin: 0;">
+              <li style="display: flex; align-items: flex-start; gap: 0.65rem; font-size: 0.94rem; color: var(--txt3);"><span style="color: #4ade80; font-size: 1rem; flex-shrink: 0; margin-top: 1px;">✔</span><span><strong style="color: var(--txt2);">Integrity</strong> — we mean what we teach</span></li>
+              <li style="display: flex; align-items: flex-start; gap: 0.65rem; font-size: 0.94rem; color: var(--txt3);"><span style="color: #4ade80; font-size: 1rem; flex-shrink: 0; margin-top: 1px;">✔</span><span><strong style="color: var(--txt2);">Empathy</strong> — every learner is unique</span></li>
+              <li style="display: flex; align-items: flex-start; gap: 0.65rem; font-size: 0.94rem; color: var(--txt3);"><span style="color: #4ade80; font-size: 1rem; flex-shrink: 0; margin-top: 1px;">✔</span><span><strong style="color: var(--txt2);">Excellence</strong> — no shortcuts in quality</span></li>
+              <li style="display: flex; align-items: flex-start; gap: 0.65rem; font-size: 0.94rem; color: var(--txt3);"><span style="color: #4ade80; font-size: 1rem; flex-shrink: 0; margin-top: 1px;">✔</span><span><strong style="color: var(--txt2);">Community</strong> — grow together, win together</span></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stats strip -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1.5rem; margin-bottom: 5rem;">
+        <div style="text-align: center; padding: 2rem 1rem; background: var(--panel2); border: 1px solid var(--border); border-radius: var(--r2);">
+          <div style="font-size: 2.4rem; font-weight: 800; background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1;">12K+</div>
+          <div style="font-size: 0.8rem; color: var(--txt4); margin-top: 0.4rem; font-weight: 500;">Students Trained</div>
+        </div>
+        <div style="text-align: center; padding: 2rem 1rem; background: var(--panel2); border: 1px solid var(--border); border-radius: var(--r2);">
+          <div style="font-size: 2.4rem; font-weight: 800; background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1;">48+</div>
+          <div style="font-size: 0.8rem; color: var(--txt4); margin-top: 0.4rem; font-weight: 500;">Expert Courses</div>
+        </div>
+        <div style="text-align: center; padding: 2rem 1rem; background: var(--panel2); border: 1px solid var(--border); border-radius: var(--r2);">
+          <div style="font-size: 2.4rem; font-weight: 800; background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1;">4.9★</div>
+          <div style="font-size: 0.8rem; color: var(--txt4); margin-top: 0.4rem; font-weight: 500;">Average Rating</div>
+        </div>
+        <div style="text-align: center; padding: 2rem 1rem; background: var(--panel2); border: 1px solid var(--border); border-radius: var(--r2);">
+          <div style="font-size: 2.4rem; font-weight: 800; background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1;">100%</div>
+          <div style="font-size: 0.8rem; color: var(--txt4); margin-top: 0.4rem; font-weight: 500;">Live Sessions</div>
+        </div>
+        <div style="text-align: center; padding: 2rem 1rem; background: var(--panel2); border: 1px solid var(--border); border-radius: var(--r2);">
+          <div style="font-size: 2.4rem; font-weight: 800; background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1;">1-on-1</div>
+          <div style="font-size: 0.8rem; color: var(--txt4); margin-top: 0.4rem; font-weight: 500;">Mentoring</div>
+        </div>
+      </div>
+
+      <!-- Story / Why us -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center;">
+        <div>
+          <h3 style="font-family: 'Cormorant Garamond', serif; font-size: clamp(1.8rem, 3vw, 2.6rem); font-weight: 700; color: var(--txt); margin-bottom: 1.2rem; line-height: 1.2;">Why Professionals <span style="background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Choose Us</span></h3>
+          <p style="font-size: 0.97rem; color: var(--txt3); line-height: 1.8; margin-bottom: 1.5rem;">Founded by seasoned HR leaders and communication coaches, SkillUpNow was built on a simple insight: technical talent alone no longer guarantees career success. The differentiator is how you communicate, collaborate, and lead.</p>
+          <p style="font-size: 0.97rem; color: var(--txt3); line-height: 1.8; margin-bottom: 2rem;">Our live cohort model ensures you don't just watch videos — you practice real scenarios, get expert feedback, and build lasting professional habits in a supportive community.</p>
+          <a href="pages/courses.html" class="btn-grad" style="display: inline-flex; align-items: center; gap: 0.5rem;">Explore Our Courses <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 1.2rem;">
+          <div style="background: var(--panel); border: 1.5px solid var(--border); border-radius: var(--r2); padding: 1.4rem 1.6rem; display: flex; align-items: flex-start; gap: 1rem; transition: border-color 0.25s, transform 0.25s;">
+            <span style="font-size: 1.4rem; flex-shrink: 0;">🏅</span>
+            <div><div style="font-weight: 700; color: var(--txt); font-size: 0.95rem; margin-bottom: 0.3rem;">Industry-Recognised Curriculum</div><div style="font-size: 0.84rem; color: var(--txt4); line-height: 1.6;">Designed in collaboration with Fortune-500 HR teams to match exactly what employers demand.</div></div>
+          </div>
+          <div style="background: var(--panel); border: 1.5px solid var(--border); border-radius: var(--r2); padding: 1.4rem 1.6rem; display: flex; align-items: flex-start; gap: 1rem; transition: border-color 0.25s, transform 0.25s;">
+            <span style="font-size: 1.4rem; flex-shrink: 0;">🧑‍🏫</span>
+            <div><div style="font-weight: 700; color: var(--txt); font-size: 0.95rem; margin-bottom: 0.3rem;">Expert-Led Live Sessions</div><div style="font-size: 0.84rem; color: var(--txt4); line-height: 1.6;">Every session is led by a certified trainer with 10+ years of corporate coaching experience.</div></div>
+          </div>
+          <div style="background: var(--panel); border: 1.5px solid var(--border); border-radius: var(--r2); padding: 1.4rem 1.6rem; display: flex; align-items: flex-start; gap: 1rem; transition: border-color 0.25s, transform 0.25s;">
+            <span style="font-size: 1.4rem; flex-shrink: 0;">🔄</span>
+            <div><div style="font-weight: 700; color: var(--txt); font-size: 0.95rem; margin-bottom: 0.3rem;">Flexible EMI &amp; Zero-Cost Plans</div><div style="font-size: 0.84rem; color: var(--txt4); line-height: 1.6;">Invest in yourself without financial stress — split payments over 3, 6, or 12 months interest-free.</div></div>
+          </div>
+          <div style="background: var(--panel); border: 1.5px solid var(--border); border-radius: var(--r2); padding: 1.4rem 1.6rem; display: flex; align-items: flex-start; gap: 1rem; transition: border-color 0.25s, transform 0.25s;">
+            <span style="font-size: 1.4rem; flex-shrink: 0;">📜</span>
+            <div><div style="font-weight: 700; color: var(--txt); font-size: 0.95rem; margin-bottom: 0.3rem;">Verifiable Certificate of Completion</div><div style="font-size: 0.84rem; color: var(--txt4); line-height: 1.6;">Earn a digital certificate you can share on LinkedIn to instantly boost your professional profile.</div></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+  <!-- ══ END ABOUT US ══ -->
 
   <!-- Modal -->
   <div class="moverlay" id="mo" onclick="if(event.target===this) closeModal()">
@@ -1540,12 +1671,61 @@
       });
     });
 
+    // ==================== HOME: DYNAMIC COURSES GRID ====================
+    async function loadHomeCoursesSection() {
+      const grid = document.getElementById('home-courses-grid');
+      if (!grid) return;
+      try {
+        if (!window.supabaseConfig) throw new Error('DB not ready');
+        const result = await window.supabaseConfig.getAllCourses();
+        if (!result.success || !result.data || !result.data.length) throw new Error('No data');
+        const courses = result.data.slice(0, 8); // show up to 8 on home
+        const catIcons = {
+          'Cloud': '☁️', 'DevOps': '⚙️', 'AI': '🤖', 'Machine Learning': '🧠',
+          'Cybersecurity': '🔒', 'Data': '📊', 'Communication': '💬',
+          'Leadership': '🏆', 'Soft': '🌟', 'default': '📚'
+        };
+        const getIcon = cat => {
+          const k = Object.keys(catIcons).find(k => (cat||'').toLowerCase().includes(k.toLowerCase()));
+          return k ? catIcons[k] : catIcons['default'];
+        };
+        const levelColors = { beginner: '#4ade80', intermediate: '#f59e0b', advanced: '#f87171' };
+        grid.innerHTML = courses.map((c, i) => {
+          const name = c.name || 'Course';
+          const cat = c.category || c.course_category || '';
+          const level = c.level || '';
+          const lvlColor = levelColors[(level||'').toLowerCase()] || 'var(--v2)';
+          const dur = c.duration_months ? c.duration_months + ' months' : (c.duration_hours ? c.duration_hours + ' hrs' : '');
+          const enrolled = c.total_enrolled || 0;
+          return `<a href="pages/courses.html" style="text-decoration:none;display:flex;align-items:center;gap:.85rem;background:var(--panel);border:1.5px solid var(--border);border-radius:var(--r2);padding:1rem 1.2rem;transition:all .3s cubic-bezier(.4,0,.2,1);animation:fadeUp .5s ease ${i*.06}s both;"
+            onmouseover="this.style.borderColor='var(--v1)';this.style.transform='translateY(-3px)';this.style.boxShadow='0 12px 32px rgba(124,92,252,0.2)'"
+            onmouseout="this.style.borderColor='var(--border)';this.style.transform='';this.style.boxShadow=''">
+            <div style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,var(--v1),var(--v2));display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;box-shadow:0 4px 14px rgba(124,92,252,.3);">${getIcon(cat)}</div>
+            <div style="min-width:0;flex:1;">
+              <div style="font-weight:700;color:var(--txt);font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:.2rem;">${name}</div>
+              <div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;">
+                ${level ? `<span style="font-size:.67rem;font-weight:700;padding:.15rem .5rem;border-radius:50px;background:rgba(${lvlColor==='#4ade80'?'74,222,128':lvlColor==='#f59e0b'?'245,158,11':'248,113,113'},.12);color:${lvlColor};">${level}</span>` : ''}
+                ${dur ? `<span style="font-size:.7rem;color:var(--txt4);">⏱ ${dur}</span>` : ''}
+                ${enrolled ? `<span style="font-size:.7rem;color:var(--txt4);">👥 ${enrolled}</span>` : ''}
+              </div>
+            </div>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--v1)" stroke-width="2.5" style="flex-shrink:0;opacity:.6;"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>`;
+        }).join('');
+      } catch(e) {
+        grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--txt4);font-size:.88rem;">
+          Could not load courses — <a href="pages/courses.html" style="color:var(--v1);font-weight:600;">Browse all courses →</a>
+        </div>`;
+      }
+    }
+
     // Render on load
     document.addEventListener('DOMContentLoaded', function() {
       renderHomeMeetings();
       renderHomeRecordings();
       loadHeroStats();
       loadTestimonials();
+      loadHomeCoursesSection();
     });
 
     // ==================== ANIMATED HERO WORDS ====================

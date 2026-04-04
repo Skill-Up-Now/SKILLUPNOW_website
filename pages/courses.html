@@ -518,6 +518,140 @@
   </footer>
 
   <!-- Modal -->
+  <!-- ═══════════════════════════════════════════════════
+       COURSE INFO MODAL
+  ════════════════════════════════════════════════════ -->
+  <div id="ci-overlay" style="position:fixed;inset:0;z-index:10000;background:rgba(6,4,20,0.82);backdrop-filter:blur(14px);display:flex;align-items:center;justify-content:center;opacity:0;visibility:hidden;transition:opacity .3s ease,visibility .3s ease;pointer-events:none;padding:1rem;" onclick="if(event.target===this)closeCourseInfo()">
+    <div id="ci-box" style="background:linear-gradient(160deg,#16123a 0%,#0f0d28 100%);border:1.5px solid rgba(124,92,252,.35);border-radius:24px;padding:2.5rem 2.2rem;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;transform:scale(.93) translateY(16px);transition:transform .3s cubic-bezier(.23,1,.32,1);position:relative;box-shadow:0 32px 64px rgba(0,0,0,.65);">
+      <button onclick="closeCourseInfo()" style="position:absolute;top:1.1rem;right:1.1rem;width:32px;height:32px;border-radius:50%;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.07);color:rgba(200,191,255,.6);font-size:.85rem;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;font-family:inherit;" onmouseover="this.style.background='rgba(255,255,255,.16)';this.style.color='#fff'" onmouseout="this.style.background='rgba(255,255,255,.07)';this.style.color='rgba(200,191,255,.6)'">✕</button>
+
+      <!-- Header badge -->
+      <div style="display:inline-flex;align-items:center;gap:.5rem;background:rgba(124,92,252,.15);border:1px solid rgba(124,92,252,.3);border-radius:50px;padding:.3rem .9rem;font-size:.72rem;font-weight:700;color:#b09fff;letter-spacing:.06em;text-transform:uppercase;margin-bottom:1.2rem;">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+        Course Details
+      </div>
+
+      <h2 id="ci-title" style="font-size:1.55rem;font-weight:800;color:#f0eeff;margin-bottom:.3rem;letter-spacing:-.02em;line-height:1.25;"></h2>
+      <p id="ci-category" style="font-size:.82rem;font-weight:600;color:#9b7dff;margin-bottom:1.5rem;text-transform:uppercase;letter-spacing:.07em;"></p>
+
+      <!-- Info grid -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.9rem;margin-bottom:1.6rem;">
+        <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:1rem 1.1rem;">
+          <div style="font-size:.68rem;color:rgba(200,191,255,.4);font-weight:700;text-transform:uppercase;letter-spacing:.07em;margin-bottom:.35rem;">Course Fee</div>
+          <div id="ci-fee" style="font-size:1.25rem;font-weight:800;color:#f0eeff;"></div>
+        </div>
+        <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:1rem 1.1rem;">
+          <div style="font-size:.68rem;color:rgba(200,191,255,.4);font-weight:700;text-transform:uppercase;letter-spacing:.07em;margin-bottom:.35rem;">Start Date</div>
+          <div id="ci-start" style="font-size:1rem;font-weight:700;color:#f0eeff;"></div>
+        </div>
+        <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:1rem 1.1rem;">
+          <div style="font-size:.68rem;color:rgba(200,191,255,.4);font-weight:700;text-transform:uppercase;letter-spacing:.07em;margin-bottom:.35rem;">Duration</div>
+          <div id="ci-duration" style="font-size:1rem;font-weight:700;color:#f0eeff;"></div>
+        </div>
+        <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:1rem 1.1rem;">
+          <div style="font-size:.68rem;color:rgba(200,191,255,.4);font-weight:700;text-transform:uppercase;letter-spacing:.07em;margin-bottom:.35rem;">Level</div>
+          <div id="ci-level" style="font-size:1rem;font-weight:700;color:#f0eeff;"></div>
+        </div>
+      </div>
+
+      <!-- Payment options -->
+      <div style="background:rgba(124,92,252,.07);border:1px solid rgba(124,92,252,.2);border-radius:14px;padding:1.1rem 1.2rem;margin-bottom:1.6rem;">
+        <div style="font-size:.72rem;color:rgba(200,191,255,.5);font-weight:700;text-transform:uppercase;letter-spacing:.07em;margin-bottom:.7rem;">💳 Payment Options</div>
+        <div style="display:flex;flex-wrap:wrap;gap:.5rem;">
+          <span style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:50px;padding:.25rem .75rem;font-size:.75rem;color:#c8bfff;font-weight:600;">Full Payment</span>
+          <span style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:50px;padding:.25rem .75rem;font-size:.75rem;color:#c8bfff;font-weight:600;">EMI – 3 Months</span>
+          <span style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:50px;padding:.25rem .75rem;font-size:.75rem;color:#c8bfff;font-weight:600;">EMI – 6 Months</span>
+          <span style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:50px;padding:.25rem .75rem;font-size:.75rem;color:#c8bfff;font-weight:600;">EMI – 12 Months</span>
+          <span style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:50px;padding:.25rem .75rem;font-size:.75rem;color:#c8bfff;font-weight:600;">Cash Payment</span>
+        </div>
+      </div>
+
+      <p id="ci-desc" style="font-size:.88rem;color:rgba(200,191,255,.55);line-height:1.65;margin-bottom:1.8rem;"></p>
+
+      <div style="display:flex;gap:.85rem;flex-wrap:wrap;">
+        <button onclick="openAdminInquiry()" style="flex:1;min-width:140px;padding:.9rem 1.2rem;background:linear-gradient(135deg,#7c5cfc,#3d6bff);color:#fff;border:none;border-radius:50px;font-size:.9rem;font-weight:700;cursor:pointer;transition:all .25s;font-family:inherit;box-shadow:0 6px 24px rgba(124,92,252,.4);" onmouseover="this.style.filter='brightness(1.1)';this.style.transform='translateY(-2px)'" onmouseout="this.style.filter='';this.style.transform=''">
+          Submit Inquiry →
+        </button>
+        <button onclick="closeCourseInfo()" style="flex:1;min-width:100px;padding:.9rem 1.2rem;background:rgba(255,255,255,.06);color:#c8bfff;border:1px solid rgba(255,255,255,.12);border-radius:50px;font-size:.9rem;font-weight:600;cursor:pointer;transition:all .25s;font-family:inherit;" onmouseover="this.style.background='rgba(255,255,255,.11)'" onmouseout="this.style.background='rgba(255,255,255,.06)'">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       ADMIN INQUIRY MODAL
+  ════════════════════════════════════════════════════ -->
+  <div id="iq-overlay" style="position:fixed;inset:0;z-index:10001;background:rgba(6,4,20,0.88);backdrop-filter:blur(16px);display:flex;align-items:center;justify-content:center;opacity:0;visibility:hidden;transition:opacity .3s ease,visibility .3s ease;pointer-events:none;padding:1rem;" onclick="if(event.target===this)closeInquiry()">
+    <div id="iq-box" style="background:linear-gradient(160deg,#16123a 0%,#0f0d28 100%);border:1.5px solid rgba(124,92,252,.38);border-radius:24px;padding:2.5rem 2.2rem;width:100%;max-width:520px;max-height:92vh;overflow-y:auto;transform:scale(.93) translateY(16px);transition:transform .3s cubic-bezier(.23,1,.32,1);position:relative;box-shadow:0 32px 64px rgba(0,0,0,.7);">
+      <button onclick="closeInquiry()" style="position:absolute;top:1.1rem;right:1.1rem;width:32px;height:32px;border-radius:50%;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.07);color:rgba(200,191,255,.6);font-size:.85rem;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;font-family:inherit;" onmouseover="this.style.background='rgba(255,255,255,.16)';this.style.color='#fff'" onmouseout="this.style.background='rgba(255,255,255,.07)';this.style.color='rgba(200,191,255,.6)'">✕</button>
+
+      <div style="display:inline-flex;align-items:center;gap:.5rem;background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.28);border-radius:50px;padding:.3rem .9rem;font-size:.72rem;font-weight:700;color:#4ade80;letter-spacing:.06em;text-transform:uppercase;margin-bottom:1.2rem;">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg>
+        Course Inquiry &amp; Enrollment
+      </div>
+
+      <h2 style="font-size:1.45rem;font-weight:800;color:#f0eeff;margin-bottom:.3rem;letter-spacing:-.02em;">Submit Your Inquiry</h2>
+      <p style="font-size:.84rem;color:rgba(200,191,255,.45);margin-bottom:1.6rem;line-height:1.5;">Our admin team will review and contact you within 24 hours.</p>
+
+      <div id="iq-err" style="display:none;background:rgba(239,68,68,.09);border:1px solid rgba(239,68,68,.28);border-radius:10px;padding:.65rem .9rem;font-size:.82rem;color:#f87171;margin-bottom:.9rem;"></div>
+      <div id="iq-ok" style="display:none;background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.28);border-radius:10px;padding:.65rem .9rem;font-size:.82rem;color:#4ade80;margin-bottom:.9rem;"></div>
+
+      <form id="iq-form" onsubmit="submitAdminInquiry(event)">
+        <!-- Auto-populated fields -->
+        <div style="margin-bottom:.9rem;">
+          <label style="display:block;font-size:.72rem;font-weight:700;color:rgba(200,191,255,.45);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.4rem;">Your Email</label>
+          <input id="iq-email" type="email" placeholder="your@email.com" required style="width:100%;padding:.8rem 1rem;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:11px;color:#f0eeff;font-size:.88rem;font-family:inherit;outline:none;transition:border-color .2s;" onfocus="this.style.borderColor='rgba(124,92,252,.65)'" onblur="this.style.borderColor='rgba(255,255,255,.1)'"/>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-bottom:.9rem;">
+          <div>
+            <label style="display:block;font-size:.72rem;font-weight:700;color:rgba(200,191,255,.45);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.4rem;">Course</label>
+            <input id="iq-course" type="text" readonly style="width:100%;padding:.8rem 1rem;background:rgba(124,92,252,.06);border:1px solid rgba(124,92,252,.2);border-radius:11px;color:#b09fff;font-size:.85rem;font-family:inherit;cursor:default;outline:none;"/>
+          </div>
+          <div>
+            <label style="display:block;font-size:.72rem;font-weight:700;color:rgba(200,191,255,.45);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.4rem;">Category</label>
+            <input id="iq-category" type="text" readonly style="width:100%;padding:.8rem 1rem;background:rgba(124,92,252,.06);border:1px solid rgba(124,92,252,.2);border-radius:11px;color:#b09fff;font-size:.85rem;font-family:inherit;cursor:default;outline:none;"/>
+          </div>
+        </div>
+
+        <div style="margin-bottom:.9rem;">
+          <label style="display:block;font-size:.72rem;font-weight:700;color:rgba(200,191,255,.45);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.4rem;">Enrollment Status</label>
+          <select id="iq-status" style="width:100%;padding:.8rem 1rem;background:rgba(20,15,40,.95);border:1px solid rgba(255,255,255,.1);border-radius:11px;color:#f0eeff;font-size:.88rem;font-family:inherit;appearance:none;-webkit-appearance:none;background-image:url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%239b8fff' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E\");background-repeat:no-repeat;background-position:right .9rem center;padding-right:2.4rem;outline:none;" onfocus="this.style.borderColor='rgba(124,92,252,.65)'" onblur="this.style.borderColor='rgba(255,255,255,.1)'">
+            <option value="new_inquiry">New Inquiry</option>
+            <option value="interested">Interested – Want More Info</option>
+            <option value="ready_to_enroll">Ready to Enroll</option>
+            <option value="payment_pending">Payment Pending</option>
+          </select>
+        </div>
+
+        <div style="margin-bottom:.9rem;">
+          <label style="display:block;font-size:.72rem;font-weight:700;color:rgba(200,191,255,.45);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.4rem;">Phone Number</label>
+          <input id="iq-phone" type="tel" placeholder="+91 9876543210" style="width:100%;padding:.8rem 1rem;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:11px;color:#f0eeff;font-size:.88rem;font-family:inherit;outline:none;transition:border-color .2s;" onfocus="this.style.borderColor='rgba(124,92,252,.65)'" onblur="this.style.borderColor='rgba(255,255,255,.1)'"/>
+        </div>
+
+        <div style="margin-bottom:.9rem;">
+          <label style="display:block;font-size:.72rem;font-weight:700;color:rgba(200,191,255,.45);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.4rem;">Payment Proof (optional)</label>
+          <div id="iq-upload-area" style="border:2px dashed rgba(124,92,252,.3);border-radius:12px;padding:1.2rem;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;" onmouseover="this.style.borderColor='rgba(124,92,252,.6)';this.style.background='rgba(124,92,252,.06)'" onmouseout="this.style.borderColor='rgba(124,92,252,.3)';this.style.background=''" onclick="document.getElementById('iq-file').click()">
+            <div style="font-size:1.5rem;margin-bottom:.4rem;">📎</div>
+            <div style="font-size:.82rem;color:rgba(200,191,255,.5);font-weight:500;">Click to upload screenshot / receipt</div>
+            <div id="iq-file-name" style="font-size:.75rem;color:#9b7dff;margin-top:.4rem;font-weight:600;"></div>
+          </div>
+          <input id="iq-file" type="file" accept="image/*,.pdf" style="display:none;" onchange="document.getElementById('iq-file-name').textContent=this.files[0]?'✓ '+this.files[0].name:''"/>
+        </div>
+
+        <div style="margin-bottom:1.4rem;">
+          <label style="display:block;font-size:.72rem;font-weight:700;color:rgba(200,191,255,.45);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.4rem;">Message / Questions</label>
+          <textarea id="iq-message" rows="3" placeholder="Any questions or specific requirements…" style="width:100%;padding:.8rem 1rem;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:11px;color:#f0eeff;font-size:.88rem;font-family:inherit;outline:none;resize:vertical;transition:border-color .2s;" onfocus="this.style.borderColor='rgba(124,92,252,.65)'" onblur="this.style.borderColor='rgba(255,255,255,.1)'"></textarea>
+        </div>
+
+        <button id="iq-submit-btn" type="submit" style="width:100%;padding:.95rem;background:linear-gradient(135deg,#7c5cfc,#3d6bff);color:#fff;border:none;border-radius:50px;font-size:.92rem;font-weight:700;cursor:pointer;transition:all .25s;font-family:inherit;box-shadow:0 8px 32px rgba(124,92,252,.4);letter-spacing:.01em;" onmouseover="this.style.filter='brightness(1.1)';this.style.transform='translateY(-2px)'" onmouseout="this.style.filter='';this.style.transform=''">
+          Submit Inquiry
+        </button>
+      </form>
+    </div>
+  </div>
+
   <div class="moverlay" id="mo" onclick="if(event.target===this) closeModal()">
     <div class="modal-box" style="animation: modalSlideUp 0.3s cubic-bezier(0.4,0,0.2,1);">
       <button class="mcls" onclick="closeModal()" style="position: absolute; top: 1.3rem; right: 1.3rem; width: 30px; height: 30px; border-radius: 50%; background: var(--panel); border: 1px solid var(--border); color: var(--txt3); font-size: 0.85rem; display: flex; align-items: center; justify-content: center; font-weight: 700; transition: all 0.2s; cursor: pointer;">✕</button>
@@ -720,11 +854,42 @@
       }
       grid.innerHTML = coursesToRender.map(course => {
         const courseName = course.name || '';
-        const duration = course.duration_months ? course.duration_months + ' months' : (course.duration_hours ? course.duration_hours + ' hrs' : 'N/A');
+        const durationLabel = course.duration_months
+          ? course.duration_months + ' month' + (course.duration_months > 1 ? 's' : '')
+          : (course.duration_hours ? course.duration_hours + ' hrs' : 'N/A');
         const safeName = courseName.replace(/'/g, "\\'");
         const levelClass = (course.level || '').toLowerCase();
         const levelColors = { beginner: '#4ade80', intermediate: '#f59e0b', advanced: '#f87171' };
         const levelColor = levelColors[levelClass] || 'var(--v2)';
+
+        // Key topics — from DB field or derived from category
+        const rawTopics = course.key_topics || course.topics || '';
+        const topicList = Array.isArray(rawTopics)
+          ? rawTopics
+          : (rawTopics ? rawTopics.split(',').map(t => t.trim()).filter(Boolean) : []);
+        const topicsHtml = topicList.length
+          ? `<div style="margin-bottom:.85rem;">
+               <div style="font-size:.7rem;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.5rem;">Key Topics</div>
+               <div style="display:flex;flex-wrap:wrap;gap:.35rem;">
+                 ${topicList.slice(0,5).map(t => `<span style="display:inline-block;padding:.2rem .6rem;border-radius:50px;background:rgba(124,92,252,.1);border:1px solid rgba(124,92,252,.2);color:var(--txt2);font-size:.72rem;font-weight:600;">${t}</span>`).join('')}
+               </div>
+             </div>`
+          : '';
+
+        // Outcomes — from DB field or smart fallback
+        const rawOutcomes = course.outcomes || course.learning_outcomes || '';
+        const outcomeList = Array.isArray(rawOutcomes)
+          ? rawOutcomes
+          : (rawOutcomes ? rawOutcomes.split('\n').map(o => o.replace(/^[-•*]\s*/, '').trim()).filter(Boolean) : []);
+        const outcomesHtml = outcomeList.length
+          ? `<div style="margin-bottom:.85rem;">
+               <div style="font-size:.7rem;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.5rem;">What You'll Achieve</div>
+               <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:.35rem;">
+                 ${outcomeList.slice(0,3).map(o => `<li style="display:flex;align-items:flex-start;gap:.45rem;font-size:.8rem;color:var(--txt3);line-height:1.4;"><span style="color:#4ade80;font-size:.85rem;flex-shrink:0;margin-top:1px;">✓</span>${o}</li>`).join('')}
+               </ul>
+             </div>`
+          : '';
+
         return `
         <div class="course-card reveal">
           <div class="course-header">
@@ -737,13 +902,18 @@
           </div>
           <div class="course-body">
             <div class="course-meta">
-              <div class="meta-item">⏱️ ${duration}</div>
+              <div class="meta-item">⏱️ ${durationLabel}</div>
               <div class="meta-item">👥 ${course.total_enrolled || 0} students</div>
               <div class="meta-item">⭐ ${course.rating ? Number(course.rating).toFixed(1) : 'New'}</div>
             </div>
             <p class="course-desc">${course.short_description || course.description || ''}</p>
+            ${topicsHtml}
+            ${outcomesHtml}
           </div>
-          <div class="course-footer" style="justify-content:flex-end;">
+          <div class="course-footer" style="justify-content:space-between;gap:.6rem;flex-wrap:wrap;">
+            <button class="btn-outline" style="border:1.5px solid var(--border2);padding:.65rem 1.1rem;font-size:.83rem;font-weight:600;border-radius:var(--r4);" onclick="viewCourseInfo('${course.id}')">
+              View Details
+            </button>
             ${enrolledCourseIds.has(String(course.id))
               ? `<button class="btn-grad" disabled style="opacity:.6;cursor:default;background:rgba(74,222,128,.18);color:#4ade80;">Already Enrolled ✓</button>`
               : `<button class="btn-grad" onclick="enrollCourse('${course.id}', '${safeName}')">Enroll Now</button>`
@@ -912,6 +1082,151 @@
         }
         if (btn) { btn.disabled = false; btn.textContent = 'Enroll Now'; }
       }
+    }
+
+    // ── Course Info Modal ──
+    let _ciCourse = null;
+
+    function viewCourseInfo(courseId) {
+      const course = courses.find(c => String(c.id) === String(courseId));
+      if (!course) return;
+      _ciCourse = course;
+
+      document.getElementById('ci-title').textContent = course.name || '';
+      document.getElementById('ci-category').textContent = course.category || 'General';
+      const fee = course.discounted_price || course.price;
+      document.getElementById('ci-fee').textContent = fee ? '₹' + Number(fee).toLocaleString('en-IN') : 'Contact for pricing';
+      const startDate = course.start_date ? new Date(course.start_date).toLocaleDateString('en-IN', { day:'numeric', month:'long', year:'numeric' }) : 'Upcoming batch';
+      document.getElementById('ci-start').textContent = startDate;
+      const dur = course.duration_months ? course.duration_months + ' months' : (course.duration_hours ? course.duration_hours + ' hrs' : 'Flexible');
+      document.getElementById('ci-duration').textContent = dur;
+      document.getElementById('ci-level').textContent = course.level || 'All Levels';
+      document.getElementById('ci-desc').textContent = course.short_description || course.description || '';
+
+      const ov = document.getElementById('ci-overlay');
+      const box = document.getElementById('ci-box');
+      ov.style.opacity = '1';
+      ov.style.visibility = 'visible';
+      ov.style.pointerEvents = 'all';
+      box.style.transform = 'scale(1) translateY(0)';
+    }
+
+    function closeCourseInfo() {
+      const ov = document.getElementById('ci-overlay');
+      const box = document.getElementById('ci-box');
+      ov.style.opacity = '0';
+      ov.style.visibility = 'hidden';
+      ov.style.pointerEvents = 'none';
+      box.style.transform = 'scale(.93) translateY(16px)';
+    }
+
+    function openAdminInquiry() {
+      closeCourseInfo();
+      if (!_ciCourse) return;
+
+      // Auto-populate
+      const userEmail = localStorage.getItem('user_email') || '';
+      document.getElementById('iq-email').value = userEmail;
+      document.getElementById('iq-course').value = _ciCourse.name || '';
+      document.getElementById('iq-category').value = _ciCourse.category || 'General';
+      document.getElementById('iq-file-name').textContent = '';
+      document.getElementById('iq-message').value = '';
+      document.getElementById('iq-err').style.display = 'none';
+      document.getElementById('iq-ok').style.display = 'none';
+
+      const ov = document.getElementById('iq-overlay');
+      const box = document.getElementById('iq-box');
+      ov.style.opacity = '1';
+      ov.style.visibility = 'visible';
+      ov.style.pointerEvents = 'all';
+      box.style.transform = 'scale(1) translateY(0)';
+    }
+
+    function closeInquiry() {
+      const ov = document.getElementById('iq-overlay');
+      const box = document.getElementById('iq-box');
+      ov.style.opacity = '0';
+      ov.style.visibility = 'hidden';
+      ov.style.pointerEvents = 'none';
+      box.style.transform = 'scale(.93) translateY(16px)';
+    }
+
+    async function submitAdminInquiry(e) {
+      e.preventDefault();
+      const btn = document.getElementById('iq-submit-btn');
+      const errEl = document.getElementById('iq-err');
+      const okEl = document.getElementById('iq-ok');
+      errEl.style.display = 'none';
+      okEl.style.display = 'none';
+
+      const email = document.getElementById('iq-email').value.trim();
+      const phone = document.getElementById('iq-phone').value.trim();
+      if (!email) { errEl.textContent = 'Please enter your email.'; errEl.style.display = 'block'; return; }
+
+      btn.disabled = true;
+      btn.textContent = 'Submitting…';
+
+      const inquiryData = {
+        user_email: email,
+        phone_number: phone,
+        course_id: String(_ciCourse?.id || ''),
+        course_name: _ciCourse?.name || '',
+        course_category: _ciCourse?.category || '',
+        enrollment_status: document.getElementById('iq-status').value,
+        message: document.getElementById('iq-message').value.trim(),
+        submitted_at: new Date().toISOString()
+      };
+
+      // Upload payment proof if provided
+      const file = document.getElementById('iq-file').files[0];
+      if (file && window.supabaseConfig?.getClient) {
+        try {
+          const ext = file.name.split('.').pop();
+          const path = `inquiries/${Date.now()}_${email.replace('@','_at_')}.${ext}`;
+          const { error: upErr } = await window.supabaseConfig.getClient().storage
+            .from('payment-proofs')
+            .upload(path, file, { contentType: file.type });
+          if (!upErr) {
+            const { data: urlData } = window.supabaseConfig.getClient().storage.from('payment-proofs').getPublicUrl(path);
+            inquiryData.payment_proof_url = urlData.publicUrl;
+          }
+        } catch(er) { /* non-critical */ }
+      }
+
+      // Save inquiry to Supabase
+      let saved = false;
+      if (window.supabaseConfig?.getClient) {
+        try {
+          const { error } = await window.supabaseConfig.getClient()
+            .from('course_inquiries')
+            .insert([inquiryData]);
+          if (!error) saved = true;
+        } catch(er) {}
+      }
+
+      // Admin notification via user_enrollments fallback
+      if (!saved && window.supabaseConfig) {
+        try {
+          let user = await window.supabaseConfig.getCurrentUser();
+          if (user) {
+            await window.supabaseConfig.createUserEnrollment(user.id, {
+              course_id: inquiryData.course_id,
+              course_name: inquiryData.course_name,
+              course_category: inquiryData.course_category,
+              total_fee: Number(_ciCourse?.discounted_price || _ciCourse?.price) || 0,
+              notes: 'Admin inquiry: ' + inquiryData.message
+            });
+            saved = true;
+          }
+        } catch(er) {}
+      }
+
+      btn.disabled = false;
+      btn.textContent = 'Submit Inquiry';
+      okEl.textContent = '✓ Inquiry submitted! Our admin team will contact you within 24 hours.';
+      okEl.style.display = 'block';
+      if (window.app) window.app.showNotification('Inquiry submitted! Team will contact you shortly.', 'success');
+      setTimeout(() => closeInquiry(), 2800);
     }
 
     function openModal(type = 'login') {

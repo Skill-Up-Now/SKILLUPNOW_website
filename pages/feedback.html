@@ -3,58 +3,361 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Course Feedback - SkillUpNow">
-  <title>Course Feedback - SkillUpNow</title>
-  
+  <meta name="description" content="Student Reviews & Feedback — SkillUpNow">
+  <title>Reviews & Feedback — SkillUpNow</title>
   <link rel="stylesheet" href="../css/variables.css">
   <link rel="stylesheet" href="../css/animations.css">
   <link rel="stylesheet" href="../css/main.css">
-  <link rel="stylesheet" href="../css/forms.css">
   <link rel="stylesheet" href="../css/responsive.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,700&family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <script>
     if (window.location.protocol !== 'file:') {
       var p = window.location.pathname;
       if (p.endsWith('.html')) history.replaceState(null, '', p.replace(/\.html$/, ''));
     }
   </script>
-
   <style>
-    .rating-stars {
-      display: flex;
-      gap: 0.8rem;
-      margin-top: 0.5rem;
-      flex-wrap: wrap;
+    /* ── Hero ── */
+    .rv-hero {
+      padding: 5.5rem 5vw 4rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
     }
-
-    .star {
-      cursor: pointer;
-      font-size: 2rem;
-      color: var(--txt4);
-      transition: all 0.2s var(--ease);
+    .rv-hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 70% 55% at 50% 0%, rgba(124,92,252,0.14) 0%, transparent 70%);
+      pointer-events: none;
     }
-
-    .star:hover,
-    .star.active {
-      color: var(--v1);
-      transform: scale(1.2);
+    .rv-hero h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2.4rem, 5.5vw, 4rem);
+      font-weight: 700;
+      color: var(--txt);
+      letter-spacing: -0.025em;
+      margin-bottom: 1rem;
+      line-height: 1.1;
     }
-
-    .rating-label {
-      display: block;
-      margin-top: 0.5rem;
-      font-size: 0.85rem;
+    .rv-hero p {
+      font-size: 1.1rem;
       color: var(--txt3);
-      min-height: 1.2rem;
+      max-width: 580px;
+      margin: 0 auto 2.5rem;
+      line-height: 1.7;
     }
 
-    .feedback-section {
+    /* ── Rating Summary Bar ── */
+    .rv-summary {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 3rem;
+      padding: 2.5rem 5vw;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+      background: rgba(124,92,252,0.03);
+    }
+    .rv-sum-score {
+      text-align: center;
+    }
+    .rv-sum-num {
+      font-size: 4rem;
+      font-weight: 800;
+      background: var(--grad);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1;
+    }
+    .rv-sum-stars {
+      display: flex;
+      gap: 4px;
+      justify-content: center;
+      margin: 0.4rem 0 0.25rem;
+      font-size: 1.3rem;
+    }
+    .rv-sum-lbl {
+      font-size: 0.8rem;
+      color: var(--txt4);
+      font-weight: 500;
+    }
+    .rv-bars {
+      display: flex;
+      flex-direction: column;
+      gap: 0.55rem;
+      min-width: 240px;
+    }
+    .rv-bar-row {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.78rem;
+      color: var(--txt3);
+    }
+    .rv-bar-label { width: 32px; text-align: right; flex-shrink: 0; }
+    .rv-bar-track {
+      flex: 1;
+      height: 6px;
+      background: var(--border);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .rv-bar-fill {
+      height: 100%;
+      border-radius: 3px;
+      background: linear-gradient(90deg, var(--v1), var(--v2));
+      transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .rv-bar-count { width: 24px; flex-shrink: 0; }
+
+    /* ── Reviews Grid ── */
+    .rv-grid-section {
+      padding: 4rem 5vw;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    .rv-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+    .rv-card {
+      background: var(--panel);
+      border: 1.5px solid var(--border);
+      border-radius: var(--r3);
+      padding: 1.8rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      transition: border-color 0.3s, transform 0.3s, box-shadow 0.3s;
+      animation: fadeUp 0.5s ease both;
+    }
+    .rv-card:hover {
+      border-color: var(--v1);
+      transform: translateY(-4px);
+      box-shadow: 0 16px 48px rgba(124,92,252,0.18);
+    }
+    .rv-card-stars {
+      display: flex;
+      gap: 3px;
+    }
+    .rv-star { color: var(--border); font-size: 1rem; }
+    .rv-star.lit { color: #fbbf24; }
+    .rv-card-text {
+      font-size: 0.93rem;
+      color: var(--txt);
+      line-height: 1.7;
+      font-style: italic;
+      flex: 1;
+    }
+    .rv-card-course {
+      display: inline-block;
+      padding: 0.2rem 0.65rem;
+      background: rgba(124,92,252,0.1);
+      border: 1px solid rgba(124,92,252,0.2);
+      border-radius: 50px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--v2);
+    }
+    .rv-card-user {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      border-top: 1px solid var(--border);
+      padding-top: 1rem;
+    }
+    .rv-avatar {
+      width: 38px; height: 38px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.88rem;
+      flex-shrink: 0;
+    }
+    .rv-name { font-weight: 700; color: var(--txt); font-size: 0.88rem; }
+    .rv-city { font-size: 0.75rem; color: var(--txt4); }
+
+    /* ── Feedback Form ── */
+    .fb-form-section {
+      padding: 5rem 5vw;
+      background: linear-gradient(180deg, rgba(124,92,252,0.04) 0%, transparent 100%);
+      border-top: 1px solid var(--border);
+    }
+    .fb-form-wrap {
+      max-width: 780px;
+      margin: 0 auto;
+    }
+    .fb-form-hd {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+    .fb-form-hd h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+      font-weight: 700;
+      color: var(--txt);
+      margin-bottom: 0.6rem;
+    }
+    .fb-form-hd p { color: var(--txt3); font-size: 0.95rem; line-height: 1.6; }
+
+    .fb-form {
+      background: var(--panel);
+      border: 1.5px solid var(--border);
+      border-radius: var(--r3);
+      padding: 2.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.6rem;
+    }
+    .fb-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.2rem;
+    }
+    .fb-group { display: flex; flex-direction: column; gap: 0.5rem; }
+    .fb-label {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--txt2);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .fb-input, .fb-select, .fb-textarea {
       background: var(--panel2);
-      padding: 2rem;
+      border: 1.5px solid var(--border);
       border-radius: var(--r2);
-      margin-bottom: 2rem;
-      border-left: 4px solid var(--v1);
+      color: var(--txt);
+      padding: 0.82rem 1rem;
+      font-size: 0.9rem;
+      font-family: inherit;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      outline: none;
+      width: 100%;
+    }
+    .fb-input:focus, .fb-select:focus, .fb-textarea:focus {
+      border-color: var(--v1);
+      box-shadow: 0 0 0 3px rgba(124,92,252,0.12);
+    }
+    .fb-textarea { resize: vertical; min-height: 100px; }
+    .fb-select option { background: var(--panel); }
+
+    /* Star rating widget */
+    .fb-stars {
+      display: flex;
+      gap: 6px;
+      margin-top: 0.2rem;
+    }
+    .fb-star {
+      font-size: 1.6rem;
+      color: var(--border);
+      cursor: pointer;
+      transition: color 0.15s, transform 0.15s;
+      user-select: none;
+    }
+    .fb-star:hover, .fb-star.hov, .fb-star.lit {
+      color: #fbbf24;
+    }
+    .fb-star.lit { transform: scale(1.15); }
+    .fb-star-label {
+      font-size: 0.8rem;
+      color: var(--txt4);
+      margin-top: 0.35rem;
+      font-weight: 500;
+      min-height: 1.2em;
+    }
+
+    /* Submit button */
+    .fb-submit {
+      width: 100%;
+      padding: 1rem;
+      border-radius: 50px;
+      background: linear-gradient(135deg, var(--v1), var(--v2));
+      color: #fff;
+      border: none;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: filter 0.2s, transform 0.2s;
+      box-shadow: 0 6px 24px rgba(124,92,252,0.4);
+      font-family: inherit;
+    }
+    .fb-submit:hover:not(:disabled) { filter: brightness(1.1); transform: translateY(-2px); }
+    .fb-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    /* Success state */
+    .fb-success {
+      display: none;
+      text-align: center;
+      padding: 3rem;
+      background: var(--panel);
+      border: 1.5px solid rgba(74,222,128,0.3);
+      border-radius: var(--r3);
+    }
+    .fb-success-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      animation: bounceIn 0.6s cubic-bezier(0.34,1.56,0.64,1) both;
+    }
+    @keyframes bounceIn {
+      from { transform: scale(0.5); opacity: 0; }
+      to   { transform: scale(1); opacity: 1; }
+    }
+    .fb-success h3 { font-size: 1.4rem; color: #4ade80; margin-bottom: 0.5rem; }
+    .fb-success p { color: var(--txt3); font-size: 0.9rem; line-height: 1.6; }
+
+    /* Toast */
+    .fb-toast {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      z-index: 999;
+      padding: 0.9rem 1.4rem;
+      border-radius: 12px;
+      font-size: 0.87rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transform: translateY(60px);
+      opacity: 0;
+      transition: 0.35s cubic-bezier(0.34,1.56,0.64,1);
+      pointer-events: none;
+    }
+    .fb-toast.show { transform: translateY(0); opacity: 1; }
+    .fb-toast.ok  { background: rgba(74,222,128,.15); border: 1px solid rgba(74,222,128,.35); color: #4ade80; }
+    .fb-toast.err { background: rgba(239,68,68,.13); border: 1px solid rgba(239,68,68,.3); color: #f87171; }
+
+    /* Loading */
+    .rv-loading {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 3rem;
+      color: var(--txt4);
+    }
+    .rv-spin {
+      width: 32px; height: 32px;
+      border: 2.5px solid var(--border);
+      border-top-color: var(--v1);
+      border-radius: 50%;
+      animation: rvSpin 0.7s linear infinite;
+      margin: 0 auto 1rem;
+    }
+    @keyframes rvSpin { to { transform: rotate(360deg); } }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+      .fb-row { grid-template-columns: 1fr; }
+      .fb-form { padding: 1.5rem; }
+      .rv-summary { gap: 1.5rem; }
+      .rv-bars { min-width: unset; width: 100%; }
     }
   </style>
 </head>
@@ -62,288 +365,406 @@
   <div class="mesh-bg"></div>
   <div class="orb orb1"></div>
   <div class="orb orb2"></div>
-  <div class="orb orb3"></div>
 
   <!-- Navigation — rebuilt by profile-nav.js -->
   <nav></nav>
 
-  <section style="padding: 3rem 5vw; min-height: calc(100vh - 200px);">
-    <div style="max-width: 900px; margin: 0 auto;">
-      <h1 style="font-family: 'Cormorant Garamond', serif; font-size: 2.5rem; text-align: center; margin-bottom: 1rem;">Share Your Feedback</h1>
-      <p style="text-align: center; color: var(--txt3); margin-bottom: 3rem; font-size: 1.05rem;">Your feedback helps us improve. Tell us about your learning experience.</p>
+  <!-- ── Hero ── -->
+  <div class="rv-hero">
+    <span style="display:inline-block;padding:.3rem 1rem;background:rgba(124,92,252,.12);border:1px solid rgba(124,92,252,.28);border-radius:50px;font-size:.74rem;font-weight:700;color:var(--v1);letter-spacing:.08em;text-transform:uppercase;margin-bottom:1.1rem;">Student Voices</span>
+    <h1>What Our Learners<br><span style="background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Say About Us</span></h1>
+    <p>Honest, unfiltered reviews from professionals who transformed their communication, leadership, and confidence with SkillUpNow.</p>
+    <div style="display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap;">
+      <a href="#fb-form" class="btn-grad">Share Your Review</a>
+      <a href="courses.html" class="btn-outline">Browse Courses</a>
+    </div>
+  </div>
 
-      <form class="form-container" id="feedbackForm" onsubmit="submitFeedback(event)">
-        <!-- Course Selection -->
-        <h2 style="margin-bottom: 2rem; border-bottom: 2px solid var(--border); padding-bottom: 1rem;">Course Details</h2>
+  <!-- ── Rating Summary ── -->
+  <div class="rv-summary">
+    <div class="rv-sum-score">
+      <div class="rv-sum-num" id="avg-rating">4.9</div>
+      <div class="rv-sum-stars" id="avg-stars">
+        <span style="color:#fbbf24;">★</span><span style="color:#fbbf24;">★</span>
+        <span style="color:#fbbf24;">★</span><span style="color:#fbbf24;">★</span>
+        <span style="color:#fbbf24;">★</span>
+      </div>
+      <div class="rv-sum-lbl" id="review-count">Based on student reviews</div>
+    </div>
+    <div class="rv-bars" id="rv-bars">
+      <div class="rv-bar-row"><span class="rv-bar-label">5★</span><div class="rv-bar-track"><div class="rv-bar-fill" style="width:0%" id="bar-5"></div></div><span class="rv-bar-count" id="cnt-5">0</span></div>
+      <div class="rv-bar-row"><span class="rv-bar-label">4★</span><div class="rv-bar-track"><div class="rv-bar-fill" style="width:0%;background:linear-gradient(90deg,#3d6bff,#00cfee)" id="bar-4"></div></div><span class="rv-bar-count" id="cnt-4">0</span></div>
+      <div class="rv-bar-row"><span class="rv-bar-label">3★</span><div class="rv-bar-track"><div class="rv-bar-fill" style="width:0%;background:linear-gradient(90deg,#f59e0b,#fbbf24)" id="bar-3"></div></div><span class="rv-bar-count" id="cnt-3">0</span></div>
+      <div class="rv-bar-row"><span class="rv-bar-label">2★</span><div class="rv-bar-track"><div class="rv-bar-fill" style="width:0%;background:linear-gradient(90deg,#f97316,#fb923c)" id="bar-2"></div></div><span class="rv-bar-count" id="cnt-2">0</span></div>
+      <div class="rv-bar-row"><span class="rv-bar-label">1★</span><div class="rv-bar-track"><div class="rv-bar-fill" style="width:0%;background:linear-gradient(90deg,#f87171,#fca5a5)" id="bar-1"></div></div><span class="rv-bar-count" id="cnt-1">0</span></div>
+    </div>
+    <div style="text-align:center;">
+      <div style="font-size:2rem;margin-bottom:.5rem;">🏅</div>
+      <div style="font-weight:700;color:var(--txt);font-size:.92rem;margin-bottom:.25rem;">Top-Rated Platform</div>
+      <div style="font-size:.78rem;color:var(--txt4);">12,000+ learners trained</div>
+    </div>
+  </div>
 
-        <div class="form-row">
-          <div class="form-group">
-            <label>Course Name *</label>
-            <select name="course" required style="background: var(--panel); border: 1.5px solid var(--border); color: var(--txt); padding: 0.9rem 1.1rem; border-radius: var(--r2);">
-              <option value="">Select a course</option>
-              <option value="aws">AWS Solutions Architect Pro</option>
-              <option value="k8s">Kubernetes & Docker Mastery</option>
-              <option value="ai">Generative AI with Python</option>
-              <option value="cyber">Cybersecurity Fundamentals</option>
-              <option value="terraform">Terraform & IaC Engineering</option>
-              <option value="spark">Data Engineering with Spark</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Completion Date *</label>
-            <input type="date" name="completionDate" required data-validate="required|date"/>
-          </div>
-        </div>
-
-        <!-- Ratings Section -->
-        <div class="feedback-section">
-          <h3 style="margin-bottom: 2rem;">Rating Your Experience</h3>
-
-          <div style="margin-bottom: 2.5rem;">
-            <label style="display: block; margin-bottom: 0.5rem;">Course Content Quality *</label>
-            <div class="rating-stars" id="contentRating">
-              <span class="star" onclick="setRating(this, 'contentQuality', 1)">★</span>
-              <span class="star" onclick="setRating(this, 'contentQuality', 2)">★</span>
-              <span class="star" onclick="setRating(this, 'contentQuality', 3)">★</span>
-              <span class="star" onclick="setRating(this, 'contentQuality', 4)">★</span>
-              <span class="star" onclick="setRating(this, 'contentQuality', 5)">★</span>
-            </div>
-            <span class="rating-label" id="contentQualityLabel">Click to rate</span>
-            <input type="hidden" name="contentQuality" value="0" required/>
-          </div>
-
-          <div style="margin-bottom: 2.5rem;">
-            <label style="display: block; margin-bottom: 0.5rem;">Instructor Quality *</label>
-            <div class="rating-stars" id="instructorRating">
-              <span class="star" onclick="setRating(this, 'instructorQuality', 1)">★</span>
-              <span class="star" onclick="setRating(this, 'instructorQuality', 2)">★</span>
-              <span class="star" onclick="setRating(this, 'instructorQuality', 3)">★</span>
-              <span class="star" onclick="setRating(this, 'instructorQuality', 4)">★</span>
-              <span class="star" onclick="setRating(this, 'instructorQuality', 5)">★</span>
-            </div>
-            <span class="rating-label" id="instructorQualityLabel">Click to rate</span>
-            <input type="hidden" name="instructorQuality" value="0" required/>
-          </div>
-
-          <div style="margin-bottom: 2.5rem;">
-            <label style="display: block; margin-bottom: 0.5rem;">Course Pacing *</label>
-            <div class="rating-stars" id="pacingRating">
-              <span class="star" onclick="setRating(this, 'coursePacing', 1)">★</span>
-              <span class="star" onclick="setRating(this, 'coursePacing', 2)">★</span>
-              <span class="star" onclick="setRating(this, 'coursePacing', 3)">★</span>
-              <span class="star" onclick="setRating(this, 'coursePacing', 4)">★</span>
-              <span class="star" onclick="setRating(this, 'coursePacing', 5)">★</span>
-            </div>
-            <span class="rating-label" id="coursePacingLabel">Click to rate</span>
-            <input type="hidden" name="coursePacing" value="0" required/>
-          </div>
-
-          <div style="margin-bottom: 2.5rem;">
-            <label style="display: block; margin-bottom: 0.5rem;">Learning Materials *</label>
-            <div class="rating-stars" id="materialsRating">
-              <span class="star" onclick="setRating(this, 'learningMaterials', 1)">★</span>
-              <span class="star" onclick="setRating(this, 'learningMaterials', 2)">★</span>
-              <span class="star" onclick="setRating(this, 'learningMaterials', 3)">★</span>
-              <span class="star" onclick="setRating(this, 'learningMaterials', 4)">★</span>
-              <span class="star" onclick="setRating(this, 'learningMaterials', 5)">★</span>
-            </div>
-            <span class="rating-label" id="learningMaterialsLabel">Click to rate</span>
-            <input type="hidden" name="learningMaterials" value="0" required/>
-          </div>
-
-          <div>
-            <label style="display: block; margin-bottom: 0.5rem;">Support & Mentorship *</label>
-            <div class="rating-stars" id="supportRating">
-              <span class="star" onclick="setRating(this, 'supportQuality', 1)">★</span>
-              <span class="star" onclick="setRating(this, 'supportQuality', 2)">★</span>
-              <span class="star" onclick="setRating(this, 'supportQuality', 3)">★</span>
-              <span class="star" onclick="setRating(this, 'supportQuality', 4)">★</span>
-              <span class="star" onclick="setRating(this, 'supportQuality', 5)">★</span>
-            </div>
-            <span class="rating-label" id="supportQualityLabel">Click to rate</span>
-            <input type="hidden" name="supportQuality" value="0" required/>
-          </div>
-        </div>
-
-        <!-- Recommendation -->
-        <h2 style="margin-bottom: 2rem; border-bottom: 2px solid var(--border); padding-bottom: 1rem;">Recommendation</h2>
-
-        <div class="form-group">
-          <label>Would you recommend this course to others? *</label>
-          <div style="display: flex; gap: 2rem; margin-top: 0.5rem;">
-            <label style="display: flex; gap: 0.7rem; align-items: center; margin: 0; font-weight: 400;">
-              <input type="radio" name="recommend" value="definitely" required/>
-              <span>Definitely Yes</span>
-            </label>
-            <label style="display: flex; gap: 0.7rem; align-items: center; margin: 0; font-weight: 400;">
-              <input type="radio" name="recommend" value="probably" required/>
-              <span>Probably Yes</span>
-            </label>
-            <label style="display: flex; gap: 0.7rem; align-items: center; margin: 0; font-weight: 400;">
-              <input type="radio" name="recommend" value="unsure" required/>
-              <span>Unsure</span>
-            </label>
-          </div>
-        </div>
-
-        <!-- Detailed Feedback -->
-        <h2 style="margin-top: 3rem; margin-bottom: 2rem; border-bottom: 2px solid var(--border); padding-bottom: 1rem;">Detailed Feedback</h2>
-
-        <div class="form-group">
-          <label>What did you like most about this course? *</label>
-          <textarea name="likeBest" placeholder="Share what you enjoyed most..." required data-validate="required|min:10" style="background: var(--panel); border: 1.5px solid var(--border); color: var(--txt); padding: 0.9rem 1.1rem; border-radius: var(--r2); min-height: 100px;"></textarea>
-        </div>
-
-        <div class="form-group">
-          <label>What could be improved?</label>
-          <textarea name="improvements" placeholder="Areas for improvement..." style="background: var(--panel); border: 1.5px solid var(--border); color: var(--txt); padding: 0.9rem 1.1rem; border-radius: var(--r2); min-height: 100px;"></textarea>
-        </div>
-
-        <div class="form-group">
-          <label>How will you apply this knowledge? *</label>
-          <textarea name="application" placeholder="Describe how you plan to apply what you learned..." required data-validate="required|min:10" style="background: var(--panel); border: 1.5px solid var(--border); color: var(--txt); padding: 0.9rem 1.1rem; border-radius: var(--r2); min-height: 100px;"></textarea>
-        </div>
-
-        <!-- Personal Info -->
-        <h2 style="margin-top: 3rem; margin-bottom: 2rem; border-bottom: 2px solid var(--border); padding-bottom: 1rem;">Personal Information</h2>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label>Full Name</label>
-            <input type="text" name="fullName" placeholder="Anonymous" data-validate=""/>
-          </div>
-          <div class="form-group">
-            <label>Email (for follow-up)</label>
-            <input type="email" name="email" placeholder="name@example.com" data-validate="email"/>
-          </div>
-        </div>
-
-        <!-- Options -->
-        <div style="background: var(--panel2); padding: 1.5rem; border-radius: var(--r2); margin-bottom: 2rem;">
-          <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
-            <input type="checkbox" name="anonymous" id="anonymousCheck"/>
-            <label style="margin: 0; font-size: 0.95rem;" for="anonymousCheck">Keep my feedback anonymous</label>
-          </div>
-          <div style="display: flex; gap: 1rem;">
-            <input type="checkbox" name="allowPublish" checked/>
-            <label style="margin: 0; font-size: 0.95rem;">Allow my feedback to be published as a testimonial</label>
-          </div>
-        </div>
-
-        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-          <button type="submit" class="btn-grad" style="flex: 1;">Submit Feedback</button>
-          <button type="reset" class="btn-outline" style="flex: 1; border: 1.5px solid var(--border2);">Clear Form</button>
-        </div>
-      </form>
-
-      <!-- Success Message -->
-      <div id="successMessage" style="display: none; margin-top: 2rem;">
-        <div style="background: rgba(16,185,129,0.1); border-left: 4px solid #10b981; padding: 2rem; border-radius: 0 var(--r2) var(--r2) 0; text-align: center;">
-          <h3 style="color: #10b981; font-size: 1.5rem; margin-bottom: 1rem;">✓ Thank You for Your Feedback!</h3>
-          <p style="color: var(--txt3); margin-bottom: 1rem;">Your feedback has been recorded successfully.</p>
-          <p style="color: var(--txt4); margin-bottom: 1.5rem; font-size: 0.95rem;">We really appreciate your time and valuable insights. Your feedback helps us enhance our courses and teaching methods.</p>
-          <a href="../index.html" class="btn-grad">Back to Home</a>
-        </div>
+  <!-- ── Reviews Grid ── -->
+  <div class="rv-grid-section">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;margin-bottom:2rem;">
+      <h2 style="font-family:'Cormorant Garamond',serif;font-size:clamp(1.6rem,3vw,2.4rem);font-weight:700;color:var(--txt);margin:0;">Student Reviews</h2>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap;" id="rv-filter-bar">
+        <button class="btn-outline" style="padding:.4rem 1rem;font-size:.78rem;" onclick="filterReviews(0,this)">All</button>
+        <button class="btn-outline" style="padding:.4rem 1rem;font-size:.78rem;" onclick="filterReviews(5,this)">5★</button>
+        <button class="btn-outline" style="padding:.4rem 1rem;font-size:.78rem;" onclick="filterReviews(4,this)">4★</button>
       </div>
     </div>
-  </section>
+    <div class="rv-grid" id="rv-grid">
+      <div class="rv-loading"><div class="rv-spin"></div>Loading reviews…</div>
+    </div>
+    <div id="rv-load-more-wrap" style="text-align:center;margin-top:2rem;display:none;">
+      <button onclick="loadMoreReviews()" class="btn-outline" id="rv-load-more-btn">Load More Reviews</button>
+    </div>
+  </div>
+
+  <!-- ── Feedback Submission Form ── -->
+  <div class="fb-form-section" id="fb-form">
+    <div class="fb-form-wrap">
+      <div class="fb-form-hd">
+        <span style="display:inline-block;padding:.28rem .9rem;background:rgba(124,92,252,.1);border:1px solid rgba(124,92,252,.25);border-radius:50px;font-size:.72rem;font-weight:700;color:var(--v1);letter-spacing:.08em;text-transform:uppercase;margin-bottom:1rem;">Share Your Experience</span>
+        <h2>Write a Review</h2>
+        <p>Your honest feedback helps us improve and helps future learners choose the right programme.</p>
+      </div>
+
+      <!-- Form -->
+      <form class="fb-form" id="feedbackForm" onsubmit="handleFbSubmit(event)" novalidate>
+
+        <!-- Name + Email -->
+        <div class="fb-row">
+          <div class="fb-group">
+            <label class="fb-label">Full Name</label>
+            <input class="fb-input" id="fb-name" type="text" placeholder="Your name (or leave blank for anonymous)">
+          </div>
+          <div class="fb-group">
+            <label class="fb-label">Email <span style="font-weight:400;color:var(--txt4);">(private)</span></label>
+            <input class="fb-input" id="fb-email" type="email" placeholder="your@email.com">
+          </div>
+        </div>
+
+        <!-- Course -->
+        <div class="fb-group">
+          <label class="fb-label">Course *</label>
+          <select class="fb-select" id="fb-course" required>
+            <option value="">Select the course you completed</option>
+          </select>
+        </div>
+
+        <!-- Overall star rating -->
+        <div class="fb-group">
+          <label class="fb-label">Overall Rating *</label>
+          <div class="fb-stars" id="fb-stars-wrap">
+            <span class="fb-star" data-val="1">★</span>
+            <span class="fb-star" data-val="2">★</span>
+            <span class="fb-star" data-val="3">★</span>
+            <span class="fb-star" data-val="4">★</span>
+            <span class="fb-star" data-val="5">★</span>
+          </div>
+          <div class="fb-star-label" id="fb-star-lbl">Click to rate</div>
+          <input type="hidden" id="fb-rating" value="0">
+        </div>
+
+        <!-- Review text -->
+        <div class="fb-group">
+          <label class="fb-label">Your Review *</label>
+          <textarea class="fb-textarea" id="fb-text" required minlength="20" placeholder="Share your honest experience — what you learned, what you loved, and how it impacted your career…" style="min-height:130px;"></textarea>
+        </div>
+
+        <!-- Like best + improvements -->
+        <div class="fb-row">
+          <div class="fb-group">
+            <label class="fb-label">What did you like most?</label>
+            <textarea class="fb-textarea" id="fb-liked" placeholder="Best part of the programme…" style="min-height:80px;"></textarea>
+          </div>
+          <div class="fb-group">
+            <label class="fb-label">What could be better?</label>
+            <textarea class="fb-textarea" id="fb-improve" placeholder="Areas for improvement…" style="min-height:80px;"></textarea>
+          </div>
+        </div>
+
+        <!-- Recommend toggle -->
+        <div style="display:flex;align-items:center;gap:1rem;padding:1rem 1.2rem;background:var(--panel2);border:1px solid var(--border);border-radius:var(--r2);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2" style="flex-shrink:0;"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
+          <label style="display:flex;align-items:center;gap:.65rem;cursor:pointer;font-size:.88rem;color:var(--txt2);font-weight:600;">
+            <input type="checkbox" id="fb-recommend" checked style="width:16px;height:16px;accent-color:var(--v1);">
+            I would recommend SkillUpNow to others
+          </label>
+        </div>
+
+        <!-- Error -->
+        <div id="fb-err" style="display:none;padding:.75rem 1rem;background:rgba(239,68,68,.09);border:1px solid rgba(239,68,68,.28);border-radius:var(--r1);font-size:.84rem;color:#f87171;"></div>
+
+        <button class="fb-submit" id="fb-submit-btn" type="submit">
+          Submit My Review
+        </button>
+      </form>
+
+      <!-- Success -->
+      <div class="fb-success" id="fb-success">
+        <div class="fb-success-icon">🎉</div>
+        <h3>Thank You for Your Review!</h3>
+        <p>Your feedback has been submitted and will appear once approved by our team.<br>It helps future learners make informed decisions — we appreciate your time!</p>
+        <a href="../index.html" class="btn-grad" style="display:inline-flex;margin-top:1.5rem;">Back to Home</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="fb-toast" id="fb-toast"></div>
 
   <!-- Footer — rebuilt by profile-nav.js -->
   <footer></footer>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="../config/supabase-config.js"></script>
-  <script src="../js/validations.js"></script>
   <script src="../js/theme.js"></script>
   <script src="../js/profile-nav.js"></script>
-  <script src="../js/emi-calculator.js"></script>
-  <script src="../js/payment.js"></script>
-  <script src="../js/main.js"></script>
 
   <script>
-    const ratingLabels = {
-      contentQuality: ['Poor', 'Fair', 'Good', 'Very Good', 'Excellent'],
-      instructorQuality: ['Poor', 'Fair', 'Good', 'Very Good', 'Excellent'],
-      coursePacing: ['Too Fast', 'Fast', 'Just Right', 'Slow', 'Too Slow'],
-      learningMaterials: ['Poor', 'Fair', 'Good', 'Very Good', 'Excellent'],
-      supportQuality: ['Poor', 'Fair', 'Good', 'Very Good', 'Excellent']
-    };
+    /* ── State ── */
+    let allReviews = [];
+    let visibleCount = 9;
+    let filterRating = 0;
+    let selectedRating = 0;
 
-    function setRating(element, fieldName, rating) {
-      const parent = element.parentElement;
-      const stars = parent.querySelectorAll('.star');
-      
-      stars.forEach((star, index) => {
-        if (index < rating) {
-          star.classList.add('active');
-        } else {
-          star.classList.remove('active');
-        }
-      });
+    const gradients = [
+      'linear-gradient(135deg,#7c5cfc,#3d6bff)',
+      'linear-gradient(135deg,#ff8c5a,#ff6b35)',
+      'linear-gradient(135deg,#10b981,#059669)',
+      'linear-gradient(135deg,#3b82f6,#1d4ed8)',
+      'linear-gradient(135deg,#a855f7,#9333ea)',
+      'linear-gradient(135deg,#06b6d4,#0891b2)',
+      'linear-gradient(135deg,#f59e0b,#d97706)',
+      'linear-gradient(135deg,#ec4899,#be185d)',
+    ];
 
-      document.querySelector(`input[name="${fieldName}"]`).value = rating;
-      document.getElementById(fieldName + 'Label').textContent = ratingLabels[fieldName][rating - 1];
+    /* ── Load reviews from Supabase ── */
+    async function loadReviews() {
+      try {
+        if (!window.supabaseConfig) throw new Error('DB not ready');
+        const client = window.supabaseConfig.getClient();
+        if (!client) throw new Error('No client');
+        const { data, error } = await client
+          .from('feedback')
+          .select('id, feedback_text, rating, created_at, user_profiles(full_name, city), courses(name)')
+          .eq('is_approved', true)
+          .order('created_at', { ascending: false })
+          .limit(60);
+        if (error) throw error;
+        allReviews = data || [];
+        renderSummary(allReviews);
+        renderReviews();
+      } catch(e) {
+        console.warn('Reviews load error:', e);
+        document.getElementById('rv-grid').innerHTML =
+          '<div class="rv-loading" style="color:var(--txt4);">No reviews available yet. Be the first to share yours!</div>';
+      }
     }
 
-    const form = document.getElementById('feedbackForm');
-    const validator = new FormValidator(form);
+    /* ── Summary bar ── */
+    function renderSummary(reviews) {
+      if (!reviews.length) return;
+      const total = reviews.length;
+      const avg = reviews.reduce((s, r) => s + (parseInt(r.rating) || 5), 0) / total;
+      document.getElementById('avg-rating').textContent = avg.toFixed(1);
+      document.getElementById('review-count').textContent = `Based on ${total} review${total !== 1 ? 's' : ''}`;
 
-    form.addEventListener('change', (e) => {
-      if (e.target.name === 'anonymous') {
-        const emailField = form.querySelector('input[name="email"]');
-        const nameField = form.querySelector('input[name="fullName"]');
-        if (e.target.checked) {
-          emailField.disabled = true;
-          nameField.disabled = true;
-          emailField.value = 'anonymous@skillupnow.com';
-          nameField.value = 'Anonymous Student';
-        } else {
-          emailField.disabled = false;
-          nameField.disabled = false;
-          emailField.value = '';
-          nameField.value = '';
-        }
+      const counts = [1,2,3,4,5].map(n => reviews.filter(r => Math.round(parseInt(r.rating) || 5) === n).length);
+      [1,2,3,4,5].forEach(n => {
+        const cnt = counts[n-1];
+        const pct = total ? Math.round(cnt / total * 100) : 0;
+        document.getElementById(`bar-${n}`).style.width = pct + '%';
+        document.getElementById(`cnt-${n}`).textContent = cnt;
+      });
+
+      // Animate avg stars
+      const starsEl = document.getElementById('avg-stars');
+      starsEl.innerHTML = [1,2,3,4,5].map(n => {
+        const filled = n <= Math.round(avg);
+        return `<span style="color:${filled ? '#fbbf24' : 'var(--border)'};">★</span>`;
+      }).join('');
+    }
+
+    /* ── Filter ── */
+    function filterReviews(rating, btn) {
+      filterRating = rating;
+      visibleCount = 9;
+      document.querySelectorAll('#rv-filter-bar button').forEach(b => {
+        b.style.background = '';
+        b.style.color = '';
+        b.style.borderColor = '';
+      });
+      if (btn) {
+        btn.style.background = 'rgba(124,92,252,0.15)';
+        btn.style.color = 'var(--v2)';
+        btn.style.borderColor = 'var(--v1)';
       }
-    });
+      renderReviews();
+    }
 
-    function submitFeedback(e) {
-      e.preventDefault();
+    /* ── Render reviews ── */
+    function renderReviews() {
+      const grid = document.getElementById('rv-grid');
+      let list = filterRating ? allReviews.filter(r => Math.round(parseInt(r.rating)||5) === filterRating) : allReviews;
+      const total = list.length;
+      list = list.slice(0, visibleCount);
 
-      // Check if all star ratings are selected
-      const ratings = ['contentQuality', 'instructorQuality', 'coursePacing', 'learningMaterials', 'supportQuality'];
-      let valid = true;
-      for (const rating of ratings) {
-        if (parseInt(form.querySelector(`input[name="${rating}"]`).value) === 0) {
-          valid = false;
-          if (window.app) window.app.showNotification(`Please rate ${rating}`, 'error');
-          break;
-        }
-      }
-
-      if (!valid) return;
-
-      if (!validator.validateAll()) {
-        if (window.app) window.app.showNotification('Please correct the errors', 'error');
+      if (!total) {
+        grid.innerHTML = '<div class="rv-loading">No reviews for this rating yet.</div>';
+        document.getElementById('rv-load-more-wrap').style.display = 'none';
         return;
       }
 
-      setTimeout(() => {
-        form.style.display = 'none';
-        document.getElementById('successMessage').style.display = 'block';
-        if (window.app) {
-          window.app.showNotification('Feedback submitted successfully!', 'success');
-        }
-      }, 500);
+      grid.innerHTML = list.map((r, i) => {
+        const name = r.user_profiles?.full_name || 'Anonymous Student';
+        const city = r.user_profiles?.city || '';
+        const course = r.courses?.name || '';
+        const rating = Math.min(5, Math.max(1, parseInt(r.rating) || 5));
+        const initials = name.split(' ').map(w => w[0]).slice(0,2).join('').toUpperCase() || 'AN';
+        const grad = gradients[i % gradients.length];
+        const stars = [1,2,3,4,5].map(n => `<span class="rv-star ${n <= rating ? 'lit' : ''}">★</span>`).join('');
+        return `
+          <div class="rv-card" style="animation-delay:${(i % 9) * 0.05}s;">
+            <div class="rv-card-stars">${stars}</div>
+            <p class="rv-card-text">"${r.feedback_text || ''}"</p>
+            ${course ? `<div><span class="rv-card-course">📚 ${course}</span></div>` : ''}
+            <div class="rv-card-user">
+              <div class="rv-avatar" style="background:${grad};">${initials}</div>
+              <div>
+                <div class="rv-name">${name}</div>
+                ${city ? `<div class="rv-city">📍 ${city}</div>` : ''}
+              </div>
+            </div>
+          </div>`;
+      }).join('');
+
+      const wrap = document.getElementById('rv-load-more-wrap');
+      wrap.style.display = visibleCount < total ? 'block' : 'none';
     }
 
-    // Initialize theme on page load
-    setTimeout(() => {
-      const themeManager = new ThemeManager();
-      themeManager.init();
-      const app = new SkillUpNowApp();
-      app.init();
-      window.app = app;
-    }, 100);
+    function loadMoreReviews() {
+      visibleCount += 9;
+      renderReviews();
+    }
+
+    /* ── Load courses for form ── */
+    async function loadFormCourses() {
+      const sel = document.getElementById('fb-course');
+      try {
+        if (!window.supabaseConfig) throw new Error('DB');
+        const res = await window.supabaseConfig.getAllCourses();
+        if (res.success && res.data?.length) {
+          sel.innerHTML = '<option value="">Select the course you completed</option>' +
+            res.data.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+          return;
+        }
+      } catch(e) {}
+      sel.innerHTML = `<option value="">Select a course</option>
+        <option value="comm">Communication Mastery</option>
+        <option value="lead">Leadership Essentials</option>
+        <option value="soft">Soft Skills for Professionals</option>
+        <option value="conf">Public Speaking & Confidence</option>
+        <option value="team">Teamwork & Collaboration</option>`;
+    }
+
+    /* ── Star widget ── */
+    const ratingLabels = ['', 'Poor', 'Fair', 'Good', 'Very Good', 'Excellent'];
+    document.querySelectorAll('.fb-star').forEach(star => {
+      star.addEventListener('mouseenter', () => {
+        const v = parseInt(star.dataset.val);
+        document.querySelectorAll('.fb-star').forEach((s, i) => {
+          s.classList.toggle('hov', i < v);
+        });
+      });
+      star.addEventListener('mouseleave', () => {
+        document.querySelectorAll('.fb-star').forEach(s => s.classList.remove('hov'));
+      });
+      star.addEventListener('click', () => {
+        selectedRating = parseInt(star.dataset.val);
+        document.getElementById('fb-rating').value = selectedRating;
+        document.getElementById('fb-star-lbl').textContent = ratingLabels[selectedRating];
+        document.querySelectorAll('.fb-star').forEach((s, i) => {
+          s.classList.toggle('lit', i < selectedRating);
+        });
+      });
+    });
+
+    /* ── Form submission ── */
+    async function handleFbSubmit(e) {
+      e.preventDefault();
+      const errEl = document.getElementById('fb-err');
+      errEl.style.display = 'none';
+
+      const rating = parseInt(document.getElementById('fb-rating').value);
+      const text   = document.getElementById('fb-text').value.trim();
+      const course = document.getElementById('fb-course').value;
+
+      if (!rating) { showFbErr('Please select a star rating.'); return; }
+      if (!text || text.length < 20) { showFbErr('Please write at least 20 characters in your review.'); return; }
+      if (!course) { showFbErr('Please select the course you completed.'); return; }
+
+      const btn = document.getElementById('fb-submit-btn');
+      btn.disabled = true; btn.textContent = 'Submitting…';
+
+      try {
+        if (!window.supabaseConfig) throw new Error('Database not available');
+        const client = window.supabaseConfig.getClient();
+
+        // Get current user if logged in
+        let userId = null;
+        try {
+          const user = await window.supabaseConfig.getCurrentUser();
+          if (user) userId = user.id;
+        } catch(_) {}
+
+        const { error } = await client.from('feedback').insert([{
+          user_id: userId,
+          course_id: course,
+          rating: rating,
+          feedback_text: text,
+          liked_most: document.getElementById('fb-liked').value.trim() || null,
+          improvements: document.getElementById('fb-improve').value.trim() || null,
+          recommend: document.getElementById('fb-recommend').checked,
+          is_approved: false, // pending admin approval
+          created_at: new Date().toISOString()
+        }]);
+
+        if (error) throw error;
+
+        document.getElementById('feedbackForm').style.display = 'none';
+        document.getElementById('fb-success').style.display = 'block';
+        showFbToast('Review submitted — pending approval!', 'ok');
+      } catch(err) {
+        showFbErr('Submission failed: ' + (err.message || 'Please try again.'));
+        btn.disabled = false; btn.textContent = 'Submit My Review';
+      }
+    }
+
+    function showFbErr(msg) {
+      const el = document.getElementById('fb-err');
+      el.textContent = msg;
+      el.style.display = 'block';
+      el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function showFbToast(msg, type) {
+      const t = document.getElementById('fb-toast');
+      t.textContent = msg;
+      t.className = 'fb-toast ' + type;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 3500);
+    }
+
+    /* ── Init ── */
+    document.addEventListener('DOMContentLoaded', () => {
+      loadReviews();
+      loadFormCourses();
+    });
   </script>
 </body>
 </html>

@@ -574,6 +574,20 @@
     </div>
   </div>
 
+  <!-- CANCEL ENROLLMENT MODAL -->
+  <div class="moverlay" id="cancel-modal" onclick="if(event.target===this)closeCancelModal()">
+    <div class="mbox" style="max-width:380px;text-align:center;">
+      <div style="font-size:2.2rem;margin-bottom:.8rem;">⚠️</div>
+      <h3 style="color:var(--txt);margin-bottom:.4rem;font-size:1.1rem;">Cancel Enrolment?</h3>
+      <p id="cancel-course-label" style="color:var(--txt3);font-size:.85rem;margin-bottom:.35rem;font-weight:600;"></p>
+      <p style="color:var(--txt4);font-size:.8rem;margin-bottom:1.5rem;line-height:1.6;">This will remove your access to this course. The action can be reversed by contacting our support team.</p>
+      <div style="display:flex;gap:.75rem;">
+        <button onclick="closeCancelModal()" style="flex:1;padding:.8rem;background:var(--card2);border:1px solid var(--border);color:var(--txt3);border-radius:50px;font-size:.88rem;font-weight:600;cursor:pointer;transition:.2s;">Keep Course</button>
+        <button id="cancel-confirm-btn" onclick="doCancel()" style="flex:1;padding:.8rem;background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.4);color:#f87171;border-radius:50px;font-size:.88rem;font-weight:700;cursor:pointer;transition:.2s;">Yes, Cancel</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast -->
   <div class="toast" id="toast"></div>
 
@@ -825,6 +839,7 @@
             ? `<div style="font-size:.71rem;color:#f87171;margin-bottom:.5rem;">⚠️ Access pending admin approval</div>`
             : '';
 
+          const canCancel = st !== 'cancelled' && st !== 'completed';
           return `<div class="c-card">
             <div class="c-top">
               <span class="c-title">${title}</span>
@@ -835,7 +850,10 @@
             ${feeInfo}${accessTag}
             <div class="pbar"><div class="pfill" style="width:${pct}%"></div></div>
             <div class="c-meta"><span>${pct}% complete</span><span>${dateStr}</span></div>
-            <button class="c-go" onclick="location.href='courses.html'">${access ? 'Continue Learning →' : 'View Course Info →'}</button>
+            <div style="display:flex;gap:.6rem;margin-top:.75rem;flex-wrap:wrap;">
+              <button class="c-go" style="flex:1;min-width:120px;" onclick="location.href='courses.html'">${access ? 'Continue Learning →' : 'View Course Info →'}</button>
+              ${canCancel && !c._legacy ? `<button onclick="openCancelModal('${c.id}','${title.replace(/'/g,"\\'")}')" style="padding:.55rem .9rem;border-radius:50px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#f87171;font-size:.75rem;font-weight:700;cursor:pointer;transition:.2s;flex-shrink:0;" onmouseover="this.style.background='rgba(239,68,68,.2)'" onmouseout="this.style.background='rgba(239,68,68,.1)'">✕ Cancel</button>` : ''}
+            </div>
           </div>`;
         }).join('');
       } catch (e) {
@@ -994,6 +1012,36 @@
         showToast('Reset email sent! Check your inbox.', 'ok');
       } catch (e) { showToast('Error: ' + e.message, 'err'); }
       finally { btn.disabled = false; btn.textContent = '📧 Send Reset Email'; }
+    }
+
+    /* ── CANCEL ENROLLMENT ─────────────────────────────────────── */
+    let _cancelEnrollmentId = null;
+
+    function openCancelModal(enrollmentId, courseName) {
+      _cancelEnrollmentId = enrollmentId;
+      document.getElementById('cancel-course-label').textContent = courseName;
+      document.getElementById('cancel-modal').classList.add('open');
+    }
+    function closeCancelModal() {
+      _cancelEnrollmentId = null;
+      document.getElementById('cancel-modal').classList.remove('open');
+    }
+
+    async function doCancel() {
+      if (!_cancelEnrollmentId || !CU) return;
+      const btn = document.getElementById('cancel-confirm-btn');
+      btn.disabled = true; btn.textContent = 'Cancelling…';
+      try {
+        const result = await window.supabaseConfig.cancelEnrollment(_cancelEnrollmentId, CU.id);
+        if (!result.success) throw new Error(result.error || 'Cancel failed');
+        closeCancelModal();
+        showToast('Enrolment cancelled.', 'ok');
+        await loadCourses(); // refresh the tab
+      } catch (e) {
+        showToast('Error: ' + e.message, 'err');
+      } finally {
+        btn.disabled = false; btn.textContent = 'Yes, Cancel';
+      }
     }
 
     /* ── LOGOUT ────────────────────────────────────────────────── */

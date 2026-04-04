@@ -40,33 +40,18 @@
           <h2 style="margin-bottom: 1.5rem;">Order Summary</h2>
 
           <div id="orderItems" style="border-bottom: 1px solid var(--border); padding-bottom: 1rem; margin-bottom: 1rem;">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 0.8rem;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.8rem;">
               <div>
-                <h4 style="font-weight: 700; color: var(--txt);">AWS Solutions Architect Pro</h4>
-                <p style="font-size: 0.85rem; color: var(--txt3);">Advanced · 48 hours</p>
+                <h4 id="order-course-name" style="font-weight: 700; color: var(--txt);">Course Enrollment</h4>
+                <p id="order-course-meta" style="font-size: 0.85rem; color: var(--txt3);">SkillUpNow Programme</p>
               </div>
-              <span style="font-weight: 700; color: var(--v1);">₹14,999</span>
+              <!-- Fee amount intentionally hidden per policy -->
             </div>
           </div>
 
-          <div style="display: flex; justify-content: space-between; margin-bottom: 0.8rem;">
-            <span style="color: var(--txt3);">Subtotal</span>
-            <span id="subtotal" style="font-weight: 600;">₹14,999</span>
-          </div>
-
-          <div style="display: flex; justify-content: space-between; margin-bottom: 0.8rem;">
-            <span style="color: var(--txt3);">Discount (0%)</span>
-            <span id="discount" style="font-weight: 600; color: #10b981;">-₹0</span>
-          </div>
-
-          <div style="display: flex; justify-content: space-between; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border);">
-            <span style="color: var(--txt3);">Taxes (0%)</span>
-            <span id="taxes" style="font-weight: 600;">₹0</span>
-          </div>
-
-          <div style="display: flex; justify-content: space-between; font-size: 1.2rem; font-weight: 700;">
-            <span>Total</span>
-            <span id="total" style="background: var(--grad); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent;">₹14,999</span>
+          <div style="background:rgba(124,92,252,0.07);border:1px solid rgba(124,92,252,0.18);border-radius:var(--r2);padding:1rem 1.2rem;margin-bottom:1.2rem;display:flex;align-items:center;gap:0.75rem;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7c5cfc" stroke-width="2" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <p style="margin:0;font-size:0.87rem;color:var(--txt3);line-height:1.5;">Fee details are communicated directly by our admissions team. Our counsellors will guide you through the best payment plan for your situation.</p>
           </div>
 
           <hr style="border: none; border-top: 1px solid var(--border); margin: 1.5rem 0;">

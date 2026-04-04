@@ -3,938 +3,800 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Fee Enquiry & Contact Form - SkillUpNow">
-  <title>Fee Enquiry & Contact - SkillUpNow</title>
-  
+  <meta name="description" content="Fee Enquiry & Contact — SkillUpNow. Talk to our team about courses, fees and EMI options.">
+  <title>Fee Enquiry & Contact — SkillUpNow</title>
   <link rel="stylesheet" href="../css/variables.css">
   <link rel="stylesheet" href="../css/animations.css">
   <link rel="stylesheet" href="../css/main.css">
-  <link rel="stylesheet" href="../css/forms.css">
   <link rel="stylesheet" href="../css/responsive.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-
-
-
-  <style>
-    .enquiry-hero {
-      text-align: center;
-      padding: 6rem 5vw 4rem;
-      background: linear-gradient(180deg, rgba(124,92,252,0.1) 0%, transparent 100%);
-    }
-
-    .enquiry-hero h1 {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: clamp(2rem, 4.5vw, 3.8rem);
-      font-weight: 700;
-      color: var(--txt);
-      margin-bottom: 1rem;
-      background: var(--grad);
-      background-clip: text;
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    .enquiry-hero p {
-      color: var(--txt3);
-      font-size: 1.1rem;
-      max-width: 600px;
-      margin: 0 auto 3rem;
-      line-height: 1.6;
-    }
-
-    .enquiry-container {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 4rem;
-      padding: 4rem 5vw;
-      max-width: 1400px;
-      margin: 0 auto;
-    }
-
-    .enquiry-form {
-      display: flex;
-      flex-direction: column;
-      gap: 1.5rem;
-    }
-
-    .form-section-title {
-      font-size: 1.2rem;
-      font-weight: 700;
-      color: var(--txt);
-      margin-top: 1.5rem;
-      margin-bottom: 0.5rem;
-    }
-
-    .form-group {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-    }
-
-    .form-group label {
-      font-size: 0.9rem;
-      font-weight: 600;
-      color: var(--txt2);
-      text-transform: capitalize;
-    }
-
-    .form-group input,
-    .form-group select,
-    .form-group textarea {
-      background: var(--panel);
-      border: 1px solid var(--border);
-      color: var(--txt);
-      padding: 0.85rem 1.1rem;
-      border-radius: var(--r2);
-      font-size: 0.9rem;
-      font-family: 'Outfit', sans-serif;
-      transition: all 0.3s ease;
-    }
-
-    .form-group input:focus,
-    .form-group select:focus,
-    .form-group textarea:focus {
-      outline: none;
-      border-color: var(--v1);
-      background: var(--panel2);
-      box-shadow: 0 0 0 3px rgba(124, 92, 252, 0.1);
-    }
-
-    .form-group textarea {
-      resize: vertical;
-      min-height: 100px;
-    }
-
-    .form-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1rem;
-    }
-
-    .form-checkbox {
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
-      margin-top: 0.5rem;
-    }
-
-    .form-checkbox input[type="checkbox"] {
-      width: 18px;
-      height: 18px;
-      cursor: pointer;
-      accent-color: var(--v1);
-    }
-
-    .form-checkbox label {
-      cursor: pointer;
-      font-size: 0.85rem;
-      color: var(--txt3);
-      margin: 0;
-    }
-
-    .submit-btn {
-      background: var(--grad);
-      color: white;
-      padding: 1rem;
-      border: none;
-      border-radius: var(--r2);
-      font-weight: 700;
-      font-size: 0.95rem;
-      cursor: pointer;
-      margin-top: 1.5rem;
-      transition: all 0.3s ease;
-      box-shadow: var(--shadow-btn);
-    }
-
-    .submit-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 12px 40px rgba(124, 92, 252, 0.55);
-    }
-
-    .enquiry-info {
-      display: flex;
-      flex-direction: column;
-      gap: 2rem;
-    }
-
-    .info-card {
-      background: var(--panel);
-      border: 1px solid var(--border);
-      padding: 2rem;
-      border-radius: var(--r2);
-      transition: all 0.3s ease;
-    }
-
-    .info-card:hover {
-      border-color: var(--v1);
-      box-shadow: 0 12px 40px rgba(124, 92, 252, 0.15);
-      transform: translateY(-4px);
-    }
-
-    .info-icon {
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, var(--v1) 0%, var(--v2) 100%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.5rem;
-      margin-bottom: 1rem;
-    }
-
-    .info-title {
-      font-size: 1.1rem;
-      font-weight: 700;
-      color: var(--txt);
-      margin-bottom: 0.5rem;
-    }
-
-    .info-desc {
-      font-size: 0.9rem;
-      color: var(--txt3);
-      line-height: 1.6;
-    }
-
-    .info-link {
-      color: var(--v1);
-      text-decoration: none;
-      font-weight: 600;
-      transition: color 0.3s ease;
-    }
-
-    .info-link:hover {
-      color: var(--v2);
-    }
-
-    .benefits-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1.5rem;
-      margin-top: 2rem;
-    }
-
-    .benefit-item {
-      display: flex;
-      align-items: center;
-      gap: 0.8rem;
-      font-size: 0.9rem;
-      color: var(--txt3);
-    }
-
-    .benefit-icon {
-      width: 24px;
-      height: 24px;
-      background: linear-gradient(135deg, var(--v1) 0%, var(--b1) 100%);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-weight: 700;
-      flex-shrink: 0;
-    }
-
-    .timeline-benefits {
-      display: flex;
-      flex-direction: column;
-      gap: 1.5rem;
-      margin-top: 2rem;
-    }
-
-    .timeline-item {
-      display: flex;
-      gap: 1.5rem;
-      padding-bottom: 1.5rem;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .timeline-item:last-child {
-      border-bottom: none;
-    }
-
-    .timeline-dot {
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      background: var(--v1);
-      margin-top: 0.3rem;
-      flex-shrink: 0;
-    }
-
-    .timeline-content h4 {
-      font-size: 0.95rem;
-      font-weight: 700;
-      color: var(--txt);
-      margin-bottom: 0.3rem;
-    }
-
-    .timeline-content p {
-      font-size: 0.85rem;
-      color: var(--txt3);
-      line-height: 1.5;
-    }
-
-    @media (max-width: 768px) {
-      .enquiry-container {
-        grid-template-columns: 1fr;
-        gap: 3rem;
-        padding: 3rem 5vw;
-      }
-
-      .form-row {
-        grid-template-columns: 1fr;
-      }
-
-      .benefits-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .enquiry-hero {
-        padding: 4rem 5vw 3rem;
-      }
-
-      .enquiry-hero h1 {
-        font-size: clamp(1.5rem, 3.5vw, 2.5rem);
-      }
-    }
-
-    /* Modal Overlay */
-    .moverlay {
-      position: fixed;
-      inset: 0;
-      z-index: 9998;
-      background: rgba(0, 0, 0, 0.5);
-      backdrop-filter: blur(8px);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      opacity: 0;
-      visibility: hidden;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      pointer-events: none;
-    }
-
-    .moverlay.open {
-      opacity: 1;
-      visibility: visible;
-      pointer-events: all;
-    }
-
-    /* Modal Box */
-    .modal-box {
-      background: var(--panel);
-      border: 1.5px solid var(--border);
-      border-radius: var(--r3);
-      padding: 2.5rem;
-      max-width: 480px;
-      width: 90vw;
-      z-index: 9999;
-      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3);
-      transform: scale(0.95);
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    .moverlay.open .modal-box {
-      transform: scale(1);
-    }
-
-    /* Modal Close Button */
-    .mcls {
-      position: absolute;
-      top: 1.3rem;
-      right: 1.3rem;
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
-      background: var(--panel2);
-      border: 1px solid var(--border);
-      color: var(--txt3);
-      font-size: 0.85rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 700;
-      transition: all 0.2s;
-      cursor: pointer;
-    }
-
-    .mcls:hover {
-      background: var(--border);
-      color: var(--txt);
-      transform: scale(1.1);
-    }
-
-    /* Modal Form Styling */
-    .modal-box .form-group {
-      animation: fadeUp 0.5s ease backwards;
-    }
-
-    .modal-box .form-group:nth-child(n+2) {
-      animation-delay: 0.1s;
-    }
-
-    .modal-box .form-group:nth-child(n+3) {
-      animation-delay: 0.2s;
-    }
-  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,700&family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <script>
     if (window.location.protocol !== 'file:') {
       var p = window.location.pathname;
       if (p.endsWith('.html')) history.replaceState(null, '', p.replace(/\.html$/, ''));
     }
   </script>
+  <style>
+    /* ── Hero ── */
+    .eq-hero {
+      padding: 5.5rem 5vw 4.5rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      align-items: center;
+      gap: 3rem;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    .eq-hero-left h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2.4rem, 5vw, 4rem);
+      font-weight: 700;
+      color: var(--txt);
+      letter-spacing: -0.025em;
+      line-height: 1.08;
+      margin-bottom: 1.2rem;
+    }
+    .eq-hero-left p {
+      font-size: 1.05rem;
+      color: var(--txt3);
+      line-height: 1.75;
+      max-width: 480px;
+      margin-bottom: 2rem;
+    }
+    .eq-hero-actions { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+
+    /* Hero right: contact info cards */
+    .eq-contact-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .eq-contact-card {
+      background: var(--panel);
+      border: 1.5px solid var(--border);
+      border-radius: var(--r2);
+      padding: 1.3rem 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1.1rem;
+      transition: border-color 0.3s, transform 0.3s, box-shadow 0.3s;
+      text-decoration: none;
+      color: inherit;
+    }
+    .eq-contact-card:hover {
+      border-color: var(--v1);
+      transform: translateX(4px);
+      box-shadow: 0 8px 28px rgba(124,92,252,0.18);
+    }
+    .eq-cc-icon {
+      width: 46px; height: 46px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      flex-shrink: 0;
+    }
+    .eq-cc-title { font-weight: 700; color: var(--txt); font-size: 0.88rem; margin-bottom: 0.15rem; }
+    .eq-cc-val { font-size: 0.82rem; color: var(--txt3); }
+
+    /* Trust strip */
+    .eq-trust {
+      background: rgba(124,92,252,0.04);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 1.4rem 5vw;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 3rem;
+      flex-wrap: wrap;
+    }
+    .eq-trust-item {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--txt3);
+    }
+
+    /* ── Main Form Area ── */
+    .eq-main {
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 2.5rem;
+      padding: 5rem 5vw;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    /* Form card */
+    .eq-form-card {
+      background: var(--panel);
+      border: 1.5px solid var(--border);
+      border-radius: var(--r3);
+      padding: 2.5rem;
+    }
+    .eq-form-card h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--txt);
+      margin-bottom: 0.4rem;
+    }
+    .eq-form-card > p {
+      font-size: 0.9rem;
+      color: var(--txt3);
+      margin-bottom: 2rem;
+      line-height: 1.6;
+    }
+
+    .eq-form { display: flex; flex-direction: column; gap: 1.2rem; }
+    .eq-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .eq-group { display: flex; flex-direction: column; gap: 0.45rem; }
+    .eq-label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--txt2);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .eq-required { color: var(--v1); }
+    .eq-input, .eq-select, .eq-textarea {
+      background: var(--panel2);
+      border: 1.5px solid var(--border);
+      border-radius: var(--r2);
+      color: var(--txt);
+      padding: 0.82rem 1rem;
+      font-size: 0.9rem;
+      font-family: inherit;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      outline: none;
+      width: 100%;
+    }
+    .eq-input:focus, .eq-select:focus, .eq-textarea:focus {
+      border-color: var(--v1);
+      box-shadow: 0 0 0 3px rgba(124,92,252,0.12);
+    }
+    .eq-textarea { resize: vertical; min-height: 110px; }
+    .eq-select option { background: var(--panel); }
+
+    /* Section divider */
+    .eq-section-head {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-top: 0.5rem;
+    }
+    .eq-sh-icon {
+      width: 30px; height: 30px;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.95rem;
+      flex-shrink: 0;
+    }
+    .eq-sh-title {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--txt2);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    .eq-sh-line { flex: 1; height: 1px; background: var(--border); }
+
+    /* Submit */
+    .eq-submit {
+      width: 100%;
+      padding: 1rem;
+      border-radius: 50px;
+      background: linear-gradient(135deg, var(--v1), var(--v2));
+      color: #fff;
+      border: none;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: filter 0.2s, transform 0.2s;
+      box-shadow: 0 6px 24px rgba(124,92,252,0.4);
+      font-family: inherit;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+    .eq-submit:hover:not(:disabled) { filter: brightness(1.1); transform: translateY(-2px); }
+    .eq-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    /* Error / Success */
+    .eq-err {
+      display: none;
+      padding: 0.75rem 1rem;
+      background: rgba(239,68,68,.09);
+      border: 1px solid rgba(239,68,68,.28);
+      border-radius: var(--r1);
+      font-size: 0.84rem;
+      color: #f87171;
+    }
+    .eq-success {
+      display: none;
+      text-align: center;
+      padding: 3rem 2rem;
+    }
+    .eq-success-icon { font-size: 3rem; margin-bottom: 1rem; animation: eqBounce .6s cubic-bezier(.34,1.56,.64,1) both; }
+    @keyframes eqBounce { from { transform: scale(0.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    .eq-success h3 { font-size: 1.35rem; color: #4ade80; margin-bottom: 0.5rem; }
+    .eq-success p { color: var(--txt3); font-size: 0.88rem; line-height: 1.65; }
+
+    /* ── Sidebar ── */
+    .eq-sidebar { display: flex; flex-direction: column; gap: 1.5rem; }
+
+    .eq-side-card {
+      background: var(--panel);
+      border: 1.5px solid var(--border);
+      border-radius: var(--r2);
+      padding: 1.8rem;
+      transition: border-color 0.3s;
+    }
+    .eq-side-card:hover { border-color: var(--v1); }
+    .eq-side-card h3 {
+      font-family: 'Inter','Outfit',sans-serif;
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: var(--txt);
+      margin-bottom: 1.1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+    }
+
+    /* Office hours */
+    .eq-hours { display: flex; flex-direction: column; gap: 0.6rem; }
+    .eq-hour-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.82rem;
+      color: var(--txt3);
+      padding-bottom: 0.6rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .eq-hour-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .eq-hour-day { font-weight: 600; color: var(--txt2); }
+    .eq-hour-open { color: #4ade80; font-weight: 600; font-size: 0.75rem; }
+
+    /* FAQ accordion */
+    .eq-faq { display: flex; flex-direction: column; gap: 0.6rem; }
+    .eq-faq-item {
+      border: 1px solid var(--border);
+      border-radius: var(--r1);
+      overflow: hidden;
+      transition: border-color 0.2s;
+    }
+    .eq-faq-item:hover { border-color: var(--v1); }
+    .eq-faq-q {
+      width: 100%;
+      background: none;
+      border: none;
+      padding: 0.85rem 1rem;
+      text-align: left;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--txt2);
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.5rem;
+      transition: color 0.2s;
+      font-family: inherit;
+    }
+    .eq-faq-q:hover { color: var(--v1); }
+    .eq-faq-a {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.35s ease, padding 0.35s ease;
+      font-size: 0.8rem;
+      color: var(--txt4);
+      line-height: 1.65;
+    }
+    .eq-faq-a.open {
+      max-height: 200px;
+      padding: 0 1rem 0.85rem;
+    }
+    .eq-faq-arrow { transition: transform 0.3s; flex-shrink: 0; }
+    .eq-faq-arrow.open { transform: rotate(180deg); }
+
+    /* ── Process timeline ── */
+    .eq-process {
+      padding: 5rem 5vw;
+      border-top: 1px solid var(--border);
+      background: rgba(124,92,252,0.03);
+    }
+    .eq-process-inner { max-width: 1400px; margin: 0 auto; }
+    .eq-process h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.8rem,3.5vw,2.8rem);
+      font-weight: 700;
+      color: var(--txt);
+      text-align: center;
+      margin-bottom: 0.5rem;
+    }
+    .eq-process > .eq-process-inner > p {
+      text-align: center;
+      color: var(--txt3);
+      margin-bottom: 3rem;
+    }
+    .eq-steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 2rem;
+      position: relative;
+    }
+    .eq-step {
+      text-align: center;
+      padding: 2rem 1.5rem;
+      background: var(--panel);
+      border: 1.5px solid var(--border);
+      border-radius: var(--r2);
+      transition: border-color 0.3s, transform 0.3s;
+    }
+    .eq-step:hover { border-color: var(--v1); transform: translateY(-4px); }
+    .eq-step-num {
+      width: 48px; height: 48px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--v1), var(--v2));
+      color: #fff;
+      font-weight: 800;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1rem;
+      box-shadow: 0 6px 20px rgba(124,92,252,0.35);
+    }
+    .eq-step h4 { font-size: 0.95rem; font-weight: 700; color: var(--txt); margin-bottom: 0.4rem; }
+    .eq-step p { font-size: 0.82rem; color: var(--txt4); line-height: 1.6; }
+
+    /* Toast */
+    .eq-toast {
+      position: fixed;
+      bottom: 1.5rem; right: 1.5rem;
+      z-index: 999;
+      padding: 0.9rem 1.4rem;
+      border-radius: 12px;
+      font-size: 0.87rem;
+      font-weight: 600;
+      display: flex; align-items: center; gap: 0.5rem;
+      transform: translateY(60px); opacity: 0;
+      transition: 0.35s cubic-bezier(0.34,1.56,0.64,1);
+      pointer-events: none;
+    }
+    .eq-toast.show { transform: translateY(0); opacity: 1; }
+    .eq-toast.ok  { background: rgba(74,222,128,.15); border: 1px solid rgba(74,222,128,.35); color: #4ade80; }
+    .eq-toast.err { background: rgba(239,68,68,.13); border: 1px solid rgba(239,68,68,.3); color: #f87171; }
+
+    /* ── Responsive ── */
+    @media (max-width: 1024px) {
+      .eq-main { grid-template-columns: 1fr; }
+      .eq-sidebar { flex-direction: row; flex-wrap: wrap; }
+      .eq-side-card { flex: 1; min-width: 260px; }
+    }
+    @media (max-width: 800px) {
+      .eq-hero { grid-template-columns: 1fr; }
+      .eq-hero-left p { max-width: unset; }
+    }
+    @media (max-width: 600px) {
+      .eq-row { grid-template-columns: 1fr; }
+      .eq-form-card { padding: 1.5rem; }
+      .eq-trust { gap: 1.5rem; }
+      .eq-sidebar { flex-direction: column; }
+    }
+  </style>
 </head>
 <body>
-  <!-- Cursor Elements -->
-  <div id="cursor"></div>
-  <div id="cursor-ring"></div>
-
-  <!-- Background Elements -->
   <div class="mesh-bg"></div>
   <div class="orb orb1"></div>
   <div class="orb orb2"></div>
   <div class="orb orb3"></div>
 
-  <!-- Navigation -->
   <!-- Navigation — rebuilt by profile-nav.js -->
   <nav></nav>
 
-  <!-- Hero Section -->
-  <section class="enquiry-hero">
-    <h1>Fee Enquiry & Contact Information</h1>
-    <p>Get comprehensive information about our training programs, flexible payment options, and EMI facilities. Our team is here to help you choose the right path for your career growth.</p>
-  </section>
-
-  <!-- Main Content -->
-  <section class="enquiry-container">
-    <!-- Form Column -->
-    <div class="enquiry-form">
-      <h2 style="font-family: 'Cormorant Garamond', serif; font-size: 1.8rem; color: var(--txt); margin-bottom: 0.5rem;">Send Your Enquiry</h2>
-      
-      <form id="enquiryForm" onsubmit="handleEnquirySubmit(event)">
-        <!-- Personal Information -->
-        <div class="form-section-title">Personal Information</div>
-        
-        <div class="form-group">
-          <label>Full Name</label>
-          <input type="text" name="fullName" placeholder="Your full name" required>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label>Email Address</label>
-            <input type="email" name="email" placeholder="your@email.com" required>
-          </div>
-          <div class="form-group">
-            <label>Phone Number</label>
-            <input type="tel" name="phone" placeholder="+91 9876543210" required>
-          </div>
-        </div>
-
-        <!-- Program Details -->
-        <div class="form-section-title">Program & Payment Interest</div>
-        
-        <div class="form-group">
-          <label>Which course are you interested in?</label>
-          <select name="courseInterest" required>
-            <option value="">Select a course...</option>
-            <option value="cloud">Cloud Computing (AWS/Azure/GCP)</option>
-            <option value="devops">DevOps & CI/CD</option>
-            <option value="ml">AI & Machine Learning</option>
-            <option value="security">Cybersecurity Professional</option>
-            <option value="data">Data Engineering</option>
-            <option value="python">Python Programming</option>
-            <option value="other">Other</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label>Program Duration</label>
-          <select name="duration" required>
-            <option value="">Select duration...</option>
-            <option value="4">4 Weeks - Intensive</option>
-            <option value="8">8 Weeks - Standard</option>
-            <option value="12">12 Weeks - Comprehensive</option>
-            <option value="16">16 Weeks - Professional</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label>Preferred Payment Method</label>
-          <select name="paymentMethod" required>
-            <option value="">Select payment method...</option>
-            <option value="onetime">One-Time Payment</option>
-            <option value="emi3">EMI - 3 Months</option>
-            <option value="emi6">EMI - 6 Months</option>
-            <option value="emi12">EMI - 12 Months</option>
-            <option value="corporate">Corporate Training</option>
-            <option value="other">Other</option>
-          </select>
-        </div>
-
-        <!-- Additional Information -->
-        <div class="form-section-title">Tell Us More</div>
-        
-        <div class="form-group">
-          <label>Professional Experience</label>
-          <select name="experience" required>
-            <option value="">Select experience level...</option>
-            <option value="fresher">Fresher (0-1 year)</option>
-            <option value="junior">Junior (1-3 years)</option>
-            <option value="mid">Mid-Level (3-5 years)</option>
-            <option value="senior">Senior (5+ years)</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label>Your Message / Questions</label>
-          <textarea name="message" placeholder="Tell us your specific queries or requirements..."></textarea>
-        </div>
-
-        <!-- Preferences -->
-        <div style="margin-top: 1.5rem; display: flex; flex-direction: column; gap: 0.8rem;">
-          <div class="form-checkbox">
-            <input type="checkbox" id="scheduleCall" name="scheduleCall">
-            <label for="scheduleCall">Schedule a free consultation call with our counselor</label>
-          </div>
-          <div class="form-checkbox">
-            <input type="checkbox" id="receive" name="receive" checked>
-            <label for="receive">Receive emails about course updates and special offers</label>
-          </div>
-          <div class="form-checkbox">
-            <input type="checkbox" id="agree" name="agree" required>
-            <label for="agree">I agree to the terms and privacy policy</label>
-          </div>
-        </div>
-
-        <button type="submit" class="submit-btn">Submit Enquiry →</button>
-      </form>
-    </div>
-
-    <!-- Info Column -->
-    <div class="enquiry-info">
-      <!-- Contact Methods -->
-      <div class="info-card">
-        <div class="info-icon" style="background: linear-gradient(135deg, #00d084 0%, #3ec96c 100%);">📞</div>
-        <div class="info-title">Get in Touch</div>
-        <div class="info-desc">
-          <p>Reach out to our support team during business hours:</p>
-          <p style="margin-top: 0.8rem;">
-            <strong>📧 Email:</strong> <a class="info-link" href="mailto:skillupnowoff@gmail.com">skillupnowoff@gmail.com</a>
-          </p>
-          <p style="margin-top: 0.8rem;">
-            <strong style="color: #2ecc71;">📱 Phone Numbers:</strong>
-            <br>• <a class="info-link" href="tel:+916383633054">+91 6383633054</a>
-            <br>• <a class="info-link" href="tel:+916381721061">+91 6381721061</a>
-          </p>
-          <p style="margin-top: 1rem; font-size: 0.8rem; color: var(--txt4);">
-            • Mon - Fri: 9:00 AM - 6:00 PM IST<br>
-            • Sat: 10:00 AM - 4:00 PM IST<br>
-            • Sun: Closed
-          </p>
-        </div>
-      </div>
-
-      <!-- Payment Options -->
-      <div class="info-card">
-        <div class="info-icon">💳</div>
-        <div class="info-title">Flexible Payment Options</div>
-        <div class="info-desc">We offer various payment plans to suit your budget:</div>
-        <div class="benefits-grid">
-          <div class="benefit-item">
-            <div class="benefit-icon">✓</div>
-            <span>One-Time Payment</span>
-          </div>
-          <div class="benefit-item">
-            <div class="benefit-icon">✓</div>
-            <span>3-Month EMI</span>
-          </div>
-          <div class="benefit-item">
-            <div class="benefit-icon">✓</div>
-            <span>6-Month EMI</span>
-          </div>
-          <div class="benefit-item">
-            <div class="benefit-icon">✓</div>
-            <span>12-Month EMI</span>
-          </div>
-          <div class="benefit-item">
-            <div class="benefit-icon">✓</div>
-            <span>Corporate Plans</span>
-          </div>
-          <div class="benefit-item">
-            <div class="benefit-icon">✓</div>
-            <span>Zero Interest EMI</span>
-          </div>
-        </div>
-        <p style="margin-top: 1rem; font-size: 0.85rem; color: var(--txt3);">
-          <strong>Note:</strong> Specific pricing and EMI options vary by course level and duration. Contact us for personalized quotes.
-        </p>
-      </div>
-
-      <!-- Why SkillUpNow -->
-      <div class="info-card">
-        <div class="info-icon">⭐</div>
-        <div class="info-title">Why Choose SkillUpNow?</div>
-        <div class="timeline-benefits">
-          <div class="timeline-item">
-            <div class="timeline-dot"></div>
-            <div class="timeline-content">
-              <h4>Industry-Expert Instructors</h4>
-              <p>Learn from professionals with 15+ years of industry experience</p>
-            </div>
-          </div>
-          <div class="timeline-item">
-            <div class="timeline-dot"></div>
-            <div class="timeline-content">
-              <h4>Live Project-Based Learning</h4>
-              <p>Work on real-world scenarios and build professional portfolio</p>
-            </div>
-          </div>
-          <div class="timeline-item">
-            <div class="timeline-dot"></div>
-            <div class="timeline-content">
-              <h4>96% Placement Guarantee</h4>
-              <p>Job assistance and career counseling included</p>
-            </div>
-          </div>
-          <div class="timeline-item">
-            <div class="timeline-dot"></div>
-            <div class="timeline-content">
-              <h4>Lifetime Access</h4>
-              <p>Access course materials forever, even after completion</p>
-            </div>
-          </div>
-        </div>
+  <!-- ── Hero ── -->
+  <div class="eq-hero">
+    <div class="eq-hero-left">
+      <span style="display:inline-block;padding:.3rem 1rem;background:rgba(124,92,252,.12);border:1px solid rgba(124,92,252,.28);border-radius:50px;font-size:.74rem;font-weight:700;color:var(--v1);letter-spacing:.08em;text-transform:uppercase;margin-bottom:1.1rem;">Free Consultation</span>
+      <h1>Get Your<br><span style="background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Personalised</span><br>Fee Quote</h1>
+      <p>No hidden charges, no pressure. Talk to our admissions team and find the right programme and payment plan for your goals.</p>
+      <div class="eq-hero-actions">
+        <a href="#eq-form" class="btn-grad">Send Enquiry</a>
+        <a href="tel:+916381721061" class="btn-outline">📞 Call Now</a>
       </div>
     </div>
-  </section>
-
-  <!-- FAQ Section -->
-  <section style="padding: 4rem 5vw; background: var(--panel); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
-    <div style="max-width: 900px; margin: 0 auto;">
-      <h2 style="font-family: 'Cormorant Garamond', serif; font-size: 2.2rem; text-align: center; color: var(--txt); margin-bottom: 3rem; background: var(--grad); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Frequently Asked Questions</h2>
-      
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
-        <div class="info-card">
-          <h4 style="color: var(--txt); font-weight: 700; margin-bottom: 0.5rem;">Do you offer discounts for bulk registrations?</h4>
-          <p style="color: var(--txt3); font-size: 0.9rem;">Yes, we offer special corporate rates for group registrations of 5 or more students. Contact our team for custom quotes.</p>
+    <div class="eq-contact-stack">
+      <a href="tel:+916381721061" class="eq-contact-card">
+        <div class="eq-cc-icon" style="background:linear-gradient(135deg,#7c5cfc,#3d6bff);">📞</div>
+        <div>
+          <div class="eq-cc-title">Primary Helpline</div>
+          <div class="eq-cc-val">+91 6381 721061</div>
         </div>
-        
-        <div class="info-card">
-          <h4 style="color: var(--txt); font-weight: 700; margin-bottom: 0.5rem;">Is there a money-back guarantee?</h4>
-          <p style="color: var(--txt3); font-size: 0.9rem;">We offer a 7-day satisfaction guarantee. If not satisfied, get a full refund, no questions asked.</p>
+      </a>
+      <a href="tel:+916383633054" class="eq-contact-card">
+        <div class="eq-cc-icon" style="background:linear-gradient(135deg,#3d6bff,#00cfee);">📱</div>
+        <div>
+          <div class="eq-cc-title">Secondary Helpline</div>
+          <div class="eq-cc-val">+91 6383 633054</div>
         </div>
-
-        <div class="info-card">
-          <h4 style="color: var(--txt); font-weight: 700; margin-bottom: 0.5rem;">What payment methods do you accept?</h4>
-          <p style="color: var(--txt3); font-size: 0.9rem;">We accept credit/debit cards, UPI, net banking, and EMI through major financial partners.</p>
+      </a>
+      <a href="mailto:skillupnow.off@gmail.com" class="eq-contact-card">
+        <div class="eq-cc-icon" style="background:linear-gradient(135deg,#10b981,#059669);">✉️</div>
+        <div>
+          <div class="eq-cc-title">Email Support</div>
+          <div class="eq-cc-val">skillupnow.off@gmail.com</div>
         </div>
-
-        <div class="info-card">
-          <h4 style="color: var(--txt); font-weight: 700; margin-bottom: 0.5rem;">Can I defer my start date?</h4>
-          <p style="color: var(--txt3); font-size: 0.9rem;">Yes, you can defer your course start by up to 60 days free of charge. Just notify us in advance.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Footer -->
-  <footer style="background: rgba(8,6,18,0.95); border-top: 1px solid var(--border); padding: 3rem 5vw;">
-    <div style="max-width: 1200px; margin: 0 auto; text-align: center;">
-      <p style="color: var(--txt3); margin-bottom: 1rem;">Have questions? Our team is ready to help!</p>
-      <a href="mailto:info@skillupnowadmin.org " class="btn-grad" style="display: inline-block; margin-bottom: 2rem;">Contact Us Now</a>
-      
-      <div style="padding-top: 2rem; border-top: 1px solid var(--border);">
-        <p style="font-size: 0.78rem; color: var(--txt4);">© 2026 SkillUpNow. All rights reserved. | <a href="#" style="color: var(--v2); text-decoration: none;">Privacy Policy</a> | <a href="#" style="color: var(--v2); text-decoration: none;">Terms of Service</a></p>
-      </div>
-    </div>
-  </footer>
-
-  <!-- Modal -->
-  <div class="moverlay" id="mo" onclick="if(event.target===this) closeModal()">
-    <div class="modal-box" style="animation: modalSlideUp 0.3s cubic-bezier(0.4,0,0.2,1);">
-      <button class="mcls" onclick="closeModal()" style="position: absolute; top: 1.3rem; right: 1.3rem; width: 30px; height: 30px; border-radius: 50%; background: var(--panel); border: 1px solid var(--border); color: var(--txt3); font-size: 0.85rem; display: flex; align-items: center; justify-content: center; font-weight: 700; transition: all 0.2s; cursor: pointer;">✕</button>
-
-      <div id="lf">
-        <h3 style="font-family: 'Cormorant Garamond', serif; font-weight: 700; font-size: 1.9rem; color: var(--txt); margin-bottom: 0.4rem; letter-spacing: -0.01em;">Welcome Back</h3>
-        <p class="msub" style="font-size: 0.85rem; color: var(--txt3); margin-bottom: 2rem; font-weight: 400;">Sign in to access your learning dashboard</p>
-
-        <div class="form-group">
-          <label>Email Address</label>
-          <input type="email" placeholder="you@example.com" style="background: rgba(255,255,255,0.04); border: 1px solid var(--border); color: var(--txt); padding: 0.8rem 1rem; border-radius: var(--r2); font-size: 0.9rem;"/>
-        </div>
-
-        <div class="form-group">
-          <label>Password</label>
-          <input type="password" placeholder="••••••••" style="background: rgba(255,255,255,0.04); border: 1px solid var(--border); color: var(--txt); padding: 0.8rem 1rem; border-radius: var(--r2); font-size: 0.9rem;"/>
-        </div>
-
-        <button class="btn-grad" style="width: 100%; padding: 0.95rem; margin-top: 0.5rem;" onclick="submitLogin()">Sign In</button>
-
-        <div style="display: flex; align-items: center; gap: 1rem; margin: 1.2rem 0; font-size: 0.73rem; color: var(--txt4); font-weight: 600;">
-          <span style="flex: 1; height: 1px; background: var(--border);"></span>
-          or continue with
-          <span style="flex: 1; height: 1px; background: var(--border);"></span>
-        </div>
-
-        <div style="text-align: center; font-size: 0.83rem; color: var(--txt3); margin-top: 1rem;">
-          No account yet? <a onclick="switchModalTab('register')" style="color: var(--v2); font-weight: 700; text-decoration: none; cursor: pointer;">Create one free →</a>
-        </div>
-      </div>
-
-      <div id="rf" style="display: none;">
-        <h3 style="font-family: 'Cormorant Garamond', serif; font-weight: 700; font-size: 1.9rem; color: var(--txt); margin-bottom: 0.4rem; letter-spacing: -0.01em;">Join SkillUpNow</h3>
-        <p class="msub" style="font-size: 0.85rem; color: var(--txt3); margin-bottom: 2rem; font-weight: 400;">Join 12,000+ professionals already upskilling</p>
-
-        <div class="form-group">
-          <label>Full Name</label>
-          <input type="text" placeholder="Your full name" style="background: rgba(255,255,255,0.04); border: 1px solid var(--border); color: var(--txt); padding: 0.8rem 1rem; border-radius: var(--r2); font-size: 0.9rem;"/>
-        </div>
-
-        <div class="form-group">
-          <label>Email Address</label>
-          <input type="email" placeholder="you@example.com" style="background: rgba(255,255,255,0.04); border: 1px solid var(--border); color: var(--txt); padding: 0.8rem 1rem; border-radius: var(--r2); font-size: 0.9rem;"/>
-        </div>
-
-        <div class="form-group">
-          <label>Phone Number</label>
-          <input type="tel" placeholder="+91 9876543210" style="background: rgba(255,255,255,0.04); border: 1px solid var(--border); color: var(--txt); padding: 0.8rem 1rem; border-radius: var(--r2); font-size: 0.9rem;"/>
-        </div>
-
-        <div class="form-group">
-          <label>I want to learn</label>
-          <select style="background: rgba(255,255,255,0.04); border: 1px solid var(--border); color: var(--txt); padding: 0.8rem 1rem; border-radius: var(--r2); font-size: 0.9rem;">
-            <option>Cloud Computing</option>
-            <option>DevOps & CI/CD</option>
-            <option>AI / Machine Learning</option>
-            <option>Cybersecurity</option>
-            <option>Data Engineering</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label>Password</label>
-          <input type="password" placeholder="Create a strong password" style="background: rgba(255,255,255,0.04); border: 1px solid var(--border); color: var(--txt); padding: 0.8rem 1rem; border-radius: var(--r2); font-size: 0.9rem;"/>
-        </div>
-
-        <button class="btn-grad" style="width: 100%; padding: 0.95rem;" onclick="submitRegister()">Create My Account</button>
-
-        <div style="display: flex; align-items: center; gap: 1rem; margin: 1.2rem 0; font-size: 0.73rem; color: var(--txt4); font-weight: 600;">
-          <span style="flex: 1; height: 1px; background: var(--border);"></span>
-          or
-          <span style="flex: 1; height: 1px; background: var(--border);"></span>
-        </div>
-
-        <div style="text-align: center; font-size: 0.83rem; color: var(--txt3); margin-top: 1rem;">
-          Already have an account? <a onclick="switchModalTab('login')" style="color: var(--v2); font-weight: 700; text-decoration: none; cursor: pointer;">Sign in →</a>
+      </a>
+      <div class="eq-contact-card" style="cursor:default;">
+        <div class="eq-cc-icon" style="background:linear-gradient(135deg,#f59e0b,#d97706);">⚡</div>
+        <div>
+          <div class="eq-cc-title">Response Time</div>
+          <div class="eq-cc-val">Within 24 hours · Mon–Sat</div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Scripts -->
+  <!-- ── Trust Strip ── -->
+  <div class="eq-trust">
+    <div class="eq-trust-item">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#7c5cfc" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      100% Privacy Guaranteed
+    </div>
+    <div class="eq-trust-item">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#7c5cfc" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+      Response within 24 hrs
+    </div>
+    <div class="eq-trust-item">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#7c5cfc" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+      Zero-Cost EMI Available
+    </div>
+    <div class="eq-trust-item">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#7c5cfc" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      No Sales Pressure
+    </div>
+  </div>
+
+  <!-- ── Main Form + Sidebar ── -->
+  <div class="eq-main" id="eq-form">
+
+    <!-- Enquiry Form -->
+    <div class="eq-form-card">
+      <h2>Send Your Enquiry</h2>
+      <p>Fill in the details below and our admissions counsellor will contact you with a personalised programme recommendation and fee breakdown.</p>
+
+      <form class="eq-form" id="enquiryForm" onsubmit="handleEnquirySubmit(event)" novalidate>
+
+        <!-- Personal Info -->
+        <div class="eq-section-head">
+          <div class="eq-sh-icon" style="background:rgba(124,92,252,.12);">👤</div>
+          <div class="eq-sh-title">Personal Information</div>
+          <div class="eq-sh-line"></div>
+        </div>
+
+        <div class="eq-group">
+          <label class="eq-label">Full Name <span class="eq-required">*</span></label>
+          <input class="eq-input" id="eq-name" type="text" placeholder="Your full name" required>
+        </div>
+
+        <div class="eq-row">
+          <div class="eq-group">
+            <label class="eq-label">Email Address <span class="eq-required">*</span></label>
+            <input class="eq-input" id="eq-email" type="email" placeholder="your@email.com" required>
+          </div>
+          <div class="eq-group">
+            <label class="eq-label">Phone Number <span class="eq-required">*</span></label>
+            <input class="eq-input" id="eq-phone" type="tel" placeholder="+91 9876543210" required>
+          </div>
+        </div>
+
+        <div class="eq-row">
+          <div class="eq-group">
+            <label class="eq-label">City</label>
+            <input class="eq-input" id="eq-city" type="text" placeholder="e.g. Chennai">
+          </div>
+          <div class="eq-group">
+            <label class="eq-label">Current Role</label>
+            <input class="eq-input" id="eq-role" type="text" placeholder="e.g. Software Engineer">
+          </div>
+        </div>
+
+        <!-- Programme Interest -->
+        <div class="eq-section-head" style="margin-top:.5rem;">
+          <div class="eq-sh-icon" style="background:rgba(61,107,255,.12);">📚</div>
+          <div class="eq-sh-title">Programme Interest</div>
+          <div class="eq-sh-line"></div>
+        </div>
+
+        <div class="eq-group">
+          <label class="eq-label">Course Interested In <span class="eq-required">*</span></label>
+          <select class="eq-select" id="eq-course" required>
+            <option value="">Loading courses…</option>
+          </select>
+        </div>
+
+        <div class="eq-row">
+          <div class="eq-group">
+            <label class="eq-label">Experience Level</label>
+            <select class="eq-select" id="eq-experience">
+              <option value="">Select level</option>
+              <option value="fresher">Fresher (0–1 yr)</option>
+              <option value="junior">Junior (1–3 yrs)</option>
+              <option value="mid">Mid-Level (3–5 yrs)</option>
+              <option value="senior">Senior (5+ yrs)</option>
+            </select>
+          </div>
+          <div class="eq-group">
+            <label class="eq-label">Preferred Start</label>
+            <select class="eq-select" id="eq-start">
+              <option value="">Select timeframe</option>
+              <option value="immediately">Immediately</option>
+              <option value="2weeks">Within 2 weeks</option>
+              <option value="1month">Within 1 month</option>
+              <option value="flexible">Flexible</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Payment -->
+        <div class="eq-section-head" style="margin-top:.5rem;">
+          <div class="eq-sh-icon" style="background:rgba(16,185,129,.12);">💳</div>
+          <div class="eq-sh-title">Payment Preference</div>
+          <div class="eq-sh-line"></div>
+        </div>
+
+        <div class="eq-group">
+          <label class="eq-label">Preferred Payment Method</label>
+          <select class="eq-select" id="eq-payment">
+            <option value="">Select method</option>
+            <option value="full">Full Payment</option>
+            <option value="emi3">EMI – 3 Months</option>
+            <option value="emi6">EMI – 6 Months</option>
+            <option value="emi12">EMI – 12 Months</option>
+            <option value="cash">Cash</option>
+            <option value="corporate">Corporate / Sponsored</option>
+          </select>
+        </div>
+
+        <!-- Message -->
+        <div class="eq-section-head" style="margin-top:.5rem;">
+          <div class="eq-sh-icon" style="background:rgba(251,191,36,.1);">💬</div>
+          <div class="eq-sh-title">Your Message</div>
+          <div class="eq-sh-line"></div>
+        </div>
+
+        <div class="eq-group">
+          <label class="eq-label">Additional Questions or Context</label>
+          <textarea class="eq-textarea" id="eq-message" placeholder="Any specific questions about the programme, fees, batch timings, or anything else we should know…"></textarea>
+        </div>
+
+        <!-- Error -->
+        <div class="eq-err" id="eq-err"></div>
+
+        <button class="eq-submit" id="eq-submit-btn" type="submit">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          Send My Enquiry
+        </button>
+
+        <p style="font-size:.75rem;color:var(--txt4);text-align:center;margin-top:.6rem;line-height:1.5;">By submitting you agree we may contact you regarding your enquiry. We never share your data with third parties.</p>
+      </form>
+
+      <!-- Success state -->
+      <div class="eq-success" id="eq-success">
+        <div class="eq-success-icon">🎉</div>
+        <h3>Enquiry Received!</h3>
+        <p>Thank you — our admissions counsellor will reach out within 24 hours with a personalised programme recommendation and fee breakdown.<br><br>In the meantime, feel free to browse our courses.</p>
+        <a href="courses.html" class="btn-grad" style="display:inline-flex;margin-top:1.5rem;">Browse Courses →</a>
+      </div>
+    </div>
+
+    <!-- ── Sidebar ── -->
+    <div class="eq-sidebar">
+
+      <!-- Office Hours -->
+      <div class="eq-side-card">
+        <h3><span style="font-size:1rem;">🕐</span> Office Hours</h3>
+        <div class="eq-hours">
+          <div class="eq-hour-row"><span class="eq-hour-day">Mon – Fri</span><span class="eq-hour-open">9 AM – 7 PM</span></div>
+          <div class="eq-hour-row"><span class="eq-hour-day">Saturday</span><span class="eq-hour-open">10 AM – 5 PM</span></div>
+          <div class="eq-hour-row"><span class="eq-hour-day">Sunday</span><span style="color:var(--txt4);font-size:.75rem;">Closed</span></div>
+        </div>
+      </div>
+
+      <!-- EMI highlight -->
+      <div class="eq-side-card" style="background:linear-gradient(145deg,rgba(124,92,252,.08),rgba(61,107,255,.05));border-color:rgba(124,92,252,.3);">
+        <h3><span style="font-size:1rem;">💳</span> Zero-Cost EMI</h3>
+        <p style="font-size:.83rem;color:var(--txt3);line-height:1.65;margin-bottom:1rem;">Split your investment across 3, 6, or 12 monthly installments — with absolutely no interest or processing fees.</p>
+        <a href="emi-application.html" class="btn-grad" style="display:inline-flex;font-size:.82rem;padding:.55rem 1.1rem;">Apply for EMI →</a>
+      </div>
+
+      <!-- FAQ Accordion -->
+      <div class="eq-side-card">
+        <h3><span style="font-size:1rem;">❓</span> Common Questions</h3>
+        <div class="eq-faq">
+          <div class="eq-faq-item">
+            <button class="eq-faq-q" onclick="toggleFaq(this)">
+              Are fees negotiable?
+              <svg class="eq-faq-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+            </button>
+            <div class="eq-faq-a">Our counsellors are empowered to offer flexible plans based on your situation. We always find a solution that works.</div>
+          </div>
+          <div class="eq-faq-item">
+            <button class="eq-faq-q" onclick="toggleFaq(this)">
+              How fast is enrollment?
+              <svg class="eq-faq-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+            </button>
+            <div class="eq-faq-a">Most students are enrolled within 48 hours of their enquiry. We handle all paperwork quickly so you can start learning ASAP.</div>
+          </div>
+          <div class="eq-faq-item">
+            <button class="eq-faq-q" onclick="toggleFaq(this)">
+              Is there a free demo class?
+              <svg class="eq-faq-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+            </button>
+            <div class="eq-faq-a">Yes! We offer a complimentary demo session for all new enquiries. Mention it in your message and our team will arrange it.</div>
+          </div>
+          <div class="eq-faq-item">
+            <button class="eq-faq-q" onclick="toggleFaq(this)">
+              Can I cancel after enrolling?
+              <svg class="eq-faq-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+            </button>
+            <div class="eq-faq-a">You can cancel from your profile page anytime before the course begins. Contact us for a full policy explanation.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Process Timeline ── -->
+  <div class="eq-process">
+    <div class="eq-process-inner">
+      <h2>What Happens Next?</h2>
+      <p style="text-align:center;color:var(--txt3);margin-bottom:3rem;">From enquiry to your first live session — here's the journey</p>
+      <div class="eq-steps">
+        <div class="eq-step" style="animation:fadeUp .5s ease .0s both;">
+          <div class="eq-step-num">1</div>
+          <h4>Submit Enquiry</h4>
+          <p>Fill in the form above with your details and programme interest. Takes under 2 minutes.</p>
+        </div>
+        <div class="eq-step" style="animation:fadeUp .5s ease .1s both;">
+          <div class="eq-step-num">2</div>
+          <h4>Counsellor Calls</h4>
+          <p>A dedicated admissions counsellor contacts you within 24 hours to understand your goals.</p>
+        </div>
+        <div class="eq-step" style="animation:fadeUp .5s ease .2s both;">
+          <div class="eq-step-num">3</div>
+          <h4>Fee Breakdown</h4>
+          <p>You receive a personalised fee breakdown with all available payment options clearly explained.</p>
+        </div>
+        <div class="eq-step" style="animation:fadeUp .5s ease .3s both;">
+          <div class="eq-step-num">4</div>
+          <h4>Enroll & Start</h4>
+          <p>Confirm enrollment, make your first payment, and join your first live session within days.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="eq-toast" id="eq-toast"></div>
+
+  <!-- Footer — rebuilt by profile-nav.js -->
+  <footer></footer>
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="../config/supabase-config.js"></script>
   <script src="../js/theme.js"></script>
   <script src="../js/profile-nav.js"></script>
-  <script src="../js/main.js"></script>
-  <script src="../js/validations.js"></script>
 
   <script>
-    async function handleEnquirySubmit(event) {
-      event.preventDefault();
-      const form = event.target;
-      const formData = new FormData(form);
-      
-      // Validate form
-      const fullName = formData.get('fullName');
-      const email = formData.get('email');
-      const phone = formData.get('phone');
-      
-      if (!fullName || !email || !phone) {
-        alert('Please fill in all required fields');
-        return;
-      }
+    /* ── Load courses into dropdown ── */
+    async function loadEnquiryCourses() {
+      const sel = document.getElementById('eq-course');
+      try {
+        if (!window.supabaseConfig) throw new Error('DB');
+        const res = await window.supabaseConfig.getAllCourses();
+        if (res.success && res.data?.length) {
+          sel.innerHTML = '<option value="">Select a course</option>' +
+            res.data.map(c => `<option value="${c.name}">${c.name}</option>`).join('') +
+            '<option value="Not sure yet">Not sure yet — help me choose</option>';
+          return;
+        }
+      } catch(e) {}
+      // Fallback
+      sel.innerHTML = `<option value="">Select a course</option>
+        <option value="Communication Mastery">Communication Mastery</option>
+        <option value="Leadership Essentials">Leadership Essentials</option>
+        <option value="Soft Skills for Professionals">Soft Skills for Professionals</option>
+        <option value="Public Speaking & Confidence">Public Speaking &amp; Confidence</option>
+        <option value="Teamwork & Collaboration">Teamwork &amp; Collaboration</option>
+        <option value="Not sure yet">Not sure yet — help me choose</option>`;
+    }
 
-      if (!window.supabaseConfig) {
-        alert('Database connection error. Please try again later.');
-        console.error('Supabase not initialized');
-        return;
-      }
+    /* ── Form submission ── */
+    async function handleEnquirySubmit(e) {
+      e.preventDefault();
+      const errEl = document.getElementById('eq-err');
+      errEl.style.display = 'none';
 
-      // Prepare enquiry data
-      const enquiryData = {
-        full_name: fullName,
-        email: email,
-        phone_number: phone,
-        course_interested: formData.get('courseInterested') || '',
-        course_title: formData.get('courseTitle') || '',
-        program_duration: formData.get('programDuration') || '',
-        learning_experience: formData.get('experience') || '',
-        current_role: formData.get('role') || '',
-        company_name: formData.get('company') || '',
-        budget_range: formData.get('budget') || '',
-        preferred_payment_method: formData.get('paymentMethod') || '',
-        preferred_contact_method: formData.get('contactMethod') || 'email',
-        message: formData.get('message') || ''
-      };
+      const name   = document.getElementById('eq-name').value.trim();
+      const email  = document.getElementById('eq-email').value.trim();
+      const phone  = document.getElementById('eq-phone').value.trim();
+      const course = document.getElementById('eq-course').value;
+
+      if (!name)   { showEqErr('Please enter your full name.'); return; }
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showEqErr('Please enter a valid email address.'); return; }
+      if (!phone)  { showEqErr('Please enter your phone number.'); return; }
+      if (!course) { showEqErr('Please select a course you are interested in.'); return; }
+
+      const btn = document.getElementById('eq-submit-btn');
+      btn.disabled = true;
+      btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:rvSpin .7s linear infinite"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg> Sending…';
 
       try {
-        const result = await window.supabaseConfig.submitContactEnquiry(enquiryData);
-        
-        if (result.success) {
-          alert('✅ Thank you for your enquiry! Our team will contact you within 24 hours.\n\nWe appreciate your interest in SkillUpNow.');
-          console.log('✅ Enquiry saved to database');
-          form.reset();
-        } else {
-          alert('❌ Error submitting enquiry: ' + (result.error || 'Unknown error'));
-          console.error('Enquiry submission error:', result.error);
-        }
-      } catch (error) {
-        alert('❌ An error occurred while submitting your enquiry. Please try again.');
-        console.error('Enquiry submission error:', error);
-      }
-    }
+        if (!window.supabaseConfig) throw new Error('Database not available');
 
-    // Initialize modal functionality if not already done
-    function openModal(type = 'login') {
-      const modal = document.getElementById('mo');
-      if (modal) {
-        modal.classList.add('open');
-        const loginForm = document.getElementById('lf');
-        const registerForm = document.getElementById('rf');
-        
-        if (type === 'login') {
-          loginForm.style.display = 'block';
-          registerForm.style.display = 'none';
-        } else {
-          loginForm.style.display = 'none';
-          registerForm.style.display = 'block';
-        }
-      }
-    }
+        const payload = {
+          full_name: name,
+          email: email,
+          phone_number: phone,
+          course_interested: course,
+          course_title: course,
+          current_role: document.getElementById('eq-role').value.trim() || null,
+          program_duration: document.getElementById('eq-start').value || null,
+          learning_experience: document.getElementById('eq-experience').value || null,
+          preferred_payment_method: document.getElementById('eq-payment').value || null,
+          message: document.getElementById('eq-message').value.trim() || null,
+          enquiry_status: 'new'
+        };
 
-    function closeModal() {
-      const modal = document.getElementById('mo');
-      if (modal) {
-        modal.classList.remove('open');
-      }
-    }
+        const result = await window.supabaseConfig.submitContactEnquiry(payload);
+        if (!result.success) throw new Error(result.error || 'Submission failed');
 
-    function switchModalTab(tab) {
-      const loginForm = document.getElementById('lf');
-      const registerForm = document.getElementById('rf');
-      
-      if (tab === 'login') {
-        loginForm.style.display = 'block';
-        registerForm.style.display = 'none';
-      } else {
-        loginForm.style.display = 'none';
-        registerForm.style.display = 'block';
-      }
-    }
-
-    function submitLogin() {
-      const loginForm = document.getElementById('lf');
-      const email = loginForm.querySelector('input[type="email"]').value.trim();
-      const password = loginForm.querySelector('input[type="password"]').value;
-
-      if (!email || !password) {
-        if (window.app) window.app.showNotification('Please fill all fields', 'error');
-        return;
-      }
-
-      if (!window.supabaseConfig) {
-        console.error('Supabase not initialized');
-        return;
-      }
-
-      const btn = loginForm.querySelector('button.btn-grad');
-      const originalText = btn.textContent;
-      btn.disabled = true;
-      btn.textContent = 'Signing in...';
-
-      window.supabaseConfig.signIn(email, password).then(result => {
-        if (result.success) {
-          alert('Welcome back!');
-          localStorage.setItem('user_id', result.data.user.id);
-          localStorage.setItem('user_email', result.data.user.email);
-          setTimeout(() => closeModal(), 1000);
-        } else {
-          alert(result.error || 'Login failed');
-        }
+        document.getElementById('enquiryForm').style.display = 'none';
+        document.getElementById('eq-success').style.display = 'block';
+        showEqToast('Enquiry submitted successfully!', 'ok');
+      } catch(err) {
+        showEqErr('Submission failed: ' + (err.message || 'Please try again or call us directly.'));
         btn.disabled = false;
-        btn.textContent = originalText;
-      }).catch(error => {
-        console.error('Login error:', error);
-        alert('An error occurred');
-        btn.disabled = false;
-        btn.textContent = originalText;
-      });
+        btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Send My Enquiry';
+      }
     }
 
-    function submitRegister() {
-      const registerForm = document.getElementById('rf');
-      const name = registerForm.querySelector('input[type="text"]').value.trim();
-      const email = registerForm.querySelector('input[type="email"]').value.trim();
-      const phone = registerForm.querySelector('input[type="tel"]').value.trim();
-      const interest = registerForm.querySelector('select').value;
-      const password = registerForm.querySelector('input[type="password"]').value;
-
-      if (!name || !email || !phone || !password) {
-        alert('Please fill all fields');
-        return;
-      }
-
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(email)) {
-        alert('Please enter a valid email');
-        return;
-      }
-
-      if (password.length < 6) {
-        alert('Password must be at least 6 characters');
-        return;
-      }
-
-      if (!window.supabaseConfig) {
-        console.error('Supabase not initialized');
-        return;
-      }
-
-      const btn = registerForm.querySelector('button.btn-grad');
-      const originalText = btn.textContent;
-      btn.disabled = true;
-      btn.textContent = 'Creating account...';
-
-      window.supabaseConfig.signUp(email, password, {
-        full_name: name,
-        email: email,
-        phone_number: phone,
-        learning_interest: interest,
-        experience_level: 'beginner'
-      }).then(result => {
-        if (result.success) {
-          alert('Account created! Check your email.');
-          localStorage.setItem('user_email', email);
-          setTimeout(() => {
-            closeModal();
-            registerForm.querySelectorAll('input, select').forEach(field => field.value = '');
-          }, 1000);
-        } else {
-          alert(result.error || 'Registration failed');
-        }
-        btn.disabled = false;
-        btn.textContent = originalText;
-      }).catch(error => {
-        console.error('Registration error:', error);
-        alert('An error occurred');
-        btn.disabled = false;
-        btn.textContent = originalText;
-      });
+    function showEqErr(msg) {
+      const el = document.getElementById('eq-err');
+      el.textContent = msg; el.style.display = 'block';
+      el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
+
+    function showEqToast(msg, type) {
+      const t = document.getElementById('eq-toast');
+      t.textContent = msg; t.className = 'eq-toast ' + type;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 3500);
+    }
+
+    /* ── FAQ accordion ── */
+    function toggleFaq(btn) {
+      const item = btn.closest('.eq-faq-item');
+      const ans  = item.querySelector('.eq-faq-a');
+      const arr  = btn.querySelector('.eq-faq-arrow');
+      const isOpen = ans.classList.contains('open');
+      // Close all
+      document.querySelectorAll('.eq-faq-a').forEach(a => a.classList.remove('open'));
+      document.querySelectorAll('.eq-faq-arrow').forEach(a => a.classList.remove('open'));
+      if (!isOpen) { ans.classList.add('open'); arr.classList.add('open'); }
+    }
+
+    /* ── Init ── */
+    document.addEventListener('DOMContentLoaded', loadEnquiryCourses);
   </script>
 </body>
 </html>

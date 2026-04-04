@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="SkillUpNow Course Pamphlet — Interactive 3D Brochure">
+  <title>Course Pamphlet — SkillUpNow</title>
+  <link rel="stylesheet" href="../css/variables.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="stylesheet" href="../css/responsive.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,700&family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script>
+    if (window.location.protocol !== 'file:') {
+      var p = window.location.pathname;
+      if (p.endsWith('.html')) history.replaceState(null, '', p.replace(/\.html$/, ''));
+    }
+  </script>
+
+  <style>
+    /* ── Page Layout ── */
+    .pamphlet-hero {
+      padding: 5rem 5vw 3rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .pamphlet-hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(124,92,252,0.15) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .pamphlet-hero h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2.4rem, 5.5vw, 4.2rem);
+      font-weight: 700;
+      color: var(--txt);
+      letter-spacing: -0.025em;
+      margin-bottom: 1rem;
+      line-height: 1.1;
+    }
+    .pamphlet-hero p {
+      font-size: 1.1rem;
+      color: var(--txt3);
+      max-width: 600px;
+      margin: 0 auto 2.5rem;
+      line-height: 1.7;
+    }
+    .phl-actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    /* ── Company Strip ── */
+    .company-strip {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+      padding: 3rem 5vw;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    .cs-card {
+      background: var(--panel);
+      border: 1.5px solid var(--border);
+      border-radius: var(--r2);
+      padding: 1.8rem 1.5rem;
+      text-align: center;
+      transition: border-color 0.3s, transform 0.3s;
+    }
+    .cs-card:hover {
+      border-color: var(--v1);
+      transform: translateY(-4px);
+    }
+    .cs-icon {
+      font-size: 2rem;
+      margin-bottom: 0.75rem;
+    }
+    .cs-val {
+      font-size: 2rem;
+      font-weight: 800;
+      background: var(--grad);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1;
+      margin-bottom: 0.35rem;
+    }
+    .cs-lbl {
+      font-size: 0.82rem;
+      color: var(--txt4);
+      font-weight: 500;
+    }
+
+    /* ── 3D Book / Pamphlet Viewer ── */
+    .pamphlet-3d-section {
+      padding: 4rem 5vw;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    .pamphlet-3d-section h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+      font-weight: 700;
+      color: var(--txt);
+      text-align: center;
+      margin-bottom: 0.6rem;
+    }
+    .pamphlet-3d-section > p {
+      text-align: center;
+      color: var(--txt3);
+      margin-bottom: 3rem;
+    }
+
+    /* Book wrapper with perspective */
+    .book-scene {
+      perspective: 1400px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 2rem 0 3rem;
+    }
+    .book {
+      width: 320px;
+      height: 440px;
+      position: relative;
+      transform-style: preserve-3d;
+      transform: rotateY(-25deg) rotateX(5deg);
+      transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+      cursor: pointer;
+    }
+    .book:hover {
+      transform: rotateY(0deg) rotateX(0deg);
+    }
+    .book-cover {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(145deg, #1a0f3a 0%, #0d0a25 100%);
+      border-radius: 4px 12px 12px 4px;
+      border: 1.5px solid rgba(124,92,252,0.4);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      box-shadow:
+        0 30px 60px rgba(0,0,0,0.6),
+        inset 0 1px 0 rgba(255,255,255,0.08),
+        8px 0 20px rgba(0,0,0,0.5);
+      backface-visibility: hidden;
+    }
+    .book-spine {
+      position: absolute;
+      left: -14px;
+      top: 0; bottom: 0;
+      width: 14px;
+      background: linear-gradient(180deg, #3d1fa8, #1a0d5c);
+      border-radius: 4px 0 0 4px;
+      border: 1px solid rgba(124,92,252,0.3);
+      transform: rotateY(-90deg) translateX(-7px);
+      transform-origin: right;
+      box-shadow: -4px 0 12px rgba(0,0,0,0.4);
+    }
+    .book-back {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(145deg, #0d0a25, #1a0f3a);
+      border-radius: 12px 4px 4px 12px;
+      transform: rotateY(180deg) translateZ(0);
+      backface-visibility: hidden;
+    }
+    .book-cover-logo {
+      font-size: 3rem;
+      margin-bottom: 1.2rem;
+    }
+    .book-cover-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #f0eeff;
+      text-align: center;
+      line-height: 1.2;
+      margin-bottom: 0.5rem;
+    }
+    .book-cover-sub {
+      font-size: 0.75rem;
+      color: rgba(200,191,255,0.5);
+      text-align: center;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    .book-cover-line {
+      width: 60px;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--v1), transparent);
+      margin: 1rem auto;
+    }
+    .book-cover-year {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--v2);
+      letter-spacing: 0.1em;
+    }
+    /* Animated gloss overlay */
+    .book-gloss {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.06) 0%, transparent 60%);
+      border-radius: 4px 12px 12px 4px;
+      pointer-events: none;
+    }
+
+    /* ── Course Cards Grid ── */
+    .pamphlet-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.8rem;
+      margin-top: 2rem;
+    }
+    .pm-card {
+      background: var(--panel);
+      border: 1.5px solid var(--border);
+      border-radius: var(--r3);
+      overflow: hidden;
+      transition: border-color 0.3s, transform 0.35s cubic-bezier(0.4,0,0.2,1), box-shadow 0.35s;
+      display: flex;
+      flex-direction: column;
+      transform-style: preserve-3d;
+      perspective: 800px;
+    }
+    .pm-card:hover {
+      border-color: var(--v1);
+      transform: translateY(-6px) rotateX(2deg);
+      box-shadow: 0 24px 64px rgba(124,92,252,0.25), 0 0 0 1px rgba(124,92,252,0.15);
+    }
+    .pm-card-top {
+      padding: 1.8rem 1.8rem 1rem;
+      background: linear-gradient(135deg, rgba(124,92,252,0.12), rgba(61,107,255,0.08));
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+    .pm-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, var(--v1), var(--v2));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      flex-shrink: 0;
+      box-shadow: 0 6px 20px rgba(124,92,252,0.35);
+    }
+    .pm-title {
+      font-family: 'Inter','Outfit',sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--txt);
+      line-height: 1.3;
+      margin-bottom: 0.3rem;
+    }
+    .pm-cat {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--v2);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .pm-body {
+      padding: 1.2rem 1.8rem;
+      flex: 1;
+    }
+    .pm-desc {
+      font-size: 0.88rem;
+      color: var(--txt3);
+      line-height: 1.65;
+      margin-bottom: 1rem;
+    }
+    .pm-meta-row {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+    }
+    .pm-meta {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 0.78rem;
+      color: var(--txt4);
+      font-weight: 500;
+    }
+    .pm-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-bottom: 0.8rem;
+    }
+    .pm-tag {
+      padding: 0.22rem 0.65rem;
+      background: rgba(124,92,252,0.1);
+      border: 1px solid rgba(124,92,252,0.2);
+      border-radius: 50px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--txt2);
+    }
+    .pm-footer {
+      padding: 1rem 1.8rem 1.4rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.8rem;
+      border-top: 1px solid var(--border);
+    }
+    .pm-level {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.25rem 0.7rem;
+      border-radius: 50px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .pm-enroll-btn {
+      padding: 0.6rem 1.3rem;
+      border-radius: 50px;
+      background: linear-gradient(135deg, var(--v1), var(--v2));
+      color: #fff;
+      border: none;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: filter 0.2s, transform 0.2s;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+    .pm-enroll-btn:hover {
+      filter: brightness(1.12);
+      transform: scale(1.04);
+    }
+
+    /* ── About Company Panel ── */
+    .company-panel {
+      margin: 4rem 5vw;
+      max-width: 1400px;
+      margin-left: auto;
+      margin-right: auto;
+      background: var(--panel);
+      border: 1.5px solid var(--border);
+      border-radius: var(--r3);
+      overflow: hidden;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+    .company-panel-left {
+      padding: 3.5rem;
+      background: linear-gradient(145deg, rgba(124,92,252,0.1) 0%, transparent 100%);
+      border-right: 1px solid var(--border);
+    }
+    .company-panel-right {
+      padding: 3.5rem;
+    }
+    .cp-label {
+      display: inline-block;
+      padding: 0.3rem 0.9rem;
+      background: rgba(124,92,252,0.12);
+      border: 1px solid rgba(124,92,252,0.28);
+      border-radius: 50px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--v1);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 1.2rem;
+    }
+    .cp-h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.6rem, 3vw, 2.4rem);
+      font-weight: 700;
+      color: var(--txt);
+      margin-bottom: 1rem;
+      line-height: 1.2;
+    }
+    .cp-p {
+      font-size: 0.95rem;
+      color: var(--txt3);
+      line-height: 1.8;
+      margin-bottom: 1.2rem;
+    }
+    .cp-values {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .cp-val-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.85rem;
+      padding: 1.1rem 1.3rem;
+      background: var(--panel2);
+      border: 1px solid var(--border);
+      border-radius: var(--r2);
+      transition: border-color 0.25s;
+    }
+    .cp-val-item:hover { border-color: var(--v1); }
+    .cp-vi-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--v1), var(--v2));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+    .cp-vi-title { font-weight: 700; color: var(--txt); font-size: 0.9rem; margin-bottom: 0.2rem; }
+    .cp-vi-desc { font-size: 0.82rem; color: var(--txt4); line-height: 1.5; }
+
+    /* ── Print / Download Bar ── */
+    .print-bar {
+      position: sticky;
+      bottom: 1.5rem;
+      display: flex;
+      justify-content: center;
+      z-index: 50;
+      pointer-events: none;
+    }
+    .print-bar-inner {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.85rem 1.8rem;
+      background: var(--panel);
+      border: 1.5px solid var(--border);
+      border-radius: 50px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+      backdrop-filter: blur(16px);
+      pointer-events: all;
+    }
+    .print-bar-inner span {
+      font-size: 0.82rem;
+      color: var(--txt3);
+      font-weight: 500;
+    }
+    .pb-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.55rem 1.1rem;
+      border-radius: 50px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: none;
+    }
+    .pb-btn-primary {
+      background: linear-gradient(135deg, var(--v1), var(--v2));
+      color: #fff;
+      box-shadow: 0 4px 16px rgba(124,92,252,0.4);
+    }
+    .pb-btn-primary:hover { filter: brightness(1.1); transform: translateY(-1px); }
+    .pb-btn-sec {
+      background: var(--panel2);
+      border: 1px solid var(--border);
+      color: var(--txt3);
+    }
+    .pb-btn-sec:hover { border-color: var(--v1); color: var(--txt); }
+
+    /* ── Loading State ── */
+    .pm-loading {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 4rem 2rem;
+      color: var(--txt4);
+      font-size: 0.95rem;
+    }
+    .pm-spin {
+      width: 36px; height: 36px;
+      border: 3px solid var(--border);
+      border-top-color: var(--v1);
+      border-radius: 50%;
+      animation: pmSpin 0.7s linear infinite;
+      margin: 0 auto 1.2rem;
+    }
+    @keyframes pmSpin { to { transform: rotate(360deg); } }
+
+    /* ── Filter chips ── */
+    .pm-filter-bar {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 2rem;
+      justify-content: center;
+    }
+    .pm-chip {
+      padding: 0.4rem 1.1rem;
+      border-radius: 50px;
+      border: 1.5px solid var(--border);
+      background: transparent;
+      color: var(--txt3);
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+    .pm-chip:hover { border-color: var(--v1); color: var(--v1); }
+    .pm-chip.active {
+      background: rgba(124,92,252,0.15);
+      border-color: var(--v1);
+      color: var(--v2);
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 900px) {
+      .company-panel { grid-template-columns: 1fr; }
+      .company-panel-left { border-right: none; border-bottom: 1px solid var(--border); }
+    }
+    @media (max-width: 640px) {
+      .book { width: 220px; height: 300px; }
+      .book-cover-title { font-size: 1.1rem; }
+      .company-panel-left, .company-panel-right { padding: 2rem; }
+    }
+    @media print {
+      .print-bar, nav, .phl-actions, .pm-filter-bar { display: none !important; }
+      .pm-card { break-inside: avoid; }
+      .book-scene { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="mesh-bg"></div>
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+
+  <!-- Navigation — rebuilt by profile-nav.js -->
+  <nav></nav>
+
+  <!-- ── Hero ── -->
+  <div class="pamphlet-hero">
+    <span style="display:inline-block;padding:0.3rem 1rem;background:rgba(124,92,252,0.12);border:1px solid rgba(124,92,252,0.28);border-radius:50px;font-size:0.75rem;font-weight:700;color:var(--v1);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:1.2rem;">Interactive Pamphlet</span>
+    <h1>SkillUpNow<br><span style="background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Course Brochure 2026</span></h1>
+    <p>Everything you need to know about our programmes — courses, company, and career outcomes — in one interactive place.</p>
+    <div class="phl-actions">
+      <button class="btn-grad" onclick="window.print()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+        Print / Save PDF
+      </button>
+      <a href="courses.html" class="btn-outline">Browse All Courses →</a>
+    </div>
+  </div>
+
+  <!-- ── Stats Strip ── -->
+  <div class="company-strip">
+    <div class="cs-card">
+      <div class="cs-icon">🎓</div>
+      <div class="cs-val">12K+</div>
+      <div class="cs-lbl">Students Trained</div>
+    </div>
+    <div class="cs-card">
+      <div class="cs-icon">📚</div>
+      <div class="cs-val" id="stat-courses">—</div>
+      <div class="cs-lbl">Active Courses</div>
+    </div>
+    <div class="cs-card">
+      <div class="cs-icon">⭐</div>
+      <div class="cs-val">4.9</div>
+      <div class="cs-lbl">Avg. Rating</div>
+    </div>
+    <div class="cs-card">
+      <div class="cs-icon">🏅</div>
+      <div class="cs-val">100%</div>
+      <div class="cs-lbl">Live Sessions</div>
+    </div>
+    <div class="cs-card">
+      <div class="cs-icon">💳</div>
+      <div class="cs-val">0% EMI</div>
+      <div class="cs-lbl">Easy Financing</div>
+    </div>
+  </div>
+
+  <!-- ── 3D Book Visual ── -->
+  <div class="pamphlet-3d-section">
+    <h2>Flip Through Our Brochure</h2>
+    <p>Hover to open the cover · Scroll down for all programmes</p>
+
+    <div class="book-scene">
+      <div class="book" id="theBook" title="Hover to open">
+        <div class="book-spine"></div>
+        <div class="book-cover">
+          <div class="book-gloss"></div>
+          <div class="book-cover-logo">
+            <svg width="56" height="56" viewBox="0 0 24 24" fill="none">
+              <defs>
+                <linearGradient id="bkLogo" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stop-color="#7c5cfc"/>
+                  <stop offset="100%" stop-color="#3d6bff"/>
+                </linearGradient>
+              </defs>
+              <path d="M12 2L2 7l10 5 10-5-10-5z" stroke="url(#bkLogo)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M2 17l10 5 10-5" stroke="url(#bkLogo)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M2 12l10 5 10-5" stroke="url(#bkLogo)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div class="book-cover-title">SkillUpNow<br>Course Catalogue</div>
+          <div class="book-cover-line"></div>
+          <div class="book-cover-sub">Professional Development</div>
+          <div class="book-cover-year" style="margin-top:0.8rem;">2026 Edition</div>
+        </div>
+        <div class="book-back"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Course Catalogue ── -->
+  <div style="padding: 0 5vw 4rem; max-width: 1400px; margin: 0 auto;">
+    <h2 style="font-family:'Cormorant Garamond',serif;font-size:clamp(1.8rem,3.5vw,2.8rem);font-weight:700;color:var(--txt);text-align:center;margin-bottom:0.5rem;">Our Programmes</h2>
+    <p style="text-align:center;color:var(--txt3);margin-bottom:2rem;">Filter by category to find your perfect course</p>
+
+    <!-- Filter chips — populated from DB -->
+    <div class="pm-filter-bar" id="pmFilterBar">
+      <button class="pm-chip active" data-cat="all" onclick="filterPamphlet('all',this)">All Courses</button>
+    </div>
+
+    <div class="pamphlet-grid" id="pamphletGrid">
+      <div class="pm-loading"><div class="pm-spin"></div>Loading programmes…</div>
+    </div>
+  </div>
+
+  <!-- ── Company Info Panel ── -->
+  <div class="company-panel" style="margin:2rem 5vw 4rem;max-width:1400px;margin-left:auto;margin-right:auto;">
+    <div class="company-panel-left">
+      <div class="cp-label">About SkillUpNow</div>
+      <h2 class="cp-h2">Built by Professionals,<br>For Professionals</h2>
+      <p class="cp-p">SkillUpNow was founded by a team of HR leaders and communication coaches who saw a gap: brilliant technical professionals held back by limited soft skills. We bridge that gap with live, personalised training.</p>
+      <p class="cp-p">Every course is designed in collaboration with industry experts and updated quarterly to reflect real workplace demands.</p>
+      <div style="display:flex;gap:0.75rem;flex-wrap:wrap;margin-top:1.5rem;">
+        <a href="contact-enquiry.html" class="btn-grad">Get a Fee Quote</a>
+        <a href="courses.html" class="btn-outline">Explore Courses</a>
+      </div>
+    </div>
+    <div class="company-panel-right">
+      <div class="cp-label">Our Core Values</div>
+      <div class="cp-values">
+        <div class="cp-val-item">
+          <div class="cp-vi-icon">🎯</div>
+          <div>
+            <div class="cp-vi-title">Mission-Driven</div>
+            <div class="cp-vi-desc">Every decision we make is grounded in our commitment to learner success and measurable career impact.</div>
+          </div>
+        </div>
+        <div class="cp-val-item">
+          <div class="cp-vi-icon">🤝</div>
+          <div>
+            <div class="cp-vi-title">People First</div>
+            <div class="cp-vi-desc">We treat every learner as an individual — with personalised attention, flexible scheduling, and genuine care.</div>
+          </div>
+        </div>
+        <div class="cp-val-item">
+          <div class="cp-vi-icon">🔒</div>
+          <div>
+            <div class="cp-vi-title">Trust & Integrity</div>
+            <div class="cp-vi-desc">Transparent fees, honest feedback, and a no-pressure enrolment process — always.</div>
+          </div>
+        </div>
+        <div class="cp-val-item">
+          <div class="cp-vi-icon">🚀</div>
+          <div>
+            <div class="cp-vi-title">Continuous Growth</div>
+            <div class="cp-vi-desc">We evolve our curriculum constantly, so you're always learning skills that matter right now.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Contact Bar ── -->
+  <div style="background:var(--panel);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:2.5rem 5vw;text-align:center;">
+    <h3 style="font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:700;color:var(--txt);margin-bottom:0.5rem;">Ready to Start Learning?</h3>
+    <p style="color:var(--txt3);margin-bottom:1.5rem;font-size:0.95rem;">Talk to our team — we'll match you with the perfect programme.</p>
+    <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
+      <a href="tel:+916381721061" class="btn-grad">📞 Call Us Now</a>
+      <a href="contact-enquiry.html" class="btn-outline">Send Enquiry →</a>
+    </div>
+    <div style="margin-top:1.5rem;display:flex;justify-content:center;gap:2rem;flex-wrap:wrap;font-size:0.82rem;color:var(--txt4);">
+      <span>✉️ skillupnow.off@gmail.com</span>
+      <span>📞 +91 6381 721061</span>
+      <span>📞 +91 6383 633054</span>
+    </div>
+  </div>
+
+  <!-- ── Sticky Print Bar ── -->
+  <div class="print-bar">
+    <div class="print-bar-inner">
+      <span>Share this brochure:</span>
+      <button class="pb-btn pb-btn-primary" onclick="window.print()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+        Print / PDF
+      </button>
+      <button class="pb-btn pb-btn-sec" onclick="copyPamphletLink()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        Copy Link
+      </button>
+    </div>
+  </div>
+
+  <!-- Footer — rebuilt by profile-nav.js -->
+  <footer></footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../config/supabase-config.js"></script>
+  <script src="../js/theme.js"></script>
+  <script src="../js/profile-nav.js"></script>
+
+  <script>
+    /* ── State ── */
+    let allCourses  = [];
+    let activeFilter = 'all';
+
+    /* ── Load courses from Supabase ── */
+    async function loadPamphletCourses() {
+      try {
+        if (!window.supabaseConfig) throw new Error('DB not ready');
+        const result = await window.supabaseConfig.getAllCourses();
+        if (result.success && result.data && result.data.length) {
+          allCourses = result.data;
+          buildFilterChips();
+          renderPamphletCards(allCourses);
+          document.getElementById('stat-courses').textContent = allCourses.length + '+';
+          return;
+        }
+      } catch (e) {
+        console.warn('Could not load courses from DB:', e);
+      }
+      document.getElementById('pamphletGrid').innerHTML =
+        '<div class="pm-loading">No programmes available yet — check back soon!</div>';
+    }
+
+    /* ── Build category filter chips ── */
+    function buildFilterChips() {
+      const cats = [...new Set(allCourses.map(c => c.category || c.course_category || '').filter(Boolean))];
+      const bar = document.getElementById('pmFilterBar');
+      cats.forEach(cat => {
+        const btn = document.createElement('button');
+        btn.className = 'pm-chip';
+        btn.dataset.cat = cat;
+        btn.textContent = cat;
+        btn.onclick = () => filterPamphlet(cat, btn);
+        bar.appendChild(btn);
+      });
+    }
+
+    /* ── Filter handler ── */
+    function filterPamphlet(cat, btn) {
+      activeFilter = cat;
+      document.querySelectorAll('.pm-chip').forEach(c => c.classList.remove('active'));
+      btn.classList.add('active');
+      const filtered = cat === 'all' ? allCourses : allCourses.filter(c => (c.category || c.course_category || '') === cat);
+      renderPamphletCards(filtered);
+    }
+
+    /* ── Render course cards ── */
+    function renderPamphletCards(list) {
+      const grid = document.getElementById('pamphletGrid');
+      if (!list.length) {
+        grid.innerHTML = '<div class="pm-loading">No courses in this category.</div>';
+        return;
+      }
+
+      const levelColors = { beginner: '#4ade80', intermediate: '#f59e0b', advanced: '#f87171' };
+      const categoryIcons = {
+        'Cloud Computing': '☁️', 'DevOps': '⚙️', 'AI': '🤖', 'Machine Learning': '🧠',
+        'Cybersecurity': '🔒', 'Data Engineering': '📊', 'Communication': '💬',
+        'Leadership': '🏆', 'Soft Skills': '🌟', 'default': '📚'
+      };
+      const getIcon = (cat) => {
+        const key = Object.keys(categoryIcons).find(k => (cat || '').toLowerCase().includes(k.toLowerCase()));
+        return key ? categoryIcons[key] : categoryIcons['default'];
+      };
+
+      grid.innerHTML = list.map(c => {
+        const title    = c.name || 'Course';
+        const cat      = c.category || c.course_category || '';
+        const desc     = c.short_description || c.description || '';
+        const duration = c.duration_months ? c.duration_months + ' months' : (c.duration_hours ? c.duration_hours + ' hrs' : '');
+        const level    = c.level || '';
+        const lvlColor = levelColors[(level || '').toLowerCase()] || 'var(--v2)';
+        const enrolled = c.total_enrolled || 0;
+        const rating   = c.rating ? Number(c.rating).toFixed(1) : 'New';
+        const icon     = getIcon(cat);
+        const safeId   = String(c.id).replace(/'/g, "\\'");
+        const safeTitle = title.replace(/'/g, "\\'");
+
+        // Topics
+        const rawTopics = c.key_topics || c.topics || '';
+        const topics = Array.isArray(rawTopics)
+          ? rawTopics.slice(0,4)
+          : rawTopics ? rawTopics.split(',').map(t=>t.trim()).filter(Boolean).slice(0,4) : [];
+
+        return `
+          <div class="pm-card" style="animation:fadeUp 0.5s ease both;">
+            <div class="pm-card-top">
+              <div class="pm-icon">${icon}</div>
+              <div>
+                <div class="pm-title">${title}</div>
+                <div class="pm-cat">${cat}</div>
+              </div>
+            </div>
+            <div class="pm-body">
+              <p class="pm-desc">${desc}</p>
+              <div class="pm-meta-row">
+                ${duration ? `<div class="pm-meta">⏱️ ${duration}</div>` : ''}
+                <div class="pm-meta">👥 ${enrolled} enrolled</div>
+                <div class="pm-meta">⭐ ${rating}</div>
+              </div>
+              ${topics.length ? `<div class="pm-tags">${topics.map(t=>`<span class="pm-tag">${t}</span>`).join('')}</div>` : ''}
+            </div>
+            <div class="pm-footer">
+              ${level ? `<span class="pm-level" style="background:rgba(${lvlColor==='#4ade80'?'74,222,128':lvlColor==='#f59e0b'?'245,158,11':'248,113,113'},0.12);color:${lvlColor};">${level}</span>` : '<span></span>'}
+              <a href="courses.html" class="pm-enroll-btn">
+                Enroll Now
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </a>
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    /* ── Copy link helper ── */
+    function copyPamphletLink() {
+      navigator.clipboard.writeText(window.location.href).then(() => {
+        const btn = document.querySelector('.pb-btn-sec');
+        const orig = btn.innerHTML;
+        btn.innerHTML = '✅ Copied!';
+        setTimeout(() => btn.innerHTML = orig, 2000);
+      });
+    }
+
+    /* ── Book parallax on mouse move ── */
+    const book = document.getElementById('theBook');
+    if (book) {
+      document.addEventListener('mousemove', e => {
+        const cx = window.innerWidth / 2;
+        const cy = window.innerHeight / 2;
+        const dx = (e.clientX - cx) / cx;
+        const dy = (e.clientY - cy) / cy;
+        book.style.transform = `rotateY(${-25 + dx * 15}deg) rotateX(${5 - dy * 8}deg)`;
+      });
+    }
+
+    /* ── Init ── */
+    document.addEventListener('DOMContentLoaded', loadPamphletCourses);
+  </script>
+</body>
+</html>

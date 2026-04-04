@@ -55,6 +55,7 @@ class ProfileNavigationManager {
         <li><a href="${p}courses.html" class="nav-link-item">Courses</a></li>
         <li><a href="${p}feedback.html" class="nav-link-item">Reviews</a></li>
         <li><a href="${p}contact-enquiry.html" class="nav-link-item">Enquiry</a></li>
+        <li><a href="${p}pamphlet.html" class="nav-link-item nav-pamphlet-btn" style="display:inline-flex;align-items:center;gap:0.35rem;background:linear-gradient(135deg,rgba(124,92,252,0.18),rgba(61,107,255,0.18));border:1.5px solid rgba(124,92,252,0.35);border-radius:50px;padding:0.35rem 0.9rem;font-weight:700;transition:all 0.25s;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>Pamphlet</a></li>
       </ul>
 
       <div class="nav-actions" id="nav-actions">
@@ -102,10 +103,10 @@ class ProfileNavigationManager {
           </button>
         </div>
 
-        <!-- Get Started: shown only when logged out -->
-        <button id="cta-btn" class="nav-cta" style="display:none;" onclick="window.profileNav && window.profileNav.openRegister()">
-          Get Started
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        <!-- Sign Up: shown only when logged out -->
+        <button id="cta-btn" class="nav-cta nav-signup-btn" style="display:none;" onclick="window.profileNav && window.profileNav.openRegister()">
+          <span class="nav-signup-text">Sign Up</span>
+          <svg class="nav-signup-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
         </button>
 
         <!-- Mobile hamburger -->
@@ -123,7 +124,7 @@ class ProfileNavigationManager {
     const p = this.pagesPfx;
 
     return `
-      <div class="footer-grid-main" style="display:grid; grid-template-columns:2.2fr 1fr 1fr; gap:3.5rem; margin-bottom:3.5rem;">
+      <div class="footer-grid-main" style="display:grid; grid-template-columns:2fr 1fr 1fr 1fr; gap:3rem; margin-bottom:3.5rem;">
         <div>
           <a href="${r}index.html" class="nav-logo" style="margin-bottom:1rem; display:inline-flex;">
             <div class="logo-icon">
@@ -132,20 +133,35 @@ class ProfileNavigationManager {
             <span class="nav-logo-text">SkillUpNow</span>
           </a>
           <p style="font-size:0.84rem; color:var(--txt4); line-height:1.75; max-width:280px; margin-top:1rem;">Premium IT &amp; professional skills training. Secure, scalable, and built for career transformation.</p>
-          <div style="margin-top:1.2rem; display:flex; flex-direction:column; gap:0.45rem;">
+          <div style="margin-top:1.2rem; display:flex; flex-direction:column; gap:0.5rem;">
             <a href="mailto:skillupnow.off@gmail.com" class="footer-contact-link">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
               skillupnow.off@gmail.com
             </a>
-            <a href="tel:+919876543210" class="footer-contact-link">
+            <a href="tel:+916381721061" class="footer-contact-link">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.17 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.08 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.09 8.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21 16z"/></svg>
-              +91 98765 43210
+              +91 6381 721061
+            </a>
+            <a href="tel:+916383633054" class="footer-contact-link">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.17 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.08 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.09 8.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21 16z"/></svg>
+              +91 6383 633054
             </a>
             <div style="display:flex; align-items:center; gap:0.45rem; font-size:0.74rem; color:var(--txt4); margin-top:0.2rem; font-weight:500;">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
               SSL Enabled
             </div>
           </div>
+        </div>
+
+        <div>
+          <h5 class="footer-col-title">Courses</h5>
+          <ul class="footer-col-links">
+            <li><a href="${p}courses.html" class="footer-link">Cloud Computing</a></li>
+            <li><a href="${p}courses.html" class="footer-link">DevOps &amp; CI/CD</a></li>
+            <li><a href="${p}courses.html" class="footer-link">AI &amp; Machine Learning</a></li>
+            <li><a href="${p}courses.html" class="footer-link">Cybersecurity</a></li>
+            <li><a href="${p}courses.html" class="footer-link">Data Engineering</a></li>
+          </ul>
         </div>
 
         <div>
@@ -161,7 +177,7 @@ class ProfileNavigationManager {
         <div>
           <h5 class="footer-col-title">Company</h5>
           <ul class="footer-col-links">
-            <li><a href="#" class="footer-link">About Us</a></li>
+            <li><a href="${r}index.html#about-us" class="footer-link">About Us</a></li>
             <li><a href="#" class="footer-link">Privacy Policy</a></li>
             <li><a href="#" class="footer-link">Terms of Service</a></li>
             <li><a href="${p}contact-enquiry.html" class="footer-link">Contact Us</a></li>
