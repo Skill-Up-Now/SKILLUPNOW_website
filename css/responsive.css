@@ -540,7 +540,7 @@
 }
 .nav-cta,
 #cta-btn {
-  display: inline-flex !important;
+  /* display is controlled by JS (showLoggedInUI/showLoggedOutUI) — do NOT force it here */
   align-items: center !important;
   justify-content: center !important;
   white-space: nowrap !important;

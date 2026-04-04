@@ -23,22 +23,10 @@
   <style>
     .rating-stars {
       display: flex;
-      gap: 0.8rem;
-      margin-top: 0.5rem;
+      gap: 0.5rem;
+      margin-top: 0.6rem;
       flex-wrap: wrap;
-    }
-
-    .star {
-      cursor: pointer;
-      font-size: 2rem;
-      color: var(--txt4);
-      transition: all 0.2s var(--ease);
-    }
-
-    .star:hover,
-    .star.active {
-      color: var(--v1);
-      transform: scale(1.2);
+      perspective: 400px;
     }
 
     .rating-label {
@@ -47,6 +35,7 @@
       font-size: 0.85rem;
       color: var(--txt3);
       min-height: 1.2rem;
+      font-weight: 500;
     }
 
     .feedback-section {
@@ -55,6 +44,38 @@
       border-radius: var(--r2);
       margin-bottom: 2rem;
       border-left: 4px solid var(--v1);
+    }
+
+    /* Styled select override for feedback page */
+    .form-container select {
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%239b8fff' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 0.9rem center;
+      padding-right: 2.8rem !important;
+      cursor: pointer;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      font-weight: 500;
+    }
+    .form-container select:focus {
+      outline: none;
+      border-color: var(--v1) !important;
+      box-shadow: 0 0 0 3px rgba(124,92,252,0.12);
+    }
+
+    .form-btns-center {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .form-btns-center .btn-grad,
+    .form-btns-center .btn-outline {
+      flex: 1;
+      min-width: 140px;
+      max-width: 220px;
+      text-align: center;
     }
   </style>
 </head>
@@ -79,19 +100,9 @@
         <div class="form-row">
           <div class="form-group">
             <label>Course Name *</label>
-            <select name="course" required style="background: var(--panel); border: 1.5px solid var(--border); color: var(--txt); padding: 0.9rem 1.1rem; border-radius: var(--r2);">
-              <option value="">Select a course</option>
-              <option value="aws">AWS Solutions Architect Pro</option>
-              <option value="k8s">Kubernetes & Docker Mastery</option>
-              <option value="ai">Generative AI with Python</option>
-              <option value="cyber">Cybersecurity Fundamentals</option>
-              <option value="terraform">Terraform & IaC Engineering</option>
-              <option value="spark">Data Engineering with Spark</option>
+            <select id="fb-course-select" name="course" required style="background: var(--panel); border: 1.5px solid var(--border); color: var(--txt); padding: 0.9rem 1.1rem; border-radius: var(--r2); width:100%;">
+              <option value="">Loading courses…</option>
             </select>
-          </div>
-          <div class="form-group">
-            <label>Completion Date *</label>
-            <input type="date" name="completionDate" required data-validate="required|date"/>
           </div>
         </div>
 
@@ -102,11 +113,11 @@
           <div style="margin-bottom: 2.5rem;">
             <label style="display: block; margin-bottom: 0.5rem;">Course Content Quality *</label>
             <div class="rating-stars" id="contentRating">
-              <span class="star" onclick="setRating(this, 'contentQuality', 1)">★</span>
-              <span class="star" onclick="setRating(this, 'contentQuality', 2)">★</span>
-              <span class="star" onclick="setRating(this, 'contentQuality', 3)">★</span>
-              <span class="star" onclick="setRating(this, 'contentQuality', 4)">★</span>
-              <span class="star" onclick="setRating(this, 'contentQuality', 5)">★</span>
+              <span class="star-3d" data-field="contentQuality" data-val="1">★</span>
+              <span class="star-3d" data-field="contentQuality" data-val="2">★</span>
+              <span class="star-3d" data-field="contentQuality" data-val="3">★</span>
+              <span class="star-3d" data-field="contentQuality" data-val="4">★</span>
+              <span class="star-3d" data-field="contentQuality" data-val="5">★</span>
             </div>
             <span class="rating-label" id="contentQualityLabel">Click to rate</span>
             <input type="hidden" name="contentQuality" value="0" required/>
@@ -115,11 +126,11 @@
           <div style="margin-bottom: 2.5rem;">
             <label style="display: block; margin-bottom: 0.5rem;">Instructor Quality *</label>
             <div class="rating-stars" id="instructorRating">
-              <span class="star" onclick="setRating(this, 'instructorQuality', 1)">★</span>
-              <span class="star" onclick="setRating(this, 'instructorQuality', 2)">★</span>
-              <span class="star" onclick="setRating(this, 'instructorQuality', 3)">★</span>
-              <span class="star" onclick="setRating(this, 'instructorQuality', 4)">★</span>
-              <span class="star" onclick="setRating(this, 'instructorQuality', 5)">★</span>
+              <span class="star-3d" data-field="instructorQuality" data-val="1">★</span>
+              <span class="star-3d" data-field="instructorQuality" data-val="2">★</span>
+              <span class="star-3d" data-field="instructorQuality" data-val="3">★</span>
+              <span class="star-3d" data-field="instructorQuality" data-val="4">★</span>
+              <span class="star-3d" data-field="instructorQuality" data-val="5">★</span>
             </div>
             <span class="rating-label" id="instructorQualityLabel">Click to rate</span>
             <input type="hidden" name="instructorQuality" value="0" required/>
@@ -128,11 +139,11 @@
           <div style="margin-bottom: 2.5rem;">
             <label style="display: block; margin-bottom: 0.5rem;">Course Pacing *</label>
             <div class="rating-stars" id="pacingRating">
-              <span class="star" onclick="setRating(this, 'coursePacing', 1)">★</span>
-              <span class="star" onclick="setRating(this, 'coursePacing', 2)">★</span>
-              <span class="star" onclick="setRating(this, 'coursePacing', 3)">★</span>
-              <span class="star" onclick="setRating(this, 'coursePacing', 4)">★</span>
-              <span class="star" onclick="setRating(this, 'coursePacing', 5)">★</span>
+              <span class="star-3d" data-field="coursePacing" data-val="1">★</span>
+              <span class="star-3d" data-field="coursePacing" data-val="2">★</span>
+              <span class="star-3d" data-field="coursePacing" data-val="3">★</span>
+              <span class="star-3d" data-field="coursePacing" data-val="4">★</span>
+              <span class="star-3d" data-field="coursePacing" data-val="5">★</span>
             </div>
             <span class="rating-label" id="coursePacingLabel">Click to rate</span>
             <input type="hidden" name="coursePacing" value="0" required/>
@@ -141,24 +152,24 @@
           <div style="margin-bottom: 2.5rem;">
             <label style="display: block; margin-bottom: 0.5rem;">Learning Materials *</label>
             <div class="rating-stars" id="materialsRating">
-              <span class="star" onclick="setRating(this, 'learningMaterials', 1)">★</span>
-              <span class="star" onclick="setRating(this, 'learningMaterials', 2)">★</span>
-              <span class="star" onclick="setRating(this, 'learningMaterials', 3)">★</span>
-              <span class="star" onclick="setRating(this, 'learningMaterials', 4)">★</span>
-              <span class="star" onclick="setRating(this, 'learningMaterials', 5)">★</span>
+              <span class="star-3d" data-field="learningMaterials" data-val="1">★</span>
+              <span class="star-3d" data-field="learningMaterials" data-val="2">★</span>
+              <span class="star-3d" data-field="learningMaterials" data-val="3">★</span>
+              <span class="star-3d" data-field="learningMaterials" data-val="4">★</span>
+              <span class="star-3d" data-field="learningMaterials" data-val="5">★</span>
             </div>
             <span class="rating-label" id="learningMaterialsLabel">Click to rate</span>
             <input type="hidden" name="learningMaterials" value="0" required/>
           </div>
 
           <div>
-            <label style="display: block; margin-bottom: 0.5rem;">Support & Mentorship *</label>
+            <label style="display: block; margin-bottom: 0.5rem;">Support &amp; Mentorship *</label>
             <div class="rating-stars" id="supportRating">
-              <span class="star" onclick="setRating(this, 'supportQuality', 1)">★</span>
-              <span class="star" onclick="setRating(this, 'supportQuality', 2)">★</span>
-              <span class="star" onclick="setRating(this, 'supportQuality', 3)">★</span>
-              <span class="star" onclick="setRating(this, 'supportQuality', 4)">★</span>
-              <span class="star" onclick="setRating(this, 'supportQuality', 5)">★</span>
+              <span class="star-3d" data-field="supportQuality" data-val="1">★</span>
+              <span class="star-3d" data-field="supportQuality" data-val="2">★</span>
+              <span class="star-3d" data-field="supportQuality" data-val="3">★</span>
+              <span class="star-3d" data-field="supportQuality" data-val="4">★</span>
+              <span class="star-3d" data-field="supportQuality" data-val="5">★</span>
             </div>
             <span class="rating-label" id="supportQualityLabel">Click to rate</span>
             <input type="hidden" name="supportQuality" value="0" required/>
@@ -220,19 +231,21 @@
 
         <!-- Options -->
         <div style="background: var(--panel2); padding: 1.5rem; border-radius: var(--r2); margin-bottom: 2rem;">
-          <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+          <label class="modern-checkbox-wrap" style="margin-bottom: 0.8rem;">
             <input type="checkbox" name="anonymous" id="anonymousCheck"/>
-            <label style="margin: 0; font-size: 0.95rem;" for="anonymousCheck">Keep my feedback anonymous</label>
-          </div>
-          <div style="display: flex; gap: 1rem;">
+            <span class="modern-checkbox-box"></span>
+            <span class="modern-checkbox-label">Keep my feedback anonymous</span>
+          </label>
+          <label class="modern-checkbox-wrap">
             <input type="checkbox" name="allowPublish" checked/>
-            <label style="margin: 0; font-size: 0.95rem;">Allow my feedback to be published as a testimonial</label>
-          </div>
+            <span class="modern-checkbox-box"></span>
+            <span class="modern-checkbox-label">Allow my feedback to be published as a testimonial</span>
+          </label>
         </div>
 
-        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-          <button type="submit" class="btn-grad" style="flex: 1;">Submit Feedback</button>
-          <button type="reset" class="btn-outline" style="flex: 1; border: 1.5px solid var(--border2);">Clear Form</button>
+        <div class="form-btns-center">
+          <button type="submit" class="btn-grad">Submit Feedback</button>
+          <button type="reset" class="btn-outline" style="border: 1.5px solid var(--border2);">Clear Form</button>
         </div>
       </form>
 
@@ -261,6 +274,31 @@
   <script src="../js/main.js"></script>
 
   <script>
+    // ── Dynamic Course Loading ──
+    async function loadFeedbackCourses() {
+      const sel = document.getElementById('fb-course-select');
+      if (!sel) return;
+      try {
+        if (window.supabaseConfig) {
+          const res = await window.supabaseConfig.getAllCourses();
+          if (res.success && res.data && res.data.length) {
+            sel.innerHTML = '<option value="">Select a course</option>' +
+              res.data.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+            return;
+          }
+        }
+      } catch(e) {}
+      // Fallback static list
+      sel.innerHTML = `<option value="">Select a course</option>
+        <option value="aws">AWS Solutions Architect Pro</option>
+        <option value="k8s">Kubernetes &amp; Docker Mastery</option>
+        <option value="ai">Generative AI with Python</option>
+        <option value="cyber">Cybersecurity Fundamentals</option>
+        <option value="terraform">Terraform &amp; IaC Engineering</option>
+        <option value="spark">Data Engineering with Spark</option>`;
+    }
+
+    // ── 3D Golden Star Rating ──
     const ratingLabels = {
       contentQuality: ['Poor', 'Fair', 'Good', 'Very Good', 'Excellent'],
       instructorQuality: ['Poor', 'Fair', 'Good', 'Very Good', 'Excellent'],
@@ -269,20 +307,47 @@
       supportQuality: ['Poor', 'Fair', 'Good', 'Very Good', 'Excellent']
     };
 
-    function setRating(element, fieldName, rating) {
-      const parent = element.parentElement;
-      const stars = parent.querySelectorAll('.star');
-      
-      stars.forEach((star, index) => {
-        if (index < rating) {
-          star.classList.add('active');
-        } else {
-          star.classList.remove('active');
-        }
-      });
+    function initStars() {
+      document.querySelectorAll('.star-3d').forEach(star => {
+        star.addEventListener('click', function() {
+          const field = this.dataset.field;
+          const val   = parseInt(this.dataset.val);
+          const group = this.closest('.rating-stars');
+          group.querySelectorAll('.star-3d').forEach((s, i) => {
+            s.classList.toggle('lit', i < val);
+            if (i === val - 1) {
+              s.classList.add('popping');
+              s.addEventListener('animationend', () => s.classList.remove('popping'), { once: true });
+            }
+          });
+          document.querySelector(`input[name="${field}"]`).value = val;
+          document.getElementById(field + 'Label').textContent = ratingLabels[field][val - 1];
+        });
 
-      document.querySelector(`input[name="${fieldName}"]`).value = rating;
-      document.getElementById(fieldName + 'Label').textContent = ratingLabels[fieldName][rating - 1];
+        // Hover preview
+        star.addEventListener('mouseenter', function() {
+          const val = parseInt(this.dataset.val);
+          const group = this.closest('.rating-stars');
+          group.querySelectorAll('.star-3d').forEach((s, i) => {
+            s.style.color = i < val ? '#FFD700' : '';
+            s.style.filter = i < val ? 'drop-shadow(0 2px 6px rgba(255,200,0,0.5))' : '';
+          });
+        });
+        star.addEventListener('mouseleave', function() {
+          const field = this.dataset.field;
+          const current = parseInt(document.querySelector(`input[name="${field}"]`).value);
+          const group = this.closest('.rating-stars');
+          group.querySelectorAll('.star-3d').forEach((s, i) => {
+            s.style.color = '';
+            s.style.filter = '';
+            s.classList.toggle('lit', i < current);
+          });
+        });
+      });
+    }
+
+    function setRating(element, fieldName, rating) {
+      // Legacy compat — handled by initStars now
     }
 
     const form = document.getElementById('feedbackForm');
@@ -343,6 +408,8 @@
       const app = new SkillUpNowApp();
       app.init();
       window.app = app;
+      initStars();
+      loadFeedbackCourses();
     }, 100);
   </script>
 </body>

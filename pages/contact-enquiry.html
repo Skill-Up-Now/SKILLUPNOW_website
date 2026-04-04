@@ -438,15 +438,8 @@
         
         <div class="form-group">
           <label>Which course are you interested in?</label>
-          <select name="courseInterest" required>
-            <option value="">Select a course...</option>
-            <option value="cloud">Cloud Computing (AWS/Azure/GCP)</option>
-            <option value="devops">DevOps & CI/CD</option>
-            <option value="ml">AI & Machine Learning</option>
-            <option value="security">Cybersecurity Professional</option>
-            <option value="data">Data Engineering</option>
-            <option value="python">Python Programming</option>
-            <option value="other">Other</option>
+          <select id="enq-course-select" name="courseInterest" required>
+            <option value="">Loading courses…</option>
           </select>
         </div>
 
@@ -640,17 +633,8 @@
     </div>
   </section>
 
-  <!-- Footer -->
-  <footer style="background: rgba(8,6,18,0.95); border-top: 1px solid var(--border); padding: 3rem 5vw;">
-    <div style="max-width: 1200px; margin: 0 auto; text-align: center;">
-      <p style="color: var(--txt3); margin-bottom: 1rem;">Have questions? Our team is ready to help!</p>
-      <a href="mailto:info@skillupnowadmin.org " class="btn-grad" style="display: inline-block; margin-bottom: 2rem;">Contact Us Now</a>
-      
-      <div style="padding-top: 2rem; border-top: 1px solid var(--border);">
-        <p style="font-size: 0.78rem; color: var(--txt4);">© 2026 SkillUpNow. All rights reserved. | <a href="#" style="color: var(--v2); text-decoration: none;">Privacy Policy</a> | <a href="#" style="color: var(--v2); text-decoration: none;">Terms of Service</a></p>
-      </div>
-    </div>
-  </footer>
+  <!-- Footer — rebuilt by profile-nav.js -->
+  <footer></footer>
 
   <!-- Modal -->
   <div class="moverlay" id="mo" onclick="if(event.target===this) closeModal()">
@@ -935,6 +919,36 @@
         btn.textContent = originalText;
       });
     }
+
+    // ── Dynamic Course Loading for Enquiry Form ──
+    async function loadEnquiryCourses() {
+      const sel = document.getElementById('enq-course-select');
+      if (!sel) return;
+      try {
+        if (window.supabaseConfig) {
+          const res = await window.supabaseConfig.getAllCourses();
+          if (res.success && res.data && res.data.length) {
+            sel.innerHTML = '<option value="">Select a course...</option>' +
+              res.data.map(c => `<option value="${c.id}">${c.name}</option>`).join('') +
+              '<option value="other">Other</option>';
+            return;
+          }
+        }
+      } catch(e) {}
+      sel.innerHTML = `<option value="">Select a course...</option>
+        <option value="cloud">Cloud Computing (AWS/Azure/GCP)</option>
+        <option value="devops">DevOps &amp; CI/CD</option>
+        <option value="ml">AI &amp; Machine Learning</option>
+        <option value="security">Cybersecurity Professional</option>
+        <option value="data">Data Engineering</option>
+        <option value="python">Python Programming</option>
+        <option value="other">Other</option>`;
+    }
+
+    // ── Init ──
+    document.addEventListener('DOMContentLoaded', () => {
+      setTimeout(() => loadEnquiryCourses(), 600);
+    });
   </script>
 </body>
 </html>
