@@ -212,10 +212,56 @@
       border: 1px solid var(--border);
       border-radius: var(--r2);
       position: sticky;
-      top: 114px; /* nav (78px) + breadcrumb (~36px) */
+      top: 78px;
       z-index: 85;
       backdrop-filter: blur(16px);
     }
+
+    /* ── Hover Category Panel ── */
+    .cat-filter-wrap {
+      position: relative;
+    }
+    .cat-filter-btn {
+      display: flex; align-items: center; gap: 0.4rem;
+      padding: 0.55rem 1rem;
+      background: var(--panel);
+      border: 1.5px solid var(--border);
+      border-radius: var(--r2);
+      color: var(--txt2);
+      font-size: 0.875rem; font-weight: 600;
+      cursor: pointer; white-space: nowrap;
+      transition: border-color 0.2s, color 0.2s;
+      font-family: inherit;
+    }
+    .cat-filter-btn:hover,
+    .cat-filter-btn.active { border-color: var(--v1); color: var(--v1); }
+    .cat-panel {
+      position: absolute; top: calc(100% + 8px); left: 0;
+      min-width: 260px; background: var(--panel);
+      border: 1.5px solid var(--border2);
+      border-radius: var(--r2);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.35);
+      z-index: 200;
+      opacity: 0; visibility: hidden;
+      transform: translateY(-6px);
+      transition: opacity 0.2s, transform 0.2s, visibility 0.2s;
+      padding: 0.5rem;
+    }
+    .cat-filter-wrap:hover .cat-panel,
+    .cat-panel:hover { opacity: 1; visibility: visible; transform: translateY(0); }
+    .cat-chip {
+      display: flex; align-items: center; gap: 0.65rem;
+      width: 100%; padding: 0.6rem 0.85rem;
+      background: transparent; border: none;
+      color: var(--txt2); font-size: 0.865rem; font-weight: 500;
+      cursor: pointer; border-radius: var(--r1);
+      text-align: left; transition: background 0.15s, color 0.15s;
+      font-family: inherit;
+    }
+    .cat-chip:hover { background: rgba(124,92,252,0.1); color: var(--v2); }
+    .cat-chip.active { background: rgba(124,92,252,0.18); color: var(--v2); font-weight: 700; }
+    .cat-chip-icon { font-size: 1rem; flex-shrink: 0; }
+    .cat-panel-loading { padding: 0.75rem; color: var(--txt4); font-size: 0.82rem; }
     .filter-search-wrap {
       flex: 1;
       min-width: 180px;
@@ -360,6 +406,20 @@
 
         <div class="filter-divider"></div>
 
+        <!-- Hover Category Filter -->
+        <div class="cat-filter-wrap">
+          <button type="button" class="cat-filter-btn" id="catFilterBtn">
+            <span id="catFilterLabel">🌐 All Courses</span>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="cat-panel" id="catPanel">
+            <!-- Populated by loadCategories() -->
+            <div class="cat-panel-loading">Loading categories…</div>
+          </div>
+        </div>
+
+        <div class="filter-divider"></div>
+
         <select id="levelFilter" class="filter-select" onchange="applyFilters()" title="Filter by level">
           <option value="">All Levels</option>
           <option value="beginner">Beginner</option>
@@ -367,16 +427,8 @@
           <option value="advanced">Advanced</option>
         </select>
 
-        <select id="statusFilter" class="filter-select" onchange="applyFilters()" title="Filter by status">
-          <option value="">All Courses</option>
-          <option value="active">Active Courses</option>
-          <option value="closed">Closed Courses</option>
-          <option value="featured">Featured</option>
-        </select>
-
         <select id="sortFilter" class="filter-select" onchange="setSortFromDropdown(this.value)" title="Sort courses">
           <option value="popular">Most Popular</option>
-          <option value="trending">Recent Trends</option>
           <option value="newest">Newest First</option>
           <option value="rating">Top Rated</option>
         </select>
@@ -612,6 +664,7 @@
     let filteredCourses = [];
     let currentSort = 'popular';
     let courseRecordingsMap = {}; // course_id -> [recordings]
+    let enrolledCourseIds = new Set(); // tracks course IDs the current user is already enrolled in
 
     // Load recordings and build course_id map
     async function loadRecordingsForCourses() {
@@ -691,7 +744,10 @@
             <p class="course-desc">${course.short_description || course.description || ''}</p>
           </div>
           <div class="course-footer" style="justify-content:flex-end;">
-            <button class="btn-grad" onclick="enrollCourse('${course.id}', '${safeName}')">Enroll Now</button>
+            ${enrolledCourseIds.has(String(course.id))
+              ? `<button class="btn-grad" disabled style="opacity:.6;cursor:default;background:rgba(74,222,128,.18);color:#4ade80;">Already Enrolled ✓</button>`
+              : `<button class="btn-grad" onclick="enrollCourse('${course.id}', '${safeName}')">Enroll Now</button>`
+            }
           </div>
           ${(() => {
             const recs = courseRecordingsMap[course.id];
@@ -779,15 +835,21 @@
     }
 
     async function enrollCourse(courseId, courseTitle) {
-      // Check if user is logged in
-      const userId = localStorage.getItem('user_id');
-      
-      if (!userId) {
-        // Prompt user to login
-        if (window.app) {
-          window.app.showNotification('Please login to enroll in this course', 'info');
+      // Check if user is logged in via Supabase
+      let user = null;
+      try {
+        if (window.supabaseConfig) user = await window.supabaseConfig.getCurrentUser();
+      } catch(e) {}
+
+      if (!user) {
+        // Open login modal (works on all pages via profile-nav.js injected modal)
+        if (window.profileNav) {
+          window.profileNav.openLoginModal();
+        } else if (typeof openModal === 'function' && document.getElementById('mo')) {
+          openModal('role-select');
+        } else {
+          window.location.href = '../index.html';
         }
-        openModal('login');
         return;
       }
 
@@ -803,23 +865,52 @@
         return;
       }
 
+      // Disable the button temporarily to prevent double-clicks
+      const btn = event?.target;
+      if (btn) { btn.disabled = true; btn.textContent = 'Checking…'; }
+
+      // Check for existing enrollment (duplicate prevention)
       try {
-        const result = await window.supabaseConfig.enrollCourse(userId, {
-          id: course.id,
-          title: course.name,
-          category: course.category,
-          level: course.level
+        const existing = await window.supabaseConfig.checkExistingEnrollment(user.id, String(course.id));
+        if (existing.exists) {
+          if (window.app) window.app.showNotification(`You are already enrolled in "${courseTitle}".`, 'info');
+          if (btn) { btn.textContent = 'Already Enrolled ✓'; btn.style.background = 'rgba(74,222,128,.18)'; btn.style.color = '#4ade80'; }
+          enrolledCourseIds.add(String(course.id));
+          return;
+        }
+      } catch(e) { /* proceed */ }
+
+      if (btn) btn.textContent = 'Enrolling…';
+
+      try {
+        // Create enrollment record with pending payment status
+        await window.supabaseConfig.createUserEnrollment(user.id, {
+          course_id: String(course.id),
+          course_name: course.name,
+          course_category: course.category,
+          total_fee: Number(course.discounted_price || course.price) || 0
         });
 
-        // Show success regardless — DB table may not exist yet but interest is noted
+        // Also add to course_registrations for backward-compat
+        try {
+          await window.supabaseConfig.enrollCourse(user.id, {
+            id: course.id,
+            title: course.name,
+            category: course.category,
+            level: course.level
+          });
+        } catch(e) { /* non-critical */ }
+
+        enrolledCourseIds.add(String(course.id));
         if (window.app) {
-          window.app.showNotification(`🎉 Enrolled in "${courseTitle}"! Our team will contact you to confirm.`, 'success');
+          window.app.showNotification(`Enrolled in "${courseTitle}"! Payment pending — our team will contact you to confirm.`, 'success');
         }
+        if (btn) { btn.disabled = true; btn.textContent = 'Enrolled ✓'; btn.style.background = 'rgba(74,222,128,0.18)'; btn.style.color = '#4ade80'; }
       } catch (error) {
-        // Silently succeed — show user-friendly message even if DB is unavailable
         if (window.app) {
-          window.app.showNotification(`🎉 Enrollment interest noted for "${courseTitle}"! We'll be in touch soon.`, 'success');
+          window.app.showNotification(`Enrollment interest noted for "${courseTitle}"! We'll be in touch soon.`, 'success');
         }
+        if (btn) { btn.disabled = false; btn.textContent = 'Enroll Now'; }
       }
     }
 
@@ -827,15 +918,24 @@
       const modal = document.getElementById('mo');
       if (modal) {
         modal.classList.add('open');
-        const loginForm = document.getElementById('lf');
+        const loginForm    = document.getElementById('lf');
         const registerForm = document.getElementById('rf');
-        
-        if (type === 'login') {
+        const roleSelect   = document.getElementById('rs');
+        const adminForm    = document.getElementById('af');
+        [loginForm, registerForm, roleSelect, adminForm].forEach(el => { if (el) el.style.display = 'none'; });
+
+        if (type === 'role-select' && roleSelect) {
+          roleSelect.style.display = 'block';
+        } else if (type === 'login' && loginForm) {
           loginForm.style.display = 'block';
-          registerForm.style.display = 'none';
-        } else {
-          loginForm.style.display = 'none';
+        } else if (type === 'register' && registerForm) {
           registerForm.style.display = 'block';
+        } else if (type === 'admin' && adminForm) {
+          adminForm.style.display = 'block';
+        } else if (roleSelect) {
+          roleSelect.style.display = 'block';
+        } else if (loginForm) {
+          loginForm.style.display = 'block';
         }
       }
     }
@@ -848,16 +948,17 @@
     }
 
     function switchModalTab(tab) {
-      const loginForm = document.getElementById('lf');
+      const loginForm    = document.getElementById('lf');
       const registerForm = document.getElementById('rf');
-      
-      if (tab === 'login') {
-        loginForm.style.display = 'block';
-        registerForm.style.display = 'none';
-      } else {
-        loginForm.style.display = 'none';
-        registerForm.style.display = 'block';
-      }
+      const roleSelect   = document.getElementById('rs');
+      const adminForm    = document.getElementById('af');
+      [loginForm, registerForm, roleSelect, adminForm].forEach(el => { if (el) el.style.display = 'none'; });
+      if (tab === 'role-select' && roleSelect)   roleSelect.style.display   = 'block';
+      else if (tab === 'login' && loginForm)     loginForm.style.display    = 'block';
+      else if (tab === 'register' && registerForm) registerForm.style.display = 'block';
+      else if (tab === 'admin' && adminForm)     adminForm.style.display    = 'block';
+      else if (roleSelect)                       roleSelect.style.display   = 'block';
+      else if (loginForm)                        loginForm.style.display    = 'block';
     }
 
     function submitLogin() {
@@ -992,15 +1093,25 @@
 
     document.getElementById('searchBox').addEventListener('input', applyFilters);
 
+    async function loadUserEnrolledCourses() {
+      try {
+        if (!window.supabaseConfig) return;
+        const user = await window.supabaseConfig.getCurrentUser();
+        if (!user) return;
+        const enrollments = await window.supabaseConfig.getUserEnrollments(user.id);
+        enrolledCourseIds = new Set(enrollments.map(e => String(e.course_id)));
+      } catch(e) { /* non-critical */ }
+    }
+
     // Initialize
     document.addEventListener('DOMContentLoaded', async () => {
-      await loadCoursesFromDB();
+      await Promise.all([loadCoursesFromDB(), loadUserEnrolledCourses()]);
       applySort();
     });
 
     // Fallback init if DOMContentLoaded already fired
     if (document.readyState !== 'loading') {
-      loadCoursesFromDB().then(() => applySort());
+      Promise.all([loadCoursesFromDB(), loadUserEnrolledCourses()]).then(() => applySort());
     }
   </script>
 

@@ -186,6 +186,26 @@ class SupabaseConfig {
     }
   }
 
+  async uploadProfilePicture(userId, file) {
+    try {
+      const ext = file.name.split('.').pop().toLowerCase() || 'jpg';
+      const path = `${userId}/avatar.${ext}`;
+      const { error: uploadError } = await this.client.storage
+        .from('avatars')
+        .upload(path, file, { upsert: true, contentType: file.type });
+      if (uploadError) throw uploadError;
+      const { data: urlData } = this.client.storage
+        .from('avatars')
+        .getPublicUrl(path);
+      const url = urlData.publicUrl + '?t=' + Date.now(); // cache-bust
+      await this.updateUserProfile(userId, { profile_picture_url: url });
+      return { success: true, url };
+    } catch (error) {
+      console.error('Error uploading profile picture:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
   // ==================== COURSE REGISTRATIONS ====================
   
   async enrollCourse(userId, courseData) {
@@ -608,6 +628,133 @@ class SupabaseConfig {
     }
   }
 
+  // ==================== USER ENROLLMENTS (user_enrollments table) ====================
+
+  async createUserEnrollment(userId, enrollData) {
+    try {
+      const totalFee = Number(enrollData.total_fee) || 0;
+      const { data, error } = await this.client
+        .from('user_enrollments')
+        .insert([{
+          user_id: userId,
+          course_id: String(enrollData.course_id),
+          course_name: enrollData.course_name || '',
+          course_category: enrollData.course_category || null,
+          enrollment_status: 'pending',
+          payment_status: 'pending',
+          payment_type: 'full',
+          total_fee: totalFee,
+          amount_paid: 0,
+          remaining_balance: totalFee,
+          course_access_enabled: false
+        }]);
+      if (error) throw error;
+      await this.logAuditEvent(userId, 'course_enroll', 'user_enrollment', data?.[0]?.id || userId);
+      return { success: true, data };
+    } catch (error) {
+      console.error('Error creating user enrollment:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  async checkExistingEnrollment(userId, courseId) {
+    try {
+      const { data, error } = await this.client
+        .from('user_enrollments')
+        .select('id')
+        .eq('user_id', userId)
+        .eq('course_id', String(courseId))
+        .maybeSingle();
+      if (error) throw error;
+      return { exists: !!data, id: data?.id };
+    } catch (error) {
+      console.error('Error checking enrollment:', error);
+      return { exists: false };
+    }
+  }
+
+  async getUserEnrollments(userId) {
+    try {
+      const { data, error } = await this.client
+        .from('user_enrollments')
+        .select('*')
+        .eq('user_id', userId)
+        .order('enrollment_date', { ascending: false });
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      console.error('Error fetching user enrollments:', error);
+      return [];
+    }
+  }
+
+  async adminDeleteEnrollment(enrollmentId) {
+    try {
+      const { error } = await this.client
+        .from('user_enrollments')
+        .delete()
+        .eq('id', enrollmentId);
+      if (error) throw error;
+      return { success: true };
+    } catch (error) {
+      console.error('Error deleting enrollment:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  async adminUpdateEnrollment(enrollmentId, updates) {
+    try {
+      const payload = { ...updates, updated_at: new Date().toISOString() };
+      // Recalculate balance if fees change
+      if (payload.total_fee !== undefined || payload.amount_paid !== undefined) {
+        const totalFee   = Number(payload.total_fee   ?? updates.total_fee   ?? 0);
+        const amountPaid = Number(payload.amount_paid ?? updates.amount_paid ?? 0);
+        payload.remaining_balance = Math.max(0, totalFee - amountPaid);
+      }
+      // Auto-set course_access_enabled based on enrollment_status if not explicitly set
+      if (payload.enrollment_status !== undefined && payload.course_access_enabled === undefined) {
+        payload.course_access_enabled = payload.enrollment_status === 'active';
+      }
+      const { data, error } = await this.client
+        .from('user_enrollments')
+        .update(payload)
+        .eq('id', enrollmentId)
+        .select();
+      if (error) throw error;
+      return { success: true, data };
+    } catch (error) {
+      console.error('Error updating enrollment:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  async adminCreateEnrollment(enrollData) {
+    try {
+      const totalFee = Number(enrollData.total_fee) || 0;
+      const amountPaid = Number(enrollData.amount_paid) || 0;
+      const { data, error } = await this.client
+        .from('user_enrollments')
+        .insert([{
+          user_id: enrollData.user_id,
+          course_id: String(enrollData.course_id || 'manual'),
+          course_name: enrollData.course_name || '',
+          course_category: enrollData.course_category || null,
+          enrollment_status: enrollData.enrollment_status || 'active',
+          payment_status: enrollData.payment_status || 'pending',
+          payment_type: enrollData.payment_type || 'full',
+          total_fee: totalFee,
+          amount_paid: amountPaid,
+          remaining_balance: totalFee - amountPaid,
+          course_access_enabled: enrollData.enrollment_status === 'active'
+        }]);
+      if (error) throw error;
+      return { success: true, data };
+    } catch (error) {
+      console.error('Error creating admin enrollment:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
   async getUserEMIApplications(userId) {
     try {
       const { data, error } = await this.client
@@ -665,20 +812,24 @@ class SupabaseConfig {
 
   async createEnrollment(userId, enrollmentData) {
     try {
-      const priceNum = parseInt((enrollmentData.price || '0').replace(/[^\d]/g, '')) || 0;
+      const priceRaw = enrollmentData.price || '0';
+      const priceNum = typeof priceRaw === 'number'
+        ? priceRaw
+        : parseInt(String(priceRaw).replace(/[^\d]/g, '')) || 0;
       const { data, error } = await this.client
         .from('user_enrollments')
         .insert([{
           user_id: userId,
           course_id: enrollmentData.id,
-          course_name: enrollmentData.name,
+          course_name: enrollmentData.name || enrollmentData.title || 'Course',
           course_category: enrollmentData.category || null,
           enrollment_status: 'pending',
-          payment_status: 'pending',
+          payment_status: enrollmentData.payment_method && enrollmentData.payment_method !== 'pending' ? 'partial' : 'pending',
           payment_type: enrollmentData.payment_type || 'full',
+          payment_method: enrollmentData.payment_method || 'pending',
           total_fee: priceNum,
-          amount_paid: 0,
-          remaining_balance: priceNum,
+          amount_paid: enrollmentData.amount_paid || 0,
+          remaining_balance: priceNum - (enrollmentData.amount_paid || 0),
           emi_months: enrollmentData.emi_months || null,
           emi_amount_per_month: enrollmentData.emi_amount_per_month || null,
           course_access_enabled: false
@@ -692,22 +843,6 @@ class SupabaseConfig {
     } catch (error) {
       console.error('Error creating enrollment:', error);
       return { success: false, error: error.message };
-    }
-  }
-
-  async getUserEnrollments(userId) {
-    try {
-      const { data, error } = await this.client
-        .from('user_enrollments')
-        .select('*')
-        .eq('user_id', userId)
-        .order('enrollment_date', { ascending: false });
-
-      if (error) throw error;
-      return { success: true, data: data || [] };
-    } catch (error) {
-      console.error('Error fetching user enrollments:', error);
-      return { success: false, data: [], error: error.message };
     }
   }
 
@@ -786,6 +921,81 @@ class SupabaseConfig {
       return { success: true, data };
     } catch (error) {
       console.error('Error toggling course access:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // ==================== COURSE CATEGORIES ====================
+
+  async getCategories(activeOnly = true) {
+    try {
+      let query = this.client
+        .from('course_categories')
+        .select('*')
+        .order('sort_order', { ascending: true });
+      if (activeOnly) query = query.eq('is_active', true);
+      const { data, error } = await query;
+      if (error) throw error;
+      return { success: true, data: data || [] };
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+      return { success: false, data: [], error: error.message };
+    }
+  }
+
+  async createCategory(categoryData) {
+    try {
+      const slug = (categoryData.name || '')
+        .toLowerCase().trim()
+        .replace(/[^a-z0-9\s]/g, '')
+        .replace(/\s+/g, '-');
+      const { data, error } = await this.client
+        .from('course_categories')
+        .insert([{
+          name:       categoryData.name,
+          slug:       categoryData.slug || slug,
+          icon:       categoryData.icon || '📘',
+          color:      categoryData.color || '#7c5cfc',
+          sort_order: categoryData.sort_order || 99,
+          is_active:  true
+        }])
+        .select()
+        .single();
+      if (error) throw error;
+      return { success: true, data };
+    } catch (error) {
+      console.error('Error creating category:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  async updateCategory(categoryId, updates) {
+    try {
+      updates.updated_at = new Date().toISOString();
+      const { data, error } = await this.client
+        .from('course_categories')
+        .update(updates)
+        .eq('id', categoryId)
+        .select()
+        .single();
+      if (error) throw error;
+      return { success: true, data };
+    } catch (error) {
+      console.error('Error updating category:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  async deleteCategory(categoryId) {
+    try {
+      const { error } = await this.client
+        .from('course_categories')
+        .delete()
+        .eq('id', categoryId);
+      if (error) throw error;
+      return { success: true };
+    } catch (error) {
+      console.error('Error deleting category:', error);
       return { success: false, error: error.message };
     }
   }

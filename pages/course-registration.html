@@ -261,6 +261,10 @@
           return;
         }
 
+        // Save to user_enrollments (new relational enrollment table)
+        await window.supabaseConfig.createEnrollment(result.data.user.id, courseInfo);
+
+        // Also save to legacy course_registrations table for backward compat
         await window.supabaseConfig.enrollCourse(result.data.user.id, courseInfo);
 
         setTimeout(() => {
