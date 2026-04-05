@@ -2917,16 +2917,16 @@ async function loadEnrollments() {
 
   try {
     const { data, error } = await sb.getClient()
-      .from('user_enrollments')
+      .from('course_registrations')
       .select('*, user_profiles(full_name, email)')
-      .order('enrollment_date', { ascending: false });
+      .order('registration_date', { ascending: false });
 
     if (error) throw error;
     allEnrollments = data || [];
     renderEnrollments(allEnrollments);
   } catch(e) {
-    console.warn('user_enrollments table may not exist yet:', e.message);
-    el.innerHTML = `<tr><td colspan="11" style="text-align:center;padding:2rem;color:var(--txt4)">No enrollment data yet. Create the <code>user_enrollments</code> table in Supabase using the SQL schema provided.</td></tr>`;
+    console.warn('course_registrations table may not exist yet:', e.message);
+    el.innerHTML = `<tr><td colspan="11" style="text-align:center;padding:2rem;color:var(--txt4)">No enrollment data yet. Create the <code>course_registrations</code> table in Supabase using the SQL schema provided.</td></tr>`;
     ['enr-total','enr-pending','enr-active','enr-revenue'].forEach(id => {
       const e = document.getElementById(id); if(e) e.textContent = '0';
     });

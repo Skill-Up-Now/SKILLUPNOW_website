@@ -20,25 +20,62 @@ class ProfileNavigationManager {
     this.injectCursor();
     this.rebuildNav();
     this.replaceFooter();
+    this.updateYearFields();
     this.setupMobileMenu();
     this.setupProfileDropdown();
     this.injectAuthModal();
     await this.checkUserSession();
   }
 
-  /* ── Cursor elements ── */
+  /* ── Update any current-year placeholders ── */
+  updateYearFields() {
+    const year = new Date().getFullYear();
+    document.querySelectorAll('.site-year').forEach(el => { el.textContent = year; });
+  }
+
+  /* ── Cursor elements + tracking ── */
   injectCursor() {
     if (document.getElementById('cursor')) return;
     const dot  = document.createElement('div'); dot.id = 'cursor';
     const ring = document.createElement('div'); ring.id = 'cursor-ring';
     document.body.prepend(ring);
     document.body.prepend(dot);
+
+    // Mouse tracking (runs on ALL pages via profile-nav)
+    let mx = -100, my = -100, rx = -100, ry = -100;
+    document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+    const lerp = (a, b, t) => a + (b - a) * t;
+    const tick = () => {
+      rx = lerp(rx, mx, 0.14); ry = lerp(ry, my, 0.14);
+      dot.style.left = mx + 'px'; dot.style.top = my + 'px';
+      ring.style.left = rx + 'px'; ring.style.top = ry + 'px';
+      requestAnimationFrame(tick);
+    };
+    tick();
+
+    const hoverSel = 'a,button,[role="button"],input,select,textarea,label,.course-card,.ftab,.hero-cta,.nav-signin,.nav-cta,#login-btn,#cta-btn';
+    document.addEventListener('mouseover', e => { if (e.target.closest(hoverSel)) document.body.classList.add('cursor-hover'); });
+    document.addEventListener('mouseout',  e => { if (e.target.closest(hoverSel)) document.body.classList.remove('cursor-hover'); });
+    document.addEventListener('focusin',   e => { if (['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName)) document.body.classList.add('cursor-input'); });
+    document.addEventListener('focusout',  () => document.body.classList.remove('cursor-input'));
+    document.addEventListener('mousedown', () => document.body.classList.add('cursor-click'));
+    document.addEventListener('mouseup',   () => document.body.classList.remove('cursor-click'));
+    document.addEventListener('mouseleave', () => { dot.style.opacity = '0'; ring.style.opacity = '0'; });
+    document.addEventListener('mouseenter', () => { dot.style.opacity = ''; ring.style.opacity = ''; });
   }
 
   /* ── Build nav HTML with correct paths ── */
   buildNavHTML() {
     const r = this.rootPfx;   // '../' from /pages/, '' from root
     const p = this.pagesPfx;  // '' from /pages/, 'pages/' from root
+
+    // Determine current page for active state
+    const currentPath = window.location.pathname.replace(/\\/g, '/');
+    const isHome = currentPath.endsWith('/') || currentPath.endsWith('index.html') || currentPath.endsWith('index');
+    const isCourses = currentPath.includes('courses');
+    const isFeedback = currentPath.includes('feedback');
+    const isContact = currentPath.includes('contact-enquiry');
+    const isPamphlet = currentPath.includes('pamphlet');
 
     return `
       <a href="${r}index.html" class="nav-logo">
@@ -51,11 +88,11 @@ class ProfileNavigationManager {
       </a>
 
       <ul class="nav-links" id="nav-links-list">
-        <li><a href="${r}index.html" class="nav-link-item">Home</a></li>
-        <li><a href="${p}courses.html" class="nav-link-item">Courses</a></li>
-        <li><a href="${p}feedback.html" class="nav-link-item">Reviews</a></li>
-        <li><a href="${p}contact-enquiry.html" class="nav-link-item">Enquiry</a></li>
-        <li><a href="${p}pamphlet.html" class="nav-link-item nav-pamphlet-btn" style="display:inline-flex;align-items:center;gap:0.35rem;background:linear-gradient(135deg,rgba(124,92,252,0.18),rgba(61,107,255,0.18));border:1.5px solid rgba(124,92,252,0.35);border-radius:50px;padding:0.35rem 0.9rem;font-weight:700;transition:all 0.25s;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>Pamphlet</a></li>
+        <li><a href="${r}index.html" class="nav-link-item ${isHome ? 'active' : ''}">Home</a></li>
+        <li><a href="${p}courses.html" class="nav-link-item ${isCourses ? 'active' : ''}">Courses</a></li>
+        <li><a href="${p}feedback.html" class="nav-link-item ${isFeedback ? 'active' : ''}">Reviews</a></li>
+        <li><a href="${p}contact-enquiry.html" class="nav-link-item ${isContact ? 'active' : ''}">Enquiry</a></li>
+        <li><a href="${p}pamphlet.html" class="nav-link-item ${isPamphlet ? 'active' : ''}">Pamphlet</a></li>
       </ul>
 
       <div class="nav-actions" id="nav-actions">
@@ -124,7 +161,7 @@ class ProfileNavigationManager {
     const p = this.pagesPfx;
 
     return `
-      <div class="footer-grid-main" style="display:grid; grid-template-columns:2fr 1fr 1fr 1fr; gap:3rem; margin-bottom:3.5rem;">
+      <div class="footer-grid-main" style="display:grid; grid-template-columns:2fr 1fr 1fr; gap:2.5rem; margin-bottom:3.5rem; align-items:start;">
         <div>
           <a href="${r}index.html" class="nav-logo" style="margin-bottom:1rem; display:inline-flex;">
             <div class="logo-icon">
@@ -154,17 +191,6 @@ class ProfileNavigationManager {
         </div>
 
         <div>
-          <h5 class="footer-col-title">Courses</h5>
-          <ul class="footer-col-links">
-            <li><a href="${p}courses.html" class="footer-link">Cloud Computing</a></li>
-            <li><a href="${p}courses.html" class="footer-link">DevOps &amp; CI/CD</a></li>
-            <li><a href="${p}courses.html" class="footer-link">AI &amp; Machine Learning</a></li>
-            <li><a href="${p}courses.html" class="footer-link">Cybersecurity</a></li>
-            <li><a href="${p}courses.html" class="footer-link">Data Engineering</a></li>
-          </ul>
-        </div>
-
-        <div>
           <h5 class="footer-col-title">Platform</h5>
           <ul class="footer-col-links">
             <li><a href="${r}index.html#how-it-works" class="footer-link">How It Works</a></li>
@@ -186,7 +212,7 @@ class ProfileNavigationManager {
       </div>
 
       <div class="footer-bottom">
-        <p class="footer-copy">© 2026 SkillUpNow. All rights reserved.</p>
+        <p class="footer-copy">© ${new Date().getFullYear()} SkillUpNow. All rights reserved.</p>
         <div class="footer-socials">
           <a href="#" class="footer-social-icon" aria-label="Facebook">📘</a>
           <a href="#" class="footer-social-icon" aria-label="X">𝕏</a>

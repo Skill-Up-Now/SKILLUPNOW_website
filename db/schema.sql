@@ -104,6 +104,9 @@ CREATE TABLE IF NOT EXISTS public.courses (
                                    'DevOps','Networking','Database','Other')),
   description       TEXT,
   short_description TEXT,
+  key_topics        TEXT[],       -- Array of key topics covered
+  learning_outcomes TEXT[],       -- Array of what students will achieve
+  career_opportunities TEXT[],    -- Array of career paths unlocked
   price             NUMERIC(10,2) NOT NULL DEFAULT 0 CHECK (price >= 0),
   discounted_price  NUMERIC(10,2)           CHECK (discounted_price >= 0),
   duration_hours    INT,
@@ -142,6 +145,38 @@ CREATE INDEX IF NOT EXISTS idx_courses_rating      ON public.courses (rating DES
 -- Full-text search index on course name + description
 CREATE INDEX IF NOT EXISTS idx_courses_search ON public.courses
   USING GIN (to_tsvector('english', coalesce(name,'') || ' ' || coalesce(short_description,'')));
+
+
+-- ============================================================
+-- 4. COURSE REGISTRATIONS (Legacy)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS public.course_registrations (
+  id                  UUID         PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id             UUID         NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  course_id           TEXT         NOT NULL,
+  course_title        TEXT         NOT NULL,
+  course_category     TEXT,
+  course_level        TEXT,
+  registration_date   TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+  materials_given     BOOLEAN      NOT NULL DEFAULT FALSE,
+  progress_percentage INT          NOT NULL DEFAULT 0 CHECK (progress_percentage BETWEEN 0 AND 100),
+  status              TEXT         NOT NULL DEFAULT 'active'
+                                   CHECK (status IN ('active','completed','paused','cancelled')),
+  amount              NUMERIC(10,2),
+  payment_type        TEXT         CHECK (payment_type IN ('full','emi')),
+  notes               TEXT,
+  created_at          TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+  updated_at          TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+);
+
+CREATE TRIGGER trg_course_registrations_updated_at
+  BEFORE UPDATE ON public.course_registrations
+  FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();
+
+-- Indexes
+CREATE INDEX IF NOT EXISTS idx_course_registrations_user   ON public.course_registrations (user_id);
+CREATE INDEX IF NOT EXISTS idx_course_registrations_course ON public.course_registrations (course_id);
+CREATE INDEX IF NOT EXISTS idx_course_registrations_status ON public.course_registrations (status);
 
 
 -- ============================================================

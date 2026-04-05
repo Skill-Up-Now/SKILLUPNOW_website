@@ -418,7 +418,7 @@
   <nav></nav>
 
   <!-- Hero Section -->
-  <section class="hero" style="padding: 5rem 5vw 4rem; display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 2rem; overflow: visible;">
+  <section class="hero" style="padding: 2rem 5vw 4rem; display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 2rem; overflow: visible;">
     <div class="hero-content">
 <!-- styling -->
       <style>
@@ -458,23 +458,36 @@
           background-size: 200% 200%;
         }
       </style>
-      <h1 style="font-family: 'Cormorant Garamond', serif; font-weight: 700; font-size: clamp(3rem, 5.5vw, 5.2rem); line-height: 1.04; letter-spacing: -0.02em; color: var(--txt); margin-bottom: 1.5rem; animation: fadeUp 0.7s 0.1s ease both;">
+      <h1 style="font-family: 'Cormorant Garamond', serif; font-weight: 700; font-size: clamp(3rem, 5.5vw, 5.2rem); line-height: 1.04; letter-spacing: -0.02em; color: var(--txt); margin-bottom: 1rem; animation: fadeUp 0.7s 0.1s ease both;">
         Master Soft Skills, <span class="text-gradient hero-word-wrap"><span id="hero-word" class="hero-word">Communication</span></span><br/>with <span class="text-gradient">Unwavering</span><br/>Confidence
       </h1>
 
-      <p class="hero-desc" style="font-size: 1.06rem; color: var(--txt3); line-height: 1.8; max-width: 500px; font-weight: 400; margin-bottom: 2.4rem; animation: fadeUp 0.7s 0.2s ease both;">
+      <p class="hero-desc" style="font-size: 1.06rem; color: var(--txt3); line-height: 1.8; max-width: 500px; font-weight: 400; margin-bottom: 2rem; animation: fadeUp 0.7s 0.2s ease both;">
         Master Yourself, Inspire the World
-      </p> 
+      </p>
 
-      <div class="hero-actions" style="display: flex; gap: 1rem; flex-wrap: wrap; animation: fadeUp 0.7s 0.3s ease both;">
-        <a href="pages/courses.html" class="btn-grad">Explore Courses</a>
-        <a href="pages/contact-enquiry.html" class="btn-outline">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-          Get Fee Quote
-        </a>
+      <div class="hero-actions" style="animation: fadeUp 0.7s 0.3s ease both; margin-bottom: 2.2rem;">
+        <div style="display: flex; gap: 1.5rem; flex-wrap: wrap; justify-content: flex-start; align-items: center;">
+          <a href="pages/courses.html" class="btn-grad" style="min-width: 190px; padding: 1rem 2.2rem; font-size: 1rem; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; box-shadow: 0 0 28px rgba(124,92,252,0.45), 0 8px 28px rgba(124,92,252,0.28); transition: all 0.3s cubic-bezier(0.4,0,0.2,1);"
+            onmouseover="this.style.boxShadow='0 0 48px rgba(124,92,252,0.7), 0 12px 40px rgba(124,92,252,0.45)';this.style.transform='translateY(-3px)'"
+            onmouseout="this.style.boxShadow='0 0 28px rgba(124,92,252,0.45), 0 8px 28px rgba(124,92,252,0.28)';this.style.transform=''">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+            Explore Courses
+          </a>
+          <a href="pages/contact-enquiry.html" class="btn-outline" style="min-width: 190px; padding: 1rem 2.2rem; font-size: 1rem; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; transition: all 0.3s cubic-bezier(0.4,0,0.2,1);"
+            onmouseover="this.style.boxShadow='0 0 32px rgba(61,107,255,0.4), 0 8px 28px rgba(61,107,255,0.22)';this.style.transform='translateY(-3px)'"
+            onmouseout="this.style.boxShadow='';this.style.transform=''">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+            Get Fee Quote
+          </a>
+        </div>
+
+        <div style="text-align: center; margin-top: 1.2rem;">
+          <span style="font-size: 0.85rem; color: var(--txt4);">No commitment • Free consultation • EMI available</span>
+        </div>
       </div>
 
-      <div style="display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 2.4rem;">
+      <div style="display: flex; flex-wrap: wrap; gap: 0.75rem;">
         <div class="feat-pill" style="animation-delay: 0.5s;">
           <span class="pill-check">✔</span> Build Confidence
         </div>
@@ -613,7 +626,7 @@
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7c5cfc" stroke-width="2" style="flex-shrink: 0;"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg> Zero-Cost EMI Available
     </div>
     <div style="display: flex; align-items: center; gap: 0.6rem; font-size: 0.82rem; font-weight: 600; color: var(--txt3);">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7c5cfc" stroke-width="2" style="flex-shrink: 0;"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg> 12,000+ Students
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7c5cfc" stroke-width="2" style="flex-shrink: 0;"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg> <span id="trust-students">Growing</span> Students
     </div>
     <div style="display: flex; align-items: center; gap: 0.6rem; font-size: 0.82rem; font-weight: 600; color: var(--txt3);">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7c5cfc" stroke-width="2" style="flex-shrink: 0;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> 4.9 Average Rating
@@ -838,25 +851,25 @@
         </div>
       </div>
 
-      <!-- Stats strip -->
+      <!-- Stats strip — values loaded dynamically from database -->
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1.5rem; margin-bottom: 5rem;">
-        <div style="text-align: center; padding: 2rem 1rem; background: var(--panel2); border: 1px solid var(--border); border-radius: var(--r2);">
-          <div style="font-size: 2.4rem; font-weight: 800; background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1;">12K+</div>
-          <div style="font-size: 0.8rem; color: var(--txt4); margin-top: 0.4rem; font-weight: 500;">Students Trained</div>
+        <div style="text-align: center; padding: 2rem 1rem; background: var(--panel2); border: 1px solid var(--border); border-radius: var(--r2); transition: border-color 0.3s, transform 0.3s;" onmouseover="this.style.borderColor='var(--v1)';this.style.transform='translateY(-4px)'" onmouseout="this.style.borderColor='var(--border)';this.style.transform=''">
+          <div id="stat-students" style="font-size: 2.4rem; font-weight: 800; background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1; min-height: 1em;">—</div>
+          <div style="font-size: 0.8rem; color: var(--txt4); margin-top: 0.4rem; font-weight: 500;">Students Enrolled</div>
         </div>
-        <div style="text-align: center; padding: 2rem 1rem; background: var(--panel2); border: 1px solid var(--border); border-radius: var(--r2);">
-          <div style="font-size: 2.4rem; font-weight: 800; background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1;">48+</div>
+        <div style="text-align: center; padding: 2rem 1rem; background: var(--panel2); border: 1px solid var(--border); border-radius: var(--r2); transition: border-color 0.3s, transform 0.3s;" onmouseover="this.style.borderColor='var(--v1)';this.style.transform='translateY(-4px)'" onmouseout="this.style.borderColor='var(--border)';this.style.transform=''">
+          <div id="stat-courses" style="font-size: 2.4rem; font-weight: 800; background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1; min-height: 1em;">—</div>
           <div style="font-size: 0.8rem; color: var(--txt4); margin-top: 0.4rem; font-weight: 500;">Expert Courses</div>
         </div>
-        <div style="text-align: center; padding: 2rem 1rem; background: var(--panel2); border: 1px solid var(--border); border-radius: var(--r2);">
-          <div style="font-size: 2.4rem; font-weight: 800; background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1;">4.9★</div>
+        <div style="text-align: center; padding: 2rem 1rem; background: var(--panel2); border: 1px solid var(--border); border-radius: var(--r2); transition: border-color 0.3s, transform 0.3s;" onmouseover="this.style.borderColor='var(--v1)';this.style.transform='translateY(-4px)'" onmouseout="this.style.borderColor='var(--border)';this.style.transform=''">
+          <div id="stat-rating" style="font-size: 2.4rem; font-weight: 800; background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1; min-height: 1em;">—</div>
           <div style="font-size: 0.8rem; color: var(--txt4); margin-top: 0.4rem; font-weight: 500;">Average Rating</div>
         </div>
-        <div style="text-align: center; padding: 2rem 1rem; background: var(--panel2); border: 1px solid var(--border); border-radius: var(--r2);">
+        <div style="text-align: center; padding: 2rem 1rem; background: var(--panel2); border: 1px solid var(--border); border-radius: var(--r2); transition: border-color 0.3s, transform 0.3s;" onmouseover="this.style.borderColor='var(--v1)';this.style.transform='translateY(-4px)'" onmouseout="this.style.borderColor='var(--border)';this.style.transform=''">
           <div style="font-size: 2.4rem; font-weight: 800; background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1;">100%</div>
           <div style="font-size: 0.8rem; color: var(--txt4); margin-top: 0.4rem; font-weight: 500;">Live Sessions</div>
         </div>
-        <div style="text-align: center; padding: 2rem 1rem; background: var(--panel2); border: 1px solid var(--border); border-radius: var(--r2);">
+        <div style="text-align: center; padding: 2rem 1rem; background: var(--panel2); border: 1px solid var(--border); border-radius: var(--r2); transition: border-color 0.3s, transform 0.3s;" onmouseover="this.style.borderColor='var(--v1)';this.style.transform='translateY(-4px)'" onmouseout="this.style.borderColor='var(--border)';this.style.transform=''">
           <div style="font-size: 2.4rem; font-weight: 800; background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1;">1-on-1</div>
           <div style="font-size: 0.8rem; color: var(--txt4); margin-top: 0.4rem; font-weight: 500;">Mentoring</div>
         </div>
@@ -890,9 +903,251 @@
         </div>
       </div>
 
+      <!-- Our Journey / Timeline -->
+      <div style="margin-top: 5rem; padding: 3rem 0; background: linear-gradient(135deg, rgba(124,92,252,0.03), rgba(0,207,238,0.03)); border-radius: var(--r3); border: 1px solid rgba(124,92,252,0.1);">
+        <div style="text-align: center; margin-bottom: 3rem;">
+          <span style="display: inline-block; padding: 0.35rem 1.1rem; background: rgba(124,92,252,0.1); border: 1px solid rgba(124,92,252,0.25); border-radius: 50px; font-size: 0.8rem; font-weight: 700; color: var(--v1); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 1.2rem;">Our Journey</span>
+          <h3 style="font-family: 'Cormorant Garamond', serif; font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 700; color: var(--txt); margin-bottom: 1rem; letter-spacing: -0.02em;">From Vision to <span style="background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Reality</span></h3>
+          <p style="font-size: 1rem; color: var(--txt3); max-width: 600px; margin: 0 auto; line-height: 1.6;">A timeline of milestones that shaped SkillUpNow into the premier destination for professional development.</p>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem; max-width: 1200px; margin: 0 auto;">
+          <!-- Timeline Item 1 -->
+          <div style="background: var(--panel); border: 1.5px solid var(--border); border-radius: var(--r3); padding: 2rem; position: relative; overflow: hidden; transition: transform 0.3s, border-color 0.3s;" onmouseover="this.style.transform='translateY(-5px)';this.style.borderColor='var(--v1)'" onmouseout="this.style.transform='';this.style.borderColor='var(--border)'">
+            <div style="position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: linear-gradient(180deg, var(--v1), var(--v2));"></div>
+            <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.2rem;">
+              <div style="width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, #7c5cfc, #3d6bff); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0;">🚀</div>
+              <div>
+                <div style="font-size: 1.1rem; font-weight: 700; color: var(--txt);">2026 — Q1</div>
+                <div style="font-size: 0.85rem; color: var(--txt3);">The Beginning</div>
+              </div>
+            </div>
+            <p style="font-size: 0.9rem; color: var(--txt3); line-height: 1.6; margin: 0;">SkillUpNow is founded with a clear mission — to help professionals build the communication, leadership, and soft skills that no algorithm can replace.</p>
+          </div>
+
+          <!-- Timeline Item 2 -->
+          <div style="background: var(--panel); border: 1.5px solid var(--border); border-radius: var(--r3); padding: 2rem; position: relative; overflow: hidden; transition: transform 0.3s, border-color 0.3s;" onmouseover="this.style.transform='translateY(-5px)';this.style.borderColor='#00cfee'" onmouseout="this.style.transform='';this.style.borderColor='var(--border)'">
+            <div style="position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: linear-gradient(180deg, #00cfee, #0090b8);"></div>
+            <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.2rem;">
+              <div style="width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, #00cfee, #0090b8); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0;">📚</div>
+              <div>
+                <div style="font-size: 1.1rem; font-weight: 700; color: var(--txt);">2026 — Q2</div>
+                <div style="font-size: 0.85rem; color: var(--txt3);">First Cohort</div>
+              </div>
+            </div>
+            <p style="font-size: 0.9rem; color: var(--txt3); line-height: 1.6; margin: 0;">Our first batch of learners enrolls. Flagship programmes in Communication Mastery and Leadership Excellence launch to an enthusiastic reception.</p>
+          </div>
+
+          <!-- Timeline Item 3 -->
+          <div style="background: var(--panel); border: 1.5px solid var(--border); border-radius: var(--r3); padding: 2rem; position: relative; overflow: hidden; transition: transform 0.3s, border-color 0.3s;" onmouseover="this.style.transform='translateY(-5px)';this.style.borderColor='#4ade80'" onmouseout="this.style.transform='';this.style.borderColor='var(--border)'">
+            <div style="position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: linear-gradient(180deg, #4ade80, #16a34a);"></div>
+            <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.2rem;">
+              <div style="width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, #4ade80, #16a34a); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0;">🖥️</div>
+              <div>
+                <div style="font-size: 1.1rem; font-weight: 700; color: var(--txt);">2026 — Q3</div>
+                <div style="font-size: 0.85rem; color: var(--txt3);">Platform Goes Live</div>
+              </div>
+            </div>
+            <p style="font-size: 0.9rem; color: var(--txt3); line-height: 1.6; margin: 0;">Full digital platform launched — live sessions, recorded modules, 1-on-1 mentoring, and flexible EMI plans all available in one place.</p>
+          </div>
+
+          <!-- Timeline Item 4 -->
+          <div style="background: var(--panel); border: 1.5px solid var(--border); border-radius: var(--r3); padding: 2rem; position: relative; overflow: hidden; transition: transform 0.3s, border-color 0.3s;" onmouseover="this.style.transform='translateY(-5px)';this.style.borderColor='#f59e0b'" onmouseout="this.style.transform='';this.style.borderColor='var(--border)'">
+            <div style="position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: linear-gradient(180deg, #f59e0b, #d97706);"></div>
+            <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.2rem;">
+              <div style="width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, #f59e0b, #d97706); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0;">🌱</div>
+              <div>
+                <div style="font-size: 1.1rem; font-weight: 700; color: var(--txt);">2026 — Q4</div>
+                <div style="font-size: 0.85rem; color: var(--txt3);">Growing Strong</div>
+              </div>
+            </div>
+            <p style="font-size: 0.9rem; color: var(--txt3); line-height: 1.6; margin: 0;">Course catalog expands, first corporate tie-ups established, and the SkillUpNow community grows with professionals from across India.</p>
+          </div>
+
+          <!-- Timeline Item 5 -->
+          <div style="background: var(--panel); border: 1.5px solid var(--border); border-radius: var(--r3); padding: 2rem; position: relative; overflow: hidden; transition: transform 0.3s, border-color 0.3s;" onmouseover="this.style.transform='translateY(-5px)';this.style.borderColor='#ec4899'" onmouseout="this.style.transform='';this.style.borderColor='var(--border)'">
+            <div style="position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: linear-gradient(180deg, #ec4899, #be185d);"></div>
+            <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.2rem;">
+              <div style="width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, #ec4899, #be185d); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0;">📈</div>
+              <div>
+                <div style="font-size: 1.1rem; font-weight: 700; color: var(--txt);">2027</div>
+                <div style="font-size: 0.85rem; color: var(--txt3);">Scaling Up</div>
+              </div>
+            </div>
+            <p style="font-size: 0.9rem; color: var(--txt3); line-height: 1.6; margin: 0;">Planned expansion into new cities and sectors, deeper corporate partnerships, AI-powered personalised learning paths for every student.</p>
+          </div>
+
+          <!-- Timeline Item 6 -->
+          <div style="background: var(--panel); border: 1.5px solid var(--border); border-radius: var(--r3); padding: 2rem; position: relative; overflow: hidden; transition: transform 0.3s, border-color 0.3s;" onmouseover="this.style.transform='translateY(-5px)';this.style.borderColor='var(--v1)'" onmouseout="this.style.transform='';this.style.borderColor='var(--border)'">
+            <div style="position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: linear-gradient(180deg, var(--v1), var(--v2));"></div>
+            <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.2rem;">
+              <div style="width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, var(--v1), var(--v2)); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0;">🌏</div>
+              <div>
+                <div style="font-size: 1.1rem; font-weight: 700; color: var(--txt);">2028+</div>
+                <div style="font-size: 0.85rem; color: var(--txt3);">Going Global</div>
+              </div>
+            </div>
+            <p style="font-size: 0.9rem; color: var(--txt3); line-height: 1.6; margin: 0;">Our vision — a world where every professional communicates with clarity, leads with empathy, and collaborates with confidence across borders.</p>
+          </div>
+        </div>
+      </div>
+
     </div>
   </section>
   <!-- ══ END ABOUT US ══ -->
+
+  <!-- ══ FAQ ACCORDION ══ -->
+  <section style="padding: 6rem 5vw; background: linear-gradient(180deg, rgba(124,92,252,0.03) 0%, transparent 100%); border-top: 1px solid var(--border);">
+    <div style="max-width: 860px; margin: 0 auto;">
+      <div style="text-align: center; margin-bottom: 3.5rem;">
+        <span style="display:inline-block;padding:.35rem 1.1rem;background:rgba(124,92,252,.1);border:1px solid rgba(124,92,252,.25);border-radius:50px;font-size:.8rem;font-weight:700;color:var(--v1);letter-spacing:.08em;text-transform:uppercase;margin-bottom:1.2rem;">FAQ</span>
+        <h2 style="font-family:'Cormorant Garamond',serif;font-size:clamp(2rem,5vw,3rem);font-weight:700;color:var(--txt);margin-bottom:.8rem;line-height:1.15;">Frequently Asked <span style="background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Questions</span></h2>
+        <p style="font-size:1rem;color:var(--txt3);max-width:540px;margin:0 auto;line-height:1.65;">Everything you need to know about our courses, schedules, and pricing.</p>
+      </div>
+      <div id="faq-list" style="display:flex;flex-direction:column;gap:.75rem;"></div>
+    </div>
+  </section>
+  <style>
+    .faq-item { background:var(--panel);border:1.5px solid var(--border);border-radius:var(--r2);overflow:hidden;transition:border-color .25s; }
+    .faq-item.open { border-color:var(--v1); }
+    .faq-q { display:flex;align-items:center;justify-content:space-between;padding:1.3rem 1.6rem;cursor:pointer;user-select:none;gap:1rem; }
+    .faq-q h4 { margin:0;font-size:.97rem;font-weight:600;color:var(--txt);transition:color .2s; }
+    .faq-item.open .faq-q h4 { color:var(--v1); }
+    .faq-icon { width:28px;height:28px;border-radius:50%;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .3s;background:transparent; }
+    .faq-item.open .faq-icon { background:var(--v1);border-color:var(--v1); }
+    .faq-icon svg { transition:transform .3s; }
+    .faq-item.open .faq-icon svg { transform:rotate(45deg); }
+    .faq-a { max-height:0;overflow:hidden;transition:max-height .4s cubic-bezier(.4,0,.2,1),padding .3s; }
+    .faq-a-inner { padding:0 1.6rem 1.4rem;font-size:.92rem;color:var(--txt3);line-height:1.75; }
+    .faq-item.open .faq-a { max-height:300px; }
+  </style>
+  <script>
+  (function initFAQ() {
+    const faqs = [
+      { q: 'What courses do you currently offer?', a: 'We offer a growing catalog of live programmes across Communication Mastery, Leadership Excellence, Business English, Interview Confidence, Public Speaking, and domain-specific soft-skills tracks. New batches are announced regularly — browse the Courses page for the latest offerings.' },
+      { q: 'When do new batches start, and how long are they?', a: 'New batches typically start at the beginning of each month. Most programmes run 4–12 weeks with 2–3 live sessions per week. Exact schedules are shown on each course card. You\'ll receive a confirmed timetable on enrollment.' },
+      { q: 'What are the flexible EMI payment options?', a: 'We offer zero-cost EMI plans across 3, 6, and 12 months on most courses. No processing fees, no interest. Simply fill the EMI application after selecting your course and our team will confirm approval within 24 hours.' },
+      { q: 'Will I receive a certificate after completing a course?', a: 'Yes — every student who completes a programme receives a digitally verifiable Certificate of Completion that you can share directly to your LinkedIn profile or include in your resume.' },
+      { q: 'Are the classes fully online?', a: 'All sessions are conducted live via video conferencing so you learn in real time with your cohort and instructor. Recordings are provided for every session, so you never miss a class even if your schedule changes.' },
+      { q: 'How is SkillUpNow different from self-paced platforms?', a: 'We focus on live, interactive cohort learning — not passive video watching. Every session includes practice exercises, peer feedback, and expert coaching. Our 1-on-1 mentoring model ensures personalised guidance that generic platforms simply cannot provide.' },
+      { q: 'How do I enroll or enquire about fees?', a: 'Click "Explore Courses" to browse all programmes and enroll directly. For personalised fee consultation, use "Get Fee Quote" — our team responds within a few hours with a tailored pricing breakdown.' },
+    ];
+    const list = document.getElementById('faq-list');
+    if (!list) return;
+    list.innerHTML = faqs.map((f, i) => `
+      <div class="faq-item" id="faq-${i}">
+        <div class="faq-q" onclick="toggleFAQ(${i})">
+          <h4>${f.q}</h4>
+          <div class="faq-icon">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M12 5v14M5 12h14"/></svg>
+          </div>
+        </div>
+        <div class="faq-a"><div class="faq-a-inner">${f.a}</div></div>
+      </div>`).join('');
+  })();
+  function toggleFAQ(i) {
+    const item = document.getElementById('faq-' + i);
+    const isOpen = item.classList.contains('open');
+    document.querySelectorAll('.faq-item.open').forEach(el => el.classList.remove('open'));
+    if (!isOpen) item.classList.add('open');
+  }
+  </script>
+  <!-- ══ END FAQ ══ -->
+
+  <!-- Home Course Modal -->
+  <div id="hcm-overlay" onclick="if(event.target===this)closeHomeCourseModal()" style="position:fixed;inset:0;z-index:9800;background:rgba(6,4,20,.85);backdrop-filter:blur(16px);display:flex;align-items:center;justify-content:center;padding:1rem;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .3s,visibility .3s;">
+    <div id="hcm-box" style="background:linear-gradient(160deg,#16123a 0%,#0f0d28 100%);border:1.5px solid rgba(124,92,252,.35);border-radius:24px;width:100%;max-width:580px;max-height:90vh;overflow-y:auto;transform:scale(.93) translateY(16px);transition:transform .3s cubic-bezier(.23,1,.32,1);position:relative;box-shadow:0 32px 64px rgba(0,0,0,.65);">
+      <!-- Hero banner -->
+      <div id="hcm-banner" style="padding:2.5rem 2.2rem 1.8rem;background:linear-gradient(135deg,rgba(124,92,252,.18),rgba(61,107,255,.1));border-bottom:1px solid rgba(255,255,255,.07);position:relative;">
+        <button onclick="closeHomeCourseModal()" style="position:absolute;top:1.2rem;right:1.2rem;width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:#fff;font-size:.85rem;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .2s;" onmouseover="this.style.background='rgba(255,255,255,.18)'" onmouseout="this.style.background='rgba(255,255,255,.08)'">✕</button>
+        <div id="hcm-icon" style="width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,var(--v1),var(--v2));display:flex;align-items:center;justify-content:center;font-size:1.4rem;margin-bottom:1rem;box-shadow:0 8px 24px rgba(124,92,252,.4);">📚</div>
+        <h2 id="hcm-title" style="font-family:'Cormorant Garamond',serif;font-size:1.85rem;font-weight:700;color:#f0eeff;margin:0 0 .4rem;line-height:1.2;">Course</h2>
+        <div style="display:flex;flex-wrap:wrap;gap:.6rem;align-items:center;margin-top:.7rem;">
+          <span id="hcm-cat" style="padding:.2rem .75rem;background:rgba(124,92,252,.2);border:1px solid rgba(124,92,252,.35);border-radius:50px;font-size:.72rem;font-weight:700;color:#b09fff;"></span>
+          <span id="hcm-level" style="padding:.2rem .75rem;background:rgba(74,222,128,.12);border:1px solid rgba(74,222,128,.25);border-radius:50px;font-size:.72rem;font-weight:700;color:#4ade80;"></span>
+          <span id="hcm-dur" style="font-size:.78rem;color:rgba(200,191,255,.6);">⏱ —</span>
+          <span id="hcm-enrolled" style="font-size:.78rem;color:rgba(200,191,255,.6);">👥 —</span>
+        </div>
+      </div>
+      <!-- Body -->
+      <div style="padding:2rem 2.2rem;">
+        <!-- Meta row -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.6rem;">
+          <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:1rem;">
+            <div style="font-size:.73rem;font-weight:600;color:rgba(200,191,255,.5);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.3rem;">Fee</div>
+            <div id="hcm-fee" style="font-size:1.1rem;font-weight:700;color:#f0eeff;"></div>
+          </div>
+          <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:1rem;">
+            <div style="font-size:.73rem;font-weight:600;color:rgba(200,191,255,.5);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.3rem;">Next Batch</div>
+            <div id="hcm-start" style="font-size:1.1rem;font-weight:700;color:#f0eeff;"></div>
+          </div>
+        </div>
+        <!-- Description -->
+        <div style="margin-bottom:1.6rem;">
+          <h4 style="font-size:.9rem;font-weight:700;color:#f0eeff;margin-bottom:.6rem;">About This Course</h4>
+          <p id="hcm-desc" style="font-size:.88rem;color:rgba(200,191,255,.7);line-height:1.75;margin:0;"></p>
+        </div>
+        <!-- Topics -->
+        <div id="hcm-topics-wrap" style="margin-bottom:1.6rem;display:none;">
+          <h4 style="font-size:.9rem;font-weight:700;color:#f0eeff;margin-bottom:.7rem;">Key Topics</h4>
+          <div id="hcm-topics" style="display:flex;flex-wrap:wrap;gap:.5rem;"></div>
+        </div>
+        <!-- Outcomes -->
+        <div id="hcm-outcomes-wrap" style="margin-bottom:1.8rem;display:none;">
+          <h4 style="font-size:.9rem;font-weight:700;color:#f0eeff;margin-bottom:.7rem;">Learning Outcomes</h4>
+          <div id="hcm-outcomes" style="display:flex;flex-direction:column;gap:.45rem;"></div>
+        </div>
+        <!-- CTA -->
+        <div style="display:flex;gap:1rem;flex-wrap:wrap;">
+          <a id="hcm-enroll-link" href="pages/courses.html" class="btn-grad" style="flex:1;text-align:center;justify-content:center;padding:.9rem 1.5rem;font-size:.95rem;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:.5rem;min-width:140px;">
+            Enroll Now
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+          <a href="pages/contact-enquiry.html" class="btn-outline" style="flex:1;text-align:center;justify-content:center;padding:.9rem 1.5rem;font-size:.95rem;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:.5rem;min-width:140px;">Get Fee Quote</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+  function showHomeCourseModal(courseId) {
+    const courses = window._homeCourses || [];
+    const c = courses.find(x => String(x.id) === String(courseId));
+    if (!c) return;
+    const catIcons = {'Cloud':'☁️','DevOps':'⚙️','AI':'🤖','Machine Learning':'🧠','Cybersecurity':'🔒','Data':'📊','Communication':'💬','Leadership':'🏆','Soft':'🌟','default':'📚'};
+    const getIcon = cat => { const k = Object.keys(catIcons).find(k => (cat||'').toLowerCase().includes(k.toLowerCase())); return k ? catIcons[k] : catIcons['default']; };
+    document.getElementById('hcm-icon').textContent   = getIcon(c.category || '');
+    document.getElementById('hcm-title').textContent  = c.name || 'Course';
+    document.getElementById('hcm-cat').textContent    = c.category || 'General';
+    document.getElementById('hcm-level').textContent  = c.level || 'All Levels';
+    const dur = c.duration_months ? c.duration_months + ' months' : (c.duration_hours ? c.duration_hours + ' hrs' : '—');
+    document.getElementById('hcm-dur').textContent    = '⏱ ' + dur;
+    document.getElementById('hcm-enrolled').textContent = '👥 ' + (c.total_enrolled || 0) + ' enrolled';
+    const fee = c.discounted_price || c.price;
+    document.getElementById('hcm-fee').textContent    = fee ? '₹' + Number(fee).toLocaleString('en-IN') : 'Contact us';
+    const startDate = c.start_date ? new Date(c.start_date).toLocaleDateString('en-IN',{day:'numeric',month:'long'}) : 'Upcoming';
+    document.getElementById('hcm-start').textContent  = startDate;
+    document.getElementById('hcm-desc').textContent   = c.short_description || c.description || 'Full course details will be shared upon enrollment.';
+    const topics = Array.isArray(c.key_topics) ? c.key_topics : (c.key_topics ? c.key_topics.split(',').map(t=>t.trim()) : []);
+    const topicsWrap = document.getElementById('hcm-topics-wrap');
+    if (topics.length) { document.getElementById('hcm-topics').innerHTML = topics.map(t=>`<span style="background:rgba(124,92,252,.15);border:1px solid rgba(124,92,252,.3);border-radius:6px;padding:.25rem .55rem;font-size:.73rem;color:#b09fff;">${t}</span>`).join(''); topicsWrap.style.display=''; } else { topicsWrap.style.display='none'; }
+    const outcomes = Array.isArray(c.learning_outcomes) ? c.learning_outcomes : (c.learning_outcomes ? c.learning_outcomes.split('\n').map(o=>o.replace(/^[-•*]\s*/,'').trim()).filter(Boolean) : []);
+    const outcomesWrap = document.getElementById('hcm-outcomes-wrap');
+    if (outcomes.length) { document.getElementById('hcm-outcomes').innerHTML = outcomes.slice(0,5).map(o=>`<div style="display:flex;align-items:flex-start;gap:.45rem;font-size:.84rem;color:rgba(200,191,255,.75);"><span style="color:#4ade80;flex-shrink:0;">✓</span>${o}</div>`).join(''); outcomesWrap.style.display=''; } else { outcomesWrap.style.display='none'; }
+    const ov  = document.getElementById('hcm-overlay');
+    const box = document.getElementById('hcm-box');
+    ov.style.opacity='1'; ov.style.visibility='visible'; ov.style.pointerEvents='all';
+    box.style.transform='scale(1) translateY(0)';
+    document.body.style.overflow='hidden';
+  }
+  function closeHomeCourseModal() {
+    const ov  = document.getElementById('hcm-overlay');
+    const box = document.getElementById('hcm-box');
+    ov.style.opacity='0'; ov.style.visibility='hidden'; ov.style.pointerEvents='none';
+    box.style.transform='scale(.93) translateY(16px)';
+    document.body.style.overflow='';
+  }
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeHomeCourseModal(); });
+  </script>
 
   <!-- Modal -->
   <div class="moverlay" id="mo" onclick="if(event.target===this) closeModal()">
@@ -1164,7 +1419,7 @@
         </p>
       </div>
       <div style="background:rgba(255,255,255,0.03);border-top:1px solid rgba(130,100,255,0.18);padding:18px 32px;text-align:center;">
-        <p style="margin:0;font-size:0.76rem;color:#564f7a;">© 2026 SkillUpNow &nbsp;·&nbsp; <a href="https://skillupnowadmin.org" style="color:#7c5cfc;text-decoration:none;">skillupnowadmin.org</a></p>
+        <p style="margin:0;font-size:0.76rem;color:#564f7a;">© SkillUpNow &nbsp;·&nbsp; <a href="https://skillupnowadmin.org" style="color:#7c5cfc;text-decoration:none;">skillupnowadmin.org</a></p>
         <p style="margin:4px 0 0;font-size:0.72rem;color:#564f7a;">If you did not request this, please ignore this email.</p>
       </div>
     </div>
@@ -1370,6 +1625,12 @@
         btn.disabled = false;
         btn.textContent = 'Verify OTP';
       }
+    }
+
+    // ==================== HERO CTA SUBMISSION ====================
+    async function submitHeroCTA() {
+      // Redirect to contact enquiry page for detailed form submission
+      window.location.href = 'pages/contact-enquiry.html';
     }
 
     // ==================== HERO VISUAL: SCROLL REVEAL + 3D PARALLAX ====================
@@ -1690,6 +1951,8 @@
           return k ? catIcons[k] : catIcons['default'];
         };
         const levelColors = { beginner: '#4ade80', intermediate: '#f59e0b', advanced: '#f87171' };
+        // Store courses for modal access
+        window._homeCourses = result.data;
         grid.innerHTML = courses.map((c, i) => {
           const name = c.name || 'Course';
           const cat = c.category || c.course_category || '';
@@ -1697,7 +1960,7 @@
           const lvlColor = levelColors[(level||'').toLowerCase()] || 'var(--v2)';
           const dur = c.duration_months ? c.duration_months + ' months' : (c.duration_hours ? c.duration_hours + ' hrs' : '');
           const enrolled = c.total_enrolled || 0;
-          return `<a href="pages/courses.html" style="text-decoration:none;display:flex;align-items:center;gap:.85rem;background:var(--panel);border:1.5px solid var(--border);border-radius:var(--r2);padding:1rem 1.2rem;transition:all .3s cubic-bezier(.4,0,.2,1);animation:fadeUp .5s ease ${i*.06}s both;"
+          return `<button onclick="showHomeCourseModal('${c.id}')" style="text-align:left;text-decoration:none;display:flex;align-items:center;gap:.85rem;background:var(--panel);border:1.5px solid var(--border);border-radius:var(--r2);padding:1rem 1.2rem;transition:all .3s cubic-bezier(.4,0,.2,1);animation:fadeUp .5s ease ${i*.06}s both;cursor:pointer;font-family:inherit;width:100%;"
             onmouseover="this.style.borderColor='var(--v1)';this.style.transform='translateY(-3px)';this.style.boxShadow='0 12px 32px rgba(124,92,252,0.2)'"
             onmouseout="this.style.borderColor='var(--border)';this.style.transform='';this.style.boxShadow=''">
             <div style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,var(--v1),var(--v2));display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;box-shadow:0 4px 14px rgba(124,92,252,.3);">${getIcon(cat)}</div>
@@ -1709,13 +1972,65 @@
                 ${enrolled ? `<span style="font-size:.7rem;color:var(--txt4);">👥 ${enrolled}</span>` : ''}
               </div>
             </div>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--v1)" stroke-width="2.5" style="flex-shrink:0;opacity:.6;"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-          </a>`;
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--v1)" stroke-width="2.5" style="flex-shrink:0;opacity:.6;"><path d="M9 5l7 7-7 7"/></svg>
+          </button>`;
         }).join('');
       } catch(e) {
         grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--txt4);font-size:.88rem;">
           Could not load courses — <a href="pages/courses.html" style="color:var(--v1);font-weight:600;">Browse all courses →</a>
         </div>`;
+      }
+    }
+
+    // ==================== DYNAMIC SITE STATS ====================
+    async function loadSiteStats() {
+      try {
+        if (!window.supabaseConfig) return;
+        const client = window.supabaseConfig.getClient();
+        if (!client) return;
+
+        // Student count (enrollments)
+        const { count: studentCount } = await client
+          .from('user_enrollments')
+          .select('*', { count: 'exact', head: true });
+
+        // Course count
+        const { count: courseCount } = await client
+          .from('courses')
+          .select('*', { count: 'exact', head: true });
+
+        // Average rating
+        const { data: ratings } = await client
+          .from('feedback')
+          .select('rating')
+          .eq('is_approved', true);
+        const avgRating = (ratings && ratings.length)
+          ? (ratings.reduce((s, r) => s + (parseInt(r.rating) || 5), 0) / ratings.length).toFixed(1) + '★'
+          : null;
+
+        // Update stats strip
+        const se = document.getElementById('stat-students');
+        const ce = document.getElementById('stat-courses');
+        const re = document.getElementById('stat-rating');
+        const te = document.getElementById('trust-students');
+
+        if (se) se.textContent = studentCount ? (studentCount > 999 ? Math.floor(studentCount/100)/10 + 'K+' : studentCount + '+') : 'New';
+        if (ce) ce.textContent = courseCount ? courseCount + '+' : 'Growing';
+        if (re) re.textContent = avgRating || 'New ★';
+        if (te) te.textContent = studentCount ? (studentCount > 999 ? Math.floor(studentCount/100)/10 + 'K+' : studentCount) : 'Growing';
+
+        // Animate updated values
+        [se, ce, re].forEach(el => {
+          if (el) { el.style.animation = 'none'; el.offsetHeight; el.style.animation = 'fc-num-in 0.5s cubic-bezier(0.34,1.56,0.64,1) both'; }
+        });
+      } catch (e) {
+        // Fallback: show generic starter values
+        const se = document.getElementById('stat-students');
+        const ce = document.getElementById('stat-courses');
+        const re = document.getElementById('stat-rating');
+        if (se) se.textContent = 'Growing';
+        if (ce) ce.textContent = '10+';
+        if (re) re.textContent = '5.0★';
       }
     }
 
@@ -1726,6 +2041,7 @@
       loadHeroStats();
       loadTestimonials();
       loadHomeCoursesSection();
+      loadSiteStats();
     });
 
     // ==================== ANIMATED HERO WORDS ====================

@@ -499,6 +499,14 @@ nav {
   width: 100%;
 }
 
+.nav-links a.active {
+  color: var(--txt);
+}
+
+.nav-links a.active::after {
+  width: 100%;
+}
+
 .nav-actions {
   display: flex;
   align-items: center;
@@ -1436,8 +1444,12 @@ nav {
 }
 @media (max-width: 640px) {
   .footer-grid-main {
-    grid-template-columns: 1fr !important;
+    grid-template-columns: 1fr 1fr !important;
     gap: 2rem !important;
+  }
+  /* Brand takes full width on mobile; Platform and Company stay side-by-side */
+  .footer-grid-main > div:first-child {
+    grid-column: 1 / -1 !important;
   }
 }
 

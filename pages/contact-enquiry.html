@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Fee Enquiry & Contact — SkillUpNow. Talk to our team about courses, fees and EMI options.">
-  <title>Fee Enquiry & Contact — SkillUpNow</title>
+  <meta name="description" content="Fee Enquiry — SkillUpNow Professional Training">
+  <title>Fee Enquiry — SkillUpNow</title>
   <link rel="stylesheet" href="../css/variables.css">
   <link rel="stylesheet" href="../css/animations.css">
   <link rel="stylesheet" href="../css/main.css">
@@ -18,675 +18,529 @@
     }
   </script>
   <style>
-    /* ── Hero ── */
-    .eq-hero {
-      padding: 5.5rem 5vw 4.5rem;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      align-items: center;
-      gap: 3rem;
-      max-width: 1400px;
-      margin: 0 auto;
+    /* ── Page Container ── */
+    .contact-page {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #4a2d8a 0%, #5a3ba0 50%, #7c5cfc 100%);
+      position: relative;
+      overflow-x: hidden;
     }
-    .eq-hero-left h1 {
+    :root[data-theme="light"] .contact-page {
+      background: linear-gradient(135deg, #5c3fb8 0%, #4a2e9c 50%, #3d6bff 100%);
+    }
+
+    .contact-page::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background:
+        radial-gradient(circle at 30% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+        radial-gradient(circle at 70% 80%, rgba(120, 219, 255, 0.3) 0%, transparent 50%),
+        radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+      pointer-events: none;
+    }
+
+    /* ── Hero Section ── */
+    .contact-hero {
+      padding: 6rem 2rem 4rem;
+      text-align: center;
+      position: relative;
+      z-index: 2;
+    }
+
+    .contact-hero h1 {
       font-family: 'Cormorant Garamond', serif;
-      font-size: clamp(2.4rem, 5vw, 4rem);
+      font-size: clamp(2.5rem, 6vw, 4.5rem);
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 1.5rem;
+      text-shadow: 0 2px 20px rgba(0,0,0,0.3);
+      letter-spacing: -0.02em;
+    }
+
+    .contact-hero p {
+      font-size: clamp(1.1rem, 2.5vw, 1.4rem);
+      color: rgba(255,255,255,0.9);
+      max-width: 600px;
+      margin: 0 auto 3rem;
+      line-height: 1.6;
+      font-weight: 300;
+    }
+
+    /* ── Main Content Grid ── */
+    .contact-main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem 4rem;
+      display: grid;
+      grid-template-columns: 1fr 400px;
+      gap: 3rem;
+      position: relative;
+      z-index: 2;
+    }
+
+    /* ── Contact Form ── */
+    .contact-form-card {
+      background: var(--panel);
+      backdrop-filter: blur(20px);
+      border: 1.5px solid var(--border);
+      border-radius: 24px;
+      padding: 3rem;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.25), 0 0 0 1px rgba(124,92,252,0.12);
+      animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+    :root[data-theme="light"] .contact-form-card {
+      background: rgba(255,255,255,0.97);
+      border-color: rgba(124,92,252,0.2);
+    }
+
+    .form-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2.2rem;
       font-weight: 700;
       color: var(--txt);
-      letter-spacing: -0.025em;
-      line-height: 1.08;
-      margin-bottom: 1.2rem;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(135deg, var(--v1), var(--v2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
-    .eq-hero-left p {
-      font-size: 1.05rem;
+
+    .form-subtitle {
       color: var(--txt3);
-      line-height: 1.75;
-      max-width: 480px;
-      margin-bottom: 2rem;
-    }
-    .eq-hero-actions { display: flex; gap: 0.75rem; flex-wrap: wrap; }
-
-    /* Hero right: contact info cards */
-    .eq-contact-stack {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-    }
-    .eq-contact-card {
-      background: var(--panel);
-      border: 1.5px solid var(--border);
-      border-radius: var(--r2);
-      padding: 1.3rem 1.5rem;
-      display: flex;
-      align-items: center;
-      gap: 1.1rem;
-      transition: border-color 0.3s, transform 0.3s, box-shadow 0.3s;
-      text-decoration: none;
-      color: inherit;
-    }
-    .eq-contact-card:hover {
-      border-color: var(--v1);
-      transform: translateX(4px);
-      box-shadow: 0 8px 28px rgba(124,92,252,0.18);
-    }
-    .eq-cc-icon {
-      width: 46px; height: 46px;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.3rem;
-      flex-shrink: 0;
-    }
-    .eq-cc-title { font-weight: 700; color: var(--txt); font-size: 0.88rem; margin-bottom: 0.15rem; }
-    .eq-cc-val { font-size: 0.82rem; color: var(--txt3); }
-
-    /* Trust strip */
-    .eq-trust {
-      background: rgba(124,92,252,0.04);
-      border-top: 1px solid var(--border);
-      border-bottom: 1px solid var(--border);
-      padding: 1.4rem 5vw;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 3rem;
-      flex-wrap: wrap;
-    }
-    .eq-trust-item {
-      display: flex;
-      align-items: center;
-      gap: 0.55rem;
-      font-size: 0.82rem;
-      font-weight: 600;
-      color: var(--txt3);
-    }
-
-    /* ── Main Form Area ── */
-    .eq-main {
-      display: grid;
-      grid-template-columns: 1fr 380px;
-      gap: 2.5rem;
-      padding: 5rem 5vw;
-      max-width: 1400px;
-      margin: 0 auto;
-    }
-
-    /* Form card */
-    .eq-form-card {
-      background: var(--panel);
-      border: 1.5px solid var(--border);
-      border-radius: var(--r3);
-      padding: 2.5rem;
-    }
-    .eq-form-card h2 {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 2rem;
-      font-weight: 700;
-      color: var(--txt);
-      margin-bottom: 0.4rem;
-    }
-    .eq-form-card > p {
-      font-size: 0.9rem;
-      color: var(--txt3);
-      margin-bottom: 2rem;
+      font-size: 1rem;
+      margin-bottom: 2.5rem;
       line-height: 1.6;
     }
 
-    .eq-form { display: flex; flex-direction: column; gap: 1.2rem; }
-    .eq-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-    .eq-group { display: flex; flex-direction: column; gap: 0.45rem; }
-    .eq-label {
-      font-size: 0.8rem;
-      font-weight: 700;
-      color: var(--txt2);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
+    .form-group {
+      margin-bottom: 1.5rem;
     }
-    .eq-required { color: var(--v1); }
-    .eq-input, .eq-select, .eq-textarea {
-      background: var(--panel2);
-      border: 1.5px solid var(--border);
-      border-radius: var(--r2);
-      color: var(--txt);
-      padding: 0.82rem 1rem;
+
+    .form-label {
+      display: block;
       font-size: 0.9rem;
-      font-family: inherit;
-      transition: border-color 0.2s, box-shadow 0.2s;
-      outline: none;
-      width: 100%;
-    }
-    .eq-input:focus, .eq-select:focus, .eq-textarea:focus {
-      border-color: var(--v1);
-      box-shadow: 0 0 0 3px rgba(124,92,252,0.12);
-    }
-    .eq-textarea { resize: vertical; min-height: 110px; }
-    .eq-select option { background: var(--panel); }
-
-    /* Section divider */
-    .eq-section-head {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      margin-top: 0.5rem;
-    }
-    .eq-sh-icon {
-      width: 30px; height: 30px;
-      border-radius: 8px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 0.95rem;
-      flex-shrink: 0;
-    }
-    .eq-sh-title {
-      font-size: 0.78rem;
-      font-weight: 700;
+      font-weight: 600;
       color: var(--txt2);
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-    }
-    .eq-sh-line { flex: 1; height: 1px; background: var(--border); }
-
-    /* Submit */
-    .eq-submit {
-      width: 100%;
-      padding: 1rem;
-      border-radius: 50px;
-      background: linear-gradient(135deg, var(--v1), var(--v2));
-      color: #fff;
-      border: none;
-      font-size: 0.95rem;
-      font-weight: 700;
-      cursor: pointer;
-      transition: filter 0.2s, transform 0.2s;
-      box-shadow: 0 6px 24px rgba(124,92,252,0.4);
-      font-family: inherit;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-    }
-    .eq-submit:hover:not(:disabled) { filter: brightness(1.1); transform: translateY(-2px); }
-    .eq-submit:disabled { opacity: 0.6; cursor: not-allowed; }
-
-    /* Error / Success */
-    .eq-err {
-      display: none;
-      padding: 0.75rem 1rem;
-      background: rgba(239,68,68,.09);
-      border: 1px solid rgba(239,68,68,.28);
-      border-radius: var(--r1);
-      font-size: 0.84rem;
-      color: #f87171;
-    }
-    .eq-success {
-      display: none;
-      text-align: center;
-      padding: 3rem 2rem;
-    }
-    .eq-success-icon { font-size: 3rem; margin-bottom: 1rem; animation: eqBounce .6s cubic-bezier(.34,1.56,.64,1) both; }
-    @keyframes eqBounce { from { transform: scale(0.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-    .eq-success h3 { font-size: 1.35rem; color: #4ade80; margin-bottom: 0.5rem; }
-    .eq-success p { color: var(--txt3); font-size: 0.88rem; line-height: 1.65; }
-
-    /* ── Sidebar ── */
-    .eq-sidebar { display: flex; flex-direction: column; gap: 1.5rem; }
-
-    .eq-side-card {
-      background: var(--panel);
-      border: 1.5px solid var(--border);
-      border-radius: var(--r2);
-      padding: 1.8rem;
-      transition: border-color 0.3s;
-    }
-    .eq-side-card:hover { border-color: var(--v1); }
-    .eq-side-card h3 {
-      font-family: 'Inter','Outfit',sans-serif;
-      font-size: 0.95rem;
-      font-weight: 800;
-      color: var(--txt);
-      margin-bottom: 1.1rem;
-      display: flex;
-      align-items: center;
-      gap: 0.55rem;
-    }
-
-    /* Office hours */
-    .eq-hours { display: flex; flex-direction: column; gap: 0.6rem; }
-    .eq-hour-row {
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.82rem;
-      color: var(--txt3);
-      padding-bottom: 0.6rem;
-      border-bottom: 1px solid var(--border);
-    }
-    .eq-hour-row:last-child { border-bottom: none; padding-bottom: 0; }
-    .eq-hour-day { font-weight: 600; color: var(--txt2); }
-    .eq-hour-open { color: #4ade80; font-weight: 600; font-size: 0.75rem; }
-
-    /* FAQ accordion */
-    .eq-faq { display: flex; flex-direction: column; gap: 0.6rem; }
-    .eq-faq-item {
-      border: 1px solid var(--border);
-      border-radius: var(--r1);
-      overflow: hidden;
-      transition: border-color 0.2s;
-    }
-    .eq-faq-item:hover { border-color: var(--v1); }
-    .eq-faq-q {
-      width: 100%;
-      background: none;
-      border: none;
-      padding: 0.85rem 1rem;
-      text-align: left;
-      font-size: 0.82rem;
-      font-weight: 700;
-      color: var(--txt2);
-      cursor: pointer;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 0.5rem;
-      transition: color 0.2s;
-      font-family: inherit;
-    }
-    .eq-faq-q:hover { color: var(--v1); }
-    .eq-faq-a {
-      max-height: 0;
-      overflow: hidden;
-      transition: max-height 0.35s ease, padding 0.35s ease;
-      font-size: 0.8rem;
-      color: var(--txt4);
-      line-height: 1.65;
-    }
-    .eq-faq-a.open {
-      max-height: 200px;
-      padding: 0 1rem 0.85rem;
-    }
-    .eq-faq-arrow { transition: transform 0.3s; flex-shrink: 0; }
-    .eq-faq-arrow.open { transform: rotate(180deg); }
-
-    /* ── Process timeline ── */
-    .eq-process {
-      padding: 5rem 5vw;
-      border-top: 1px solid var(--border);
-      background: rgba(124,92,252,0.03);
-    }
-    .eq-process-inner { max-width: 1400px; margin: 0 auto; }
-    .eq-process h2 {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: clamp(1.8rem,3.5vw,2.8rem);
-      font-weight: 700;
-      color: var(--txt);
-      text-align: center;
       margin-bottom: 0.5rem;
     }
-    .eq-process > .eq-process-inner > p {
-      text-align: center;
-      color: var(--txt3);
-      margin-bottom: 3rem;
+
+    .form-input, .form-select, .form-textarea {
+      width: 100%;
+      padding: 0.8rem 1rem;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      background: var(--bg);
+      font-size: 1rem;
+      color: var(--txt);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      font-family: inherit;
     }
-    .eq-steps {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 2rem;
-      position: relative;
+    :root[data-theme="light"] .form-input,
+    :root[data-theme="light"] .form-select,
+    :root[data-theme="light"] .form-textarea {
+      background: rgba(255,255,255,0.9);
+      border-color: rgba(124,92,252,0.2);
     }
-    .eq-step {
-      text-align: center;
-      padding: 2rem 1.5rem;
+
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      outline: none;
+      border-color: var(--v1);
+      box-shadow: 0 0 0 3px rgba(124,92,252,0.15);
+    }
+    .form-select option {
       background: var(--panel);
-      border: 1.5px solid var(--border);
-      border-radius: var(--r2);
-      transition: border-color 0.3s, transform 0.3s;
+      color: var(--txt);
     }
-    .eq-step:hover { border-color: var(--v1); transform: translateY(-4px); }
-    .eq-step-num {
-      width: 48px; height: 48px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, var(--v1), var(--v2));
+
+    .form-textarea {
+      min-height: 120px;
+      resize: vertical;
+      line-height: 1.6;
+    }
+
+    .form-submit {
+      width: 100%;
+      padding: 1rem 2rem;
+      background: linear-gradient(135deg, #7c5cfc, #3d6bff);
       color: #fff;
-      font-weight: 800;
-      font-size: 1.1rem;
+      border: none;
+      border-radius: 14px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 8px 25px rgba(124,92,252,0.35);
       display: flex;
       align-items: center;
       justify-content: center;
-      margin: 0 auto 1rem;
-      box-shadow: 0 6px 20px rgba(124,92,252,0.35);
+      gap: 0.5rem;
+      font-family: inherit;
     }
-    .eq-step h4 { font-size: 0.95rem; font-weight: 700; color: var(--txt); margin-bottom: 0.4rem; }
-    .eq-step p { font-size: 0.82rem; color: var(--txt4); line-height: 1.6; }
 
-    /* Toast */
-    .eq-toast {
-      position: fixed;
-      bottom: 1.5rem; right: 1.5rem;
-      z-index: 999;
-      padding: 0.9rem 1.4rem;
-      border-radius: 12px;
-      font-size: 0.87rem;
-      font-weight: 600;
-      display: flex; align-items: center; gap: 0.5rem;
-      transform: translateY(60px); opacity: 0;
-      transition: 0.35s cubic-bezier(0.34,1.56,0.64,1);
-      pointer-events: none;
+    .form-submit:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 16px 40px rgba(124,92,252,0.5);
     }
-    .eq-toast.show { transform: translateY(0); opacity: 1; }
-    .eq-toast.ok  { background: rgba(74,222,128,.15); border: 1px solid rgba(74,222,128,.35); color: #4ade80; }
-    .eq-toast.err { background: rgba(239,68,68,.13); border: 1px solid rgba(239,68,68,.3); color: #f87171; }
+
+    .form-submit:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* ── Sidebar ── */
+    .contact-sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+
+    .sidebar-card {
+      background: var(--panel);
+      backdrop-filter: blur(20px);
+      border: 1.5px solid var(--border);
+      border-radius: 20px;
+      padding: 2rem;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.22), 0 0 0 1px rgba(124,92,252,0.1);
+      animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both;
+    }
+    :root[data-theme="light"] .sidebar-card {
+      background: rgba(255,255,255,0.97);
+      border-color: rgba(124,92,252,0.2);
+    }
+
+    .sidebar-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--txt);
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .contact-info-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .contact-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #7c5cfc, #3d6bff);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+
+    .contact-details h4 {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--txt);
+      margin-bottom: 0.25rem;
+    }
+
+    .contact-details p {
+      font-size: 0.9rem;
+      color: var(--txt3);
+      line-height: 1.5;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+
+    .stat-item {
+      text-align: center;
+    }
+
+    .stat-number {
+      font-size: 2rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--v1), var(--v2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1;
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+      font-size: 0.85rem;
+      color: var(--txt3);
+      font-weight: 600;
+    }
+
+    /* ── Toast Notifications ── */
+    .toast {
+      position: fixed;
+      top: 2rem;
+      right: 2rem;
+      z-index: 1000;
+      padding: 1rem 1.5rem;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transform: translateX(400px);
+      opacity: 0;
+      transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      backdrop-filter: blur(10px);
+    }
+
+    .toast.show {
+      transform: translateX(0);
+      opacity: 1;
+    }
+
+    .toast.success {
+      background: rgba(34, 197, 94, 0.95);
+      border: 1px solid rgba(34, 197, 94, 0.3);
+      color: #fff;
+    }
+
+    .toast.error {
+      background: rgba(239, 68, 68, 0.95);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #fff;
+    }
+
+    /* ── Loading Spinner ── */
+    .loading-spinner {
+      width: 20px;
+      height: 20px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top: 2px solid #fff;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    /* ── Animations ── */
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
 
     /* ── Responsive ── */
     @media (max-width: 1024px) {
-      .eq-main { grid-template-columns: 1fr; }
-      .eq-sidebar { flex-direction: row; flex-wrap: wrap; }
-      .eq-side-card { flex: 1; min-width: 260px; }
+      .contact-main {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+      }
+      /* Form on top, contact info below on mobile */
+      .contact-sidebar { order: 2; }
+      .contact-form-card { order: 1; }
     }
-    @media (max-width: 800px) {
-      .eq-hero { grid-template-columns: 1fr; }
-      .eq-hero-left p { max-width: unset; }
+
+    @media (max-width: 768px) {
+      .contact-hero {
+        padding: 4rem 1rem 3rem;
+      }
+
+      .contact-hero h1 {
+        font-size: 2.5rem;
+      }
+
+      .contact-main {
+        padding: 0 1rem 3rem;
+      }
+
+      .contact-form-card {
+        padding: 2rem 1.5rem;
+      }
+
+      .sidebar-card {
+        padding: 1.5rem;
+      }
+
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
     }
-    @media (max-width: 600px) {
-      .eq-row { grid-template-columns: 1fr; }
-      .eq-form-card { padding: 1.5rem; }
-      .eq-trust { gap: 1.5rem; }
-      .eq-sidebar { flex-direction: column; }
+
+    @media (max-width: 480px) {
+      .contact-hero h1 {
+        font-size: 2rem;
+      }
+
+      .contact-form-card {
+        padding: 1.5rem 1rem;
+      }
+
+      .sidebar-card {
+        padding: 1.5rem 1rem;
+      }
+
+      .form-submit {
+        padding: 0.8rem 1.5rem;
+        font-size: 0.95rem;
+      }
     }
   </style>
 </head>
 <body>
+  <!-- Background Elements -->
   <div class="mesh-bg"></div>
   <div class="orb orb1"></div>
   <div class="orb orb2"></div>
-  <div class="orb orb3"></div>
+  <div class="contact-page">
+    <!-- Navigation — rebuilt by profile-nav.js -->
+    <nav></nav>
 
-  <!-- Navigation — rebuilt by profile-nav.js -->
-  <nav></nav>
-
-  <!-- ── Hero ── -->
-  <div class="eq-hero">
-    <div class="eq-hero-left">
-      <span style="display:inline-block;padding:.3rem 1rem;background:rgba(124,92,252,.12);border:1px solid rgba(124,92,252,.28);border-radius:50px;font-size:.74rem;font-weight:700;color:var(--v1);letter-spacing:.08em;text-transform:uppercase;margin-bottom:1.1rem;">Free Consultation</span>
-      <h1>Get Your<br><span style="background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Personalised</span><br>Fee Quote</h1>
-      <p>No hidden charges, no pressure. Talk to our admissions team and find the right programme and payment plan for your goals.</p>
-      <div class="eq-hero-actions">
-        <a href="#eq-form" class="btn-grad">Send Enquiry</a>
-        <a href="tel:+916381721061" class="btn-outline">📞 Call Now</a>
-      </div>
+    <!-- ── Hero Section ── */
+    <div class="contact-hero">
+      <h1>Get Fee Quote<br><span style="background: linear-gradient(135deg, #fff, #e0e7ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">For Your Course</span></h1>
+      <p>Ready to invest in your career? Get personalized fee quotes for our premium training programs with flexible EMI options.</p>
     </div>
-    <div class="eq-contact-stack">
-      <a href="tel:+916381721061" class="eq-contact-card">
-        <div class="eq-cc-icon" style="background:linear-gradient(135deg,#7c5cfc,#3d6bff);">📞</div>
-        <div>
-          <div class="eq-cc-title">Primary Helpline</div>
-          <div class="eq-cc-val">+91 6381 721061</div>
-        </div>
-      </a>
-      <a href="tel:+916383633054" class="eq-contact-card">
-        <div class="eq-cc-icon" style="background:linear-gradient(135deg,#3d6bff,#00cfee);">📱</div>
-        <div>
-          <div class="eq-cc-title">Secondary Helpline</div>
-          <div class="eq-cc-val">+91 6383 633054</div>
-        </div>
-      </a>
-      <a href="mailto:skillupnow.off@gmail.com" class="eq-contact-card">
-        <div class="eq-cc-icon" style="background:linear-gradient(135deg,#10b981,#059669);">✉️</div>
-        <div>
-          <div class="eq-cc-title">Email Support</div>
-          <div class="eq-cc-val">skillupnow.off@gmail.com</div>
-        </div>
-      </a>
-      <div class="eq-contact-card" style="cursor:default;">
-        <div class="eq-cc-icon" style="background:linear-gradient(135deg,#f59e0b,#d97706);">⚡</div>
-        <div>
-          <div class="eq-cc-title">Response Time</div>
-          <div class="eq-cc-val">Within 24 hours · Mon–Sat</div>
-        </div>
-      </div>
-    </div>
-  </div>
 
-  <!-- ── Trust Strip ── -->
-  <div class="eq-trust">
-    <div class="eq-trust-item">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#7c5cfc" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-      100% Privacy Guaranteed
-    </div>
-    <div class="eq-trust-item">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#7c5cfc" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
-      Response within 24 hrs
-    </div>
-    <div class="eq-trust-item">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#7c5cfc" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
-      Zero-Cost EMI Available
-    </div>
-    <div class="eq-trust-item">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#7c5cfc" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-      No Sales Pressure
-    </div>
-  </div>
+    <!-- ── Main Content ── */
+    <div class="contact-main">
+      <!-- Contact Form -->
+      <div class="contact-form-card">
+        <h2 class="form-title">Request Fee Quote</h2>
+        <p class="form-subtitle">Select your preferred course and get a detailed quote with EMI options.</p>
 
-  <!-- ── Main Form + Sidebar ── -->
-  <div class="eq-main" id="eq-form">
-
-    <!-- Enquiry Form -->
-    <div class="eq-form-card">
-      <h2>Send Your Enquiry</h2>
-      <p>Fill in the details below and our admissions counsellor will contact you with a personalised programme recommendation and fee breakdown.</p>
-
-      <form class="eq-form" id="enquiryForm" onsubmit="handleEnquirySubmit(event)" novalidate>
-
-        <!-- Personal Info -->
-        <div class="eq-section-head">
-          <div class="eq-sh-icon" style="background:rgba(124,92,252,.12);">👤</div>
-          <div class="eq-sh-title">Personal Information</div>
-          <div class="eq-sh-line"></div>
-        </div>
-
-        <div class="eq-group">
-          <label class="eq-label">Full Name <span class="eq-required">*</span></label>
-          <input class="eq-input" id="eq-name" type="text" placeholder="Your full name" required>
-        </div>
-
-        <div class="eq-row">
-          <div class="eq-group">
-            <label class="eq-label">Email Address <span class="eq-required">*</span></label>
-            <input class="eq-input" id="eq-email" type="email" placeholder="your@email.com" required>
+        <form id="contactForm" onsubmit="handleEnquirySubmit(event)" novalidate>
+          <div class="form-group">
+            <label class="form-label">Full Name *</label>
+            <input type="text" id="fullName" class="form-input" placeholder="Your full name" required>
           </div>
-          <div class="eq-group">
-            <label class="eq-label">Phone Number <span class="eq-required">*</span></label>
-            <input class="eq-input" id="eq-phone" type="tel" placeholder="+91 9876543210" required>
+
+          <div class="form-group">
+            <label class="form-label">Email Address *</label>
+            <input type="email" id="email" class="form-input" placeholder="your.email@example.com" required>
           </div>
-        </div>
 
-        <div class="eq-row">
-          <div class="eq-group">
-            <label class="eq-label">City</label>
-            <input class="eq-input" id="eq-city" type="text" placeholder="e.g. Chennai">
+          <div class="form-group">
+            <label class="form-label">Phone Number</label>
+            <input type="tel" id="phone" class="form-input" placeholder="+91 98765 43210">
           </div>
-          <div class="eq-group">
-            <label class="eq-label">Current Role</label>
-            <input class="eq-input" id="eq-role" type="text" placeholder="e.g. Software Engineer">
-          </div>
-        </div>
 
-        <!-- Programme Interest -->
-        <div class="eq-section-head" style="margin-top:.5rem;">
-          <div class="eq-sh-icon" style="background:rgba(61,107,255,.12);">📚</div>
-          <div class="eq-sh-title">Programme Interest</div>
-          <div class="eq-sh-line"></div>
-        </div>
-
-        <div class="eq-group">
-          <label class="eq-label">Course Interested In <span class="eq-required">*</span></label>
-          <select class="eq-select" id="eq-course" required>
-            <option value="">Loading courses…</option>
-          </select>
-        </div>
-
-        <div class="eq-row">
-          <div class="eq-group">
-            <label class="eq-label">Experience Level</label>
-            <select class="eq-select" id="eq-experience">
-              <option value="">Select level</option>
-              <option value="fresher">Fresher (0–1 yr)</option>
-              <option value="junior">Junior (1–3 yrs)</option>
-              <option value="mid">Mid-Level (3–5 yrs)</option>
-              <option value="senior">Senior (5+ yrs)</option>
+          <div class="form-group">
+            <label class="form-label">Course of Interest *</label>
+            <select id="courseInterest" class="form-select" required>
+              <option value="">Select a course</option>
             </select>
           </div>
-          <div class="eq-group">
-            <label class="eq-label">Preferred Start</label>
-            <select class="eq-select" id="eq-start">
-              <option value="">Select timeframe</option>
-              <option value="immediately">Immediately</option>
-              <option value="2weeks">Within 2 weeks</option>
-              <option value="1month">Within 1 month</option>
-              <option value="flexible">Flexible</option>
+
+          <div class="form-group">
+            <label class="form-label">Preferred Contact Method</label>
+            <select id="contactMethod" class="form-select">
+              <option value="email">Email</option>
+              <option value="phone">Phone Call</option>
+              <option value="whatsapp">WhatsApp</option>
             </select>
           </div>
-        </div>
 
-        <!-- Payment -->
-        <div class="eq-section-head" style="margin-top:.5rem;">
-          <div class="eq-sh-icon" style="background:rgba(16,185,129,.12);">💳</div>
-          <div class="eq-sh-title">Payment Preference</div>
-          <div class="eq-sh-line"></div>
-        </div>
+          <div class="form-group">
+            <label class="form-label">Message *</label>
+            <textarea id="message" class="form-textarea" placeholder="Tell us about your goals, current experience, and how we can help you..." required></textarea>
+          </div>
 
-        <div class="eq-group">
-          <label class="eq-label">Preferred Payment Method</label>
-          <select class="eq-select" id="eq-payment">
-            <option value="">Select method</option>
-            <option value="full">Full Payment</option>
-            <option value="emi3">EMI – 3 Months</option>
-            <option value="emi6">EMI – 6 Months</option>
-            <option value="emi12">EMI – 12 Months</option>
-            <option value="cash">Cash</option>
-            <option value="corporate">Corporate / Sponsored</option>
-          </select>
-        </div>
-
-        <!-- Message -->
-        <div class="eq-section-head" style="margin-top:.5rem;">
-          <div class="eq-sh-icon" style="background:rgba(251,191,36,.1);">💬</div>
-          <div class="eq-sh-title">Your Message</div>
-          <div class="eq-sh-line"></div>
-        </div>
-
-        <div class="eq-group">
-          <label class="eq-label">Additional Questions or Context</label>
-          <textarea class="eq-textarea" id="eq-message" placeholder="Any specific questions about the programme, fees, batch timings, or anything else we should know…"></textarea>
-        </div>
-
-        <!-- Error -->
-        <div class="eq-err" id="eq-err"></div>
-
-        <button class="eq-submit" id="eq-submit-btn" type="submit">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-          Send My Enquiry
-        </button>
-
-        <p style="font-size:.75rem;color:var(--txt4);text-align:center;margin-top:.6rem;line-height:1.5;">By submitting you agree we may contact you regarding your enquiry. We never share your data with third parties.</p>
-      </form>
-
-      <!-- Success state -->
-      <div class="eq-success" id="eq-success">
-        <div class="eq-success-icon">🎉</div>
-        <h3>Enquiry Received!</h3>
-        <p>Thank you — our admissions counsellor will reach out within 24 hours with a personalised programme recommendation and fee breakdown.<br><br>In the meantime, feel free to browse our courses.</p>
-        <a href="courses.html" class="btn-grad" style="display:inline-flex;margin-top:1.5rem;">Browse Courses →</a>
-      </div>
-    </div>
-
-    <!-- ── Sidebar ── -->
-    <div class="eq-sidebar">
-
-      <!-- Office Hours -->
-      <div class="eq-side-card">
-        <h3><span style="font-size:1rem;">🕐</span> Office Hours</h3>
-        <div class="eq-hours">
-          <div class="eq-hour-row"><span class="eq-hour-day">Mon – Fri</span><span class="eq-hour-open">9 AM – 7 PM</span></div>
-          <div class="eq-hour-row"><span class="eq-hour-day">Saturday</span><span class="eq-hour-open">10 AM – 5 PM</span></div>
-          <div class="eq-hour-row"><span class="eq-hour-day">Sunday</span><span style="color:var(--txt4);font-size:.75rem;">Closed</span></div>
-        </div>
+          <button type="submit" class="form-submit" id="submitBtn">
+            <span>Send Message</span>
+          </button>
+        </form>
       </div>
 
-      <!-- EMI highlight -->
-      <div class="eq-side-card" style="background:linear-gradient(145deg,rgba(124,92,252,.08),rgba(61,107,255,.05));border-color:rgba(124,92,252,.3);">
-        <h3><span style="font-size:1rem;">💳</span> Zero-Cost EMI</h3>
-        <p style="font-size:.83rem;color:var(--txt3);line-height:1.65;margin-bottom:1rem;">Split your investment across 3, 6, or 12 monthly installments — with absolutely no interest or processing fees.</p>
-        <a href="emi-application.html" class="btn-grad" style="display:inline-flex;font-size:.82rem;padding:.55rem 1.1rem;">Apply for EMI →</a>
-      </div>
+      <!-- Sidebar -->
+      <div class="contact-sidebar">
+        <!-- Contact Information -->
+        <div class="sidebar-card">
+          <h3 class="sidebar-title">
+            <span>📞</span>
+            Contact Information
+          </h3>
 
-      <!-- FAQ Accordion -->
-      <div class="eq-side-card">
-        <h3><span style="font-size:1rem;">❓</span> Common Questions</h3>
-        <div class="eq-faq">
-          <div class="eq-faq-item">
-            <button class="eq-faq-q" onclick="toggleFaq(this)">
-              Are fees negotiable?
-              <svg class="eq-faq-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
-            </button>
-            <div class="eq-faq-a">Our counsellors are empowered to offer flexible plans based on your situation. We always find a solution that works.</div>
+          <div class="contact-info-item">
+            <div class="contact-icon">📧</div>
+            <div class="contact-details">
+              <h4>Email</h4>
+              <p><a href="mailto:skillupnowoff@gmail.com" style="color: var(--txt2); text-decoration: none;">skillupnowoff@gmail.com</a></p>
+            </div>
           </div>
-          <div class="eq-faq-item">
-            <button class="eq-faq-q" onclick="toggleFaq(this)">
-              How fast is enrollment?
-              <svg class="eq-faq-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
-            </button>
-            <div class="eq-faq-a">Most students are enrolled within 48 hours of their enquiry. We handle all paperwork quickly so you can start learning ASAP.</div>
+
+          <div class="contact-info-item">
+            <div class="contact-icon">📱</div>
+            <div class="contact-details">
+              <h4>Phone & WhatsApp</h4>
+              <p><a href="https://wa.me/919876543210" target="_blank" style="color: var(--txt2); text-decoration: none;">+91 98765 43210</a><br>
+              <a href="https://wa.me/918765432109" target="_blank" style="color: var(--txt2); text-decoration: none;">+91 87654 32109</a></p>
+            </div>
           </div>
-          <div class="eq-faq-item">
-            <button class="eq-faq-q" onclick="toggleFaq(this)">
-              Is there a free demo class?
-              <svg class="eq-faq-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
-            </button>
-            <div class="eq-faq-a">Yes! We offer a complimentary demo session for all new enquiries. Mention it in your message and our team will arrange it.</div>
+
+          <div class="contact-info-item">
+            <div class="contact-icon">📍</div>
+            <div class="contact-details">
+              <h4>Address</h4>
+              <p>123 Business District<br>Mumbai, Maharashtra 400001<br>India</p>
+            </div>
           </div>
-          <div class="eq-faq-item">
-            <button class="eq-faq-q" onclick="toggleFaq(this)">
-              Can I cancel after enrolling?
-              <svg class="eq-faq-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
-            </button>
-            <div class="eq-faq-a">You can cancel from your profile page anytime before the course begins. Contact us for a full policy explanation.</div>
+
+          <div class="contact-info-item">
+            <div class="contact-icon">🕒</div>
+            <div class="contact-details">
+              <h4>Business Hours</h4>
+              <p>Mon - Fri: 9:00 AM - 6:00 PM<br>Sat: 10:00 AM - 4:00 PM<br>Sun: Closed</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="sidebar-card">
+          <h3 class="sidebar-title">
+            <span>📊</span>
+            Our Impact
+          </h3>
+
+          <div class="stats-grid">
+            <div class="stat-item">
+              <div class="stat-number" id="students-count">500+</div>
+              <div class="stat-label">Students Trained</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-number" id="courses-count">10+</div>
+              <div class="stat-label">Courses Offered</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-number" id="rating-count">4.9</div>
+              <div class="stat-label">Average Rating</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-number" id="response-count">2hrs</div>
+              <div class="stat-label">Avg Response Time</div>
+            </div>
           </div>
         </div>
       </div>
     </div>
+
+    <!-- Toast Notifications -->
+    <div class="toast" id="contact-toast"></div>
   </div>
-
-  <!-- ── Process Timeline ── -->
-  <div class="eq-process">
-    <div class="eq-process-inner">
-      <h2>What Happens Next?</h2>
-      <p style="text-align:center;color:var(--txt3);margin-bottom:3rem;">From enquiry to your first live session — here's the journey</p>
-      <div class="eq-steps">
-        <div class="eq-step" style="animation:fadeUp .5s ease .0s both;">
-          <div class="eq-step-num">1</div>
-          <h4>Submit Enquiry</h4>
-          <p>Fill in the form above with your details and programme interest. Takes under 2 minutes.</p>
-        </div>
-        <div class="eq-step" style="animation:fadeUp .5s ease .1s both;">
-          <div class="eq-step-num">2</div>
-          <h4>Counsellor Calls</h4>
-          <p>A dedicated admissions counsellor contacts you within 24 hours to understand your goals.</p>
-        </div>
-        <div class="eq-step" style="animation:fadeUp .5s ease .2s both;">
-          <div class="eq-step-num">3</div>
-          <h4>Fee Breakdown</h4>
-          <p>You receive a personalised fee breakdown with all available payment options clearly explained.</p>
-        </div>
-        <div class="eq-step" style="animation:fadeUp .5s ease .3s both;">
-          <div class="eq-step-num">4</div>
-          <h4>Enroll & Start</h4>
-          <p>Confirm enrollment, make your first payment, and join your first live session within days.</p>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Toast -->
-  <div class="eq-toast" id="eq-toast"></div>
 
   <!-- Footer — rebuilt by profile-nav.js -->
   <footer></footer>
@@ -697,106 +551,179 @@
   <script src="../js/profile-nav.js"></script>
 
   <script>
-    /* ── Load courses into dropdown ── */
-    async function loadEnquiryCourses() {
-      const sel = document.getElementById('eq-course');
+    /* ── Load Courses ── */
+    async function loadCourses() {
       try {
-        if (!window.supabaseConfig) throw new Error('DB');
-        const res = await window.supabaseConfig.getAllCourses();
-        if (res.success && res.data?.length) {
-          sel.innerHTML = '<option value="">Select a course</option>' +
-            res.data.map(c => `<option value="${c.name}">${c.name}</option>`).join('') +
-            '<option value="Not sure yet">Not sure yet — help me choose</option>';
-          return;
+        if (!window.supabaseConfig) throw new Error('Database not ready');
+        const result = await window.supabaseConfig.getAllCourses();
+        if (result.success && result.data) {
+          populateCourseSelect(result.data);
+        } else {
+          populateFallbackCourses();
         }
-      } catch(e) {}
-      // Fallback
-      sel.innerHTML = `<option value="">Select a course</option>
-        <option value="Communication Mastery">Communication Mastery</option>
-        <option value="Leadership Essentials">Leadership Essentials</option>
-        <option value="Soft Skills for Professionals">Soft Skills for Professionals</option>
-        <option value="Public Speaking & Confidence">Public Speaking &amp; Confidence</option>
-        <option value="Teamwork & Collaboration">Teamwork &amp; Collaboration</option>
-        <option value="Not sure yet">Not sure yet — help me choose</option>`;
-    }
-
-    /* ── Form submission ── */
-    async function handleEnquirySubmit(e) {
-      e.preventDefault();
-      const errEl = document.getElementById('eq-err');
-      errEl.style.display = 'none';
-
-      const name   = document.getElementById('eq-name').value.trim();
-      const email  = document.getElementById('eq-email').value.trim();
-      const phone  = document.getElementById('eq-phone').value.trim();
-      const course = document.getElementById('eq-course').value;
-
-      if (!name)   { showEqErr('Please enter your full name.'); return; }
-      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showEqErr('Please enter a valid email address.'); return; }
-      if (!phone)  { showEqErr('Please enter your phone number.'); return; }
-      if (!course) { showEqErr('Please select a course you are interested in.'); return; }
-
-      const btn = document.getElementById('eq-submit-btn');
-      btn.disabled = true;
-      btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:rvSpin .7s linear infinite"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg> Sending…';
-
-      try {
-        if (!window.supabaseConfig) throw new Error('Database not available');
-
-        const payload = {
-          full_name: name,
-          email: email,
-          phone_number: phone,
-          course_interested: course,
-          course_title: course,
-          current_role: document.getElementById('eq-role').value.trim() || null,
-          program_duration: document.getElementById('eq-start').value || null,
-          learning_experience: document.getElementById('eq-experience').value || null,
-          preferred_payment_method: document.getElementById('eq-payment').value || null,
-          message: document.getElementById('eq-message').value.trim() || null,
-          enquiry_status: 'new'
-        };
-
-        const result = await window.supabaseConfig.submitContactEnquiry(payload);
-        if (!result.success) throw new Error(result.error || 'Submission failed');
-
-        document.getElementById('enquiryForm').style.display = 'none';
-        document.getElementById('eq-success').style.display = 'block';
-        showEqToast('Enquiry submitted successfully!', 'ok');
-      } catch(err) {
-        showEqErr('Submission failed: ' + (err.message || 'Please try again or call us directly.'));
-        btn.disabled = false;
-        btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Send My Enquiry';
+      } catch (e) {
+        console.warn('Failed to load courses:', e);
+        populateFallbackCourses();
       }
     }
 
-    function showEqErr(msg) {
-      const el = document.getElementById('eq-err');
-      el.textContent = msg; el.style.display = 'block';
-      el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    function populateCourseSelect(courses) {
+      const select = document.getElementById('courseInterest');
+      select.innerHTML = '<option value="">Select a course</option>' +
+        courses.map(course => `<option value="${course.id}">${course.name}</option>`).join('');
     }
 
-    function showEqToast(msg, type) {
-      const t = document.getElementById('eq-toast');
-      t.textContent = msg; t.className = 'eq-toast ' + type;
-      t.classList.add('show');
-      setTimeout(() => t.classList.remove('show'), 3500);
+    function populateFallbackCourses() {
+      const select = document.getElementById('courseInterest');
+      select.innerHTML = `
+        <option value="">Select a course</option>
+        <option value="1">Communication Mastery</option>
+        <option value="2">Leadership Excellence</option>
+        <option value="3">Public Speaking Pro</option>
+        <option value="4">Soft Skills Development</option>
+        <option value="5">Business Etiquette</option>
+        <option value="6">Presentation Skills</option>
+        <option value="7">Negotiation Mastery</option>
+        <option value="8">Team Building</option>
+        <option value="9">Time Management</option>
+        <option value="10">Emotional Intelligence</option>
+      `;
     }
 
-    /* ── FAQ accordion ── */
-    function toggleFaq(btn) {
-      const item = btn.closest('.eq-faq-item');
-      const ans  = item.querySelector('.eq-faq-a');
-      const arr  = btn.querySelector('.eq-faq-arrow');
-      const isOpen = ans.classList.contains('open');
-      // Close all
-      document.querySelectorAll('.eq-faq-a').forEach(a => a.classList.remove('open'));
-      document.querySelectorAll('.eq-faq-arrow').forEach(a => a.classList.remove('open'));
-      if (!isOpen) { ans.classList.add('open'); arr.classList.add('open'); }
+    /* ── Form Submission ── */
+    async function handleEnquirySubmit(e) {
+      e.preventDefault();
+
+      const fullName = document.getElementById('fullName').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const phone = document.getElementById('phone').value.trim();
+      const courseId = document.getElementById('courseInterest').value;
+      const contactMethod = document.getElementById('contactMethod').value;
+      const message = document.getElementById('message').value.trim();
+
+      // Validation
+      if (!fullName || fullName.length < 2) {
+        showToast('Please enter your full name (at least 2 characters)', 'error');
+        return;
+      }
+
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        showToast('Please enter a valid email address', 'error');
+        return;
+      }
+
+      if (phone && !/^\+?\d{7,15}$/.test(phone.replace(/[\s\-()]/g, ''))) {
+        showToast('Please enter a valid phone number (7–15 digits)', 'error');
+        return;
+      }
+
+      if (!message || message.length < 10) {
+        showToast('Please write at least 10 characters in your message', 'error');
+        return;
+      }
+
+      // Submit
+      const submitBtn = document.getElementById('submitBtn');
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<div class="loading-spinner"></div><span>Sending...</span>';
+
+      try {
+        if (!window.supabaseConfig) throw new Error('Database not available');
+        const client = window.supabaseConfig.getClient();
+
+        const enquiryData = {
+          full_name: fullName,
+          email: email,
+          phone: phone || null,
+          course_id: courseId,
+          contact_method: contactMethod,
+          message: message,
+          status: 'new',
+          created_at: new Date().toISOString()
+        };
+
+        const { error } = await client.from('contact_enquiries').insert(enquiryData);
+        if (error) throw error;
+
+        // Success
+        document.getElementById('contactForm').reset();
+        showToast('Message sent successfully! We\'ll get back to you within 24 hours.', 'success');
+
+      } catch (error) {
+        console.error('Enquiry submission error:', error);
+        showToast('Failed to send message. Please try again or contact us directly.', 'error');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<span>Send Message</span>';
+      }
     }
 
-    /* ── Init ── */
-    document.addEventListener('DOMContentLoaded', loadEnquiryCourses);
+    /* ── Load Stats ── */
+    async function loadStats() {
+      try {
+        if (!window.supabaseConfig) throw new Error('Database not ready');
+        const client = window.supabaseConfig.getClient();
+
+        // Get student count
+        const { count: studentCount } = await client
+          .from('user_enrollments')
+          .select('*', { count: 'exact', head: true });
+
+        // Get course count
+        const { count: courseCount } = await client
+          .from('courses')
+          .select('*', { count: 'exact', head: true });
+
+        // Get average rating
+        const { data: ratings } = await client
+          .from('feedback')
+          .select('rating')
+          .eq('is_approved', true);
+
+        const avgRating = ratings && ratings.length ?
+          (ratings.reduce((s, r) => s + (parseInt(r.rating) || 5), 0) / ratings.length).toFixed(1) : '4.9';
+
+        // Update stats
+        document.getElementById('students-count').textContent = studentCount || '500+';
+        document.getElementById('courses-count').textContent = courseCount || '10+';
+        document.getElementById('rating-count').textContent = avgRating;
+
+      } catch (e) {
+        console.warn('Failed to load stats:', e);
+        // Keep default values
+      }
+    }
+
+    /* ── Toast Notifications ── */
+    function showToast(message, type) {
+      const toast = document.getElementById('contact-toast');
+      toast.className = `toast ${type}`;
+      toast.innerHTML = `
+        <span>${type === 'success' ? '✅' : '❌'}</span>
+        <span>${message}</span>
+      `;
+      setTimeout(() => toast.classList.add('show'), 100);
+      setTimeout(() => toast.classList.remove('show'), 5000);
+    }
+
+    /* ── Enter Key Submission ── */
+    function setupEnterKey() {
+      const form = document.getElementById('contactForm');
+      if (!form) return;
+      form.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
+          e.preventDefault();
+          form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+        }
+      });
+    }
+
+    /* ── Initialize ── */
+    document.addEventListener('DOMContentLoaded', () => {
+      loadCourses();
+      loadStats();
+      setupEnterKey();
+    });
   </script>
 </body>
 </html>

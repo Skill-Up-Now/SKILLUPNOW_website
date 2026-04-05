@@ -115,8 +115,19 @@
       from { opacity: 0; transform: translateY(20px); }
       to   { opacity: 1; transform: translateY(0); }
     }
-    .course-card.reveal.visible {
-      animation: card-glow-in 0.5s var(--ease) both;
+    .ci-tab.active {
+      background: rgba(124,92,252,0.3) !important;
+      color: #fff !important;
+      border-color: rgba(124,92,252,0.6) !important;
+    }
+
+    .ci-tab-content {
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     .course-header {
@@ -198,6 +209,29 @@
       font-size: 1.3rem;
       font-weight: 700;
       color: var(--v1);
+    }
+
+    .btn-blue {
+      background: #2563eb;
+      color: #fff;
+      padding: 0.9rem 2.2rem;
+      border-radius: var(--r4);
+      font-family: 'Plus Jakarta Sans', 'Poppins', sans-serif;
+      font-weight: 700;
+      font-size: 0.92rem;
+      text-decoration: none;
+      border: none;
+      box-shadow: var(--shadow-btn);
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+    }
+
+    .btn-blue:hover {
+      background: #1d4ed8;
+      transform: translateY(-3px);
+      box-shadow: 0 16px 48px rgba(37, 99, 235, 0.65);
     }
 
     /* ── Top Filter Bar ── */
@@ -395,7 +429,7 @@
 
       <!-- Page heading -->
       <h1 style="font-family: 'Cormorant Garamond', serif; font-size: 3rem; text-align: center; margin-bottom: 0.6rem; line-height: 1.15;">Our Premium Courses</h1>
-      <p style="text-align: center; color: var(--txt3); margin-bottom: 2rem; font-size: 1.1rem;">Choose from 48+ expertly-designed courses covering cloud, DevOps, AI, security, and more.</p>
+      <p style="text-align: center; color: var(--txt3); margin-bottom: 2rem; font-size: 1.1rem;">Explore top-tier specialized courses tailored to you.</p>
 
       <!-- Horizontal Filter Bar -->
       <div class="filter-topbar">
@@ -409,7 +443,7 @@
         <!-- Hover Category Filter -->
         <div class="cat-filter-wrap">
           <button type="button" class="cat-filter-btn" id="catFilterBtn">
-            <span id="catFilterLabel">🌐 All Courses</span>
+            <span id="catFilterLabel">🔥 Trending Now</span>
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
           </button>
           <div class="cat-panel" id="catPanel">
@@ -506,7 +540,7 @@
 
       <!-- Bottom bar -->
       <div style="padding-top: 1.5rem; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-        <p style="font-size: 0.78rem; color: var(--txt4);">© 2026 SkillUpNow. All rights reserved.</p>
+        <p style="font-size: 0.78rem; color: var(--txt4);">© <span class="site-year"></span> SkillUpNow. All rights reserved.</p>
         <div style="display: flex; gap: 0.65rem;">
           <a href="#" style="width: 34px; height: 34px; border-radius: var(--r1); border: 1px solid var(--border); background: var(--panel); display: flex; align-items: center; justify-content: center; text-decoration: none; transition: all 0.25s; font-size: 0.9rem;" title="Facebook">📘</a>
           <a href="#" style="width: 34px; height: 34px; border-radius: var(--r1); border: 1px solid var(--border); background: var(--panel); display: flex; align-items: center; justify-content: center; text-decoration: none; transition: all 0.25s; font-size: 0.9rem;" title="X / Twitter">𝕏</a>
@@ -567,6 +601,85 @@
       </div>
 
       <p id="ci-desc" style="font-size:.88rem;color:rgba(200,191,255,.55);line-height:1.65;margin-bottom:1.8rem;"></p>
+
+      <!-- Course Details Tabs -->
+      <div style="margin-bottom: 1.8rem;">
+        <div style="display: flex; gap: 0.5rem; margin-bottom: 1.2rem; flex-wrap: wrap;">
+          <button onclick="switchCourseTab('overview')" id="tab-overview" class="ci-tab active" style="padding: 0.5rem 1rem; background: rgba(124,92,252,0.2); border: 1px solid rgba(124,92,252,0.4); border-radius: 8px; color: #b09fff; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.2s;">Overview</button>
+          <button onclick="switchCourseTab('curriculum')" id="tab-curriculum" class="ci-tab" style="padding: 0.5rem 1rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: rgba(200,191,255,0.6); font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.2s;">Curriculum</button>
+          <button onclick="switchCourseTab('outcomes')" id="tab-outcomes" class="ci-tab" style="padding: 0.5rem 1rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: rgba(200,191,255,0.6); font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.2s;">Outcomes</button>
+          <button onclick="switchCourseTab('careers')" id="tab-careers" class="ci-tab" style="padding: 0.5rem 1rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: rgba(200,191,255,0.6); font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.2s;">Careers</button>
+          <button onclick="switchCourseTab('payment')" id="tab-payment" class="ci-tab" style="padding: 0.5rem 1rem; background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.25); border-radius: 8px; color: #4ade80; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.2s;">💳 Pay Now</button>
+        </div>
+
+        <div id="tab-content-overview" class="ci-tab-content active">
+          <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 1.2rem;">
+            <h4 style="font-size: 1rem; font-weight: 700; color: #f0eeff; margin-bottom: 0.8rem;">Course Overview</h4>
+            <p id="ci-full-desc" style="font-size: 0.85rem; color: rgba(200,191,255,0.7); line-height: 1.6; margin: 0;"></p>
+          </div>
+        </div>
+
+        <div id="tab-content-curriculum" class="ci-tab-content" style="display: none;">
+          <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 1.2rem;">
+            <h4 style="font-size: 1rem; font-weight: 700; color: #f0eeff; margin-bottom: 0.8rem;">Key Topics Covered</h4>
+            <div id="ci-topics" style="display: flex; flex-wrap: wrap; gap: 0.5rem;"></div>
+          </div>
+        </div>
+
+        <div id="tab-content-outcomes" class="ci-tab-content" style="display: none;">
+          <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 1.2rem;">
+            <h4 style="font-size: 1rem; font-weight: 700; color: #f0eeff; margin-bottom: 0.8rem;">What You'll Achieve</h4>
+            <div id="ci-outcomes" style="display: flex; flex-direction: column; gap: 0.6rem;"></div>
+          </div>
+        </div>
+
+        <div id="tab-content-careers" class="ci-tab-content" style="display: none;">
+          <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 1.2rem;">
+            <h4 style="font-size: 1rem; font-weight: 700; color: #f0eeff; margin-bottom: 0.8rem;">Career Opportunities</h4>
+            <div id="ci-careers" style="display: flex; flex-wrap: wrap; gap: 0.5rem;"></div>
+          </div>
+        </div>
+
+        <div id="tab-content-payment" class="ci-tab-content" style="display: none;">
+          <div style="background: rgba(16,185,129,0.05); border: 1px solid rgba(16,185,129,0.2); border-radius: 14px; padding: 1.4rem;">
+            <h4 style="font-size: 1rem; font-weight: 700; color: #f0eeff; margin-bottom: 1.2rem; display:flex; align-items:center; gap:.5rem;">
+              <span style="width:28px;height:28px;background:linear-gradient(135deg,#10b981,#059669);border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:.9rem;">💳</span>
+              Secure Payment
+            </h4>
+            <!-- Recipient Info -->
+            <div style="background:rgba(255,255,255,.04);border:1px solid rgba(16,185,129,.2);border-radius:12px;padding:1.1rem;margin-bottom:1.2rem;">
+              <div style="font-size:.68rem;color:rgba(74,222,128,.6);font-weight:700;text-transform:uppercase;letter-spacing:.07em;margin-bottom:.7rem;">📲 UPI / GPay Recipient</div>
+              <div style="display:flex;align-items:center;gap:.9rem;margin-bottom:.6rem;">
+                <div style="width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,#10b981,#059669);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;">👤</div>
+                <div>
+                  <div style="font-size:1rem;font-weight:700;color:#f0eeff;">Swaminathan S</div>
+                  <div style="font-size:.8rem;color:rgba(200,191,255,.6);">SkillUpNow — Official Payment</div>
+                </div>
+              </div>
+              <div style="background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.25);border-radius:10px;padding:.85rem 1rem;display:flex;align-items:center;justify-content:space-between;gap:.8rem;">
+                <div>
+                  <div style="font-size:.68rem;color:rgba(74,222,128,.55);font-weight:600;text-transform:uppercase;letter-spacing:.06em;">GPay / Phone Pe / Paytm</div>
+                  <div style="font-size:1.2rem;font-weight:800;color:#4ade80;letter-spacing:.04em;margin-top:.25rem;">6381 721 061</div>
+                </div>
+                <button onclick="navigator.clipboard?.writeText('6381721061').then(()=>{this.textContent='✓ Copied!';setTimeout(()=>this.textContent='Copy',1800)})" style="padding:.45rem .9rem;background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.35);border-radius:8px;color:#4ade80;font-size:.75rem;font-weight:700;cursor:pointer;white-space:nowrap;transition:all .2s;font-family:inherit;" onmouseover="this.style.background='rgba(16,185,129,.28)'" onmouseout="this.style.background='rgba(16,185,129,.15)'">Copy</button>
+              </div>
+            </div>
+            <!-- Payment amount reminder -->
+            <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:1rem;margin-bottom:1.2rem;display:flex;align-items:center;justify-content:space-between;gap:.8rem;">
+              <div style="font-size:.78rem;color:rgba(200,191,255,.6);">Course fee to pay:</div>
+              <div id="ci-pay-amount" style="font-size:1.15rem;font-weight:800;color:#f0eeff;">—</div>
+            </div>
+            <!-- Steps -->
+            <div style="display:flex;flex-direction:column;gap:.6rem;margin-bottom:1.2rem;">
+              <div style="font-size:.72rem;color:rgba(200,191,255,.5);font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.2rem;">How to Pay</div>
+              ${['Open GPay / PhonePe / Paytm on your phone', 'Send the course fee to <strong style="color:#4ade80;">6381 721 061</strong> (Swaminathan S)', 'Take a screenshot of the payment confirmation', 'Click "Submit Inquiry" below and attach the screenshot'].map((s,i)=>`<div style="display:flex;align-items:flex-start;gap:.7rem;"><span style="width:20px;height:20px;border-radius:50%;background:rgba(16,185,129,.2);border:1px solid rgba(16,185,129,.4);display:inline-flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:#4ade80;flex-shrink:0;">${i+1}</span><span style="font-size:.82rem;color:rgba(200,191,255,.7);line-height:1.5;">${s}</span></div>`).join('')}
+            </div>
+            <button onclick="closeCourseInfo();openAdminInquiry();" style="width:100%;padding:.9rem;background:linear-gradient(135deg,#10b981,#059669);color:#fff;border:none;border-radius:50px;font-size:.9rem;font-weight:700;cursor:pointer;transition:all .25s;font-family:inherit;box-shadow:0 6px 24px rgba(16,185,129,.35);" onmouseover="this.style.filter='brightness(1.1)';this.style.transform='translateY(-2px)'" onmouseout="this.style.filter='';this.style.transform=''">
+              Submit Payment & Enroll →
+            </button>
+          </div>
+        </div>
+      </div>
 
       <div style="display:flex;gap:.85rem;flex-wrap:wrap;">
         <button onclick="openAdminInquiry()" style="flex:1;min-width:140px;padding:.9rem 1.2rem;background:linear-gradient(135deg,#7c5cfc,#3d6bff);color:#fff;border:none;border-radius:50px;font-size:.9rem;font-weight:700;cursor:pointer;transition:all .25s;font-family:inherit;box-shadow:0 6px 24px rgba(124,92,252,.4);" onmouseover="this.style.filter='brightness(1.1)';this.style.transform='translateY(-2px)'" onmouseout="this.style.filter='';this.style.transform=''">
@@ -910,13 +1023,14 @@
             ${topicsHtml}
             ${outcomesHtml}
           </div>
-          <div class="course-footer" style="justify-content:space-between;gap:.6rem;flex-wrap:wrap;">
-            <button class="btn-outline" style="border:1.5px solid var(--border2);padding:.65rem 1.1rem;font-size:.83rem;font-weight:600;border-radius:var(--r4);" onclick="viewCourseInfo('${course.id}')">
+          <div class="course-footer" style="justify-content:space-between;align-items:center;gap:.6rem;flex-wrap:wrap;">
+            <button style="padding:.65rem 1.25rem;font-size:.83rem;font-weight:600;border-radius:50px;display:inline-flex;align-items:center;gap:0.4rem;background:rgba(0,207,238,0.1);border:1.5px solid rgba(0,207,238,0.3);color:#00cfee;cursor:pointer;transition:all 0.25s ease;font-family:inherit;" onclick="viewCourseInfo('${course.id}')" onmouseover="this.style.background='rgba(0,207,238,0.2)';this.style.borderColor='rgba(0,207,238,0.6)';this.style.transform='translateY(-2px)'" onmouseout="this.style.background='rgba(0,207,238,0.1)';this.style.borderColor='rgba(0,207,238,0.3)';this.style.transform=''">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
               View Details
             </button>
             ${enrolledCourseIds.has(String(course.id))
-              ? `<button class="btn-grad" disabled style="opacity:.6;cursor:default;background:rgba(74,222,128,.18);color:#4ade80;">Already Enrolled ✓</button>`
-              : `<button class="btn-grad" onclick="enrollCourse('${course.id}', '${safeName}')">Enroll Now</button>`
+              ? `<button class="btn-grad" disabled style="opacity:.65;cursor:default;background:rgba(74,222,128,.15);color:#4ade80;border:1.5px solid rgba(74,222,128,.3);padding:.65rem 1.25rem;font-size:.83rem;border-radius:50px;">✓ Enrolled</button>`
+              : `<button class="btn-blue" style="padding:.65rem 1.4rem;font-size:.83rem;font-weight:700;border-radius:50px;" onclick="enrollCourse('${course.id}', '${safeName}')">Enroll Now</button>`
             }
           </div>
           ${(() => {
@@ -1103,12 +1217,59 @@
       document.getElementById('ci-level').textContent = course.level || 'All Levels';
       document.getElementById('ci-desc').textContent = course.short_description || course.description || '';
 
+      // Populate tab content
+      document.getElementById('ci-full-desc').textContent = course.description || course.short_description || 'Detailed course information coming soon.';
+
+      // Topics
+      const topics = Array.isArray(course.key_topics) ? course.key_topics : (course.key_topics ? course.key_topics.split(',').map(t => t.trim()) : []);
+      document.getElementById('ci-topics').innerHTML = topics.length
+        ? topics.map(topic => `<span style="background: rgba(124,92,252,0.15); border: 1px solid rgba(124,92,252,0.3); border-radius: 6px; padding: 0.3rem 0.6rem; font-size: 0.75rem; color: #b09fff; font-weight: 500;">${topic}</span>`).join('')
+        : '<p style="font-size: 0.8rem; color: rgba(200,191,255,0.6); margin: 0;">Curriculum details will be shared upon enrollment.</p>';
+
+      // Outcomes
+      const outcomes = Array.isArray(course.learning_outcomes) ? course.learning_outcomes : (course.learning_outcomes ? course.learning_outcomes.split('\n').map(o => o.replace(/^[-•*]\s*/, '').trim()) : []);
+      document.getElementById('ci-outcomes').innerHTML = outcomes.length
+        ? outcomes.map(outcome => `<div style="display: flex; align-items: flex-start; gap: 0.5rem; font-size: 0.8rem; color: rgba(200,191,255,0.7);"><span style="color: #4ade80; font-size: 0.9rem; margin-top: 1px;">✓</span><span>${outcome}</span></div>`).join('')
+        : '<p style="font-size: 0.8rem; color: rgba(200,191,255,0.6); margin: 0;">Learning outcomes will be provided in the course materials.</p>';
+
+      // Careers
+      const careers = Array.isArray(course.career_opportunities) ? course.career_opportunities : (course.career_opportunities ? course.career_opportunities.split(',').map(c => c.trim()) : []);
+      document.getElementById('ci-careers').innerHTML = careers.length
+        ? careers.map(career => `<span style="background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3); border-radius: 6px; padding: 0.3rem 0.6rem; font-size: 0.75rem; color: #4ade80; font-weight: 500;">${career}</span>`).join('')
+        : '<p style="font-size: 0.8rem; color: rgba(200,191,255,0.6); margin: 0;">Career guidance and placement support included.</p>';
+
+      // Populate payment tab amount
+      const payEl = document.getElementById('ci-pay-amount');
+      if (payEl) payEl.textContent = fee ? '₹' + Number(fee).toLocaleString('en-IN') : 'Contact us for pricing';
+
+      // Switch to overview tab
+      switchCourseTab('overview');
+
       const ov = document.getElementById('ci-overlay');
       const box = document.getElementById('ci-box');
       ov.style.opacity = '1';
       ov.style.visibility = 'visible';
       ov.style.pointerEvents = 'all';
       box.style.transform = 'scale(1) translateY(0)';
+    }
+
+    function switchCourseTab(tabName) {
+      // Update tab buttons
+      document.querySelectorAll('.ci-tab').forEach(btn => {
+        btn.classList.remove('active');
+        btn.style.background = 'rgba(255,255,255,0.05)';
+        btn.style.color = 'rgba(200,191,255,0.6)';
+        btn.style.borderColor = 'rgba(255,255,255,0.1)';
+      });
+      document.getElementById('tab-' + tabName).classList.add('active');
+
+      // Update tab content
+      document.querySelectorAll('.ci-tab-content').forEach(content => {
+        content.style.display = 'none';
+        content.classList.remove('active');
+      });
+      document.getElementById('tab-content-' + tabName).style.display = 'block';
+      document.getElementById('tab-content-' + tabName).classList.add('active');
     }
 
     function closeCourseInfo() {
@@ -1433,7 +1594,7 @@
   <!-- Footer -->
   <footer style="background: var(--panel); border-top: 1px solid var(--border); padding: 2rem 5vw; margin-top: 4rem;">
     <div style="max-width: 1200px; margin: 0 auto; text-align: center; color: var(--txt3); font-size: 0.9rem;">
-      <p>&copy; 2026 SkillUpNow. All rights reserved. | <a href="#" style="color: var(--v2); text-decoration: none;">Privacy Policy</a> | <a href="#" style="color: var(--v2); text-decoration: none;">Terms of Service</a></p>
+      <p>&copy; <span class="site-year"></span> SkillUpNow. All rights reserved. | <a href="#" style="color: var(--v2); text-decoration: none;">Privacy Policy</a> | <a href="#" style="color: var(--v2); text-decoration: none;">Terms of Service</a></p>
     </div>
   </footer>
 </body>

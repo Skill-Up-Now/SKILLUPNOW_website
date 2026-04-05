@@ -37,7 +37,7 @@ VALUES (
 -- SAMPLE COURSES
 -- ============================================================
 INSERT INTO public.courses
-  (name, slug, level, category, short_description, description, price, discounted_price,
+  (name, slug, level, category, short_description, description, key_topics, learning_outcomes, career_opportunities, price, discounted_price,
    duration_hours, duration_months, instructor_name, is_emi_available, min_emi_months, max_emi_months,
    is_active, is_featured, tools, prerequisites, syllabus)
 VALUES
@@ -50,6 +50,9 @@ VALUES
   'Web Development',
   'Build modern web apps with HTML, CSS, JavaScript, React and Node.js.',
   'A comprehensive hands-on program covering frontend and backend development. You will build real-world projects and deploy them to the cloud.',
+  ARRAY['HTML5 & CSS3','JavaScript ES6+','React.js','Node.js','Express','MongoDB','REST APIs','Git & GitHub'],
+  ARRAY['Build responsive web applications','Create RESTful APIs','Deploy applications to cloud','Work with databases','Implement authentication','Version control with Git'],
+  ARRAY['Full Stack Developer','Frontend Developer','Backend Developer','Web Application Developer','Freelance Developer','Startup Tech Lead'],
   35000.00, 29999.00,
   240, 6,
   'Arjun Mehta',
@@ -75,6 +78,9 @@ VALUES
   'Cloud',
   'Prepare for the AWS CCP certification with hands-on labs.',
   'Covers all AWS Cloud Practitioner exam domains: cloud concepts, security, technology, and billing. Includes practice exams.',
+  ARRAY['Cloud Computing','AWS Global Infrastructure','Core AWS Services','Security Best Practices','Cost Management','AWS Well-Architected Framework'],
+  ARRAY['Understand cloud computing fundamentals','Navigate AWS services','Implement security best practices','Optimize cloud costs','Prepare for AWS certification'],
+  ARRAY['Cloud Engineer','AWS Solutions Architect','Cloud Consultant','DevOps Engineer','Cloud Security Specialist','Infrastructure Engineer'],
   25000.00, 19999.00,
   120, 3,
   'Priya Sharma',
@@ -97,6 +103,9 @@ VALUES
   'Data Science',
   'Master data analysis, visualisation, and machine learning with Python.',
   'From Pandas and NumPy to Scikit-Learn and deep learning basics. Build a portfolio of data projects.',
+  ARRAY['Python Programming','Data Analysis','Machine Learning','Data Visualization','Statistics','SQL','Jupyter Notebooks'],
+  ARRAY['Analyze complex datasets','Build machine learning models','Create compelling visualizations','Apply statistical methods','Work with SQL databases','Present data insights'],
+  ARRAY['Data Scientist','Data Analyst','Machine Learning Engineer','Business Intelligence Analyst','Data Engineer','Research Analyst'],
   45000.00, 39999.00,
   300, 6,
   'Kavitha Rajan',
@@ -122,6 +131,9 @@ VALUES
   'Cyber Security',
   'Learn penetration testing, vulnerability assessment, and network security.',
   'Hands-on course covering OWASP Top 10, network scanning, exploitation, and security hardening. CEH exam aligned.',
+  ARRAY['Penetration Testing','Network Security','Web Application Security','Vulnerability Assessment','Ethical Hacking','OWASP Top 10','Cryptography'],
+  ARRAY['Conduct security assessments','Identify vulnerabilities','Perform penetration testing','Implement security controls','Understand attack vectors','Use security tools'],
+  ARRAY['Ethical Hacker','Cyber Security Analyst','Penetration Tester','Security Consultant','SOC Analyst','Security Engineer'],
   40000.00, 34999.00,
   200, 5,
   'Rajan Kumar',
@@ -146,6 +158,9 @@ VALUES
   'DevOps',
   'Master Docker, Kubernetes, Jenkins, and infrastructure-as-code.',
   'Enterprise-grade DevOps practices. Automate build, test, and deployment pipelines. Deploy to AWS EKS.',
+  ARRAY['Docker','Kubernetes','CI/CD Pipelines','Infrastructure as Code','Container Orchestration','Monitoring','Cloud Platforms','Automation'],
+  ARRAY['Deploy containerized applications','Automate deployment pipelines','Manage Kubernetes clusters','Implement infrastructure as code','Monitor system performance','Use DevOps tools'],
+  ARRAY['DevOps Engineer','Site Reliability Engineer','Cloud Architect','Platform Engineer','Infrastructure Engineer','Release Manager'],
   55000.00, 49999.00,
   320, 6,
   'Suresh Pillai',
