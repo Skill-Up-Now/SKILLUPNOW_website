@@ -1,7 +1,14 @@
 {
   "permissions": {
     "allow": [
-      "Bash(cat e:/SKILLUPNOW_website/config/*.js)"
+      "Bash(cat e:/SKILLUPNOW_website/config/*.js)",
+      "mcp__claude_ai_Supabase__list_projects",
+      "mcp__claude_ai_Supabase__execute_sql",
+      "mcp__claude_ai_Supabase__get_logs",
+      "mcp__claude_ai_Supabase__apply_migration",
+      "Bash(grep -l \"profile-nav.js\" e:/SKILLUPNOW_website/pages/*.html e:/SKILLUPNOW_website/index.html)",
+      "Bash(grep -l \"<nav>\" e:/SKILLUPNOW_website/pages/*.html e:/SKILLUPNOW_website/index.html)",
+      "Bash(grep -l \"<footer>\" e:/SKILLUPNOW_website/pages/*.html e:/SKILLUPNOW_website/index.html)"
     ]
   }
 }

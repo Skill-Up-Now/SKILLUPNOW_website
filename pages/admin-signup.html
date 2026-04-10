@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Sign Up — SkillUpNow</title>
+  <link rel="stylesheet" href="../css/variables.css">
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="stylesheet" href="../css/responsive.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      min-height: 100vh;
+      background: #060412; font-family: 'Plus Jakarta Sans', sans-serif;
+      overflow-x: hidden; position: relative;
+    }
+    nav { z-index: 30; }
+    .page-wrap { position: relative; z-index: 1; min-height: 100vh; display: flex; flex-direction: column; }
+    .auth-shell { flex: 1; display: flex; align-items: center; justify-content: center; padding: 7.5rem 1rem 3rem; }
+
+    /* ── Animated background ── */
+    .bg {
+      position: fixed; inset: 0; z-index: 0;
+      background:
+        radial-gradient(ellipse 70% 55% at 15% 25%, rgba(124,92,252,0.28) 0%, transparent 60%),
+        radial-gradient(ellipse 55% 45% at 85% 75%, rgba(61,107,255,0.2) 0%, transparent 55%),
+        radial-gradient(ellipse 40% 35% at 50% 50%, rgba(168,85,247,0.08) 0%, transparent 60%),
+        #060412;
+    }
+    .grid {
+      position: fixed; inset: 0; z-index: 0;
+      background-image:
+        linear-gradient(rgba(124,92,252,0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(124,92,252,0.05) 1px, transparent 1px);
+      background-size: 48px 48px;
+    }
+    @keyframes float1 {
+      0%,100% { transform: translate(0,0) scale(1); }
+      50% { transform: translate(30px,-20px) scale(1.05); }
+    }
+    @keyframes float2 {
+      0%,100% { transform: translate(0,0) scale(1); }
+      50% { transform: translate(-20px,30px) scale(0.95); }
+    }
+    .orb1 {
+      position: fixed; width: 350px; height: 350px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(124,92,252,0.18), transparent 70%);
+      top: -80px; left: -80px; z-index: 0; animation: float1 8s ease-in-out infinite;
+    }
+    .orb2 {
+      position: fixed; width: 280px; height: 280px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(61,107,255,0.15), transparent 70%);
+      bottom: -60px; right: -60px; z-index: 0; animation: float2 10s ease-in-out infinite;
+    }
+
+    /* ── Card ── */
+    .card {
+      position: relative; z-index: 1;
+      background: rgba(255,255,255,0.035);
+      border: 1.5px solid rgba(124,92,252,0.22);
+      border-radius: 28px;
+      padding: 2.75rem 2.5rem 2.25rem;
+      width: 100%; max-width: 460px;
+      margin: 1rem;
+      backdrop-filter: blur(24px) saturate(1.4);
+      box-shadow: 0 32px 80px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.05);
+      animation: slideUp 0.5s cubic-bezier(0.22,1,0.36,1) both;
+    }
+    .card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(124,92,252,0.8), rgba(61,107,255,0.6), transparent);
+      border-radius: 28px 28px 0 0;
+    }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(28px) scale(0.97); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    /* ── Brand ── */
+    .brand { text-align: center; margin-bottom: 1.8rem; }
+    .brand-logo {
+      width: 60px; height: 60px;
+      background: linear-gradient(135deg, #9b8fff 0%, #7c6cff 50%, #5b3fd4 100%);
+      border-radius: 18px; margin: 0 auto 0.9rem;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.7rem; box-shadow: 0 10px 28px rgba(124,108,255,0.45);
+      animation: pulseLogo 3s ease-in-out infinite;
+    }
+    @keyframes pulseLogo {
+      0%,100% { box-shadow: 0 10px 28px rgba(124,108,255,0.45); }
+      50% { box-shadow: 0 14px 36px rgba(124,108,255,0.65), 0 0 0 8px rgba(124,92,252,0.08); }
+    }
+    .brand h2 { color: #f0eeff; font-size: 1.45rem; font-weight: 800; letter-spacing: -0.02em; }
+    .brand p  { color: rgba(200,191,255,0.55); font-size: 0.82rem; margin-top: 0.25rem; }
+    .badge {
+      display: inline-flex; align-items: center; gap: 0.35rem;
+      background: rgba(124,92,252,0.15); border: 1px solid rgba(124,92,252,0.3);
+      border-radius: 999px; padding: 0.22rem 0.75rem;
+      font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; color: #b5adff; margin-top: 0.6rem;
+    }
+
+    /* ── Progress bar ── */
+    .progress-bar {
+      display: flex; gap: 0.5rem; margin-bottom: 1.8rem; justify-content: center;
+      align-items: center;
+    }
+    .progress-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: rgba(124,92,252,0.2); border: 1px solid rgba(124,92,252,0.3);
+      transition: all 0.3s;
+    }
+    .progress-dot.active { background: #9b8fff; border-color: #9b8fff; box-shadow: 0 0 8px rgba(155,143,255,0.6); width: 24px; border-radius: 4px; }
+    .progress-dot.done   { background: #4ade80; border-color: #4ade80; }
+
+    /* ── Alert ── */
+    .alert { padding: 0.7rem 1rem; border-radius: 12px; font-size: 0.8rem; margin-bottom: 1rem; display: none; line-height: 1.5; }
+    .alert.error   { background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.28); color: #fca5a5; }
+    .alert.success { background: rgba(34,197,94,0.1);  border: 1px solid rgba(34,197,94,0.28);  color: #86efac; }
+    .alert.show { display: block; }
+
+    /* ── Steps ── */
+    .step { display: none; }
+    .step.active { display: block; }
+    .step-title { font-size: 1.1rem; font-weight: 800; color: #f0eeff; margin-bottom: 0.3rem; }
+    .step-sub   { font-size: 0.8rem; color: rgba(200,191,255,0.45); margin-bottom: 1.5rem; line-height: 1.5; }
+
+    /* ── Form fields ── */
+    .f-group { margin-bottom: 1rem; }
+    .f-group label {
+      display: block; font-size: 0.73rem; font-weight: 700; letter-spacing: 0.07em;
+      text-transform: uppercase; color: rgba(200,191,255,0.45); margin-bottom: 0.4rem;
+    }
+    .req { color: #ef4444; }
+    .input-wrap { position: relative; }
+    .f-icon {
+      position: absolute; left: 0.9rem; top: 50%; transform: translateY(-50%);
+      color: rgba(155,143,255,0.4); font-size: 0.95rem; pointer-events: none;
+    }
+    .f-group input {
+      width: 100%;
+      background: rgba(255,255,255,0.04);
+      border: 1.5px solid rgba(124,92,252,0.18);
+      border-radius: 14px;
+      padding: 0.8rem 1rem 0.8rem 2.65rem;
+      color: #f0eeff; font-size: 0.9rem; font-family: inherit;
+      outline: none; transition: all 0.22s;
+    }
+    .f-group input:focus {
+      border-color: rgba(155,143,255,0.65);
+      background: rgba(124,92,252,0.07);
+      box-shadow: 0 0 0 3px rgba(124,92,252,0.14);
+    }
+    .f-group input::placeholder { color: rgba(200,191,255,0.22); }
+    .pw-toggle {
+      position: absolute; right: 0.85rem; top: 50%; transform: translateY(-50%);
+      background: none; border: none; color: rgba(155,143,255,0.4);
+      cursor: pointer; font-size: 0.78rem; font-family: inherit; transition: color 0.2s;
+    }
+    .pw-toggle:hover { color: #9b8fff; }
+
+    /* Invite code field — special styling */
+    .invite-field input {
+      border-color: rgba(250,204,21,0.3) !important;
+      background: rgba(250,204,21,0.04) !important;
+    }
+    .invite-field input:focus {
+      border-color: rgba(250,204,21,0.6) !important;
+      box-shadow: 0 0 0 3px rgba(250,204,21,0.12) !important;
+    }
+    .invite-field label { color: rgba(250,204,21,0.6) !important; }
+    .invite-field .f-icon { color: rgba(250,204,21,0.5) !important; }
+    .invite-hint {
+      font-size: 0.72rem; color: rgba(250,204,21,0.45); margin-top: 0.35rem;
+      line-height: 1.4;
+    }
+
+    /* Password strength meter */
+    .pw-strength { margin-top: 0.4rem; }
+    .pw-bar { height: 3px; border-radius: 2px; background: rgba(255,255,255,0.06); overflow: hidden; }
+    .pw-fill { height: 100%; border-radius: 2px; width: 0%; transition: all 0.3s; }
+    .pw-label { font-size: 0.7rem; margin-top: 0.25rem; color: rgba(200,191,255,0.3); }
+
+    /* ── OTP inputs ── */
+    .otp-wrap { display: flex; gap: 0.55rem; justify-content: center; margin: 1.2rem 0 1.5rem; }
+    .otp-box {
+      width: 48px; height: 56px; border-radius: 14px;
+      border: 1.5px solid rgba(124,92,252,0.22);
+      background: rgba(255,255,255,0.04);
+      color: #f0eeff; font-size: 1.4rem; font-weight: 800;
+      text-align: center; outline: none; font-family: inherit;
+      transition: all 0.2s; caret-color: #9b8fff;
+    }
+    .otp-box:focus { border-color: rgba(155,143,255,0.7); box-shadow: 0 0 0 3px rgba(124,92,252,0.18); background: rgba(124,92,252,0.06); }
+    .otp-filled { border-color: rgba(74,222,128,0.5) !important; color: #86efac !important; }
+    .otp-timer { text-align: center; font-size: 0.78rem; color: rgba(200,191,255,0.35); margin-bottom: 0.5rem; }
+    .otp-resend { text-align: center; font-size: 0.78rem; color: rgba(200,191,255,0.35); }
+    .otp-resend button {
+      background: none; border: none; color: #9b8fff; font-weight: 700;
+      cursor: pointer; font-family: inherit; font-size: 0.78rem; transition: color 0.2s;
+    }
+    .otp-resend button:hover { color: #c4b5fd; }
+    .otp-resend button:disabled { color: rgba(200,191,255,0.25); cursor: not-allowed; }
+    .email-highlight {
+      color: #b5adff; font-weight: 700;
+      background: rgba(124,92,252,0.1); border-radius: 6px;
+      padding: 0.1rem 0.5rem; font-size: 0.85rem;
+    }
+
+    /* ── Submit button ── */
+    .btn {
+      width: 100%;
+      background: linear-gradient(135deg, #9b8fff 0%, #7c6cff 50%, #9b8fff 100%);
+      background-size: 200% 100%;
+      color: #fff; border: none; border-radius: 14px;
+      padding: 0.9rem; font-size: 0.95rem; font-weight: 700;
+      cursor: pointer; font-family: inherit;
+      display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+      box-shadow: 0 8px 24px rgba(124,108,255,0.4);
+      transition: all 0.3s; position: relative; overflow: hidden;
+      animation: btnGlow 3s ease-in-out infinite;
+    }
+    @keyframes btnGlow {
+      0%,100% { box-shadow: 0 8px 24px rgba(124,108,255,0.4); }
+      50% { box-shadow: 0 10px 32px rgba(124,108,255,0.65); }
+    }
+    .btn::after {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.14) 50%, transparent 70%);
+      transform: translateX(-120%); transition: transform 0.5s ease;
+    }
+    .btn:hover::after { transform: translateX(120%); }
+    .btn:hover:not(:disabled) { filter: brightness(1.1); transform: translateY(-1px); background-position: 100% 0; }
+    .btn:active:not(:disabled) { transform: translateY(0); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; animation: none; }
+
+    /* ── Spinner ── */
+    .spin {
+      width: 15px; height: 15px; border: 2px solid rgba(255,255,255,0.35);
+      border-top-color: #fff; border-radius: 50%;
+      animation: rotate 0.7s linear infinite; display: inline-block; flex-shrink: 0;
+    }
+    @keyframes rotate { to { transform: rotate(360deg); } }
+
+    /* ── Back button ── */
+    .back-btn {
+      background: none; border: none; color: rgba(200,191,255,0.35); cursor: pointer;
+      font-size: 0.8rem; font-family: inherit; transition: color 0.2s;
+      display: flex; align-items: center; gap: 0.3rem; margin-bottom: 1rem; padding: 0;
+    }
+    .back-btn:hover { color: #9b8fff; }
+
+    /* ── Success state ── */
+    .success-icon {
+      width: 72px; height: 72px; border-radius: 50%;
+      background: rgba(74,222,128,0.12);
+      border: 2px solid rgba(74,222,128,0.4);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2rem; margin: 0 auto 1.2rem;
+      animation: successPop 0.5s cubic-bezier(0.22,1,0.36,1) both;
+    }
+    @keyframes successPop {
+      from { transform: scale(0.5); opacity: 0; }
+      to   { transform: scale(1); opacity: 1; }
+    }
+    .success-title { font-size: 1.2rem; font-weight: 800; color: #86efac; text-align: center; margin-bottom: 0.5rem; }
+    .success-sub { font-size: 0.82rem; color: rgba(200,191,255,0.5); text-align: center; line-height: 1.6; margin-bottom: 1.5rem; }
+    .btn-outline {
+      width: 100%; background: transparent;
+      border: 1.5px solid rgba(155,143,255,0.4);
+      color: #9b8fff; border-radius: 14px;
+      padding: 0.85rem; font-size: 0.9rem; font-weight: 700;
+      cursor: pointer; font-family: inherit; transition: all 0.2s;
+      display: flex; align-items: center; justify-content: center; gap: 0.4rem;
+    }
+    .btn-outline:hover { background: rgba(124,92,252,0.12); border-color: rgba(155,143,255,0.7); transform: translateY(-1px); }
+
+    /* ── Footer ── */
+    .card-footer {
+      text-align: center; margin-top: 1.5rem;
+      font-size: 0.75rem; color: rgba(200,191,255,0.3);
+      display: flex; flex-direction: column; gap: 0.5rem;
+    }
+    .card-footer a { color: rgba(155,143,255,0.6); text-decoration: none; transition: color 0.2s; }
+    .card-footer a:hover { color: #9b8fff; }
+    .ssl-note { display: flex; align-items: center; justify-content: center; gap: 0.35rem; }
+
+    /* Two-column row for name/role */
+    .f-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+    @media (max-width: 400px) { .f-row { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+<div class="bg"></div>
+<div class="grid"></div>
+<div class="orb1"></div>
+<div class="orb2"></div>
+<nav></nav>
+
+<div class="page-wrap">
+<main class="auth-shell">
+<div class="card">
+  <div class="brand">
+    <div class="brand-logo">⚡</div>
+    <h2>SkillUpNow</h2>
+    <p>Administration Portal</p>
+    <span class="badge">🔑 Admin Registration</span>
+  </div>
+
+  <!-- Progress dots -->
+  <div class="progress-bar">
+    <div class="progress-dot active" id="dot1"></div>
+    <div class="progress-dot" id="dot2"></div>
+    <div class="progress-dot" id="dot3"></div>
+  </div>
+
+  <!-- Alerts -->
+  <div class="alert error"   id="err-alert"></div>
+  <div class="alert success" id="suc-alert"></div>
+
+  <!-- ═══ STEP 1: Registration form ═══ -->
+  <div class="step active" id="step1">
+    <div class="step-title">Create Admin Account</div>
+    <div class="step-sub">Fill in your details and enter the admin invite code to register</div>
+
+    <div class="f-group">
+      <label>Full Name <span class="req">*</span></label>
+      <div class="input-wrap">
+        <span class="f-icon">👤</span>
+        <input type="text" id="a-name" placeholder="Your full name" autocomplete="name" required>
+      </div>
+    </div>
+
+    <div class="f-group">
+      <label>Email Address <span class="req">*</span></label>
+      <div class="input-wrap">
+        <span class="f-icon">✉</span>
+        <input type="email" id="a-email" placeholder="your@email.com" autocomplete="email" required>
+      </div>
+    </div>
+
+    <div class="f-group">
+      <label>Password <span class="req">*</span></label>
+      <div class="input-wrap">
+        <span class="f-icon">🔒</span>
+        <input type="password" id="a-pass" placeholder="Min 8 chars, A-Z, 0-9" autocomplete="new-password" required oninput="checkStrength(this.value)">
+        <button type="button" class="pw-toggle" onclick="togglePw('a-pass',this)">Show</button>
+      </div>
+      <div class="pw-strength">
+        <div class="pw-bar"><div class="pw-fill" id="pw-fill"></div></div>
+        <div class="pw-label" id="pw-label">Enter a password</div>
+      </div>
+    </div>
+
+    <div class="f-group">
+      <label>Confirm Password <span class="req">*</span></label>
+      <div class="input-wrap">
+        <span class="f-icon">🔒</span>
+        <input type="password" id="a-pass2" placeholder="Repeat your password" autocomplete="new-password" required>
+        <button type="button" class="pw-toggle" onclick="togglePw('a-pass2',this)">Show</button>
+      </div>
+    </div>
+
+    <div class="f-group invite-field">
+      <label>Admin Invite Code <span class="req">*</span></label>
+      <div class="input-wrap">
+        <span class="f-icon">🗝</span>
+        <input type="password" id="a-invite" placeholder="Enter your invite code" autocomplete="off" required>
+        <button type="button" class="pw-toggle" onclick="togglePw('a-invite',this)">Show</button>
+      </div>
+      <div class="invite-hint">Contact the system administrator for your invite code</div>
+    </div>
+
+    <button class="btn" id="step1-btn" onclick="doStep1()">
+      <span id="step1-label">Send Verification Code →</span>
+    </button>
+  </div>
+
+  <!-- ═══ STEP 2: OTP verification ═══ -->
+  <div class="step" id="step2">
+    <button class="back-btn" onclick="goBack(1)">← Back</button>
+    <div class="step-title">Verify Your Email</div>
+    <div class="step-sub">
+      A 6-digit code has been sent to <span class="email-highlight" id="otp-email-display"></span>
+    </div>
+
+    <div class="otp-wrap">
+      <input class="otp-box" id="otp0" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="one-time-code">
+      <input class="otp-box" id="otp1" maxlength="1" inputmode="numeric" pattern="[0-9]">
+      <input class="otp-box" id="otp2" maxlength="1" inputmode="numeric" pattern="[0-9]">
+      <input class="otp-box" id="otp3" maxlength="1" inputmode="numeric" pattern="[0-9]">
+      <input class="otp-box" id="otp4" maxlength="1" inputmode="numeric" pattern="[0-9]">
+      <input class="otp-box" id="otp5" maxlength="1" inputmode="numeric" pattern="[0-9]">
+    </div>
+
+    <div class="otp-timer" id="otp-timer">Code expires in <strong id="otp-countdown">10:00</strong></div>
+    <div class="otp-resend">
+      Didn't receive it?
+      <button id="resend-btn" onclick="resendOtp()" disabled>Resend code</button>
+    </div>
+    <br>
+    <button class="btn" id="step2-btn" onclick="doStep2()">
+      <span id="step2-label">Verify & Create Admin Account</span>
+    </button>
+  </div>
+
+  <!-- ═══ STEP 3: Creating account (loading) ═══ -->
+  <div class="step" id="step3">
+    <div style="text-align:center; padding: 1.5rem 0;">
+      <div class="spin" style="width:36px;height:36px;border-width:3px;margin:0 auto 1.2rem;"></div>
+      <div class="step-title" style="font-size:1rem;">Setting up your admin account…</div>
+      <div class="step-sub" style="margin-top:0.4rem;">This will only take a moment</div>
+    </div>
+  </div>
+
+  <!-- ═══ STEP 4: Success ═══ -->
+  <div class="step" id="step4">
+    <div class="success-icon">✅</div>
+    <div class="success-title">Admin Account Created!</div>
+    <div class="success-sub" id="success-msg">
+      Your admin account is ready. You can now sign in to the admin portal.
+    </div>
+    <button class="btn-outline" onclick="window.location.href='admin-login.html'">
+      → Go to Admin Login
+    </button>
+  </div>
+
+  <div class="card-footer">
+    <div class="ssl-note">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      256-bit SSL encrypted · Authorized personnel only
+    </div>
+    <span>Already have an account? <a href="admin-login.html">Sign In</a></span>
+    <a href="../index.html">← Return to Website</a>
+  </div>
+</div>
+</main>
+<footer></footer>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script src="../config/supabase-config.js"></script>
+<script src="../js/theme.js"></script>
+<script src="../js/profile-nav.js"></script>
+<script>
+/* ═══════════════════════════════════════════════════════════
+   ADMIN SIGNUP — 3-STEP FLOW
+   1. Form + invite code → send OTP via EmailJS
+   2. Verify OTP
+   3. Create Supabase account → call setup_new_admin RPC
+   ═══════════════════════════════════════════════════════════ */
+
+const EMAILJS_SERVICE_ID  = 'service_skillupnow';
+const EMAILJS_TEMPLATE_ID = 'template_bjqerns';
+const EMAILJS_PUBLIC_KEY  = '6chiuXaZ_OqXbYyG1';
+
+emailjs.init(EMAILJS_PUBLIC_KEY);
+
+const db = new SupabaseConfig();
+
+let _formData      = {};  // holds name, email, password, inviteCode
+let _sessionOtp    = '';
+let _timerInterval = null;
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const PASSWORD_RE = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+
+/* ── Helpers ── */
+function togglePw(id, btn) {
+  const inp = document.getElementById(id);
+  const isText = inp.type === 'text';
+  inp.type = isText ? 'password' : 'text';
+  btn.textContent = isText ? 'Show' : 'Hide';
+}
+
+function showAlert(type, msg) {
+  ['err-alert','suc-alert'].forEach(id => {
+    const el = document.getElementById(id);
+    el.classList.remove('show'); el.textContent = '';
+  });
+  const el = document.getElementById(type === 'err' ? 'err-alert' : 'suc-alert');
+  el.textContent = msg;
+  el.classList.add('show');
+}
+
+function clearAlerts() {
+  document.querySelectorAll('.alert').forEach(a => { a.classList.remove('show'); a.textContent = ''; });
+}
+
+function setLoading(btnId, labelId, loading, labelText) {
+  const btn = document.getElementById(btnId);
+  const lbl = document.getElementById(labelId);
+  if (!btn || !lbl) return;
+  btn.disabled = loading;
+  lbl.innerHTML = loading ? '<span class="spin"></span> Please wait…' : labelText;
+}
+
+function showStep(n) {
+  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+  document.getElementById('step' + n).classList.add('active');
+  // Update progress dots (only 3 visible steps for progress)
+  ['dot1','dot2','dot3'].forEach((id, i) => {
+    const dot = document.getElementById(id);
+    if (!dot) return;
+    const step = i + 1;
+    if (step < n)       dot.className = 'progress-dot done';
+    else if (step === n) dot.className = 'progress-dot active';
+    else                 dot.className = 'progress-dot';
+  });
+  clearAlerts();
+}
+
+/* ── Password strength ── */
+function checkStrength(pw) {
+  let score = 0;
+  if (pw.length >= 8)  score++;
+  if (/[A-Z]/.test(pw)) score++;
+  if (/[0-9]/.test(pw)) score++;
+  if (/[^A-Za-z0-9]/.test(pw)) score++;
+
+  const fill  = document.getElementById('pw-fill');
+  const label = document.getElementById('pw-label');
+  const colors = ['#ef4444','#f97316','#eab308','#22c55e'];
+  const labels = ['Weak','Fair','Good','Strong'];
+
+  if (!pw) { fill.style.width = '0%'; label.textContent = 'Enter a password'; label.style.color = 'rgba(200,191,255,0.3)'; return; }
+  fill.style.width = (score * 25) + '%';
+  fill.style.background = colors[score - 1] || '#ef4444';
+  label.textContent = labels[score - 1] || 'Weak';
+  label.style.color = colors[score - 1] || '#ef4444';
+}
+
+/* ── OTP helpers ── */
+function genOtp() {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+}
+
+function storeOtp(email, otp) {
+  sessionStorage.setItem('admin_signup_otp', JSON.stringify({
+    otp, email, expires: Date.now() + 10 * 60 * 1000
+  }));
+}
+
+function verifyStoredOtp(email, entered) {
+  try {
+    const stored = JSON.parse(sessionStorage.getItem('admin_signup_otp') || '{}');
+    if (!stored.otp || stored.email !== email || Date.now() > stored.expires) {
+      sessionStorage.removeItem('admin_signup_otp'); return false;
+    }
+    return stored.otp === entered;
+  } catch { return false; }
+}
+
+async function sendOtpEmail(email, name, otp) {
+  return emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+    email, name: name || 'Admin', otp
+  }, EMAILJS_PUBLIC_KEY);
+}
+
+/* ── Timer ── */
+function startTimer(seconds) {
+  clearInterval(_timerInterval);
+  const resendBtn = document.getElementById('resend-btn');
+  if (resendBtn) resendBtn.disabled = true;
+
+  let remaining = seconds;
+  const tick = () => {
+    const m = Math.floor(remaining / 60);
+    const s = remaining % 60;
+    const el = document.getElementById('otp-countdown');
+    if (el) el.textContent = m + ':' + String(s).padStart(2, '0');
+    if (remaining <= 0) {
+      clearInterval(_timerInterval);
+      const timerEl = document.getElementById('otp-timer');
+      if (timerEl) timerEl.innerHTML = '<span style="color:#fca5a5">Code expired. Please resend.</span>';
+      if (resendBtn) resendBtn.disabled = false;
+    }
+    remaining--;
+  };
+  tick();
+  _timerInterval = setInterval(tick, 1000);
+  setTimeout(() => { if (resendBtn) resendBtn.disabled = false; }, 30000);
+}
+
+/* ── OTP input wiring ── */
+document.addEventListener('DOMContentLoaded', () => {
+  for (let i = 0; i <= 5; i++) {
+    const inp = document.getElementById('otp' + i);
+    if (!inp) continue;
+    inp.addEventListener('input', () => {
+      const v = inp.value.replace(/\D/g, '');
+      inp.value = v.slice(-1);
+      if (v) {
+        inp.classList.add('otp-filled');
+        if (i < 5) document.getElementById('otp' + (i + 1))?.focus();
+        else document.getElementById('step2-btn')?.focus();
+      } else { inp.classList.remove('otp-filled'); }
+    });
+    inp.addEventListener('keydown', e => {
+      if (e.key === 'Backspace' && !inp.value && i > 0) {
+        document.getElementById('otp' + (i - 1))?.focus();
+      }
+      if (e.key === 'Enter') doStep2();
+    });
+    inp.addEventListener('paste', e => {
+      e.preventDefault();
+      const text = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g,'');
+      for (let j = 0; j < 6 && j < text.length; j++) {
+        const box = document.getElementById('otp' + j);
+        if (box) { box.value = text[j]; box.classList.add('otp-filled'); }
+      }
+      document.getElementById('otp' + Math.min(5, text.length - 1))?.focus();
+    });
+  }
+
+  // Enter key on password fields
+  document.getElementById('a-pass2')?.addEventListener('keydown', e => {
+    if (e.key === 'Enter') doStep1();
+  });
+  document.getElementById('a-invite')?.addEventListener('keydown', e => {
+    if (e.key === 'Enter') doStep1();
+  });
+});
+
+/* ══════════════════════════════════════════
+   STEP 1: Validate form + send OTP
+   ══════════════════════════════════════════ */
+async function doStep1() {
+  const name       = document.getElementById('a-name').value.trim();
+  const email      = document.getElementById('a-email').value.trim().toLowerCase();
+  const pass       = document.getElementById('a-pass').value;
+  const pass2      = document.getElementById('a-pass2').value;
+  const inviteCode = document.getElementById('a-invite').value.trim();
+
+  if (!name)       return showAlert('err', 'Please enter your full name.');
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+    return showAlert('err', 'Please enter a valid email address.');
+  if (pass.length < 8)
+    return showAlert('err', 'Password must be at least 8 characters.');
+  if (!/[A-Z]/.test(pass) || !/[0-9]/.test(pass))
+    return showAlert('err', 'Password must include at least one uppercase letter and one number.');
+  if (pass !== pass2)
+    return showAlert('err', 'Passwords do not match. Please try again.');
+  if (!inviteCode)
+    return showAlert('err', 'Please enter the admin invite code.');
+
+  setLoading('step1-btn', 'step1-label', true, 'Send Verification Code →');
+
+  try {
+    const otp = genOtp();
+    storeOtp(email, otp);
+    await sendOtpEmail(email, name, otp);
+
+    _formData = { name, email, pass, inviteCode };
+    document.getElementById('otp-email-display').textContent = email;
+    // Clear OTP boxes
+    for (let i = 0; i <= 5; i++) {
+      const box = document.getElementById('otp' + i);
+      if (box) { box.value = ''; box.classList.remove('otp-filled'); }
+    }
+    showStep(2);
+    startTimer(600);
+    setTimeout(() => document.getElementById('otp0')?.focus(), 100);
+  } catch (err) {
+    showAlert('err', 'Failed to send verification code. Check your email and try again.');
+    console.error(err);
+  }
+
+  setLoading('step1-btn', 'step1-label', false, 'Send Verification Code →');
+}
+
+/* ══════════════════════════════════════════
+   STEP 2: Verify OTP → create account
+   ══════════════════════════════════════════ */
+async function doStep2() {
+  const entered = [0,1,2,3,4,5].map(i => document.getElementById('otp'+i)?.value || '').join('');
+  if (entered.length < 6) return showAlert('err', 'Please enter the complete 6-digit code.');
+
+  if (!verifyStoredOtp(_formData.email, entered)) {
+    showAlert('err', 'Invalid or expired code. Please request a new code.');
+    for (let i = 0; i <= 5; i++) {
+      const box = document.getElementById('otp' + i);
+      if (box) { box.value = ''; box.classList.remove('otp-filled'); }
+    }
+    document.getElementById('otp0')?.focus();
+    return;
+  }
+
+  sessionStorage.removeItem('admin_signup_otp');
+  clearInterval(_timerInterval);
+
+  setLoading('step2-btn', 'step2-label', true, 'Verify & Create Admin Account');
+
+  // Move to loading step
+  showStep(3);
+
+  try {
+    // 1. Create Supabase auth user
+    const signUpRes = await db.signUp(_formData.email, _formData.pass, {
+      full_name: _formData.name,
+      role: 'admin',
+      is_email_verified: true
+    });
+
+    let userId = signUpRes.data?.user?.id;
+
+    // 2. If account already exists, try signing in to get user id
+    if (!signUpRes.success || !userId) {
+      const signInRes = await db.signIn(_formData.email, _formData.pass);
+      if (!signInRes.success) {
+        throw new Error(signUpRes.error || 'Failed to create account. This email may already be registered.');
+      }
+      userId = signInRes.data?.user?.id;
+    }
+
+    if (!userId) throw new Error('Could not retrieve user ID. Please try again.');
+
+    // Brief pause so auth trigger has time to create user_profiles
+    await new Promise(r => setTimeout(r, 1500));
+
+    // 3. Call the setup_new_admin RPC to assign admin role + portal access
+    const setupRes = await db.setupNewAdmin(userId, _formData.inviteCode);
+    if (!setupRes.success) {
+      throw new Error(setupRes.error || 'Failed to configure admin access. Check your invite code.');
+    }
+
+    // 4. Sign out so they must go through the full login flow
+    await db.signOut();
+
+    // Success!
+    document.getElementById('success-msg').textContent =
+      `Welcome, ${_formData.name}! Your admin account has been created and is ready. Please sign in to access the dashboard.`;
+    showStep(4);
+    _formData = {};
+
+  } catch (err) {
+    showAlert('err', err.message || 'Account setup failed. Please try again.');
+    showStep(2);
+    setLoading('step2-btn', 'step2-label', false, 'Verify & Create Admin Account');
+  }
+}
+
+/* ── Resend OTP ── */
+async function resendOtp() {
+  if (!_formData.email) return;
+  const btn = document.getElementById('resend-btn');
+  btn.disabled = true;
+  btn.textContent = 'Sending…';
+  try {
+    const otp = genOtp();
+    storeOtp(_formData.email, otp);
+    await sendOtpEmail(_formData.email, _formData.name, otp);
+    showAlert('suc', 'A new code has been sent to ' + _formData.email);
+    startTimer(600);
+  } catch (err) {
+    showAlert('err', 'Failed to resend code. Please go back and try again.');
+    btn.disabled = false;
+  }
+  btn.textContent = 'Resend code';
+}
+
+/* ── Back navigation ── */
+function goBack(toStep) {
+  clearInterval(_timerInterval);
+  sessionStorage.removeItem('admin_signup_otp');
+  showStep(toStep);
+}
+
+async function doStep1() {
+  const name = document.getElementById('a-name').value.trim();
+  const email = document.getElementById('a-email').value.trim().toLowerCase();
+  const pass = document.getElementById('a-pass').value;
+  const pass2 = document.getElementById('a-pass2').value;
+  const inviteCode = document.getElementById('a-invite').value.trim();
+
+  if (!name) return showAlert('err', 'Please enter your full name.');
+  if (!EMAIL_RE.test(email)) return showAlert('err', 'Please enter a valid email address.');
+  if (!PASSWORD_RE.test(pass)) return showAlert('err', 'Password must be at least 8 characters and include uppercase, lowercase, and a number.');
+  if (pass !== pass2) return showAlert('err', 'Passwords do not match. Please try again.');
+  if (!inviteCode) return showAlert('err', 'Please enter the admin invite code.');
+
+  setLoading('step1-btn', 'step1-label', true, 'Send Verification Code →');
+
+  try {
+    const otpReq = await db.requestSignupOtp(email);
+    if (!otpReq.success || !otpReq.data?.otp) throw new Error(otpReq.error || 'Failed to send verification code.');
+
+    await sendOtpEmail(email, name, otpReq.data.otp);
+    _formData = { name, email, pass, inviteCode };
+    document.getElementById('otp-email-display').textContent = email;
+    for (let i = 0; i <= 5; i++) {
+      const box = document.getElementById('otp' + i);
+      if (box) {
+        box.value = '';
+        box.classList.remove('otp-filled');
+      }
+    }
+    showStep(2);
+    startTimer(600);
+    setTimeout(() => document.getElementById('otp0')?.focus(), 100);
+  } catch (err) {
+    showAlert('err', err.message || 'Failed to send verification code.');
+  } finally {
+    setLoading('step1-btn', 'step1-label', false, 'Send Verification Code →');
+  }
+}
+
+async function doStep2() {
+  const entered = [0,1,2,3,4,5].map(i => document.getElementById('otp'+i)?.value || '').join('');
+  if (entered.length < 6) return showAlert('err', 'Please enter the complete 6-digit code.');
+
+  setLoading('step2-btn', 'step2-label', true, 'Verify & Create Admin Account');
+  showStep(3);
+
+  try {
+    const verifyRes = await db.verifySignupOtp(_formData.email, entered);
+    if (!verifyRes.success) throw new Error(verifyRes.error || 'Invalid or expired code. Please request a new one.');
+
+    const signUpRes = await db.registerVerifiedUser({
+      email: _formData.email,
+      password: _formData.pass,
+      full_name: _formData.name,
+      role: 'admin'
+    });
+    if (!signUpRes.success) throw new Error(signUpRes.error || 'Failed to create account.');
+
+    const signInRes = await db.signIn(_formData.email, _formData.pass);
+    if (!signInRes.success) throw new Error(signInRes.error || 'Account created, but sign-in failed.');
+
+    const userId = signInRes.data?.user?.id || signUpRes.data?.user_id;
+    if (!userId) throw new Error('Could not retrieve user ID. Please try again.');
+
+    const profileSync = await db.syncUserProfile(userId, {
+      full_name: _formData.name,
+      email: _formData.email,
+      role: 'admin',
+      is_email_verified: true
+    });
+    if (!profileSync.success) throw new Error(profileSync.error || 'Failed to sync admin profile.');
+
+    const setupRes = await db.setupNewAdmin(userId, _formData.inviteCode);
+    if (!setupRes.success) throw new Error(setupRes.error || 'Failed to configure admin access. Check your invite code.');
+
+    await db.signOut();
+    document.getElementById('success-msg').textContent =
+      `Welcome, ${_formData.name}! Your admin account has been created and is ready. Please sign in to access the dashboard.`;
+    showStep(4);
+    _formData = {};
+  } catch (err) {
+    showAlert('err', err.message || 'Account setup failed. Please try again.');
+    showStep(2);
+    setLoading('step2-btn', 'step2-label', false, 'Verify & Create Admin Account');
+  }
+}
+
+async function resendOtp() {
+  if (!_formData.email) return;
+  const btn = document.getElementById('resend-btn');
+  btn.disabled = true;
+  btn.textContent = 'Sending...';
+  try {
+    const otpReq = await db.requestSignupOtp(_formData.email);
+    if (!otpReq.success || !otpReq.data?.otp) throw new Error(otpReq.error || 'Failed to resend code.');
+    await sendOtpEmail(_formData.email, _formData.name, otpReq.data.otp);
+    showAlert('suc', 'A new code has been sent to ' + _formData.email);
+    startTimer(600);
+  } catch (err) {
+    showAlert('err', err.message || 'Failed to resend code. Please go back and try again.');
+    btn.disabled = false;
+  }
+  btn.textContent = 'Resend code';
+}
+
+function goBack(toStep) {
+  clearInterval(_timerInterval);
+  showStep(toStep);
+}
+</script>
+</body>
+</html>

@@ -4,13 +4,17 @@
 
 class ThemeManager {
   constructor() {
-    this.currentTheme = localStorage.getItem('theme') || 'light';
+    // Sync with pn-theme (new switcher) or fall back to old 'theme' key, default dark
+    this.currentTheme = localStorage.getItem('pn-theme') || localStorage.getItem('theme') || 'dark';
     this.root = document.documentElement;
     this.toggleButton = null;
     this.init();
   }
 
   init() {
+    // Apply saved variant
+    const variant = localStorage.getItem('pn-theme-variant');
+    if (variant && variant !== 'purple') this.root.setAttribute('data-theme-variant', variant);
     // Set initial theme
     this.setTheme(this.currentTheme);
     
@@ -34,6 +38,7 @@ class ThemeManager {
     this.currentTheme = theme;
     this.root.setAttribute('data-theme', theme);
     localStorage.setItem('theme', theme);
+    localStorage.setItem('pn-theme', theme); // Keep in sync with switcher
     this.updateToggleButtonUI();
     this.updateMetaThemeColor();
     this.dispatchThemeChangeEvent();

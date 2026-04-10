@@ -385,6 +385,16 @@
       .icon-orbit-wrap { display: none; }
       /* Hero visual scroll-reveal: always show on mobile (no JS observer needed) */
       .hero-visual.sr-r { opacity: 1 !important; transform: none !important; }
+
+      /* Mobile: Why Professionals first, stats strip below */
+      #about-reorder-wrap { display: flex; flex-direction: column; }
+      #why-us-section {
+        order: -1;
+        grid-template-columns: 1fr !important;
+        gap: 2rem !important;
+        margin-bottom: 3rem !important;
+      }
+      #stats-strip { order: 0; }
     }
   </style>
   
@@ -658,6 +668,92 @@
     </div>
   </section>
 
+  <!-- ── UPCOMING COURSES MARQUEE ── -->
+  <section style="padding: 3.5rem 0 2rem; border-top: 1px solid var(--border); overflow: hidden;">
+    <div style="max-width: 1400px; margin: 0 auto; padding: 0 5vw;">
+      <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap;">
+        <div>
+          <span style="display:inline-block;padding:.22rem .8rem;background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.3);border-radius:50px;font-size:.7rem;font-weight:700;color:#fbbf24;letter-spacing:.06em;text-transform:uppercase;margin-bottom:.5rem;">Upcoming Courses</span>
+          <h2 style="font-family:'Cormorant Garamond',serif;font-size:clamp(1.6rem,3vw,2.2rem);font-weight:700;color:var(--txt);margin:0;line-height:1.15;">New Batches <span style="background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Starting Soon</span></h2>
+        </div>
+        <a href="pages/courses.html" class="btn-outline" style="margin-left:auto;display:inline-flex;align-items:center;gap:.5rem;white-space:nowrap;padding:.65rem 1.4rem;font-size:.82rem;">
+          All Courses <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+      </div>
+    </div>
+    <div class="courses-marquee-wrap">
+      <div class="courses-marquee-track" id="upcoming-marquee">
+        <!-- populated by JS -->
+      </div>
+    </div>
+  </section>
+
+  <!-- ── EXCITING OFFERS SECTION ── -->
+  <section style="padding: 4rem 5vw; border-top: 1px solid var(--border); background: linear-gradient(135deg, rgba(124,92,252,0.04) 0%, rgba(239,68,68,0.03) 100%);">
+    <div style="max-width: 1400px; margin: 0 auto;">
+      <div style="text-align: center; margin-bottom: 2.5rem;">
+        <span style="display:inline-block;padding:.25rem .9rem;background:linear-gradient(135deg,rgba(239,68,68,.15),rgba(251,191,36,.12));border:1px solid rgba(239,68,68,.3);border-radius:50px;font-size:.72rem;font-weight:700;color:#ef4444;letter-spacing:.07em;text-transform:uppercase;margin-bottom:.7rem;animation:pulse-badge 2s ease-in-out infinite;">🔥 Limited Time</span>
+        <h2 style="font-family:'Cormorant Garamond',serif;font-size:clamp(1.8rem,4vw,2.8rem);font-weight:700;color:var(--txt);margin:0 0 .8rem;line-height:1.15;">Exciting <span style="background:linear-gradient(135deg,#ef4444,#f59e0b);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Offers</span></h2>
+        <p style="font-size:.97rem;color:var(--txt3);max-width:520px;margin:0 auto;">Don't miss these exclusive deals — limited seats, maximum value.</p>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;">
+
+        <!-- Offer 1 -->
+        <div class="offer-card">
+          <div class="offer-badge">🎁 50% Off</div>
+          <div style="font-size: 1.55rem; margin: 1rem 0 .4rem; font-weight: 800; color: var(--txt);">Communication Mastery</div>
+          <div style="font-size: .88rem; color: var(--txt3); line-height: 1.6; margin-bottom: 1.2rem;">Full 8-week live programme — half price for the next batch enrollments. Includes 1-on-1 mentoring.</div>
+          <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.4rem;">
+            <div><div style="font-size: .7rem; color: var(--txt4); text-decoration: line-through;">₹12,000</div><div style="font-size: 1.4rem; font-weight: 800; background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">₹6,000</div></div>
+            <div style="width: 1px; height: 36px; background: var(--border);"></div>
+            <div style="font-size: .78rem; color: #fbbf24;"><div style="font-weight: 700;">🕐 Ends in</div><div id="offer-timer-1" style="font-size: 1rem; font-weight: 800; font-family: monospace; color: #ef4444;">48:00:00</div></div>
+          </div>
+          <a href="pages/contact-enquiry.html" class="liquid-btn" style="width: 100%; justify-content: center; padding: .85rem;">Claim Offer →</a>
+        </div>
+
+        <!-- Offer 2 -->
+        <div class="offer-card" style="background: linear-gradient(135deg, rgba(0,207,238,0.1) 0%, rgba(61,107,255,0.07) 100%); border-color: rgba(0,207,238,0.25);">
+          <div class="offer-badge" style="background: linear-gradient(135deg, #0ea5e9, #3d6bff);">🚀 Free EMI</div>
+          <div style="font-size: 1.55rem; margin: 1rem 0 .4rem; font-weight: 800; color: var(--txt);">Leadership Excellence</div>
+          <div style="font-size: .88rem; color: var(--txt3); line-height: 1.6; margin-bottom: 1.2rem;">Zero-interest EMI across 6 months. Start learning today, pay at your convenience.</div>
+          <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.4rem;">
+            <div><div style="font-size: .75rem; color: var(--txt4);">Starting from</div><div style="font-size: 1.4rem; font-weight: 800; background: linear-gradient(135deg,#0ea5e9,#3d6bff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">₹999/mo</div></div>
+            <div style="width: 1px; height: 36px; background: var(--border);"></div>
+            <div style="font-size: .78rem; color: var(--txt4);"><div style="font-weight: 700; color: #4ade80;">✓ 0% Interest</div><div>6 months plan</div></div>
+          </div>
+          <a href="pages/emi-application.html" class="liquid-btn" style="width: 100%; justify-content: center; padding: .85rem; background: linear-gradient(135deg, rgba(0,207,238,0.85), rgba(61,107,255,0.85));">Apply for EMI →</a>
+        </div>
+
+        <!-- Offer 3 -->
+        <div class="offer-card" style="background: linear-gradient(135deg, rgba(74,222,128,0.1) 0%, rgba(16,185,129,0.07) 100%); border-color: rgba(74,222,128,0.22);">
+          <div class="offer-badge" style="background: linear-gradient(135deg, #10b981, #059669);">👥 Refer & Earn</div>
+          <div style="font-size: 1.55rem; margin: 1rem 0 .4rem; font-weight: 800; color: var(--txt);">Bring a Friend</div>
+          <div style="font-size: .88rem; color: var(--txt3); line-height: 1.6; margin-bottom: 1.2rem;">Refer a colleague or friend and both of you get ₹1,500 off your next enrollment — no cap!</div>
+          <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.4rem;">
+            <div><div style="font-size: .75rem; color: var(--txt4);">You both save</div><div style="font-size: 1.4rem; font-weight: 800; background: linear-gradient(135deg,#4ade80,#10b981); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">₹1,500</div></div>
+            <div style="width: 1px; height: 36px; background: var(--border);"></div>
+            <div style="font-size: .78rem; color: var(--txt4);"><div style="font-weight: 700; color: #4ade80;">✓ Unlimited</div><div>referrals allowed</div></div>
+          </div>
+          <a href="pages/contact-enquiry.html" class="liquid-btn" style="width: 100%; justify-content: center; padding: .85rem; background: linear-gradient(135deg, rgba(74,222,128,0.85), rgba(16,185,129,0.85));">Refer Now →</a>
+        </div>
+
+        <!-- Offer 4 -->
+        <div class="offer-card" style="background: linear-gradient(135deg, rgba(168,85,247,0.1) 0%, rgba(236,72,153,0.07) 100%); border-color: rgba(168,85,247,0.22);">
+          <div class="offer-badge" style="background: linear-gradient(135deg, #a855f7, #ec4899);">📜 Bundle Deal</div>
+          <div style="font-size: 1.55rem; margin: 1rem 0 .4rem; font-weight: 800; color: var(--txt);">2-Course Bundle</div>
+          <div style="font-size: .88rem; color: var(--txt3); line-height: 1.6; margin-bottom: 1.2rem;">Enroll in any 2 programmes together and save 35% on the combined fee. Flexible scheduling.</div>
+          <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.4rem;">
+            <div><div style="font-size: .75rem; color: var(--txt4);">Save up to</div><div style="font-size: 1.4rem; font-weight: 800; background: linear-gradient(135deg,#a855f7,#ec4899); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">35%</div></div>
+            <div style="width: 1px; height: 36px; background: var(--border);"></div>
+            <div style="font-size: .78rem; color: var(--txt4);"><div style="font-weight: 700; color: #a855f7;">✓ Any 2 courses</div><div>choose freely</div></div>
+          </div>
+          <a href="pages/courses.html" class="liquid-btn" style="width: 100%; justify-content: center; padding: .85rem; background: linear-gradient(135deg, rgba(168,85,247,0.85), rgba(236,72,153,0.85));">View Bundles →</a>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
   <!-- Explore Our Platform -->
   <section style="padding: 6rem 5vw; background: linear-gradient(180deg, transparent 0%, rgba(124,92,252,0.03) 100%);">
     <div style="max-width: 1400px; margin: 0 auto;">
@@ -785,18 +881,86 @@
     </div>
   </section>
 
-  <!-- Student Testimonials -->
-  <section style="padding: 6rem 5vw; background: rgba(124,92,252,0.04); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
+  <!-- Student Testimonials — Animated Liquid Glass Grid -->
+  <section id="testimonials" style="padding: 6rem 5vw; background: linear-gradient(135deg, rgba(124,92,252,0.04) 0%, rgba(0,207,238,0.02) 100%); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); overflow: hidden;">
     <div style="max-width: 1400px; margin: 0 auto;">
-      <div style="text-align: center; margin-bottom: 4rem;">
-        <h2 style="font-family: 'Inter', 'Outfit', sans-serif; font-size: clamp(2rem, 4.5vw, 3.2rem); font-weight: 700; color: var(--txt); margin-bottom: 1rem;">What Our Students Say</h2>
-        <p style="font-size: 1.1rem; color: var(--txt3); max-width: 600px; margin: 0 auto;">Real experiences from professionals who transformed their careers with SkillUpNow</p>
+      <div style="text-align: center; margin-bottom: 3.5rem;">
+        <span style="display:inline-block;padding:.25rem .9rem;background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.25);border-radius:50px;font-size:.72rem;font-weight:700;color:#fbbf24;letter-spacing:.07em;text-transform:uppercase;margin-bottom:.8rem;">⭐ Student Testimonials</span>
+        <h2 style="font-family:'Cormorant Garamond',serif;font-size:clamp(2rem,4.5vw,3.2rem);font-weight:700;color:var(--txt);margin:0 0 .8rem;line-height:1.15;">What Our <span style="background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Students Say</span></h2>
+        <p style="font-size:1rem;color:var(--txt3);max-width:560px;margin:0 auto;line-height:1.65;">Real experiences from professionals who transformed their careers with SkillUpNow</p>
       </div>
 
-      <div class="reviews-track-wrap">
-        <div id="reviews-track" class="reviews-track">
-          <p style="color:var(--txt3);text-align:center;padding:2rem;width:100%;">Loading reviews...</p>
+      <!-- Static featured testimonials + dynamic DB reviews -->
+      <div id="testimonials-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1.5rem;margin-bottom:2rem;">
+
+        <!-- Static cards (fallback / always shown) -->
+        <div class="testimonial-card" style="animation: fadeUp .6s .1s ease both;">
+          <div style="position:relative;z-index:1;">
+            <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1.2rem;">
+              <div style="width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,#7c5cfc,#3d6bff);display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:800;color:#fff;flex-shrink:0;">R</div>
+              <div><div style="font-weight:700;font-size:.9rem;color:var(--txt);">Riya Menon</div><div style="font-size:.72rem;color:var(--txt4);">Communication Mastery · Chennai</div></div>
+              <div style="margin-left:auto;color:#fbbf24;font-size:.8rem;">★★★★★</div>
+            </div>
+            <p style="font-size:.88rem;color:var(--txt3);line-height:1.75;margin:0;">"SkillUpNow completely transformed how I present in board meetings. My confidence went from 3/10 to where colleagues now ask me for presentation tips. Best investment of my career."</p>
+          </div>
         </div>
+
+        <div class="testimonial-card" style="animation: fadeUp .6s .2s ease both;">
+          <div style="position:relative;z-index:1;">
+            <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1.2rem;">
+              <div style="width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,#00cfee,#0090b8);display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:800;color:#fff;flex-shrink:0;">A</div>
+              <div><div style="font-weight:700;font-size:.9rem;color:var(--txt);">Arjun Sharma</div><div style="font-size:.72rem;color:var(--txt4);">Leadership Excellence · Bangalore</div></div>
+              <div style="margin-left:auto;color:#fbbf24;font-size:.8rem;">★★★★★</div>
+            </div>
+            <p style="font-size:.88rem;color:var(--txt3);line-height:1.75;margin:0;">"The 1-on-1 mentoring sessions were game-changing. My mentor helped me identify exact communication gaps I didn't even know existed. Got promoted 3 months after completing the course."</p>
+          </div>
+        </div>
+
+        <div class="testimonial-card" style="animation: fadeUp .6s .3s ease both;">
+          <div style="position:relative;z-index:1;">
+            <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1.2rem;">
+              <div style="width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,#4ade80,#16a34a);display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:800;color:#fff;flex-shrink:0;">P</div>
+              <div><div style="font-weight:700;font-size:.9rem;color:var(--txt);">Priya Krishnan</div><div style="font-size:.72rem;color:var(--txt4);">Interview Confidence · Hyderabad</div></div>
+              <div style="margin-left:auto;color:#fbbf24;font-size:.8rem;">★★★★★</div>
+            </div>
+            <p style="font-size:.88rem;color:var(--txt3);line-height:1.75;margin:0;">"After completing Interview Confidence, I cracked 3 top-tier company interviews back to back. The mock sessions with real feedback are absolutely invaluable."</p>
+          </div>
+        </div>
+
+        <div class="testimonial-card" style="animation: fadeUp .6s .4s ease both;">
+          <div style="position:relative;z-index:1;">
+            <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1.2rem;">
+              <div style="width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,#f59e0b,#ea580c);display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:800;color:#fff;flex-shrink:0;">K</div>
+              <div><div style="font-weight:700;font-size:.9rem;color:var(--txt);">Karthik Sundaram</div><div style="font-size:.72rem;color:var(--txt4);">Business English Pro · Coimbatore</div></div>
+              <div style="margin-left:auto;color:#fbbf24;font-size:.8rem;">★★★★★</div>
+            </div>
+            <p style="font-size:.88rem;color:var(--txt3);line-height:1.75;margin:0;">"The EMI option made this completely stress-free financially. The course content itself is world-class — structured, practical, and directly applicable to my daily work."</p>
+          </div>
+        </div>
+
+        <div class="testimonial-card" style="animation: fadeUp .6s .5s ease both;">
+          <div style="position:relative;z-index:1;">
+            <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1.2rem;">
+              <div style="width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,#a855f7,#ec4899);display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:800;color:#fff;flex-shrink:0;">S</div>
+              <div><div style="font-weight:700;font-size:.9rem;color:var(--txt);">Sneha Raju</div><div style="font-size:.72rem;color:var(--txt4);">Public Speaking · Mumbai</div></div>
+              <div style="margin-left:auto;color:#fbbf24;font-size:.8rem;">★★★★★</div>
+            </div>
+            <p style="font-size:.88rem;color:var(--txt3);line-height:1.75;margin:0;">"I used to freeze on stage. After 8 weeks with SkillUpNow, I delivered a TEDx talk. The instructors' patience and personalized feedback made all the difference."</p>
+          </div>
+        </div>
+
+        <!-- Dynamic DB reviews will be appended here -->
+        <div id="reviews-track" style="display:contents;">
+          <!-- populated by main.js -->
+        </div>
+
+      </div>
+
+      <div style="text-align:center;">
+        <a href="pages/feedback.html" class="liquid-btn-outline" style="padding:.8rem 2rem;font-size:.88rem;">
+          See All Reviews
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
       </div>
     </div>
   </section>
@@ -851,8 +1015,11 @@
         </div>
       </div>
 
+      <!-- Wrapper — lets mobile CSS swap stats/why-us order -->
+      <div id="about-reorder-wrap">
+
       <!-- Stats strip — values loaded dynamically from database -->
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1.5rem; margin-bottom: 5rem;">
+      <div id="stats-strip" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1.5rem; margin-bottom: 5rem;">
         <div style="text-align: center; padding: 2rem 1rem; background: var(--panel2); border: 1px solid var(--border); border-radius: var(--r2); transition: border-color 0.3s, transform 0.3s;" onmouseover="this.style.borderColor='var(--v1)';this.style.transform='translateY(-4px)'" onmouseout="this.style.borderColor='var(--border)';this.style.transform=''">
           <div id="stat-students" style="font-size: 2.4rem; font-weight: 800; background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1; min-height: 1em;">—</div>
           <div style="font-size: 0.8rem; color: var(--txt4); margin-top: 0.4rem; font-weight: 500;">Students Enrolled</div>
@@ -876,7 +1043,7 @@
       </div>
 
       <!-- Story / Why us -->
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center;">
+      <div id="why-us-section" style="display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center; margin-bottom: 5rem;">
         <div>
           <h3 style="font-family: 'Cormorant Garamond', serif; font-size: clamp(1.8rem, 3vw, 2.6rem); font-weight: 700; color: var(--txt); margin-bottom: 1.2rem; line-height: 1.2;">Why Professionals <span style="background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Choose Us</span></h3>
           <p style="font-size: 0.97rem; color: var(--txt3); line-height: 1.8; margin-bottom: 1.5rem;">Founded by seasoned HR leaders and communication coaches, SkillUpNow was built on a simple insight: technical talent alone no longer guarantees career success. The differentiator is how you communicate, collaborate, and lead.</p>
@@ -902,6 +1069,8 @@
           </div>
         </div>
       </div>
+
+      </div><!-- /about-reorder-wrap -->
 
       <!-- Our Journey / Timeline -->
       <div style="margin-top: 5rem; padding: 3rem 0; background: linear-gradient(135deg, rgba(124,92,252,0.03), rgba(0,207,238,0.03)); border-radius: var(--r3); border: 1px solid rgba(124,92,252,0.1);">
@@ -1480,9 +1649,9 @@
       btn.textContent = 'Sending OTP...';
 
       try {
-        // Generate 6-digit OTP and store with 10-min expiry
-        const otp = Math.floor(100000 + Math.random() * 900000).toString();
-        sessionStorage.setItem('_otp_data', JSON.stringify({ otp, email, expiry: Date.now() + 600000 }));
+        if (!window.supabaseConfig) {
+          throw new Error('Database connection is not ready. Please refresh and try again.');
+        }
 
         // Store registration data for use after OTP verification
         window._pendingRegister = { name, email, phone, city, state, gender, password };
@@ -1492,16 +1661,24 @@
                              EMAILJS_TEMPLATE_ID !== 'YOUR_TEMPLATE_ID' &&
                              EMAILJS_PUBLIC_KEY  !== 'YOUR_PUBLIC_KEY';
 
+        const otpReq = await window.supabaseConfig.requestSignupOtp(email);
+        if (!otpReq.success || !otpReq.data?.otp) {
+          throw new Error(otpReq.error || 'Failed to generate OTP. Please try again.');
+        }
+        const otp = otpReq.data.otp;
+
         if (emailjsReady) {
           // Production: send email via EmailJS (custom address / Gmail)
           await emailjs.send(
             EMAILJS_SERVICE_ID,
             EMAILJS_TEMPLATE_ID,
             {
-              name:     name,
-              email:    email,
-              otp:      otp,
-              time:     new Date().toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })
+              name,
+              to_name: name,
+              email,
+              otp,
+              otp_code: otp,
+              time: new Date().toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })
             },
             EMAILJS_PUBLIC_KEY
           );
@@ -1522,7 +1699,6 @@
 
       } catch (error) {
         console.error('OTP send error:', error);
-        sessionStorage.removeItem('_otp_data');
         if (window.app) window.app.showNotification('Failed to send OTP. Please try again.', 'error');
       } finally {
         btn.disabled = false;
@@ -1544,33 +1720,17 @@
       btn.textContent = 'Verifying...';
 
       try {
-        // Verify OTP from sessionStorage
-        const raw = sessionStorage.getItem('_otp_data');
-        if (!raw) {
-          if (window.app) window.app.showNotification('OTP expired. Please register again.', 'error');
-          btn.disabled = false; btn.textContent = 'Verify OTP';
-          return;
-        }
-        const { otp, email: storedEmail, expiry } = JSON.parse(raw);
-
-        if (Date.now() > expiry) {
-          sessionStorage.removeItem('_otp_data');
-          if (window.app) window.app.showNotification('OTP expired. Please request a new one.', 'error');
-          btn.disabled = false; btn.textContent = 'Verify OTP';
-          return;
-        }
-        if (otpInput !== otp || email !== storedEmail) {
-          showFieldError('otp-input', 'Invalid OTP. Please try again.');
-          btn.disabled = false; btn.textContent = 'Verify OTP';
-          return;
-        }
-
-        // OTP correct — clear it and create Supabase account
-        sessionStorage.removeItem('_otp_data');
-
         if (!window.supabaseConfig) {
           if (window.app) window.app.showNotification('Database connection error', 'error');
           btn.disabled = false; btn.textContent = 'Verify OTP';
+          return;
+        }
+
+        const verifyResult = await window.supabaseConfig.verifySignupOtp(email, otpInput);
+        if (!verifyResult.success) {
+          showFieldError('otp-input', verifyResult.error || 'Invalid OTP. Please try again.');
+          btn.disabled = false;
+          btn.textContent = 'Verify OTP';
           return;
         }
 
@@ -1597,11 +1757,24 @@
         btn.textContent = 'Logging you in...';
         const loginResult = await window.supabaseConfig.signIn(p.email, p.password);
 
-        window._pendingRegister = null;
-
         if (loginResult.success) {
-          localStorage.setItem('user_id', loginResult.data.user.id);
-          localStorage.setItem('user_email', loginResult.data.user.email);
+          const authUser = loginResult.data.user;
+          const profileSync = await window.supabaseConfig.syncUserProfile(authUser.id, {
+            full_name: p.name,
+            email: p.email,
+            phone: p.phone,
+            city: p.city || null,
+            state: p.state || null,
+            gender: p.gender || null,
+            role: 'user',
+            is_email_verified: true
+          });
+          if (!profileSync.success) {
+            throw new Error(profileSync.error || 'Account created, but profile sync failed.');
+          }
+          localStorage.setItem('user_id', authUser.id);
+          localStorage.setItem('user_email', authUser.email);
+          window._pendingRegister = null;
           if (window.app) window.app.showNotification('Welcome to SkillUpNow! Account created and logged in.', 'success');
           setTimeout(() => {
             closeModal();
@@ -1611,6 +1784,7 @@
           }, 1500);
         } else {
           // Account created but auto-login failed — ask user to sign in manually
+          window._pendingRegister = null;
           if (window.app) window.app.showNotification('Account created! Please sign in.', 'success');
           setTimeout(() => {
             document.getElementById('otp-step').style.display = 'none';
@@ -1865,20 +2039,21 @@
       const city = f.user_profiles?.city || '';
       const initials = name.split(' ').map(w => w[0]).slice(0,2).join('').toUpperCase();
       const rating = Math.min(5, Math.max(1, parseInt(f.rating) || 5));
-      const stars = '★'.repeat(rating) + '☆'.repeat(5 - rating);
       const gradient = _avatarGradients[idx % _avatarGradients.length];
       const courseName = f.courses?.name || '';
-      return `<div class="review-card">
-        <div style="display:flex;gap:0.4rem;margin-bottom:1rem;">
-          ${Array.from({length:5},(_,i)=>`<span style="color:${i<rating?'var(--v1)':'var(--border)'};font-size:1.1rem;">★</span>`).join('')}
-        </div>
-        <p style="font-size:0.95rem;color:var(--txt);line-height:1.7;margin-bottom:1.5rem;font-style:italic;">"${f.feedback_text || ''}"</p>
-        <div style="display:flex;align-items:center;gap:1rem;">
-          <div style="width:40px;height:40px;border-radius:50%;background:${gradient};display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:0.9rem;flex-shrink:0;">${initials}</div>
-          <div>
-            <h4 style="font-family:'Inter','Outfit',sans-serif;margin:0;font-weight:700;color:var(--txt);font-size:0.95rem;">${name}</h4>
-            <p style="margin:0;font-size:0.8rem;color:var(--txt3);">${courseName ? courseName + (city ? ', ' + city : '') : city}</p>
+      const stars = '★'.repeat(rating) + '☆'.repeat(5 - rating);
+      const subtitle = [courseName, city].filter(Boolean).join(' · ');
+      return `<div class="testimonial-card">
+        <div style="position:relative;z-index:1;">
+          <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1.2rem;">
+            <div style="width:46px;height:46px;border-radius:50%;background:${gradient};display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:800;color:#fff;flex-shrink:0;">${initials}</div>
+            <div>
+              <div style="font-weight:700;font-size:.9rem;color:var(--txt);">${name}</div>
+              <div style="font-size:.72rem;color:var(--txt4);">${subtitle}</div>
+            </div>
+            <div style="margin-left:auto;color:#fbbf24;font-size:.8rem;">${stars}</div>
           </div>
+          <p style="font-size:.88rem;color:var(--txt3);line-height:1.75;margin:0;">"${f.comment || ''}"</p>
         </div>
       </div>`;
     }
@@ -1890,8 +2065,8 @@
         const client = window.supabaseConfig.getClient();
         if (!client) return;
         const { data, error } = await client
-          .from('feedback')
-          .select('feedback_text, rating, user_profiles(full_name, city), courses(name)')
+          .from('reviews')
+          .select('comment, rating, user_profiles(full_name, city), courses(name)')
           .eq('is_approved', true)
           .order('created_at', { ascending: false })
           .limit(12);
@@ -1900,8 +2075,7 @@
           return;
         }
         const cards = data.map((f, i) => _buildReviewCard(f, i)).join('');
-        // Duplicate cards for seamless infinite scroll animation
-        track.innerHTML = cards + cards;
+        track.innerHTML = cards;
       } catch(e) {
         track.innerHTML = '<p style="color:var(--txt3);text-align:center;padding:2rem;width:100%;">Reviews unavailable right now.</p>';
       }
@@ -1991,7 +2165,7 @@
 
         // Student count (enrollments)
         const { count: studentCount } = await client
-          .from('user_enrollments')
+          .from('enrollments')
           .select('*', { count: 'exact', head: true });
 
         // Course count
@@ -1999,9 +2173,9 @@
           .from('courses')
           .select('*', { count: 'exact', head: true });
 
-        // Average rating
+        // Average rating from approved reviews
         const { data: ratings } = await client
-          .from('feedback')
+          .from('reviews')
           .select('rating')
           .eq('is_approved', true);
         const avgRating = (ratings && ratings.length)
@@ -2204,5 +2378,52 @@
   })();
   </script>
   <script src="js/neural-cursor.js"></script>
+
+  <!-- ── Upcoming Courses Marquee Populate ── -->
+  <script>
+  (function initMarquee() {
+    const COURSES = [
+      { icon: '🎤', name: 'Communication Mastery',    tag: 'Live · Starts May', color: 'rgba(124,92,252,0.2)' },
+      { icon: '🏆', name: 'Leadership Excellence',    tag: 'Live · Starts May', color: 'rgba(61,107,255,0.2)' },
+      { icon: '💼', name: 'Business English Pro',     tag: 'Live · Starts Jun', color: 'rgba(0,207,238,0.2)'  },
+      { icon: '🎯', name: 'Interview Confidence',     tag: 'Live · Starts May', color: 'rgba(74,222,128,0.2)' },
+      { icon: '🌐', name: 'Public Speaking Mastery',  tag: 'Live · Starts Jun', color: 'rgba(251,191,36,0.2)' },
+      { icon: '🤝', name: 'Team Collaboration',       tag: 'Live · Starts Jun', color: 'rgba(236,72,153,0.2)' },
+      { icon: '🧠', name: 'Emotional Intelligence',   tag: 'Live · Starts Jul', color: 'rgba(168,85,247,0.2)' },
+      { icon: '📊', name: 'Executive Presence',       tag: 'Live · Starts Jul', color: 'rgba(16,185,129,0.2)' },
+    ];
+    const track = document.getElementById('upcoming-marquee');
+    if (!track) return;
+    // Double the items for seamless loop
+    const all = [...COURSES, ...COURSES];
+    track.innerHTML = all.map(c => `
+      <div class="marquee-course-pill">
+        <div class="marquee-pill-icon" style="background:${c.color};">${c.icon}</div>
+        <div>
+          <div class="marquee-pill-name">${c.name}</div>
+          <div class="marquee-pill-tag">${c.tag}</div>
+        </div>
+      </div>`).join('');
+  })();
+
+  // ── Offer countdown timers ──
+  (function initTimers() {
+    function startTimer(id, hoursLeft) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      let secs = hoursLeft * 3600;
+      const tick = () => {
+        const h = Math.floor(secs / 3600);
+        const m = Math.floor((secs % 3600) / 60);
+        const s = secs % 60;
+        el.textContent = String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+        if (secs > 0) secs--;
+      };
+      tick();
+      setInterval(tick, 1000);
+    }
+    startTimer('offer-timer-1', 47);
+  })();
+  </script>
 </body>
 </html>

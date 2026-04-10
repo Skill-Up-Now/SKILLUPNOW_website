@@ -262,7 +262,7 @@
         if (this.morphT < 1) this.morphT = Math.min(1, this.morphT + 0.07);
 
         // Smooth cursor position
-        const spd = this.state === ST.HOVER ? 0.22 : 0.14;
+        const spd = this.state === ST.HOVER ? 0.42 : 0.3;
         const plx = this.lx, ply = this.ly;
         this.lx = this._lerp(this.lx, this.mx, spd);
         this.ly = this._lerp(this.ly, this.my, spd);
@@ -365,7 +365,7 @@
     _drawState(ctx, x, y, s) {
       switch (s) {
         case ST.IDLE:       this._drawArrow(ctx, x, y, false); break;
-        case ST.HOVER:      this._drawArrow(ctx, x, y, true);  break;
+        case ST.HOVER:      this._drawHand(ctx, x, y);         break;
         case ST.TEXT:       this._drawIBeam(ctx, x, y);        break;
         case ST.PROCESSING: this._drawProcessing(ctx, x, y);   break;
       }
@@ -434,7 +434,83 @@
       ctx.restore();
     }
 
-    // 2. I-Beam (TEXT) ─────────────────────────────────────────
+    // 2. Hand Pointer (HOVER) ──────────────────────────────────
+    _drawHand(ctx, x, y) {
+      const sc = 1.08 + Math.sin(this.t * 3) * 0.025;
+      const breathe = 1 + Math.sin(this.osc * 2) * 0.04;
+
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.scale(sc * breathe, sc * breathe);
+
+      // Outer aura
+      const aura = ctx.createRadialGradient(4, 4, 1, 4, 8, 24);
+      aura.addColorStop(0, 'rgba(138,85,255,0.32)');
+      aura.addColorStop(0.5, 'rgba(0,240,255,0.16)');
+      aura.addColorStop(1, 'rgba(106,9,145,0)');
+      ctx.fillStyle = aura;
+      ctx.beginPath();
+      ctx.arc(4, 8, 24, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Gradient fill
+      const hg = ctx.createLinearGradient(0, 0, 14, 22);
+      hg.addColorStop(0,   C.cyan);
+      hg.addColorStop(0.45, C.purple);
+      hg.addColorStop(1,   C.pink);
+
+      ctx.shadowColor = C.purple;
+      ctx.shadowBlur  = 20;
+      ctx.fillStyle   = hg;
+
+      // Draw hand pointer shape (hotspot = fingertip = top of index finger)
+      ctx.beginPath();
+      // Index finger (pointing up, hotspot)
+      ctx.moveTo(5, 0);
+      ctx.lineTo(7.5, 0);
+      ctx.lineTo(7.5, 10);
+      // Middle finger
+      ctx.lineTo(9.5, 8);
+      ctx.lineTo(11.5, 8);
+      ctx.lineTo(11.5, 16);
+      // Ring finger
+      ctx.lineTo(13, 9);
+      ctx.lineTo(15, 9);
+      ctx.lineTo(15, 17);
+      // Pinky
+      ctx.lineTo(16, 10.5);
+      ctx.lineTo(17.5, 10.5);
+      ctx.lineTo(17.5, 18);
+      // Palm bottom-right
+      ctx.lineTo(17, 22);
+      ctx.lineTo(4, 22);
+      // Thumb (left side)
+      ctx.lineTo(1, 18);
+      ctx.lineTo(0, 15);
+      ctx.lineTo(0, 10);
+      ctx.lineTo(2, 8);
+      ctx.lineTo(5, 8);
+      ctx.closePath();
+      ctx.fill();
+
+      // Glass highlight edge
+      ctx.strokeStyle = 'rgba(255,255,255,0.42)';
+      ctx.lineWidth   = 0.6;
+      ctx.shadowBlur  = 0;
+      ctx.beginPath();
+      ctx.moveTo(5.4, 0.4);
+      ctx.lineTo(7.1, 0.4);
+      ctx.lineTo(7.1, 9);
+      ctx.stroke();
+
+      // Fingertip bright pixel
+      ctx.fillStyle = 'rgba(255,255,255,0.9)';
+      ctx.fillRect(5, 0, 2.5, 2);
+
+      ctx.restore();
+    }
+
+    // 3. I-Beam (TEXT) ─────────────────────────────────────────
     _drawIBeam(ctx, x, y) {
       const flicker = 0.75 + Math.sin(this.t * 18) * 0.25;
       const H = 26, W = 11, B = 3;

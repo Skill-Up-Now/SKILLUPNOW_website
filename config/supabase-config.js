@@ -27,28 +27,107 @@ class SupabaseConfig {
     return this.client;
   }
 
+  normalizeRole(role) {
+    const value = (role || 'user').toString().toLowerCase();
+    if (value === 'student') return 'user';
+    if (['user', 'mentor', 'admin', 'super_admin', 'support'].includes(value)) return value;
+    return 'user';
+  }
+
+  buildProfilePayload(userId, userData = {}, overrides = {}) {
+    return {
+      user_id: userId,
+      full_name: userData.full_name || '',
+      username: userData.username || null,
+      email: userData.email || '',
+      phone: userData.phone || '',
+      city: userData.city || null,
+      state: userData.state || null,
+      gender: userData.gender || null,
+      role: this.normalizeRole(userData.role),
+      profile_picture_url: userData.profile_picture_url || userData.avatar_url || null,
+      avatar_url: userData.avatar_url || userData.profile_picture_url || null,
+      address: userData.address || null,
+      is_email_verified: !!userData.is_email_verified,
+      updated_at: new Date().toISOString(),
+      ...overrides
+    };
+  }
+
+  async syncUserProfile(userId, userData = {}, overrides = {}, retryCount = 5) {
+    try {
+      const payload = this.buildProfilePayload(userId, userData, overrides);
+      const updates = { ...payload };
+      delete updates.user_id;
+      delete updates.id;
+
+      for (let attempt = 0; attempt < retryCount; attempt++) {
+        const { data: existing, error: fetchError } = await this.client
+          .from('user_profiles')
+          .select('user_id')
+          .eq('user_id', userId)
+          .maybeSingle();
+
+        if (fetchError && fetchError.code !== 'PGRST116') throw fetchError;
+
+        if (existing) {
+          const { data, error } = await this.client
+            .from('user_profiles')
+            .update(updates)
+            .eq('user_id', userId)
+            .select()
+            .maybeSingle();
+
+          if (error) throw error;
+          return { success: true, data, message: 'Profile synced successfully' };
+        }
+
+        await new Promise(resolve => setTimeout(resolve, 350));
+      }
+
+      return this.upsertUserProfile(userId, userData, overrides);
+    } catch (error) {
+      console.error('Error syncing profile:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
   // ==================== AUTHENTICATION ====================
   
-  async signUp(email, password, userData) {
+  async signUp(email, password, userData = {}, options = {}) {
     try {
+      const normalizedRole = this.normalizeRole(userData.role);
+      const profileData = {
+        ...userData,
+        email,
+        role: normalizedRole,
+        is_email_verified: !!options.isEmailVerified
+      };
+
       const { data, error } = await this.client.auth.signUp({
         email,
         password,
         options: {
-          data: userData,
+          data: {
+            ...userData,
+            role: normalizedRole
+          },
           emailRedirectTo: null
         }
       });
 
       if (error) throw error;
 
-      // Create user profile immediately after signup (requires email confirmation disabled in Supabase)
+      let profileSync = { success: false, skipped: true };
       if (data.user) {
-        await this.createUserProfile(data.user.id, { ...userData, email });
+        const activeUser = data.session?.user || await this.getCurrentUser();
+        if (activeUser?.id === data.user.id) {
+          profileSync = await this.syncUserProfile(data.user.id, profileData);
+        }
         await this.logAuditEvent(data.user.id, 'register', 'user', data.user.id);
       }
 
-      return { success: true, data, message: 'Account created successfully!' };
+      return { success: true, data, profileSync, message: 'Account created successfully!' };
     } catch (error) {
       console.error('Sign up error:', error);
       return { success: false, error: error.message };
@@ -67,7 +146,12 @@ class SupabaseConfig {
 
       // Now create the user profile after confirmed OTP
       if (data.user) {
-        await this.createUserProfile(data.user.id, { ...userData, email });
+        await this.syncUserProfile(data.user.id, {
+          ...userData,
+          email,
+          role: this.normalizeRole(userData?.role),
+          is_email_verified: true
+        });
         await this.logAuditEvent(data.user.id, 'register', 'user', data.user.id);
       }
 
@@ -131,24 +215,20 @@ class SupabaseConfig {
   // ==================== USER PROFILES ====================
   
   async createUserProfile(userId, userData) {
+    return this.upsertUserProfile(userId, userData);
+  }
+
+  async upsertUserProfile(userId, userData = {}, overrides = {}) {
     try {
       const { data, error } = await this.client
         .from('user_profiles')
-        .insert([{
-          id: userId,
-          full_name: userData.full_name || '',
-          email: userData.email || '',
-          phone: userData.phone || '',
-          city: userData.city || null,
-          state: userData.state || null,
-          gender: userData.gender || null,
-          is_email_verified: true
-        }]);
+        .upsert([this.buildProfilePayload(userId, userData, overrides)], { onConflict: 'user_id' })
+        .select();
 
       if (error) throw error;
-      return { success: true, data, message: 'Profile created successfully' };
+      return { success: true, data, message: 'Profile saved successfully' };
     } catch (error) {
-      console.error('Error creating profile:', error);
+      console.error('Error saving profile:', error);
       return { success: false, error: error.message };
     }
   }
@@ -158,7 +238,7 @@ class SupabaseConfig {
       const { data, error } = await this.client
         .from('user_profiles')
         .select('*')
-        .eq('id', userId)
+        .eq('user_id', userId)
         .single();
 
       if (error && error.code !== 'PGRST116') throw error;
@@ -172,11 +252,13 @@ class SupabaseConfig {
   async updateUserProfile(userId, updates) {
     try {
       updates.updated_at = new Date().toISOString();
+      if (updates.profile_picture_url && !updates.avatar_url) updates.avatar_url = updates.profile_picture_url;
+      if (updates.avatar_url && !updates.profile_picture_url) updates.profile_picture_url = updates.avatar_url;
       
       const { data, error } = await this.client
         .from('user_profiles')
         .update(updates)
-        .eq('id', userId);
+        .eq('user_id', userId);
 
       if (error) throw error;
       return { success: true, data, message: 'Profile updated successfully' };
@@ -198,7 +280,7 @@ class SupabaseConfig {
         .from('avatars')
         .getPublicUrl(path);
       const url = urlData.publicUrl + '?t=' + Date.now(); // cache-bust
-      await this.updateUserProfile(userId, { profile_picture_url: url });
+      await this.updateUserProfile(userId, { profile_picture_url: url, avatar_url: url });
       return { success: true, url };
     } catch (error) {
       console.error('Error uploading profile picture:', error);
@@ -210,21 +292,21 @@ class SupabaseConfig {
   
   async enrollCourse(userId, courseData) {
     try {
+      if (!courseData.pricing_id) return { success: false, error: 'No pricing ID provided.' };
       const { data, error } = await this.client
-        .from('course_registrations')
+        .from('enrollments')
         .insert([{
-          user_id: userId,
+          student_user_id: userId,
           course_id: courseData.id,
-          course_title: courseData.title,
-          course_category: courseData.category,
-          course_level: courseData.level,
-          status: 'active'
+          pricing_id: courseData.pricing_id,
+          enrollment_status: 'pending',
+          net_amount: courseData._price || 0,
         }]);
 
       if (error) throw error;
-      
+
       await this.logAuditEvent(userId, 'course_enroll', 'course', courseData.id);
-      
+
       return { success: true, data, message: 'Course enrollment successful!' };
     } catch (error) {
       console.error('Error enrolling course:', error);
@@ -235,10 +317,10 @@ class SupabaseConfig {
   async getEnrolledCourses(userId) {
     try {
       const { data, error } = await this.client
-        .from('course_registrations')
-        .select('*')
-        .eq('user_id', userId)
-        .order('registration_date', { ascending: false });
+        .from('enrollments')
+        .select('*, courses(title, thumbnail_url, duration_days)')
+        .eq('student_user_id', userId)
+        .order('created_at', { ascending: false });
 
       if (error) throw error;
       return { success: true, data };
@@ -430,15 +512,15 @@ class SupabaseConfig {
   async logAuditEvent(userId, actionType, entityType, entityId, oldValues = null, newValues = null) {
     try {
       const { error } = await this.client
-        .from('audit_logs')
+        .from('activity_logs')
         .insert([{
-          user_id: userId,
-          action_type: actionType,
+          actor_user_id: userId,
+          actor_type: 'user',
+          action_name: actionType,
           entity_type: entityType,
-          entity_id: entityId,
+          entity_id: entityId ? String(entityId) : null,
           old_values: oldValues,
           new_values: newValues,
-          ip_address: await this.getClientIP(),
           user_agent: navigator.userAgent
         }]);
 
@@ -461,24 +543,172 @@ class SupabaseConfig {
   // ==================== ADMIN FUNCTIONS ====================
   
   async checkAdminAccess(userId) {
-    try {
-      const { data, error } = await this.client
-        .from('admin_users')
-        .select('role, permissions')
-        .eq('user_id', userId)
-        .eq('is_active', true)
-        .single();
+    return this.getAdminAuthContext(userId);
+  }
 
-      if (error && error.code === 'PGRST116') {
-        return { success: false, isAdmin: false };
+  async getAdminAuthContext(userId = null) {
+    try {
+      if (userId) {
+        const [{ data: roleRow, error: roleError }, { data: accessRow, error: accessError }] = await Promise.all([
+          this.client
+            .from('user_role_assignments')
+            .select('role, is_active')
+            .eq('user_id', userId)
+            .in('role', ['admin', 'super_admin', 'support'])
+            .eq('is_active', true)
+            .order('assigned_at', { ascending: true })
+            .limit(1)
+            .maybeSingle(),
+          this.client
+            .from('admin_profiles')
+            .select('permissions, status, admin_portal_access(otp_enabled,last_login_at,portal_status,otp_verified_until)')
+            .eq('user_id', userId)
+            .maybeSingle()
+        ]);
+
+        if (roleError) throw roleError;
+        if (accessError) throw accessError;
+        if (!roleRow?.is_active || accessRow?.status !== 'active') {
+          return { success: false, isAdmin: false, otp_verified: false };
+        }
+
+        const portal = accessRow?.admin_portal_access?.[0] || accessRow?.admin_portal_access || {};
+
+        return {
+          success: true,
+          isAdmin: true,
+          role: roleRow.role,
+          permissions: accessRow?.permissions || {},
+          otp_enabled: portal.otp_enabled !== false,
+          otp_verified: !!portal.otp_verified_until,
+          last_login_at: portal.last_login_at || null,
+          portal_status: portal.portal_status || 'active'
+        };
       }
 
+      const { data, error } = await this.client.rpc('get_admin_auth_context');
       if (error) throw error;
-
-      return { success: true, isAdmin: true, role: data.role, permissions: data.permissions };
+      if (!data?.is_admin) {
+        return { success: false, isAdmin: false };
+      }
+      return {
+        success: true,
+        isAdmin: !!data.is_admin,
+        role: data.role,
+        permissions: data.permissions || {},
+        otp_enabled: data.otp_enabled !== false,
+        otp_verified: !!data.otp_verified,
+        last_login_at: data.last_login_at || null
+      };
     } catch (error) {
       console.error('Error checking admin access:', error);
       return { success: false, isAdmin: false };
+    }
+  }
+
+  async requestSignupOtp(email) {
+    try {
+      const { data, error } = await this.client.rpc('request_signup_email_otp', {
+        p_email: email
+      });
+      if (error) throw error;
+      return { success: true, data };
+    } catch (error) {
+      console.error('Error requesting signup OTP:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  async verifySignupOtp(email, otp) {
+    try {
+      const { data, error } = await this.client.rpc('verify_signup_email_otp', {
+        p_email: email,
+        p_otp: otp
+      });
+      if (error) throw error;
+      return { success: !!data?.verified, data, error: data?.verified ? null : data?.message };
+    } catch (error) {
+      console.error('Error verifying signup OTP:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  async registerVerifiedUser({
+    email,
+    password,
+    full_name,
+    phone = null,
+    username = null,
+    role = 'user',
+    metadata = {}
+  } = {}) {
+    try {
+      const { data, error } = await this.client.rpc('register_verified_user', {
+        p_email: email,
+        p_password: password,
+        p_full_name: full_name,
+        p_phone: phone,
+        p_username: username,
+        p_role: role,
+        p_metadata: metadata || {}
+      });
+      if (error) throw error;
+      if (!data?.success) throw new Error(data?.message || 'Unable to create account.');
+      return { success: true, data };
+    } catch (error) {
+      console.error('Error registering verified user:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  async requestAdminLoginOtp() {
+    try {
+      const { data, error } = await this.client.rpc('issue_admin_login_otp');
+      if (error) throw error;
+      return { success: true, data };
+    } catch (error) {
+      console.error('Error requesting admin OTP:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  async verifyAdminLoginOtp(otp) {
+    try {
+      const { data, error } = await this.client.rpc('verify_admin_login_otp', { p_otp: otp });
+      if (error) throw error;
+      return { success: !!data?.verified, data, error: data?.verified ? null : data?.message };
+    } catch (error) {
+      console.error('Error verifying admin OTP:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  async setupNewAdmin(userId, inviteCode) {
+    try {
+      const { data, error } = await this.client.rpc('setup_new_admin', {
+        p_user_id: userId,
+        p_invite_code: inviteCode
+      });
+      if (error) throw error;
+      if (!data?.success) throw new Error(data?.message || 'Failed to configure admin account.');
+      return { success: true, data };
+    } catch (error) {
+      console.error('Error setting up admin account:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  async hasAdminPermission(section, action = 'view') {
+    try {
+      const { data, error } = await this.client.rpc('has_admin_permission', {
+        p_section: section,
+        p_action: action
+      });
+      if (error) throw error;
+      return { success: true, allowed: !!data };
+    } catch (error) {
+      console.error('Error checking admin permission:', error);
+      return { success: false, allowed: false, error: error.message };
     }
   }
 
@@ -557,10 +787,10 @@ class SupabaseConfig {
   async getUserCourses(userId) {
     try {
       const { data, error } = await this.client
-        .from('course_registrations')
-        .select('*')
-        .eq('user_id', userId)
-        .order('registration_date', { ascending: false });
+        .from('enrollments')
+        .select('*, courses(title, thumbnail_url, duration_days, course_categories(name))')
+        .eq('student_user_id', userId)
+        .order('created_at', { ascending: false });
 
       if (error) throw error;
       return data || [];
@@ -573,12 +803,12 @@ class SupabaseConfig {
   async getUserStats(userId) {
     try {
       const { data: allCourses } = await this.client
-        .from('course_registrations')
-        .select('id, status, certificate_issued')
-        .eq('user_id', userId);
+        .from('enrollments')
+        .select('id, enrollment_status, completed_at')
+        .eq('student_user_id', userId);
 
-      const completed = (allCourses || []).filter(c => c.status === 'completed');
-      const certs = (allCourses || []).filter(c => c.certificate_issued === true);
+      const completed = (allCourses || []).filter(c => c.enrollment_status === 'completed');
+      const certs = (allCourses || []).filter(c => c.completed_at);
 
       return {
         courses_enrolled: allCourses?.length || 0,
@@ -595,17 +825,17 @@ class SupabaseConfig {
   async getUserCertificates(userId) {
     try {
       const { data, error } = await this.client
-        .from('course_registrations')
-        .select('id, course_title, completion_date, registration_date')
-        .eq('user_id', userId)
-        .eq('certificate_issued', true)
-        .order('completion_date', { ascending: false });
+        .from('enrollments')
+        .select('id, completed_at, courses(title)')
+        .eq('student_user_id', userId)
+        .not('completed_at', 'is', null)
+        .order('completed_at', { ascending: false });
 
       if (error) throw error;
       return (data || []).map(cert => ({
         id: cert.id,
-        course_name: cert.course_title,
-        earned_date: cert.completion_date || cert.registration_date
+        course_name: cert.courses?.title || 'Course',
+        earned_date: cert.completed_at
       }));
     } catch (error) {
       console.error('Error fetching certificates:', error);
@@ -1066,23 +1296,18 @@ class SupabaseConfig {
       const { data, error } = await this.client
         .from('courses')
         .insert([{
-          name: courseData.name || courseData.title || '',
+          title: courseData.title || courseData.name || '',
           slug: courseData.slug || slug,
-          category: courseData.category,
+          category_id: courseData.category_id || courseData.category || null,
           level: (courseData.level || 'beginner').toLowerCase(),
           description: courseData.description || '',
           short_description: courseData.short_description || '',
-          price: parseFloat(courseData.price) || 0,
-          duration_months: parseInt(courseData.duration_months) || null,
+          duration_days: courseData.duration_months ? courseData.duration_months * 30 : null,
           duration_hours: parseInt(courseData.duration_hours) || null,
           thumbnail_url: courseData.thumbnail_url || null,
-          instructor_name: courseData.instructor_name || '',
-          is_emi_available: courseData.is_emi_available !== false,
-          is_active: courseData.is_active !== false,
           is_featured: courseData.is_featured || false,
-          total_enrolled: 0,
-          rating: 0,
-          created_by: adminUserId
+          course_status: courseData.is_active !== false ? 'published' : 'draft',
+          owner_admin_id: adminUserId,
         }])
         .select()
         .single();
@@ -1239,13 +1464,21 @@ class SupabaseConfig {
 
   async getMentorByUserId(userId) {
     try {
-      const { data, error } = await this.client
-        .from('mentors')
-        .select('*, user_profiles(full_name, email, phone, profile_picture_url)')
-        .eq('user_id', userId)
-        .maybeSingle();
-      if (error) throw error;
-      return { success: true, data };
+      const [{ data: mentor, error: mentorError }, { data: profile, error: profileError }] = await Promise.all([
+        this.client
+          .from('mentor_profiles')
+          .select('*')
+          .eq('user_id', userId)
+          .maybeSingle(),
+        this.client
+          .from('user_profiles')
+          .select('full_name, email, phone, profile_picture_url')
+          .eq('user_id', userId)
+          .maybeSingle()
+      ]);
+      if (mentorError) throw mentorError;
+      if (profileError && profileError.code !== 'PGRST116') throw profileError;
+      return { success: true, data: mentor ? { ...mentor, user_profiles: profile || null } : null };
     } catch (error) {
       console.error('Error fetching mentor:', error);
       return { success: false, error: error.message };
@@ -1266,9 +1499,9 @@ class SupabaseConfig {
         return this.client.storage.from(bucket).getPublicUrl(path).data.publicUrl;
       };
 
-      uploads.photo_url       = await uploadFile('photo', files.photo);
-      uploads.pan_url         = await uploadFile('pan', files.pan);
-      uploads.aadhaar_url     = await uploadFile('aadhaar', files.aadhaar);
+      uploads.photo_url         = await uploadFile('photo', files.photo);
+      uploads.pan_doc_url       = await uploadFile('pan', files.pan);
+      uploads.aadhaar_doc_url   = await uploadFile('aadhaar', files.aadhaar);
       uploads.address_proof_url = await uploadFile('address_proof', files.address_proof);
 
       if (files.certificates?.length) {
@@ -1277,37 +1510,108 @@ class SupabaseConfig {
           const url = await uploadFile(`cert_${i}`, files.certificates[i]);
           if (url) certUrls.push(url);
         }
-        uploads.certificate_urls = certUrls;
+        uploads.certificates_urls = certUrls;
       }
 
+      const profileResult = await this.syncUserProfile(userId, {
+        full_name: mentorData.full_name,
+        username: mentorData.username,
+        email: mentorData.email,
+        phone: mentorData.phone,
+        role: 'mentor',
+        is_email_verified: true
+      });
+      if (!profileResult.success) throw new Error(profileResult.error || 'Failed to save mentor profile');
+
       const { data, error } = await this.client
-        .from('mentors')
+        .from('mentor_profiles')
         .upsert({
-          user_id:              userId,
-          bio:                  mentorData.bio || null,
-          linkedin_url:         mentorData.linkedin_url || null,
-          years_of_experience:  parseInt(mentorData.years_of_experience) || null,
-          areas_of_expertise:   mentorData.areas_of_expertise || [],
-          highest_qualification: mentorData.highest_qualification || null,
-          current_employer:     mentorData.current_employer || null,
-          pan_number:           mentorData.pan_number || null,
-          aadhaar_number:       mentorData.aadhaar_number || null,
-          address:              mentorData.address || null,
-          ...uploads,
-          approval_status:      'pending',
+          user_id:            userId,
+          designation:        mentorData.designation || null,
+          qualifications:     mentorData.qualifications || '',
+          expertise_areas:    mentorData.expertise_areas || [],
+          years_of_experience: parseInt(mentorData.years_experience) || 0,
+          bio:                mentorData.bio || null,
+          linkedin_url:       mentorData.linkedin_url || null,
+          pan_number:         mentorData.pan_number || null,
+          aadhaar_number:     mentorData.aadhaar_number || null,
+          salary_type:        mentorData.salary_type || 'per_session',
+          photo_url:          uploads.photo_url || null,
+          status:             'pending',
         }, { onConflict: 'user_id' })
         .select()
         .single();
 
       if (error) throw error;
 
+      const documentRows = [];
+      if (uploads.photo_url) {
+        documentRows.push({
+          mentor_user_id: userId,
+          document_type: 'profile_photo',
+          file_name: files.photo?.name || 'photo',
+          storage_bucket: bucket,
+          storage_path: `${userId}/photo.${files.photo?.name?.split('.').pop() || 'jpg'}`,
+          public_url: uploads.photo_url
+        });
+      }
+      if (uploads.pan_doc_url) {
+        documentRows.push({
+          mentor_user_id: userId,
+          document_type: 'id_proof',
+          file_name: files.pan?.name || 'pan',
+          storage_bucket: bucket,
+          storage_path: `${userId}/pan.${files.pan?.name?.split('.').pop() || 'pdf'}`,
+          public_url: uploads.pan_doc_url
+        });
+      }
+      if (uploads.aadhaar_doc_url) {
+        documentRows.push({
+          mentor_user_id: userId,
+          document_type: 'id_proof',
+          file_name: files.aadhaar?.name || 'aadhaar',
+          storage_bucket: bucket,
+          storage_path: `${userId}/aadhaar.${files.aadhaar?.name?.split('.').pop() || 'pdf'}`,
+          public_url: uploads.aadhaar_doc_url
+        });
+      }
+      if (uploads.address_proof_url) {
+        documentRows.push({
+          mentor_user_id: userId,
+          document_type: 'other',
+          file_name: files.address_proof?.name || 'address_proof',
+          storage_bucket: bucket,
+          storage_path: `${userId}/address_proof.${files.address_proof?.name?.split('.').pop() || 'pdf'}`,
+          public_url: uploads.address_proof_url
+        });
+      }
+      (uploads.certificates_urls || []).forEach((url, index) => {
+        documentRows.push({
+          mentor_user_id: userId,
+          document_type: 'certification',
+          file_name: files.certificates?.[index]?.name || `certificate_${index + 1}`,
+          storage_bucket: bucket,
+          storage_path: `${userId}/cert_${index}.${files.certificates?.[index]?.name?.split('.').pop() || 'pdf'}`,
+          public_url: url
+        });
+      });
+
+      if (documentRows.length) {
+        await this.client.from('mentor_documents').insert(documentRows);
+      }
+
       // Log form submission
       await this.saveFormSubmission(userId, 'mentor_signup', null, {
         ...mentorData,
-        mentor_id: data.id,
+        mentor_user_id: data.user_id,
+        uploaded_documents: documentRows.map(row => ({
+          document_type: row.document_type,
+          file_name: row.file_name,
+          public_url: row.public_url
+        })),
       });
 
-      await this.logAuditEvent(userId, 'mentor_applied', 'mentor', data.id);
+      await this.logAuditEvent(userId, 'mentor_applied', 'mentor', data.user_id);
       return { success: true, data, message: 'Application submitted! Awaiting admin approval.' };
     } catch (error) {
       console.error('Error applying as mentor:', error);
@@ -1318,13 +1622,28 @@ class SupabaseConfig {
   async getAllMentors(statusFilter = null) {
     try {
       let query = this.client
-        .from('mentors')
-        .select('*, user_profiles(full_name, email, phone, profile_picture_url)')
+        .from('mentor_profiles')
+        .select('*')
         .order('created_at', { ascending: false });
-      if (statusFilter) query = query.eq('approval_status', statusFilter);
+      if (statusFilter) query = query.eq('status', statusFilter);
       const { data, error } = await query;
       if (error) throw error;
-      return { success: true, data: data || [] };
+
+      const userIds = [...new Set((data || []).map(item => item.user_id).filter(Boolean))];
+      let profileMap = {};
+      if (userIds.length) {
+        const { data: profiles, error: profileError } = await this.client
+          .from('user_profiles')
+          .select('user_id, full_name, email, phone, profile_picture_url')
+          .in('user_id', userIds);
+        if (profileError) throw profileError;
+        profileMap = Object.fromEntries((profiles || []).map(profile => [profile.user_id, profile]));
+      }
+
+      return {
+        success: true,
+        data: (data || []).map(item => ({ ...item, user_profiles: profileMap[item.user_id] || null }))
+      };
     } catch (error) {
       console.error('Error fetching mentors:', error);
       return { success: false, data: [], error: error.message };
@@ -1334,16 +1653,16 @@ class SupabaseConfig {
   async approveMentor(mentorId, status, adminUserId, notes = null) {
     try {
       const updates = {
-        approval_status: status,
-        approved_by:     adminUserId,
-        approved_at:     new Date().toISOString(),
-        admin_notes:     notes,
-        updated_at:      new Date().toISOString(),
+        status,
+        approved_by_admin_id: status === 'approved' ? adminUserId : null,
+        approved_at: status === 'approved' ? new Date().toISOString() : null,
+        rejection_reason: status === 'rejected' ? (notes || null) : null,
+        updated_at: new Date().toISOString(),
       };
       const { data, error } = await this.client
-        .from('mentors')
+        .from('mentor_profiles')
         .update(updates)
-        .eq('id', mentorId)
+        .eq('user_id', mentorId)
         .select()
         .single();
       if (error) throw error;
@@ -1358,13 +1677,13 @@ class SupabaseConfig {
   async updateMentorSalary(mentorId, salaryData, adminUserId) {
     try {
       const { data, error } = await this.client
-        .from('mentors')
+        .from('mentor_profiles')
         .update({
-          salary_per_month: parseFloat(salaryData.salary_per_month) || null,
-          salary_type:      salaryData.salary_type || 'monthly',
-          updated_at:       new Date().toISOString(),
+          salary_amount: parseFloat(salaryData.salary_per_month) || 0,
+          salary_type: salaryData.salary_type || 'fixed_monthly',
+          updated_at: new Date().toISOString(),
         })
-        .eq('id', mentorId)
+        .eq('user_id', mentorId)
         .select()
         .single();
       if (error) throw error;
@@ -1381,10 +1700,10 @@ class SupabaseConfig {
   async getMentorBatches(mentorId) {
     try {
       const { data, error } = await this.client
-        .from('mentor_batches')
-        .select('*, courses(name,fee,duration_weeks), enrollments(count)')
-        .eq('mentor_id', mentorId)
-        .order('start_date', { ascending: false });
+        .from('course_batches')
+        .select('*, courses(title, duration_days)')
+        .eq('primary_mentor_user_id', mentorId)
+        .order('starts_on', { ascending: false });
       if (error) throw error;
       return { success: true, data: data || [] };
     } catch (error) {
@@ -1396,17 +1715,17 @@ class SupabaseConfig {
   async createBatch(batchData, adminUserId) {
     try {
       const { data, error } = await this.client
-        .from('mentor_batches')
+        .from('course_batches')
         .insert([{
-          course_id:      batchData.course_id,
-          mentor_id:      batchData.mentor_id,
-          batch_name:     batchData.batch_name || `Batch ${Date.now()}`,
-          start_date:     batchData.start_date || null,
-          end_date:       batchData.end_date || null,
-          max_students:   parseInt(batchData.max_students) || 30,
-          schedule_info:  batchData.schedule_info || null,
-          status:         batchData.status || 'upcoming',
-          created_by:     adminUserId,
+          course_id:               batchData.course_id,
+          primary_mentor_user_id:  batchData.mentor_id || null,
+          batch_name:              batchData.batch_name || `Batch ${Date.now()}`,
+          batch_code:              batchData.batch_code || `B${Date.now()}`,
+          starts_on:               batchData.start_date || null,
+          ends_on:                 batchData.end_date || null,
+          max_students:            parseInt(batchData.max_students) || 30,
+          schedule_json:           batchData.schedule_info ? { info: batchData.schedule_info } : {},
+          is_active:               true,
         }])
         .select()
         .single();
@@ -1423,7 +1742,7 @@ class SupabaseConfig {
     try {
       updates.updated_at = new Date().toISOString();
       const { data, error } = await this.client
-        .from('mentor_batches')
+        .from('course_batches')
         .update(updates)
         .eq('id', batchId)
         .select()
@@ -1442,11 +1761,11 @@ class SupabaseConfig {
   async getClassSchedules(batchId = null, mentorId = null, userId = null) {
     try {
       let query = this.client
-        .from('class_schedules')
-        .select('*, mentor_batches(batch_name, courses(name)), mentors(user_profiles(full_name))')
-        .order('scheduled_at', { ascending: true });
+        .from('class_sessions')
+        .select('*, course_batches:batch_id(batch_name, courses(title)), mentor_profiles:mentor_user_id(user_profiles(full_name))')
+        .order('scheduled_start_at', { ascending: true });
       if (batchId)   query = query.eq('batch_id', batchId);
-      if (mentorId)  query = query.eq('mentor_id', mentorId);
+      if (mentorId)  query = query.eq('mentor_user_id', mentorId);
       const { data, error } = await query;
       if (error) throw error;
       return { success: true, data: data || [] };
@@ -1456,21 +1775,23 @@ class SupabaseConfig {
     }
   }
 
-  async createSchedule(scheduleData, createdBy) {
+  async createSchedule(scheduleData) {
     try {
+      // Calculate end time from duration
+      const startAt = new Date(scheduleData.scheduled_at);
+      const durationMins = parseInt(scheduleData.duration_minutes) || 60;
+      const endAt = new Date(startAt.getTime() + durationMins * 60000);
       const { data, error } = await this.client
-        .from('class_schedules')
+        .from('class_sessions')
         .insert([{
-          batch_id:        scheduleData.batch_id,
-          mentor_id:       scheduleData.mentor_id,
-          title:           scheduleData.title || 'Live Class',
-          description:     scheduleData.description || null,
-          scheduled_at:    scheduleData.scheduled_at,
-          duration_minutes: parseInt(scheduleData.duration_minutes) || 60,
-          meet_link:       scheduleData.meet_link || null,
-          recording_url:   scheduleData.recording_url || null,
-          status:          scheduleData.status || 'scheduled',
-          created_by:      createdBy,
+          batch_id:            scheduleData.batch_id,
+          course_id:           scheduleData.course_id,
+          mentor_user_id:      scheduleData.mentor_id,
+          session_title:       scheduleData.title || 'Live Class',
+          scheduled_start_at:  scheduleData.scheduled_at,
+          scheduled_end_at:    endAt.toISOString(),
+          meeting_url:         scheduleData.meet_link || null,
+          session_status:      'scheduled',
         }])
         .select()
         .single();
@@ -1486,7 +1807,7 @@ class SupabaseConfig {
     try {
       updates.updated_at = new Date().toISOString();
       const { data, error } = await this.client
-        .from('class_schedules')
+        .from('class_sessions')
         .update(updates)
         .eq('id', scheduleId)
         .select()
@@ -1503,7 +1824,7 @@ class SupabaseConfig {
     try {
       const { data, error } = await this.client
         .from('class_attendance')
-        .upsert({ schedule_id: scheduleId, user_id: userId, status }, { onConflict: 'schedule_id,user_id' })
+        .upsert({ class_session_id: scheduleId, student_user_id: userId, status }, { onConflict: 'class_session_id,student_user_id' })
         .select()
         .single();
       if (error) throw error;
@@ -1590,7 +1911,7 @@ class SupabaseConfig {
     try {
       let query = this.client
         .from('reviews')
-        .select('*, user_profiles(full_name, profile_picture_url), courses(name)')
+        .select('*, user_profiles(full_name, profile_picture_url), courses(title)')
         .order('created_at', { ascending: false })
         .limit(limit);
       if (courseId)    query = query.eq('course_id', courseId);
@@ -1639,7 +1960,7 @@ class SupabaseConfig {
     try {
       let query = this.client
         .from('inquiries')
-        .select('*, courses(name)')
+        .select('*, courses(title)')
         .order('created_at', { ascending: false })
         .limit(limit);
       if (statusFilter) query = query.eq('status', statusFilter);
@@ -1745,7 +2066,7 @@ class SupabaseConfig {
     try {
       let query = this.client
         .from('payments')
-        .select('*, user_profiles(full_name, email), courses(name)')
+        .select('*, user_profiles(full_name, email), courses(title)')
         .eq('payment_status', 'completed')
         .order('payment_date', { ascending: false });
       if (startDate) query = query.gte('payment_date', startDate);
@@ -1765,7 +2086,7 @@ class SupabaseConfig {
     try {
       let query = this.client
         .from('emi_schedules')
-        .select('*, enrollments(user_id, course_id, user_profiles(full_name, email), courses(name))')
+        .select('*, enrollments(user_id, course_id, user_profiles(full_name, email), courses(title))')
         .order('due_date', { ascending: true });
       if (statusFilter) query = query.eq('status', statusFilter);
       const { data, error } = await query;

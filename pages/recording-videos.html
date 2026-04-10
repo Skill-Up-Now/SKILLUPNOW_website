@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recorded Sessions — SkillUpNow</title>
+  <meta name="description" content="Watch recorded live sessions at your own pace. Premium soft-skills training from India's top coaches.">
+  <link rel="stylesheet" href="../css/variables.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="stylesheet" href="../css/responsive.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Cormorant+Garamond:ital,wght@0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    /* ── Page hero ── */
+    .rv-hero {
+      padding: 8rem 5vw 4rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .rv-hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 50% 0%, rgba(124,92,252,0.18) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .rv-hero-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: .45rem;
+      padding: .3rem .95rem;
+      background: rgba(168,85,247,0.12);
+      border: 1px solid rgba(168,85,247,0.3);
+      border-radius: 50px;
+      font-size: .72rem;
+      font-weight: 700;
+      color: #a855f7;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+      margin-bottom: 1.2rem;
+      animation: fadeUp .5s ease both;
+    }
+    .rv-hero h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2.4rem, 5.5vw, 4.5rem);
+      font-weight: 700;
+      color: var(--txt);
+      line-height: 1.05;
+      margin-bottom: 1.1rem;
+      animation: fadeUp .6s .1s ease both;
+    }
+    .rv-hero p {
+      font-size: 1.08rem;
+      color: var(--txt3);
+      max-width: 560px;
+      margin: 0 auto 2.5rem;
+      line-height: 1.75;
+      animation: fadeUp .6s .2s ease both;
+    }
+
+    /* ── Filters ── */
+    .rv-filters {
+      display: flex;
+      gap: .65rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 3rem;
+    }
+    .rv-filter-btn {
+      padding: .5rem 1.2rem;
+      border-radius: 50px;
+      font-size: .8rem;
+      font-weight: 600;
+      border: 1.5px solid var(--border);
+      background: transparent;
+      color: var(--txt3);
+      cursor: pointer;
+      font-family: inherit;
+      transition: all .22s cubic-bezier(.4,0,.2,1);
+    }
+    .rv-filter-btn:hover, .rv-filter-btn.active {
+      background: rgba(124,92,252,0.12);
+      border-color: rgba(124,92,252,0.5);
+      color: var(--v1);
+    }
+    .rv-filter-btn.active {
+      background: rgba(124,92,252,0.18);
+      border-color: var(--v1);
+    }
+
+    /* ── Search ── */
+    .rv-search-wrap {
+      position: relative;
+      max-width: 440px;
+      margin: 0 auto 2.5rem;
+    }
+    .rv-search-wrap svg {
+      position: absolute;
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--txt4);
+      pointer-events: none;
+    }
+    .rv-search {
+      width: 100%;
+      padding: .82rem 1rem .82rem 2.85rem;
+      background: rgba(255,255,255,0.05);
+      border: 1.5px solid var(--border);
+      border-radius: 50px;
+      color: var(--txt);
+      font-size: .9rem;
+      font-family: inherit;
+      outline: none;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      transition: border-color .22s, box-shadow .22s;
+    }
+    .rv-search:focus { border-color: var(--v1); box-shadow: 0 0 0 3px rgba(124,92,252,0.12); }
+    .rv-search::placeholder { color: var(--txt4); }
+    :root[data-theme="light"] .rv-search { background: rgba(255,255,255,0.82); }
+
+    /* ── Video Grid ── */
+    .rv-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1.8rem;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 5vw 5rem;
+    }
+
+    /* ── Video Card ── */
+    .rv-card {
+      background: rgba(255,255,255,0.05);
+      backdrop-filter: blur(16px) saturate(1.8);
+      -webkit-backdrop-filter: blur(16px) saturate(1.8);
+      border: 1px solid rgba(124,92,252,0.16);
+      border-radius: 24px;
+      overflow: hidden;
+      transition: transform .38s cubic-bezier(.34,1.56,.64,1), box-shadow .38s ease, border-color .38s ease;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.06);
+      cursor: pointer;
+      position: relative;
+    }
+    .rv-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    }
+    .rv-card:hover {
+      transform: translateY(-8px) scale(1.02);
+      border-color: rgba(124,92,252,0.5);
+      box-shadow: 0 24px 64px rgba(124,92,252,0.3), 0 4px 16px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.1);
+    }
+    :root[data-theme="light"] .rv-card {
+      background: rgba(255,255,255,0.88);
+      border-color: rgba(124,92,252,0.12);
+      box-shadow: 0 2px 16px rgba(124,92,252,0.08), inset 0 1px 0 rgba(255,255,255,0.9);
+    }
+    :root[data-theme="light"] .rv-card:hover {
+      box-shadow: 0 16px 48px rgba(124,92,252,0.22), 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    /* ── Thumbnail ── */
+    .rv-thumb {
+      position: relative;
+      aspect-ratio: 16/9;
+      background: linear-gradient(135deg, #0d0b1a, #1d1a3e);
+      overflow: hidden;
+    }
+    .rv-thumb-bg {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 4rem;
+      opacity: 0.3;
+      transition: opacity .3s, transform .4s cubic-bezier(.34,1.56,.64,1);
+    }
+    .rv-card:hover .rv-thumb-bg { opacity: 0.45; transform: scale(1.12); }
+    .rv-thumb-gradient {
+      position: absolute;
+      inset: 0;
+      opacity: 0.7;
+    }
+    .rv-play-btn {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform .38s cubic-bezier(.34,1.56,.64,1);
+    }
+    .rv-card:hover .rv-play-btn { transform: scale(1.12); }
+    .rv-play-circle {
+      width: 58px;
+      height: 58px;
+      background: rgba(255,255,255,0.16);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 2px solid rgba(255,255,255,0.35);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 28px rgba(0,0,0,0.4);
+      transition: background .3s, box-shadow .3s;
+    }
+    .rv-card:hover .rv-play-circle {
+      background: rgba(124,92,252,0.7);
+      border-color: rgba(255,255,255,0.5);
+      box-shadow: 0 12px 40px rgba(124,92,252,0.5);
+    }
+    .rv-duration {
+      position: absolute;
+      bottom: .6rem;
+      right: .75rem;
+      background: rgba(0,0,0,0.75);
+      border-radius: 6px;
+      padding: .18rem .55rem;
+      font-size: .72rem;
+      font-weight: 700;
+      color: #fff;
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+    }
+    .rv-new-badge {
+      position: absolute;
+      top: .7rem;
+      left: .7rem;
+      background: linear-gradient(135deg, #7c5cfc, #3d6bff);
+      border-radius: 6px;
+      padding: .2rem .6rem;
+      font-size: .62rem;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+
+    /* ── Card body ── */
+    .rv-card-body { padding: 1.4rem 1.5rem 1.6rem; }
+    .rv-card-tags { display: flex; gap: .45rem; flex-wrap: wrap; margin-bottom: .75rem; }
+    .rv-tag {
+      padding: .2rem .65rem;
+      background: rgba(124,92,252,0.1);
+      border: 1px solid rgba(124,92,252,0.22);
+      border-radius: 50px;
+      font-size: .66rem;
+      font-weight: 700;
+      color: var(--v1);
+      letter-spacing: .04em;
+    }
+    .rv-card-title {
+      font-size: 1.04rem;
+      font-weight: 700;
+      color: var(--txt);
+      line-height: 1.35;
+      margin-bottom: .5rem;
+    }
+    .rv-card-meta {
+      display: flex;
+      align-items: center;
+      gap: .85rem;
+      font-size: .75rem;
+      color: var(--txt4);
+    }
+    .rv-card-mentor { display: flex; align-items: center; gap: .4rem; }
+    .rv-mentor-dot {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--v1), var(--b1));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: .6rem;
+      font-weight: 800;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    /* ── Video Modal ── */
+    #rv-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 99999;
+      background: rgba(0,0,0,0.88);
+      backdrop-filter: blur(20px) saturate(1.8);
+      -webkit-backdrop-filter: blur(20px) saturate(1.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity .3s ease, visibility .3s ease;
+    }
+    #rv-modal.open { opacity: 1; visibility: visible; pointer-events: all; }
+    .rv-modal-box {
+      width: 100%;
+      max-width: 880px;
+      background: rgba(13,11,26,0.95);
+      border: 1px solid rgba(124,92,252,0.3);
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 0 32px 96px rgba(0,0,0,0.6), 0 4px 16px rgba(124,92,252,0.2);
+      transform: scale(0.93) translateY(24px);
+      transition: transform .35s cubic-bezier(.23,1,.32,1);
+    }
+    #rv-modal.open .rv-modal-box { transform: scale(1) translateY(0); }
+    :root[data-theme="light"] .rv-modal-box { background: rgba(255,255,255,0.97); border-color: rgba(124,92,252,0.2); }
+
+    .rv-modal-video {
+      aspect-ratio: 16/9;
+      background: #000;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .rv-modal-video iframe, .rv-modal-video video {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+    .rv-modal-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      color: rgba(255,255,255,0.5);
+      font-size: .95rem;
+    }
+    .rv-modal-placeholder .big-icon { font-size: 3.5rem; }
+
+    .rv-modal-info { padding: 1.5rem 1.8rem; }
+    .rv-modal-title { font-size: 1.3rem; font-weight: 800; color: var(--txt); margin-bottom: .4rem; }
+    .rv-modal-meta { font-size: .82rem; color: var(--txt4); display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+    .rv-modal-close {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      width: 36px;
+      height: 36px;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 50%;
+      color: #fff;
+      font-size: .85rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background .2s, transform .2s;
+      z-index: 2;
+    }
+    .rv-modal-close:hover { background: rgba(255,255,255,0.2); transform: rotate(90deg) scale(1.1); }
+
+    /* ── Empty state ── */
+    .rv-empty {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 4rem 2rem;
+      color: var(--txt4);
+    }
+    .rv-empty .rv-empty-icon { font-size: 3.5rem; margin-bottom: 1rem; opacity: .6; }
+
+    /* ── Animations ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .rv-card { animation: fadeUp .55s ease both; }
+    .rv-card:nth-child(2) { animation-delay: .05s; }
+    .rv-card:nth-child(3) { animation-delay: .1s; }
+    .rv-card:nth-child(4) { animation-delay: .15s; }
+    .rv-card:nth-child(5) { animation-delay: .2s; }
+    .rv-card:nth-child(6) { animation-delay: .25s; }
+
+    @media (max-width: 640px) {
+      .rv-grid { grid-template-columns: 1fr; gap: 1.2rem; }
+      .rv-hero h1 { font-size: 2.2rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="mesh-bg"></div>
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+
+  <nav></nav>
+
+  <!-- Hero -->
+  <section class="rv-hero">
+    <div class="rv-hero-tag">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+      Recorded Sessions
+    </div>
+    <h1>Watch. Learn. <span style="background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Grow.</span></h1>
+    <p>Every live session recorded for you. Watch premium soft-skills coaching at your own pace, whenever it suits you.</p>
+
+    <!-- Search -->
+    <div class="rv-search-wrap">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input class="rv-search" type="text" id="rv-search-input" placeholder="Search sessions, topics, mentors…" oninput="filterVideos()">
+    </div>
+
+    <!-- Filters -->
+    <div class="rv-filters" id="rv-filters">
+      <button class="rv-filter-btn active" data-filter="all" onclick="setFilter('all',this)">All Sessions</button>
+      <button class="rv-filter-btn" data-filter="communication" onclick="setFilter('communication',this)">Communication</button>
+      <button class="rv-filter-btn" data-filter="leadership" onclick="setFilter('leadership',this)">Leadership</button>
+      <button class="rv-filter-btn" data-filter="interview" onclick="setFilter('interview',this)">Interview Prep</button>
+      <button class="rv-filter-btn" data-filter="business" onclick="setFilter('business',this)">Business English</button>
+      <button class="rv-filter-btn" data-filter="speaking" onclick="setFilter('speaking',this)">Public Speaking</button>
+    </div>
+  </section>
+
+  <!-- Video Grid -->
+  <div class="rv-grid" id="rv-grid">
+    <!-- populated by JS -->
+  </div>
+
+  <!-- Video Modal -->
+  <div id="rv-modal" onclick="if(event.target===this)closeModal()">
+    <div class="rv-modal-box" style="position:relative;">
+      <button class="rv-modal-close" onclick="closeModal()">✕</button>
+      <div class="rv-modal-video" id="rv-modal-video">
+        <div class="rv-modal-placeholder">
+          <div class="big-icon">🎬</div>
+          <div>Loading video…</div>
+        </div>
+      </div>
+      <div class="rv-modal-info">
+        <div class="rv-modal-title" id="rv-modal-title">Session Title</div>
+        <div class="rv-modal-meta">
+          <span id="rv-modal-mentor">👤 Mentor</span>
+          <span id="rv-modal-dur">⏱ Duration</span>
+          <span id="rv-modal-cat">📚 Category</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer></footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../config/supabase-config.js"></script>
+  <script src="../js/theme.js"></script>
+  <script src="../js/profile-nav.js"></script>
+
+  <script>
+  // ── Static video data (DB recordings will be appended) ──
+  const STATIC_VIDEOS = [
+    { id: 's1', title: 'Mastering Eye Contact in Presentations', category: 'communication', mentor: 'Meena Krishnan', duration: '42 min', icon: '🎤', gradient: 'linear-gradient(135deg,#7c5cfc,#3d6bff)', isNew: true, tags: ['Communication', 'Presentations'], videoUrl: null },
+    { id: 's2', title: 'The Leadership Triangle: Vision, Voice & Values', category: 'leadership', mentor: 'Arjun Pillai', duration: '58 min', icon: '🏆', gradient: 'linear-gradient(135deg,#00cfee,#0090b8)', isNew: false, tags: ['Leadership', 'Strategy'], videoUrl: null },
+    { id: 's3', title: 'Cracking Behavioral Interview Questions (STAR Method)', category: 'interview', mentor: 'Priya Suresh', duration: '35 min', icon: '🎯', gradient: 'linear-gradient(135deg,#4ade80,#16a34a)', isNew: true, tags: ['Interview', 'HR'], videoUrl: null },
+    { id: 's4', title: 'Business Writing: Emails That Get Responses', category: 'business', mentor: 'Karthik Nair', duration: '28 min', icon: '💼', gradient: 'linear-gradient(135deg,#f59e0b,#ea580c)', isNew: false, tags: ['Business English', 'Writing'], videoUrl: null },
+    { id: 's5', title: 'Overcoming Stage Fright — Proven Techniques', category: 'speaking', mentor: 'Shalini Rao', duration: '47 min', icon: '🎭', gradient: 'linear-gradient(135deg,#a855f7,#ec4899)', isNew: false, tags: ['Public Speaking', 'Confidence'], videoUrl: null },
+    { id: 's6', title: 'Active Listening: The Skill Leaders Don\'t Talk About', category: 'communication', mentor: 'Ravi Kumar', duration: '33 min', icon: '👂', gradient: 'linear-gradient(135deg,#3b82f6,#1d4ed8)', isNew: false, tags: ['Communication', 'Leadership'], videoUrl: null },
+    { id: 's7', title: 'How to Negotiate Your Salary Confidently', category: 'interview', mentor: 'Deepa Sharma', duration: '41 min', icon: '💰', gradient: 'linear-gradient(135deg,#10b981,#059669)', isNew: true, tags: ['Interview', 'Negotiation'], videoUrl: null },
+    { id: 's8', title: 'Structuring Impactful Corporate Presentations', category: 'speaking', mentor: 'Meena Krishnan', duration: '52 min', icon: '📊', gradient: 'linear-gradient(135deg,#f43f5e,#be123c)', isNew: false, tags: ['Presentations', 'Corporate'], videoUrl: null },
+    { id: 's9', title: 'Team Communication in Remote Workplaces', category: 'communication', mentor: 'Arjun Pillai', duration: '39 min', icon: '🌐', gradient: 'linear-gradient(135deg,#8b5cf6,#6d28d9)', isNew: false, tags: ['Communication', 'Remote Work'], videoUrl: null },
+  ];
+
+  let currentFilter = 'all';
+  let allVideos = [...STATIC_VIDEOS];
+  let dbVideos = [];
+
+  function renderVideos() {
+    const q = document.getElementById('rv-search-input')?.value?.toLowerCase() || '';
+    const filtered = allVideos.filter(v => {
+      const matchCat = currentFilter === 'all' || v.category === currentFilter;
+      const matchQ = !q || v.title.toLowerCase().includes(q) || v.mentor.toLowerCase().includes(q) || (v.tags||[]).some(t => t.toLowerCase().includes(q));
+      return matchCat && matchQ;
+    });
+    const grid = document.getElementById('rv-grid');
+    if (!grid) return;
+    if (!filtered.length) {
+      grid.innerHTML = `<div class="rv-empty"><div class="rv-empty-icon">🎬</div><p style="font-size:1.05rem;font-weight:600;color:var(--txt3);margin-bottom:.5rem;">No sessions found</p><p style="font-size:.88rem;">Try adjusting your search or filter.</p></div>`;
+      return;
+    }
+    grid.innerHTML = filtered.map((v, i) => `
+      <div class="rv-card" style="animation-delay:${i*0.05}s" onclick="openModal('${v.id}')">
+        <div class="rv-thumb">
+          <div class="rv-thumb-bg">${v.icon}</div>
+          <div class="rv-thumb-gradient" style="background:${v.gradient};opacity:.45;"></div>
+          <div class="rv-play-btn">
+            <div class="rv-play-circle">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="#fff" style="margin-left:3px"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            </div>
+          </div>
+          <div class="rv-duration">⏱ ${v.duration}</div>
+          ${v.isNew ? '<div class="rv-new-badge">New</div>' : ''}
+        </div>
+        <div class="rv-card-body">
+          <div class="rv-card-tags">${(v.tags||[]).map(t=>`<span class="rv-tag">${t}</span>`).join('')}</div>
+          <div class="rv-card-title">${v.title}</div>
+          <div class="rv-card-meta">
+            <div class="rv-card-mentor">
+              <div class="rv-mentor-dot">${v.mentor.charAt(0)}</div>
+              <span>${v.mentor}</span>
+            </div>
+            <span style="margin-left:auto;">▶ Watch</span>
+          </div>
+        </div>
+      </div>`).join('');
+  }
+
+  function setFilter(filter, btn) {
+    currentFilter = filter;
+    document.querySelectorAll('.rv-filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderVideos();
+  }
+
+  function filterVideos() { renderVideos(); }
+
+  function openModal(id) {
+    const v = allVideos.find(x => x.id === id);
+    if (!v) return;
+    const modal = document.getElementById('rv-modal');
+    const videoArea = document.getElementById('rv-modal-video');
+    document.getElementById('rv-modal-title').textContent = v.title;
+    document.getElementById('rv-modal-mentor').textContent = '👤 ' + v.mentor;
+    document.getElementById('rv-modal-dur').textContent = '⏱ ' + v.duration;
+    document.getElementById('rv-modal-cat').textContent = '📚 ' + (v.tags?.[0] || v.category);
+    if (v.videoUrl && v.videoUrl.startsWith('http')) {
+      const isYT = v.videoUrl.includes('youtube') || v.videoUrl.includes('youtu.be');
+      if (isYT) {
+        const ytId = v.videoUrl.match(/(?:v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/)?.[1];
+        videoArea.innerHTML = `<iframe src="https://www.youtube.com/embed/${ytId}?autoplay=1&rel=0" allow="autoplay; fullscreen" allowfullscreen></iframe>`;
+      } else {
+        videoArea.innerHTML = `<video controls autoplay src="${v.videoUrl}" style="width:100%;height:100%;"></video>`;
+      }
+    } else {
+      videoArea.innerHTML = `
+        <div class="rv-modal-placeholder">
+          <div class="big-icon">${v.icon}</div>
+          <div style="font-size:1rem;font-weight:700;color:rgba(255,255,255,.7);">${v.title}</div>
+          <div style="font-size:.82rem;color:rgba(255,255,255,.4);max-width:320px;text-align:center;">
+            This session recording will be available once you're enrolled in this programme.
+            <br><br>
+            <a href="contact-enquiry.html" style="color:#a78bfa;font-weight:700;text-decoration:none;">Enquire to enroll →</a>
+          </div>
+        </div>`;
+    }
+    modal.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeModal() {
+    const modal = document.getElementById('rv-modal');
+    modal.classList.remove('open');
+    document.body.style.overflow = '';
+    // Stop any playing video
+    const videoArea = document.getElementById('rv-modal-video');
+    videoArea.innerHTML = '<div class="rv-modal-placeholder"><div class="big-icon">🎬</div><div>Loading…</div></div>';
+  }
+
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+  // Load from DB
+  async function loadDBVideos() {
+    try {
+      if (!window.supabaseConfig) return;
+      const { data } = await window.supabaseConfig.client
+        .from('recorded_sessions')
+        .select('id,title,description,video_url,category,duration_minutes,created_at')
+        .eq('is_published', true)
+        .order('created_at', { ascending: false });
+      if (!data?.length) return;
+      dbVideos = data.map(r => ({
+        id: 'db_' + r.id,
+        title: r.title || 'Session Recording',
+        category: (r.category || 'communication').toLowerCase(),
+        mentor: 'SkillUpNow Mentor',
+        duration: (r.duration_minutes || 0) + ' min',
+        icon: '🎬',
+        gradient: 'linear-gradient(135deg,#7c5cfc,#3d6bff)',
+        isNew: (Date.now() - new Date(r.created_at).getTime()) < 7*24*3600*1000,
+        tags: [r.category || 'Session'],
+        videoUrl: r.video_url,
+      }));
+      allVideos = [...STATIC_VIDEOS, ...dbVideos];
+      renderVideos();
+    } catch(e) { /* DB videos unavailable, static data shown */ }
+  }
+
+  // Init
+  renderVideos();
+  document.addEventListener('DOMContentLoaded', () => {
+    loadDBVideos();
+  });
+  </script>
+</body>
+</html>

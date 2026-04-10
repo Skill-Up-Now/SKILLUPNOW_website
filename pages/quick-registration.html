@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Quick Registration — SkillUpNow</title>
+  <title>Quick Registration - SkillUpNow</title>
   <link rel="stylesheet" href="../css/variables.css">
   <link rel="stylesheet" href="../css/main.css">
   <link rel="stylesheet" href="../css/responsive.css">
@@ -16,7 +16,11 @@
       box-shadow:var(--shadow-glow);
     }
     .reg-header { text-align:center; margin-bottom:2rem; }
-    .reg-icon { width:56px; height:56px; background:var(--grad); border-radius:var(--r2); display:inline-flex; align-items:center; justify-content:center; font-size:1.6rem; margin-bottom:0.75rem; box-shadow:var(--shadow-btn); }
+    .reg-icon {
+      width:56px; height:56px; background:var(--grad); border-radius:var(--r2);
+      display:inline-flex; align-items:center; justify-content:center; font-size:1.1rem;
+      margin-bottom:0.75rem; box-shadow:var(--shadow-btn); color:#fff; font-weight:800;
+    }
     .reg-header h2 { font-size:1.5rem; font-weight:800; }
     .reg-header p  { font-size:0.85rem; color:var(--txt3); margin-top:0.3rem; }
 
@@ -30,26 +34,32 @@
     }
     .f-group input:focus, .f-group select:focus { border-color:var(--v1); box-shadow:0 0 0 3px var(--v5); }
     .f-group input::placeholder { color:var(--txt4); }
-
     .form-row { display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; }
 
-    /* Role tabs */
     .role-tabs { display:flex; gap:0; background:var(--bg2); border-radius:var(--r1); padding:3px; margin-bottom:1.25rem; }
-    .role-tab { flex:1; padding:0.55rem; border-radius:calc(var(--r1) - 2px); text-align:center; font-size:0.85rem; font-weight:700; cursor:pointer; transition:all 0.2s; color:var(--txt3); }
+    .role-tab {
+      flex:1; padding:0.55rem; border-radius:calc(var(--r1) - 2px); text-align:center;
+      font-size:0.85rem; font-weight:700; cursor:pointer; transition:all 0.2s; color:var(--txt3);
+    }
     .role-tab.active { background:var(--bg); color:var(--v1); box-shadow:var(--shadow-card); }
 
-    /* Password strength */
     .pass-strength { display:flex; gap:4px; margin-top:0.4rem; }
     .pass-bar { height:3px; flex:1; background:var(--border); border-radius:999px; transition:background 0.3s; }
-    .pass-bar.weak   { background:#ef4444; }
+    .pass-bar.weak { background:#ef4444; }
     .pass-bar.medium { background:#f59e0b; }
     .pass-bar.strong { background:#22c55e; }
     .pass-label { font-size:0.72rem; color:var(--txt4); margin-top:0.25rem; }
 
-    /* Show/hide pass */
-    .pass-toggle { position:absolute; right:0.9rem; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; color:var(--txt3); font-size:0.8rem; font-family:inherit; }
+    .pass-toggle {
+      position:absolute; right:0.9rem; top:50%; transform:translateY(-50%);
+      background:none; border:none; cursor:pointer; color:var(--txt3); font-size:0.8rem; font-family:inherit;
+    }
 
-    .btn-reg { width:100%; background:var(--grad); color:#fff; border:none; border-radius:var(--r1); padding:0.85rem; font-size:0.95rem; font-weight:800; cursor:pointer; transition:all 0.25s; font-family:inherit; margin-top:0.5rem; box-shadow:var(--shadow-btn); }
+    .btn-reg {
+      width:100%; background:var(--grad); color:#fff; border:none; border-radius:var(--r1);
+      padding:0.85rem; font-size:0.95rem; font-weight:800; cursor:pointer; transition:all 0.25s;
+      font-family:inherit; margin-top:0.5rem; box-shadow:var(--shadow-btn);
+    }
     .btn-reg:hover:not(:disabled) { opacity:0.88; transform:scale(1.01); }
     .btn-reg:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
 
@@ -60,18 +70,32 @@
     .login-link a { color:var(--v1); font-weight:700; text-decoration:none; }
 
     .alert { padding:0.75rem 1rem; border-radius:var(--r1); font-size:0.83rem; margin-bottom:1rem; display:none; }
-    .alert.error   { background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.25); color:#dc2626; }
+    .alert.error { background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.25); color:#dc2626; }
     .alert.success { background:rgba(34,197,94,0.1); border:1px solid rgba(34,197,94,0.25); color:#16a34a; }
     .alert.show { display:block; }
 
-    /* OTP */
     .otp-wrap { display:none; }
     .otp-inputs { display:flex; gap:0.65rem; justify-content:center; margin:1rem 0; }
-    .otp-digit { width:48px; height:52px; border:2px solid var(--border); border-radius:var(--r1); text-align:center; font-size:1.4rem; font-weight:800; color:var(--txt); background:var(--bg); outline:none; transition:border-color 0.2s; font-family:inherit; }
+    .otp-digit {
+      width:48px; height:52px; border:2px solid var(--border); border-radius:var(--r1);
+      text-align:center; font-size:1.4rem; font-weight:800; color:var(--txt); background:var(--bg);
+      outline:none; transition:border-color 0.2s; font-family:inherit;
+    }
     .otp-digit:focus { border-color:var(--v1); box-shadow:0 0 0 3px var(--v5); }
 
-    .spinner { display:inline-block; width:16px; height:16px; border:2.5px solid rgba(255,255,255,0.3); border-top-color:#fff; border-radius:50%; animation:spin 0.7s linear infinite; }
-    @keyframes spin { to{ transform:rotate(360deg); } }
+    .spinner {
+      display:inline-block; width:16px; height:16px; border:2.5px solid rgba(255,255,255,0.3);
+      border-top-color:#fff; border-radius:50%; animation:spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform:rotate(360deg); } }
+
+    @media(max-width:640px) {
+      .page-wrap { padding-bottom:2rem; }
+      .reg-card { padding:1.35rem; margin:1rem; }
+      .form-row { grid-template-columns:1fr; }
+      .otp-inputs { gap:0.4rem; }
+      .otp-digit { width:42px; height:48px; }
+    }
   </style>
 </head>
 <body>
@@ -83,34 +107,45 @@
 <div class="page-wrap">
   <div class="reg-card">
     <div class="reg-header">
-      <div class="reg-icon">🚀</div>
+      <div class="reg-icon">SUN</div>
       <h2>Create Your Account</h2>
-      <p>Join 12,000+ learners and start your journey today</p>
+      <p>Join learners and mentors with secure email verification.</p>
     </div>
 
-    <!-- Role selector -->
     <div class="role-tabs">
-      <div class="role-tab active" data-role="user" onclick="setRole('user',this)">🎓 Student</div>
-      <div class="role-tab" data-role="mentor" onclick="setRole('mentor',this)">👨‍🏫 Mentor</div>
+      <div class="role-tab active" data-role="user" onclick="setRole('user', this)">Student</div>
+      <div class="role-tab" data-role="mentor" onclick="setRole('mentor', this)">Mentor</div>
     </div>
 
-    <div class="alert error"   id="err-alert"></div>
+    <div class="alert error" id="err-alert"></div>
     <div class="alert success" id="suc-alert"></div>
 
-    <!-- Registration form -->
     <div id="reg-form">
       <div class="form-row">
-        <div class="f-group"><label>Full Name <span>*</span></label><input type="text" id="r-name" placeholder="Full name" autocomplete="name"></div>
-        <div class="f-group"><label>Username <span>*</span></label><input type="text" id="r-username" placeholder="username123" autocomplete="username"></div>
+        <div class="f-group">
+          <label>Full Name <span>*</span></label>
+          <input type="text" id="r-name" placeholder="Full name" autocomplete="name">
+        </div>
+        <div class="f-group">
+          <label>Username <span>*</span></label>
+          <input type="text" id="r-username" placeholder="username123" autocomplete="username">
+        </div>
       </div>
-      <div class="f-group"><label>Email Address <span>*</span></label><input type="email" id="r-email" placeholder="you@email.com" autocomplete="email"></div>
-      <div class="f-group"><label>Phone Number <span>*</span></label><input type="tel" id="r-phone" placeholder="10-digit mobile number" maxlength="10"></div>
 
-      <!-- Interested course (for students) -->
+      <div class="f-group">
+        <label>Email Address <span>*</span></label>
+        <input type="email" id="r-email" placeholder="you@email.com" autocomplete="email">
+      </div>
+
+      <div class="f-group">
+        <label>Phone Number <span>*</span></label>
+        <input type="tel" id="r-phone" placeholder="10-digit mobile number" maxlength="10" inputmode="numeric">
+      </div>
+
       <div class="f-group" id="course-interest-wrap">
         <label>Interested In</label>
         <select id="r-interest">
-          <option value="">Select a course or category…</option>
+          <option value="">Select a course or category...</option>
         </select>
       </div>
 
@@ -118,7 +153,7 @@
         <label>Password <span>*</span></label>
         <div class="input-wrap">
           <input type="password" id="r-pass" placeholder="Minimum 8 characters" oninput="checkStrength(this.value)" autocomplete="new-password">
-          <button type="button" class="pass-toggle" onclick="togglePass('r-pass',this)">Show</button>
+          <button type="button" class="pass-toggle" onclick="togglePass('r-pass', this)">Show</button>
         </div>
         <div class="pass-strength">
           <div class="pass-bar" id="pb1"></div>
@@ -128,11 +163,12 @@
         </div>
         <div class="pass-label" id="pass-label">Enter password</div>
       </div>
+
       <div class="f-group">
         <label>Confirm Password <span>*</span></label>
         <div class="input-wrap">
           <input type="password" id="r-pass2" placeholder="Repeat password" autocomplete="new-password">
-          <button type="button" class="pass-toggle" onclick="togglePass('r-pass2',this)">Show</button>
+          <button type="button" class="pass-toggle" onclick="togglePass('r-pass2', this)">Show</button>
         </div>
       </div>
 
@@ -146,61 +182,85 @@
       </button>
 
       <div class="divider">or</div>
-      <div class="login-link">Already have an account? <a href="../index.html" onclick="window.profileNav?.openLoginModal?.();return false">Sign In</a></div>
-      <div class="login-link" id="mentor-link" style="display:none;margin-top:0.5rem">Becoming a mentor? <a href="mentor-signup.html">Full Mentor Registration →</a></div>
+      <div class="login-link">Already have an account? <a href="../index.html" onclick="window.profileNav?.openLoginModal?.(); return false;">Sign In</a></div>
+      <div class="login-link" id="mentor-link" style="display:none;margin-top:0.5rem">Becoming a mentor? <a href="mentor-signup.html">Full Mentor Registration -></a></div>
     </div>
 
-    <!-- OTP verification -->
     <div class="otp-wrap" id="otp-wrap">
       <div style="text-align:center;margin-bottom:1rem">
-        <div style="font-size:1.5rem;margin-bottom:0.5rem">📧</div>
+        <div style="font-size:1.2rem;margin-bottom:0.5rem">Email OTP</div>
         <div style="font-weight:700">Verify Your Email</div>
-        <div style="font-size:0.83rem;color:var(--txt3);margin-top:0.3rem">We've sent a 6-digit code to <strong id="otp-email-display"></strong></div>
+        <div style="font-size:0.83rem;color:var(--txt3);margin-top:0.3rem">We have sent a 6-digit code to <strong id="otp-email-display"></strong></div>
       </div>
       <div class="otp-inputs">
-        <input class="otp-digit" maxlength="1" id="o1" oninput="otpNav(this,'','o2')">
-        <input class="otp-digit" maxlength="1" id="o2" oninput="otpNav(this,'o1','o3')">
-        <input class="otp-digit" maxlength="1" id="o3" oninput="otpNav(this,'o2','o4')">
-        <input class="otp-digit" maxlength="1" id="o4" oninput="otpNav(this,'o3','o5')">
-        <input class="otp-digit" maxlength="1" id="o5" oninput="otpNav(this,'o4','o6')">
-        <input class="otp-digit" maxlength="1" id="o6" oninput="otpNav(this,'o5','')">
+        <input class="otp-digit" maxlength="1" id="o1" oninput="otpNav(this, '', 'o2')">
+        <input class="otp-digit" maxlength="1" id="o2" oninput="otpNav(this, 'o1', 'o3')">
+        <input class="otp-digit" maxlength="1" id="o3" oninput="otpNav(this, 'o2', 'o4')">
+        <input class="otp-digit" maxlength="1" id="o4" oninput="otpNav(this, 'o3', 'o5')">
+        <input class="otp-digit" maxlength="1" id="o5" oninput="otpNav(this, 'o4', 'o6')">
+        <input class="otp-digit" maxlength="1" id="o6" oninput="otpNav(this, 'o5', '')">
       </div>
       <button class="btn-reg" onclick="verifyOtp()"><span id="otp-label">Verify & Activate</span></button>
       <div style="text-align:center;margin-top:0.75rem;font-size:0.82rem;color:var(--txt3)">
-        Didn't get it? <button onclick="resendOtp()" style="background:none;border:none;color:var(--v1);cursor:pointer;font-weight:700;font-family:inherit">Resend</button>
+        Did not get it? <button onclick="resendOtp()" style="background:none;border:none;color:var(--v1);cursor:pointer;font-weight:700;font-family:inherit">Resend</button>
       </div>
     </div>
-
   </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script src="../config/supabase-config.js"></script>
 <script src="../js/theme.js"></script>
 <script src="../js/profile-nav.js"></script>
 <script>
 const db = new SupabaseConfig();
 let selectedRole = 'user';
+let pendingSignup = null;
 
-// Load courses for interest dropdown
+const EMAILJS_SERVICE_ID = 'service_skillupnow';
+const EMAILJS_TEMPLATE_ID = 'template_bjqerns';
+const EMAILJS_PUBLIC_KEY = '6chiuXaZ_OqXbYyG1';
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const PHONE_RE = /^[6-9]\d{9}$/;
+const USERNAME_RE = /^[a-zA-Z0-9._-]{3,30}$/;
+const PASSWORD_RE = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+
+if (window.emailjs) window.emailjs.init(EMAILJS_PUBLIC_KEY);
+
 (async () => {
-  const { data } = await db.client.from('courses').select('id,name').eq('is_active',true).order('name');
-  const sel = document.getElementById('r-interest');
-  (data||[]).forEach(c => { const o = document.createElement('option'); o.value = c.id; o.textContent = c.name; sel.appendChild(o); });
+  const { data, error } = await db.client
+    .from('courses')
+    .select('id, title')
+    .eq('course_status', 'published')
+    .order('title');
+
+  if (error) {
+    console.error('Unable to load course interests:', error);
+    return;
+  }
+
+  const select = document.getElementById('r-interest');
+  (data || []).forEach((course) => {
+    const option = document.createElement('option');
+    option.value = course.id;
+    option.textContent = course.title;
+    select.appendChild(option);
+  });
 })();
 
 function setRole(role, el) {
   selectedRole = role;
-  document.querySelectorAll('.role-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.role-tab').forEach(tab => tab.classList.remove('active'));
   el.classList.add('active');
   document.getElementById('course-interest-wrap').style.display = role === 'user' ? 'block' : 'none';
   document.getElementById('mentor-link').style.display = role === 'mentor' ? 'block' : 'none';
 }
 
 function togglePass(id, btn) {
-  const inp = document.getElementById(id);
-  const show = inp.type === 'password';
-  inp.type = show ? 'text' : 'password';
+  const input = document.getElementById(id);
+  const show = input.type === 'password';
+  input.type = show ? 'text' : 'password';
   btn.textContent = show ? 'Hide' : 'Show';
 }
 
@@ -210,103 +270,172 @@ function checkStrength(pass) {
   if (/[A-Z]/.test(pass)) strength++;
   if (/[0-9]/.test(pass)) strength++;
   if (/[^A-Za-z0-9]/.test(pass)) strength++;
-  const bars  = ['pb1','pb2','pb3','pb4'];
-  const label = ['Enter password','Weak','Medium','Strong','Very Strong'][strength];
-  const cls   = [null,'weak','weak','medium','strong'][strength];
-  bars.forEach((b,i) => { const el = document.getElementById(b); el.className = 'pass-bar'; if (i < strength && cls) el.classList.add(cls); });
+
+  const bars = ['pb1', 'pb2', 'pb3', 'pb4'];
+  const label = ['Enter password', 'Weak', 'Medium', 'Strong', 'Very Strong'][strength];
+  const cls = [null, 'weak', 'weak', 'medium', 'strong'][strength];
+
+  bars.forEach((barId, index) => {
+    const el = document.getElementById(barId);
+    el.className = 'pass-bar';
+    if (index < strength && cls) el.classList.add(cls);
+  });
+
   document.getElementById('pass-label').textContent = label;
 }
 
 function showAlert(type, msg) {
-  document.querySelectorAll('.alert').forEach(a => a.classList.remove('show'));
+  document.querySelectorAll('.alert').forEach(alert => alert.classList.remove('show'));
   const el = document.getElementById(type + '-alert');
-  el.textContent = msg; el.classList.add('show');
+  el.textContent = msg;
+  el.classList.add('show');
+}
+
+function normalizePhone(value) {
+  return (value || '').replace(/\D/g, '').slice(0, 10);
+}
+
+async function sendEmailOtp(email, name, otp) {
+  if (!window.emailjs) throw new Error('Email service not ready. Please refresh and try again.');
+  return window.emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+    email,
+    name,
+    to_name: name,
+    otp,
+    otp_code: otp
+  }, EMAILJS_PUBLIC_KEY);
 }
 
 async function submitReg() {
-  const name  = document.getElementById('r-name').value.trim();
-  const uname = document.getElementById('r-username').value.trim();
-  const email = document.getElementById('r-email').value.trim();
-  const phone = document.getElementById('r-phone').value.trim();
-  const pass  = document.getElementById('r-pass').value;
-  const pass2 = document.getElementById('r-pass2').value;
-  if (!name || !uname || !email || !phone || !pass) { showAlert('err', 'Please fill all required fields.'); return; }
-  if (pass !== pass2) { showAlert('err', 'Passwords do not match.'); return; }
-  if (pass.length < 8) { showAlert('err', 'Password must be at least 8 characters.'); return; }
-  if (!/^\d{10}$/.test(phone)) { showAlert('err', 'Enter a valid 10-digit phone number.'); return; }
-  if (!document.getElementById('r-terms').checked) { showAlert('err', 'Please accept the Terms of Service.'); return; }
+  const name = document.getElementById('r-name').value.trim();
+  const username = document.getElementById('r-username').value.trim();
+  const email = document.getElementById('r-email').value.trim().toLowerCase();
+  const phone = normalizePhone(document.getElementById('r-phone').value);
+  const password = document.getElementById('r-pass').value;
+  const confirmPassword = document.getElementById('r-pass2').value;
+
+  if (!name || !username || !email || !phone || !password || !confirmPassword) return showAlert('err', 'Please fill all required fields.');
+  if (!USERNAME_RE.test(username)) return showAlert('err', 'Username must be 3-30 characters and can use letters, numbers, dot, underscore, or hyphen.');
+  if (!EMAIL_RE.test(email)) return showAlert('err', 'Please enter a valid email address.');
+  if (!PHONE_RE.test(phone)) return showAlert('err', 'Enter a valid 10-digit phone number.');
+  if (!PASSWORD_RE.test(password)) return showAlert('err', 'Password must be at least 8 characters and include uppercase, lowercase, and a number.');
+  if (password !== confirmPassword) return showAlert('err', 'Passwords do not match.');
+  if (!document.getElementById('r-terms').checked) return showAlert('err', 'Please accept the Terms of Service.');
+
+  document.getElementById('r-phone').value = phone;
 
   const btn = document.getElementById('reg-btn');
   const label = document.getElementById('reg-label');
   btn.disabled = true;
-  label.innerHTML = '<span class="spinner"></span> Creating account…';
+  label.innerHTML = '<span class="spinner"></span> Creating account...';
 
   try {
-    const { data, error } = await db.client.auth.signUp({
-      email, password: pass,
-      options: { data: { full_name: name, username: uname, role: selectedRole } }
-    });
-    if (error) throw error;
+    const otpReq = await db.requestSignupOtp(email);
+    if (!otpReq.success || !otpReq.data?.otp) throw new Error(otpReq.error || 'Unable to send verification code.');
 
-    // Save quick form submission
-    await db.client.from('form_submissions').insert({
-      user_id: data.user?.id || null,
-      form_type: 'quick_registration',
-      form_data: { name, username: uname, email, phone, role: selectedRole, interest: document.getElementById('r-interest').value },
-    });
+    pendingSignup = {
+      name,
+      username,
+      email,
+      phone,
+      password,
+      role: selectedRole,
+      interest: document.getElementById('r-interest').value || null
+    };
 
-    // Check if email confirmation is needed
-    if (data.session) {
-      // No OTP — redirect to profile
-      window.location.href = 'profile.html';
-    } else {
-      // Show OTP screen
-      document.getElementById('otp-email-display').textContent = email;
-      document.getElementById('reg-form').style.display = 'none';
-      document.getElementById('otp-wrap').style.display = 'block';
-    }
+    await sendEmailOtp(email, name, otpReq.data.otp);
+    document.getElementById('otp-email-display').textContent = email;
+    document.getElementById('reg-form').style.display = 'none';
+    document.getElementById('otp-wrap').style.display = 'block';
+    showAlert('suc', 'Verification code sent to your email.');
   } catch (err) {
     showAlert('err', err.message || 'Registration failed.');
+  } finally {
+    btn.disabled = false;
+    label.textContent = 'Create Account';
   }
-  btn.disabled = false;
-  label.textContent = 'Create Account';
 }
 
 async function verifyOtp() {
-  const code = ['o1','o2','o3','o4','o5','o6'].map(id => document.getElementById(id).value).join('');
-  if (code.length < 6) { showAlert('err', 'Enter the full 6-digit code.'); return; }
-  const email = document.getElementById('r-email').value.trim();
+  const code = ['o1', 'o2', 'o3', 'o4', 'o5', 'o6'].map(id => document.getElementById(id).value).join('');
+  if (code.length < 6) return showAlert('err', 'Enter the full 6-digit code.');
+  if (!pendingSignup?.email) return showAlert('err', 'Signup session expired. Please try again.');
+
   const btn = document.querySelector('#otp-wrap .btn-reg');
-  document.getElementById('otp-label').innerHTML = '<span class="spinner"></span> Verifying…';
+  document.getElementById('otp-label').innerHTML = '<span class="spinner"></span> Verifying...';
   btn.disabled = true;
 
   try {
-    const { error } = await db.client.auth.verifyOtp({ email, token: code, type: 'signup' });
-    if (error) throw error;
+    const verifyRes = await db.verifySignupOtp(pendingSignup.email, code);
+    if (!verifyRes.success) throw new Error(verifyRes.error || 'Invalid OTP. Please try again.');
 
-    // Redirect based on role
-    if (selectedRole === 'mentor') {
-      window.location.href = 'mentor-signup.html';
-    } else {
-      window.location.href = 'profile.html';
-    }
+    const createRes = await db.registerVerifiedUser({
+      email: pendingSignup.email,
+      password: pendingSignup.password,
+      full_name: pendingSignup.name,
+      phone: pendingSignup.phone,
+      username: pendingSignup.username,
+      role: 'user',
+      metadata: {
+        requested_role: pendingSignup.role === 'mentor' ? 'mentor' : null
+      }
+    });
+    if (!createRes.success) throw new Error(createRes.error || 'Unable to create your account.');
+
+    const loginRes = await db.signIn(pendingSignup.email, pendingSignup.password);
+    if (!loginRes.success) throw new Error(loginRes.error || 'Account created, but sign-in failed.');
+
+    const currentUser = loginRes.data?.user || loginRes.user;
+    const profileRes = await db.syncUserProfile(currentUser.id, {
+      full_name: pendingSignup.name,
+      username: pendingSignup.username,
+      email: pendingSignup.email,
+      phone: pendingSignup.phone,
+      role: 'user',
+      is_email_verified: true
+    });
+    if (!profileRes.success) throw new Error(profileRes.error || 'Account created, but profile sync failed.');
+
+    await db.saveFormSubmission(currentUser.id, 'registration', pendingSignup.interest, {
+      name: pendingSignup.name,
+      username: pendingSignup.username,
+      email: pendingSignup.email,
+      phone: pendingSignup.phone,
+      role: pendingSignup.role,
+      interest: pendingSignup.interest
+    });
+
+    if (pendingSignup.role === 'mentor') window.location.href = 'mentor-signup.html';
+    else window.location.href = 'profile.html';
   } catch (err) {
     showAlert('err', err.message || 'Invalid OTP. Please try again.');
+  } finally {
+    document.getElementById('otp-label').textContent = 'Verify & Activate';
+    btn.disabled = false;
   }
-  document.getElementById('otp-label').textContent = 'Verify & Activate';
-  btn.disabled = false;
 }
 
 function resendOtp() {
-  const email = document.getElementById('r-email').value.trim();
-  db.client.auth.resend({ type: 'signup', email });
-  showAlert('suc', 'OTP resent! Check your email.');
+  if (!pendingSignup?.email) return showAlert('err', 'Signup session expired. Please start again.');
+
+  db.requestSignupOtp(pendingSignup.email)
+    .then(async (otpReq) => {
+      if (!otpReq.success || !otpReq.data?.otp) throw new Error(otpReq.error || 'Unable to resend OTP.');
+      await sendEmailOtp(pendingSignup.email, pendingSignup.name, otpReq.data.otp);
+      showAlert('suc', 'OTP resent! Check your email.');
+    })
+    .catch(err => showAlert('err', err.message || 'Unable to resend OTP.'));
 }
 
 function otpNav(el, prevId, nextId) {
+  el.value = el.value.replace(/\D/g, '').slice(0, 1);
   if (el.value && nextId) document.getElementById(nextId)?.focus();
   if (!el.value && prevId) document.getElementById(prevId)?.focus();
 }
+
+document.getElementById('r-phone')?.addEventListener('input', (event) => {
+  event.target.value = normalizePhone(event.target.value);
+});
 </script>
 <footer></footer>
 </body>

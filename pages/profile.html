@@ -208,6 +208,7 @@
           <span class="pbadge" id="hero-role">Student</span>
           <span class="pbadge" id="hero-joined"></span>
           <span class="pbadge" id="hero-courses">0 Courses</span>
+          <span class="pbadge" id="hero-streak" style="background:linear-gradient(135deg,#ff6b35,#f59e0b);color:#fff;display:none;">🔥 <span id="hero-streak-count">0</span> Day Streak</span>
         </div>
       </div>
     </div>
@@ -237,6 +238,31 @@
         <div class="stat-box"><div class="val" id="ls-active">—</div><div class="lbl">Active</div></div>
         <div class="stat-box"><div class="val" id="ls-completed">—</div><div class="lbl">Completed</div></div>
         <div class="stat-box"><div class="val" id="ls-certs">—</div><div class="lbl">Certificates</div></div>
+        <div class="stat-box" id="streak-stat-box" style="background:linear-gradient(135deg,rgba(255,107,53,.15),rgba(245,158,11,.12));border-color:rgba(255,107,53,.3);">
+          <div class="val" id="ls-streak" style="color:#f59e0b;">—</div>
+          <div class="lbl">🔥 Login Streak</div>
+        </div>
+      </div>
+
+      <!-- Streak Calendar -->
+      <div class="card" id="streak-card" style="margin-bottom:1.5rem;display:none;">
+        <div class="card-title">🔥 Login Streak</div>
+        <div id="streak-summary" style="display:flex;gap:2rem;flex-wrap:wrap;margin-bottom:1.25rem;">
+          <div style="text-align:center;">
+            <div style="font-size:2.5rem;font-weight:800;color:#f59e0b;" id="streak-current">0</div>
+            <div style="font-size:.8rem;color:var(--txt3);">Current Streak</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="font-size:2.5rem;font-weight:800;color:var(--v1);" id="streak-longest">0</div>
+            <div style="font-size:.8rem;color:var(--txt3);">Longest Streak</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="font-size:2.5rem;font-weight:800;color:var(--txt2);" id="streak-total">0</div>
+            <div style="font-size:.8rem;color:var(--txt3);">Total Days</div>
+          </div>
+        </div>
+        <div id="streak-calendar" style="display:flex;flex-wrap:wrap;gap:4px;max-width:420px;"></div>
+        <p style="font-size:.75rem;color:var(--txt4);margin-top:.75rem;">Keep logging in every day to maintain your streak!</p>
       </div>
       <div class="course-list" id="my-courses">
         <div class="empty-state"><div class="ei">📚</div><p>Loading your courses…</p></div>
@@ -397,7 +423,7 @@ async function loadProfile() {
   document.getElementById('hero-name').textContent = data.full_name || 'User';
   document.getElementById('hero-email').textContent = data.email;
   document.getElementById('hero-role').textContent = data.role === 'mentor' ? '👨‍🏫 Mentor' : '🎓 Student';
-  document.getElementById('hero-joined').textContent = 'Joined ' + fmtDate(data.registration_date);
+  document.getElementById('hero-joined').textContent = 'Joined ' + fmtDate(data.account_created_at);
   document.getElementById('avatar-initial').textContent = (data.full_name||'U')[0].toUpperCase();
   document.getElementById('referral-code').textContent = data.referral_code || '—';
   document.getElementById('reward-points').textContent = data.reward_points || 0;
@@ -417,27 +443,28 @@ async function loadProfile() {
   document.getElementById('edit-gender').value   = data.gender || '';
   document.getElementById('edit-city').value     = data.city || '';
   document.getElementById('edit-state').value    = data.state || '';
-  document.getElementById('edit-pincode').value  = data.pincode || '';
+  document.getElementById('edit-pincode').value  = data.postal_code || '';
   document.getElementById('edit-address').value  = data.address || '';
 }
 
 async function loadLearningPath() {
   const { data: enrollments } = await db.client.from('enrollments')
-    .select('*, courses(name, category, thumbnail_url, duration_months, mentor_id, mentors(user_profiles(full_name)))')
-    .eq('user_id', currentUser.id).order('enrolled_at', { ascending: false });
+    .select('*, courses(title, thumbnail_url, duration_days, duration_hours, course_categories(name))')
+    .eq('student_user_id', currentUser.id).order('created_at', { ascending: false });
 
   const total     = (enrollments||[]).length;
   const active    = (enrollments||[]).filter(e => e.enrollment_status === 'active').length;
   const completed = (enrollments||[]).filter(e => e.enrollment_status === 'completed').length;
-  const certs     = (enrollments||[]).filter(e => e.certificate_issued).length;
+  const certs     = (enrollments||[]).filter(e => e.completed_at).length;
 
   document.getElementById('ls-enrolled').textContent  = total;
   document.getElementById('ls-active').textContent    = active;
   document.getElementById('ls-completed').textContent = completed;
   document.getElementById('ls-certs').textContent     = certs;
   document.getElementById('hero-courses').textContent = total + ' Course' + (total !== 1 ? 's' : '');
+  loadStreakData();
 
-  const icons = { 'IT':'💻','Cloud':'☁️','AI/ML':'🤖','DevOps':'⚙️','Cybersecurity':'🔐','Data Science':'📊' };
+  const icons = { 'Communication':'💬','Leadership':'👑','Interview':'🎯','Business':'💼','Speaking':'🎤','IT':'💻','Cloud':'☁️','AI/ML':'🤖' };
 
   if (!enrollments?.length) {
     document.getElementById('my-courses').innerHTML = `<div class="empty-state"><div class="ei">📚</div><h3>No courses enrolled yet</h3><p>Browse our course catalog and start your learning journey.</p><a href="courses.html"><button class="btn-save" style="margin-top:0.75rem">Browse Courses</button></a></div>`;
@@ -446,23 +473,26 @@ async function loadLearningPath() {
 
   document.getElementById('my-courses').innerHTML = enrollments.map(e => {
     const c = e.courses || {};
-    const icon = icons[c.category] || '📚';
-    const payBadge = e.payment_status === 'completed' ? 'cp-badge-green' : e.payment_status === 'partial' ? 'cp-badge-yellow' : 'cp-badge-red';
+    const catName = c.course_categories?.name || '';
+    const icon = icons[catName] || '📚';
+    const paidBadge = e.paid_amount >= e.net_amount ? 'cp-badge-green' : e.paid_amount > 0 ? 'cp-badge-yellow' : 'cp-badge-red';
+    const paidLabel = e.paid_amount >= e.net_amount ? 'Paid' : e.paid_amount > 0 ? 'Partial' : 'Unpaid';
     const statusBadge = e.enrollment_status === 'active' ? 'cp-badge-green' : e.enrollment_status === 'completed' ? 'cp-badge-blue' : 'cp-badge-yellow';
-    const mentor = c.mentors?.user_profiles?.full_name || 'Expert Mentor';
+    const duration = c.duration_days ? Math.round(c.duration_days / 30) + ' mo' : c.duration_hours ? c.duration_hours + ' hrs' : '—';
+    const hasAccess = e.access_status === 'active';
     return `<div class="course-progress-card">
       <div class="cp-icon">${c.thumbnail_url ? `<img src="${c.thumbnail_url}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit">` : icon}</div>
       <div class="cp-info">
-        <div class="cp-name">${c.name || 'Course'}</div>
-        <div class="cp-meta">${c.category || ''} · ${mentor} · ${c.duration_months||'—'} months</div>
+        <div class="cp-name">${c.title || 'Course'}</div>
+        <div class="cp-meta">${catName || '—'} · ${duration}</div>
         <div class="progress-bar"><div class="progress-fill" style="width:${e.progress_percentage||0}%"></div></div>
         <div class="progress-label"><span>${e.progress_percentage||0}% complete</span><span>${e.enrollment_status}</span></div>
         <div class="cp-actions">
-          <span class="cp-badge ${payBadge}">Payment: ${e.payment_status}</span>
+          <span class="cp-badge ${paidBadge}">Payment: ${paidLabel}</span>
           <span class="cp-badge ${statusBadge}">${e.enrollment_status}</span>
-          ${e.access_granted ? '<span class="cp-badge cp-badge-green">✓ Access Granted</span>' : '<span class="cp-badge cp-badge-red">⚠ Access Pending</span>'}
-          ${e.certificate_issued ? `<button class="btn-sm btn-sm-outline" onclick="downloadCert('${e.certificate_url}')">🎓 Certificate</button>` : ''}
-          ${e.access_granted ? '<button class="btn-sm btn-sm-primary" onclick="alert(\'Live session link sent to email\')">Join Class</button>' : ''}
+          ${hasAccess ? '<span class="cp-badge cp-badge-green">✓ Access Active</span>' : '<span class="cp-badge cp-badge-red">⚠ Access Pending</span>'}
+          ${e.completed_at ? `<button class="btn-sm btn-sm-outline" onclick="alert('Certificate generation coming soon!')">🎓 Certificate</button>` : ''}
+          ${hasAccess ? '<button class="btn-sm btn-sm-primary" onclick="alert(\'Live session link sent to email\')">Join Class</button>' : ''}
         </div>
       </div>
     </div>`;
@@ -472,14 +502,14 @@ async function loadLearningPath() {
   loadPayments(enrollments);
   loadEmi();
   loadSchedule();
-  loadCertificates(enrollments.filter(e => e.certificate_issued));
+  loadCertificates(enrollments.filter(e => e.completed_at));
 }
 
 async function loadPayments(enrollments) {
-  const { data: payments } = await db.client.from('payments').select('*, enrollments(courses(name))').eq('user_id', currentUser.id).order('payment_date', { ascending: false });
+  const { data: payments } = await db.client.from('payments').select('*, enrollments(courses(title))').eq('student_user_id', currentUser.id).order('paid_at', { ascending: false });
 
   let totalFee = 0, totalPaid = 0, totalBal = 0;
-  (enrollments||[]).forEach(e => { totalFee += e.total_amount||0; totalPaid += e.paid_amount||0; totalBal += e.remaining_balance||0; });
+  (enrollments||[]).forEach(e => { totalFee += e.net_amount||0; totalPaid += e.paid_amount||0; totalBal += e.due_amount||0; });
   document.getElementById('pay-total').textContent   = fmtCurr(totalFee);
   document.getElementById('pay-paid').textContent    = fmtCurr(totalPaid);
   document.getElementById('pay-balance').textContent = fmtCurr(totalBal);
@@ -488,58 +518,65 @@ async function loadPayments(enrollments) {
   document.getElementById('payment-history').innerHTML = (payments||[]).map(p => `
     <tr>
       <td><code style="font-size:0.78rem;color:var(--txt3)">${p.invoice_number||'—'}</code></td>
-      <td>${p.enrollments?.courses?.name||'—'}</td>
+      <td>${p.enrollments?.courses?.title||'—'}</td>
       <td style="font-weight:700;color:var(--v1)">${fmtCurr(p.amount)}</td>
       <td>${p.payment_method}</td>
-      <td>${fmtDate(p.payment_date)}</td>
-      <td><span class="cp-badge ${statusMap[p.status]||'cp-badge-yellow'}">${p.status}</span></td>
+      <td>${fmtDate(p.paid_at || p.created_at)}</td>
+      <td><span class="cp-badge ${statusMap[p.payment_status]||'cp-badge-yellow'}">${p.payment_status}</span></td>
       <td>
-        ${p.status === 'completed'
-          ? `<button class="btn-sm btn-sm-outline" onclick="downloadInvoice('${p.id}','${p.invoice_number}')">⬇ Invoice</button>`
+        ${p.payment_status === 'completed'
+          ? `<button class="btn-sm btn-sm-outline" onclick="downloadInvoice('${p.id}','${p.invoice_id||''}')">⬇ Invoice</button>`
           : '—'}
       </td>
     </tr>`).join('') || '<tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--txt4)">No payments yet</td></tr>';
 }
 
 async function loadEmi() {
-  const { data } = await db.client.from('emi_schedules').select('*, enrollments(courses(name))').eq('user_id', currentUser.id).order('due_date');
+  // payment_schedules links via enrollment_id, need user's enrollment IDs first
+  const { data: myEnrollIds } = await db.client.from('enrollments').select('id').eq('student_user_id', currentUser.id);
+  const ids = (myEnrollIds||[]).map(e => e.id);
+  if (!ids.length) return;
+  const { data } = await db.client.from('payment_schedules')
+    .select('*, enrollments(courses(title))').in('enrollment_id', ids).order('due_at');
   if (!data?.length) return;
   const statusIcon = { paid:'✅', pending:'🕐', overdue:'⚠️', waived:'🚫' };
   document.getElementById('emi-list').innerHTML = (data||[]).map(e => `
     <div class="emi-row">
       <div>
-        <div style="font-weight:700;font-size:0.88rem">${e.enrollments?.courses?.name||'—'} — Installment #${e.installment_number}</div>
-        <div style="font-size:0.78rem;color:var(--txt3)">Due: ${fmtDate(e.due_date)}</div>
+        <div style="font-weight:700;font-size:0.88rem">${e.enrollments?.courses?.title||'—'} — Installment #${e.installment_number}</div>
+        <div style="font-size:0.78rem;color:var(--txt3)">Due: ${fmtDate(e.due_at)}</div>
       </div>
       <div style="text-align:right">
-        <div style="font-weight:800;color:var(--v1)">${fmtCurr(e.amount)}</div>
-        <div style="font-size:0.78rem">${statusIcon[e.status]} ${e.status}</div>
+        <div style="font-weight:800;color:var(--v1)">${fmtCurr(e.amount_due)}</div>
+        <div style="font-size:0.78rem">${statusIcon[e.schedule_status]||'🕐'} ${e.schedule_status}</div>
       </div>
-      ${e.status === 'pending' || e.status === 'overdue'
+      ${e.schedule_status === 'pending' || e.schedule_status === 'overdue'
         ? `<a href="payment.html?emi=${e.id}" style="margin-left:1rem"><button class="btn-sm btn-sm-primary">Pay Now</button></a>` : ''}
     </div>`).join('');
 }
 
 async function loadSchedule() {
-  const { data: enrollments } = await db.client.from('enrollments').select('batch_id').eq('user_id', currentUser.id).eq('enrollment_status', 'active');
+  const { data: enrollments } = await db.client.from('enrollments').select('batch_id').eq('student_user_id', currentUser.id).eq('enrollment_status', 'active');
   const batchIds = (enrollments||[]).map(e => e.batch_id).filter(Boolean);
   if (!batchIds.length) return;
 
   const now = new Date().toISOString();
-  const { data: upcoming } = await db.client.from('class_schedules').select('*').in('batch_id', batchIds).eq('status','scheduled').gte('scheduled_at', now).order('scheduled_at').limit(5);
-  const { data: past } = await db.client.from('class_schedules').select('*').in('batch_id', batchIds).in('status',['completed']).lt('scheduled_at', now).order('scheduled_at', { ascending: false }).limit(5);
+  // class_sessions table: scheduled_start_at, session_status, session_title, meeting_url
+  const { data: upcoming } = await db.client.from('class_sessions').select('*').in('batch_id', batchIds).eq('session_status','scheduled').gte('scheduled_start_at', now).order('scheduled_start_at').limit(5);
+  const { data: past } = await db.client.from('class_sessions').select('*, live_recordings(external_url)').in('batch_id', batchIds).eq('session_status','completed').lt('scheduled_start_at', now).order('scheduled_start_at', { ascending: false }).limit(5);
 
   if (upcoming?.length) {
     document.getElementById('schedule-list').innerHTML = upcoming.map(s => {
-      const d = new Date(s.scheduled_at);
+      const d = new Date(s.scheduled_start_at);
+      const dur = s.scheduled_end_at ? Math.round((new Date(s.scheduled_end_at) - d) / 60000) : '—';
       return `<div class="schedule-item">
         <div class="schedule-date"><div class="day">${d.getDate()}</div><div class="month">${d.toLocaleString('en-IN',{month:'short'})}</div></div>
         <div class="schedule-details">
-          <h4>${s.title}</h4>
-          <p>${d.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})} IST · ${s.duration_minutes} min</p>
+          <h4>${s.session_title}</h4>
+          <p>${d.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})} IST · ${dur} min</p>
         </div>
         <div class="schedule-action">
-          ${s.google_meet_link ? `<a href="${s.google_meet_link}" target="_blank"><button class="btn-sm btn-sm-primary">Join</button></a>` : '<span style="font-size:0.78rem;color:var(--txt4)">Link pending</span>'}
+          ${s.meeting_url ? `<a href="${s.meeting_url}" target="_blank"><button class="btn-sm btn-sm-primary">Join</button></a>` : '<span style="font-size:0.78rem;color:var(--txt4)">Link pending</span>'}
         </div>
       </div>`;
     }).join('');
@@ -547,13 +584,14 @@ async function loadSchedule() {
 
   if (past?.length) {
     document.getElementById('past-classes').innerHTML = past.map(s => {
-      const d = new Date(s.scheduled_at);
+      const d = new Date(s.scheduled_start_at);
+      const recUrl = s.live_recordings?.[0]?.external_url;
       return `<div class="schedule-item" style="opacity:0.8">
         <div class="schedule-date"><div class="day">${d.getDate()}</div><div class="month">${d.toLocaleString('en-IN',{month:'short'})}</div></div>
-        <div class="schedule-details"><h4>${s.title}</h4><p>${fmtDate(s.scheduled_at)}</p></div>
+        <div class="schedule-details"><h4>${s.session_title}</h4><p>${fmtDate(s.scheduled_start_at)}</p></div>
         <div class="schedule-action">
-          ${s.recording_url || s.drive_recording_url
-            ? `<a href="${s.recording_url||s.drive_recording_url}" target="_blank"><button class="btn-sm btn-sm-outline">▶ Watch</button></a>`
+          ${recUrl
+            ? `<a href="${recUrl}" target="_blank"><button class="btn-sm btn-sm-outline">▶ Watch</button></a>`
             : '<span style="font-size:0.78rem;color:var(--txt4)">No recording</span>'}
         </div>
       </div>`;
@@ -566,10 +604,10 @@ function loadCertificates(enrolled) {
   document.getElementById('cert-grid').innerHTML = enrolled.map(e => `
     <div class="cert-card">
       <div class="cert-icon">🎓</div>
-      <div class="cert-name">${e.courses?.name || 'Course'}</div>
-      <div class="cert-date">Issued: ${fmtDate(e.completion_date)}</div>
+      <div class="cert-name">${e.courses?.title || 'Course'}</div>
+      <div class="cert-date">Completed: ${fmtDate(e.completed_at)}</div>
       <div class="cert-download" style="margin-top:0.75rem">
-        <button class="btn-sm btn-sm-primary" onclick="downloadCert('${e.certificate_url}')">⬇ Download</button>
+        <button class="btn-sm btn-sm-primary" onclick="alert('Certificate generation coming soon!')">⬇ Download</button>
       </div>
     </div>`).join('');
 }
@@ -583,7 +621,7 @@ async function saveProfile() {
     gender:    document.getElementById('edit-gender').value || null,
     city:      document.getElementById('edit-city').value.trim(),
     state:     document.getElementById('edit-state').value.trim(),
-    pincode:   document.getElementById('edit-pincode').value.trim(),
+    postal_code: document.getElementById('edit-pincode').value.trim(),
     address:   document.getElementById('edit-address').value.trim(),
   };
   const { error } = await db.client.from('user_profiles').update(payload).eq('id', currentUser.id);
@@ -648,6 +686,54 @@ function showMsg(type, msg) {
   el.textContent = msg; el.classList.add('show');
   setTimeout(() => el.classList.remove('show'), 3000);
   window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ==================== LOGIN STREAK ====================
+function loadStreakData() {
+  try {
+    const today = new Date().toISOString().slice(0, 10);
+    // Uses same key as profile-nav.js: pn_streak = { date, count, last }
+    const stored = JSON.parse(localStorage.getItem('pn_streak') || '{"date":"","count":0,"last":""}');
+    const current = stored.date === today ? stored.count : stored.count || 0;
+
+    if (current < 1) return; // No streak yet
+
+    // For longest/total we can only show current streak (no full history stored)
+    document.getElementById('ls-streak').textContent = current + (current === 1 ? ' day' : ' days');
+    document.getElementById('streak-current').textContent = current;
+    document.getElementById('streak-longest').textContent = current; // best we can show without full history
+    document.getElementById('streak-total').textContent = current;
+
+    // Hero badge
+    const heroBadge = document.getElementById('hero-streak');
+    const heroCount = document.getElementById('hero-streak-count');
+    if (heroBadge && heroCount) {
+      heroCount.textContent = current;
+      heroBadge.style.display = '';
+    }
+
+    // Show streak card
+    const card = document.getElementById('streak-card');
+    if (card) card.style.display = '';
+
+    // Render 30-day calendar — shade backwards from today based on streak count
+    const cal = document.getElementById('streak-calendar');
+    if (cal) {
+      let html = '';
+      for (let i = 29; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        const ds = d.toISOString().slice(0, 10);
+        const isToday = ds === today;
+        // A day is "logged" if it falls within the current streak window
+        const logged = i < current;
+        const color = logged ? (isToday ? '#f59e0b' : '#7c5cfc') : 'var(--bg2)';
+        const border = isToday ? '2px solid #f59e0b' : '1px solid var(--border)';
+        html += `<div title="${ds}${isToday ? ' (today)' : ''}" style="width:20px;height:20px;border-radius:4px;background:${color};border:${border};opacity:${logged ? 1 : 0.35};transition:transform .15s;" onmouseover="this.style.transform='scale(1.3)'" onmouseout="this.style.transform=''"></div>`;
+      }
+      cal.innerHTML = html;
+    }
+  } catch(e) { console.warn('Streak load error:', e); }
 }
 
 // Tab switching

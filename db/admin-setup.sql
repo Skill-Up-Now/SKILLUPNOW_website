@@ -1,114 +1,214 @@
 -- ============================================================
---  SkillUpNow — Super Admin Setup
---  Run this ONCE in Supabase → SQL Editor after creating the
---  admin auth user via Authentication → Add User in Supabase.
--- ============================================================
-
--- ── STEP 1 ──────────────────────────────────────────────────
---  Go to: Supabase Dashboard → Authentication → Users → Add User
---  Email   : skillupnow@gmail.com
---  Password: Skillupnow@0904   (matches .env → ADMIN_PASSWORD)
---  ✓ Auto-confirm email
+-- SKILLUPNOW SUPER ADMIN BOOTSTRAP
+-- Creates or updates the dedicated super admin account and
+-- grants admin portal access for the normalized schema.
 --
---  Copy the UUID shown after creating the user.
---  Paste it below in place of '<PASTE_USER_UUID_HERE>'.
--- ────────────────────────────────────────────────────────────
+-- Default bootstrap values:
+--   Name:  SkillUpNow Admin
+--   Email: skillupnowoff@gmail.com
+--   Portal email: skillupnowoff@gmail.com
+--
+-- IMPORTANT:
+-- 1. Keep the password in sync with `.env` / `.env.local`.
+-- 2. Keep the portal secret key in sync with `ADMIN_PORTAL_SECRET_KEY`.
+-- 3. Run this after `db/schema.sql`.
+-- ============================================================
 
 DO $$
 DECLARE
-  v_user_id   UUID := '4574921a-1718-447c-92a3-a291a27cddf5';   -- ← Replace with real UUID
-  v_name      TEXT := 'SkillUpNow Admin';
-  v_email     TEXT := 'skillupnow@gmail.com';
+  v_admin_name   TEXT := 'SkillUpNow Admin';
+  v_admin_email  TEXT := 'skillupnowoff@gmail.com';
+  v_admin_password TEXT := 'Skillupnow@0904';
+  v_portal_secret  TEXT := 'SUN_ADMIN_PORTAL_2026_04_B9qL2vX7!rK4';
+  v_user_id UUID;
 BEGIN
+  SELECT id
+  INTO v_user_id
+  FROM auth.users
+  WHERE email = v_admin_email
+  LIMIT 1;
 
-  -- 1. Upsert user_profiles row
+  IF v_user_id IS NULL THEN
+    v_user_id := gen_random_uuid();
+
+    INSERT INTO auth.users (
+      instance_id,
+      id,
+      aud,
+      role,
+      email,
+      encrypted_password,
+      email_confirmed_at,
+      raw_app_meta_data,
+      raw_user_meta_data,
+      created_at,
+      updated_at,
+      confirmation_token,
+      email_change,
+      email_change_token_new,
+      recovery_token
+    ) VALUES (
+      '00000000-0000-0000-0000-000000000000',
+      v_user_id,
+      'authenticated',
+      'authenticated',
+      v_admin_email,
+      crypt(v_admin_password, gen_salt('bf')),
+      NOW(),
+      jsonb_build_object('provider', 'email', 'providers', ARRAY['email']),
+      jsonb_build_object('full_name', v_admin_name, 'role', 'super_admin'),
+      NOW(),
+      NOW(),
+      '',
+      '',
+      '',
+      ''
+    );
+
+    IF NOT EXISTS (
+      SELECT 1
+      FROM auth.identities
+      WHERE user_id = v_user_id
+        AND provider = 'email'
+    ) THEN
+      INSERT INTO auth.identities (
+        id,
+        user_id,
+        identity_data,
+        provider,
+        provider_id,
+        last_sign_in_at,
+        created_at,
+        updated_at
+      ) VALUES (
+        gen_random_uuid(),
+        v_user_id,
+        jsonb_build_object('sub', v_user_id::TEXT, 'email', v_admin_email),
+        'email',
+        v_user_id::TEXT,
+        NOW(),
+        NOW(),
+        NOW()
+      );
+    END IF;
+  ELSE
+    UPDATE auth.users
+    SET email = v_admin_email,
+        encrypted_password = crypt(v_admin_password, gen_salt('bf')),
+        email_confirmed_at = COALESCE(email_confirmed_at, NOW()),
+        raw_user_meta_data = COALESCE(raw_user_meta_data, '{}'::jsonb) || jsonb_build_object('full_name', v_admin_name, 'role', 'super_admin'),
+        updated_at = NOW()
+    WHERE id = v_user_id;
+  END IF;
+
   INSERT INTO public.user_profiles (
-    id, full_name, email, role,
-    is_email_verified, created_at, updated_at
-  )
-  VALUES (
-    v_user_id, v_name, v_email, 'super_admin',
-    true, NOW(), NOW()
-  )
-  ON CONFLICT (id) DO UPDATE
-    SET full_name = EXCLUDED.full_name,
-        email     = EXCLUDED.email,
-        role      = 'super_admin',
-        updated_at = NOW();
-
-  -- 2. Upsert admin_users row (grants access to admin-dashboard.html)
-  INSERT INTO public.admin_users (
-    user_id, role,
-    is_active, permissions, created_at, updated_at
-  )
-  VALUES (
+    user_id,
+    full_name,
+    email,
+    role,
+    is_email_verified,
+    account_created_at
+  ) VALUES (
     v_user_id,
+    v_admin_name,
+    v_admin_email,
     'super_admin',
-    true,
-    '{
-      "users":    {"view":true,"edit":true,"delete":true},
-      "courses":  {"view":true,"edit":true,"delete":true},
-      "payments": {"view":true,"edit":true,"delete":true},
-      "reports":  {"view":true,"export":true},
-      "mentors":  {"view":true,"edit":true,"approve":true},
-      "settings": {"view":true,"edit":true},
-      "enrollments": {"view":true,"edit":true,"delete":true},
-      "emi":      {"view":true,"edit":true},
-      "notifications": {"view":true,"edit":true},
-      "reviews":  {"view":true,"edit":true,"delete":true},
-      "inquiries":{"view":true,"edit":true,"delete":true},
-      "schedules":{"view":true,"edit":true,"delete":true},
-      "admins":   {"view":true,"edit":true,"delete":true}
-    }'::jsonb,
-    NOW(), NOW()
+    TRUE,
+    NOW()
   )
   ON CONFLICT (user_id) DO UPDATE
-    SET role        = 'super_admin',
-        is_active   = true,
-        permissions = EXCLUDED.permissions,
-        updated_at  = NOW();
+  SET full_name = EXCLUDED.full_name,
+      email = EXCLUDED.email,
+      role = 'super_admin',
+      is_email_verified = TRUE,
+      updated_at = NOW();
 
-  RAISE NOTICE 'Super admin created/updated successfully for user: %', v_user_id;
+  INSERT INTO public.user_role_assignments (
+    user_id,
+    role,
+    is_primary,
+    is_active,
+    assigned_reason
+  ) VALUES (
+    v_user_id,
+    'super_admin',
+    TRUE,
+    TRUE,
+    'Bootstrap super admin'
+  )
+  ON CONFLICT (user_id, role) DO UPDATE
+  SET is_primary = TRUE,
+      is_active = TRUE,
+      revoked_at = NULL;
 
+  INSERT INTO public.admin_profiles (
+    user_id,
+    admin_code,
+    admin_title,
+    department,
+    status,
+    permissions
+  ) VALUES (
+    v_user_id,
+    'SUN-SUPER-ADMIN',
+    'Founder Admin',
+    'Platform Operations',
+    'active',
+    jsonb_build_object(
+      'users', jsonb_build_object('view', true, 'edit', true, 'delete', true),
+      'courses', jsonb_build_object('view', true, 'edit', true, 'publish', true),
+      'payments', jsonb_build_object('view', true, 'edit', true, 'refund', true),
+      'mentors', jsonb_build_object('view', true, 'approve', true, 'edit', true),
+      'reports', jsonb_build_object('view', true, 'export', true)
+    )
+  )
+  ON CONFLICT (user_id) DO UPDATE
+  SET admin_code = EXCLUDED.admin_code,
+      admin_title = EXCLUDED.admin_title,
+      department = EXCLUDED.department,
+      status = 'active',
+      permissions = EXCLUDED.permissions,
+      updated_at = NOW();
+
+  INSERT INTO public.admin_portal_access (
+    user_id,
+    authorized_email,
+    secret_key_hash,
+    portal_status,
+    otp_enabled,
+    notes
+  ) VALUES (
+    v_user_id,
+    v_admin_email,
+    encode(digest(v_portal_secret, 'sha256'), 'hex'),
+    'active',
+    TRUE,
+    'Dedicated super admin portal access'
+  )
+  ON CONFLICT (user_id) DO UPDATE
+  SET authorized_email = EXCLUDED.authorized_email,
+      secret_key_hash = EXCLUDED.secret_key_hash,
+      portal_status = 'active',
+      otp_enabled = TRUE,
+      updated_at = NOW();
+
+  INSERT INTO public.auth_activity_logs (user_id, event_name, metadata)
+  VALUES (
+    v_user_id,
+    'super_admin_bootstrap',
+    jsonb_build_object('email', v_admin_email)
+  );
 END $$;
 
-
--- ── STEP 1b — Fix RLS (CRITICAL — run this if admin login fails) ──
--- admin_users has RLS enabled but no SELECT policy, which blocks
--- the login page from reading the admin row via the client.
-DO $fix$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_policies
-    WHERE tablename = 'admin_users' AND policyname = 'admin_self_select'
-  ) THEN
-    EXECUTE 'CREATE POLICY admin_self_select ON public.admin_users FOR SELECT TO authenticated USING (user_id = auth.uid())';
-  END IF;
-END $fix$;
-
--- ── STEP 2 — Verify ─────────────────────────────────────────
 SELECT
-  up.id,
+  up.user_id,
   up.full_name,
   up.email,
   up.role,
-  au.role  AS admin_role,
-  au.is_active
+  ap.status AS admin_status,
+  apa.portal_status,
+  apa.authorized_email
 FROM public.user_profiles up
-JOIN public.admin_users    au ON au.user_id = up.id
-WHERE up.email = 'skillupnow@gmail.com';
-
-
--- ── STEP 3 — Admin Login URL ─────────────────────────────────
---  The admin login page is intentionally NOT linked in the public nav.
---  To log in as admin, navigate directly to:
---
---    http://localhost:5500/pages/admin-login.html
---    or
---    https://your-domain.com/pages/admin-login.html
---
---  Use the credentials stored in .env:
---    Email   : skillupnow@gmail.com
---    Password: ADMIN_PASSWORD value from .env
---
--- ────────────────────────────────────────────────────────────
+JOIN public.admin_profiles ap ON ap.user_id = up.user_id
+JOIN public.admin_portal_access apa ON apa.user_id = up.user_id
+WHERE up.email = 'skillupnowoff@gmail.com';

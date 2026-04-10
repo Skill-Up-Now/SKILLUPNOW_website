@@ -301,7 +301,7 @@ async function submitEmi() {
     await db.client.from('form_submissions').insert({
       user_id: session?.user?.id || null,
       course_id: course,
-      form_type: 'emi_application',
+      form_type: 'emi',
       form_data: {
         name, email, phone, course_id: course,
         emi_months: selectedMonths,

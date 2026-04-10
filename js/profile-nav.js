@@ -9,8 +9,8 @@ class ProfileNavigationManager {
     this.inPages     = path.includes('/pages/');
     this.rootPfx     = this.inPages ? '../' : '';
     this.pagesPfx    = this.inPages ? ''    : 'pages/';
-    this.isAdminPage = path.includes('admin-dashboard') || path.includes('admin-login');
-    this.isMentorPage = path.includes('mentor-dashboard') || path.includes('mentor-signup');
+    this.isAdminPage = path.includes('admin-dashboard');
+    this.isMentorPage = path.includes('mentor-dashboard');
     this._pendingOtpEmail = null;
     this._pendingOtpRole  = null;
     this._pendingOtpData  = null;
@@ -18,8 +18,9 @@ class ProfileNavigationManager {
   }
 
   async init() {
-    if (this.isAdminPage) return;
+    if (this.isAdminPage || this.isMentorPage) return;
     this.injectNeuralCursor();
+    this.injectThemeSwitcher();
     this.rebuildNav();
     this.replaceFooter();
     this.updateYearFields();
@@ -63,16 +64,165 @@ class ProfileNavigationManager {
     tick();
   }
 
+  /* ── Theme Switcher (liquid glass, small floating widget) ── */
+  injectThemeSwitcher() {
+    if (document.getElementById('pn-theme-switcher')) return;
+    const themes = [
+      { id: 'dark',    icon: '🌙', label: 'Dark',    variant: 'purple'  },
+      { id: 'light',   icon: '☀️',  label: 'Light',   variant: 'purple'  },
+      { id: 'dark',    icon: '🌊', label: 'Ocean',   variant: 'ocean'   },
+      { id: 'dark',    icon: '🌅', label: 'Sunset',  variant: 'sunset'  },
+      { id: 'dark',    icon: '🌿', label: 'Emerald', variant: 'emerald' },
+    ];
+    const THEMES = JSON.stringify(themes);
+    const sw = document.createElement('div');
+    sw.id = 'pn-theme-switcher';
+    sw.innerHTML = `
+      <style>
+        #pn-theme-switcher {
+          position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 99990;
+          display: flex; flex-direction: column; align-items: flex-end; gap: .5rem;
+        }
+        #pn-ts-toggle {
+          width: 46px; height: 46px; border-radius: 50%;
+          background: rgba(124,92,252,0.85);
+          backdrop-filter: blur(18px) saturate(2);
+          -webkit-backdrop-filter: blur(18px) saturate(2);
+          border: 1.5px solid rgba(255,255,255,0.25);
+          box-shadow: 0 6px 24px rgba(124,92,252,0.5), inset 0 1px 0 rgba(255,255,255,0.25);
+          cursor: pointer; font-size: 1.15rem;
+          display: flex; align-items: center; justify-content: center;
+          transition: transform .3s cubic-bezier(.34,1.56,.64,1), box-shadow .3s;
+          color: #fff;
+        }
+        #pn-ts-toggle:hover { transform: scale(1.12) rotate(20deg); box-shadow: 0 10px 32px rgba(124,92,252,0.7); }
+        #pn-ts-panel {
+          background: rgba(18,14,42,0.94);
+          backdrop-filter: blur(20px) saturate(2);
+          -webkit-backdrop-filter: blur(20px) saturate(2);
+          border: 1px solid rgba(124,92,252,0.3);
+          border-radius: 18px;
+          padding: .65rem .75rem;
+          display: flex; flex-direction: column; gap: .38rem;
+          box-shadow: 0 16px 48px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.07);
+          transform-origin: bottom right;
+          transform: scale(0); opacity: 0;
+          transition: transform .28s cubic-bezier(.34,1.56,.64,1), opacity .25s ease;
+          pointer-events: none;
+        }
+        #pn-ts-panel.open { transform: scale(1); opacity: 1; pointer-events: all; }
+        :root[data-theme="light"] #pn-ts-panel {
+          background: rgba(255,255,255,0.96);
+          border-color: rgba(124,92,252,0.18);
+          box-shadow: 0 8px 32px rgba(124,92,252,0.18), inset 0 1px 0 rgba(255,255,255,1);
+        }
+        .pn-ts-option {
+          display: flex; align-items: center; gap: .6rem;
+          padding: .55rem .85rem; border-radius: 12px;
+          cursor: pointer; font-size: .8rem; font-weight: 600; color: var(--txt2);
+          border: 1px solid transparent; transition: all .18s;
+          white-space: nowrap;
+          background: none;
+          font-family: inherit;
+        }
+        .pn-ts-option:hover { background: rgba(124,92,252,0.12); border-color: rgba(124,92,252,0.3); }
+        .pn-ts-option.active { background: rgba(124,92,252,0.18); border-color: rgba(124,92,252,0.5); color: var(--v1); }
+        .pn-ts-option .pn-ts-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; border: 1.5px solid rgba(255,255,255,.3); }
+        #pn-ts-label { font-size: .6rem; font-weight: 700; color: rgba(200,191,255,.5); text-transform: uppercase; letter-spacing: .08em; padding: .2rem .85rem .1rem; }
+        :root[data-theme="light"] #pn-ts-label { color: var(--txt4); }
+        :root[data-theme="light"] .pn-ts-option { color: var(--txt2); }
+      </style>
+      <div id="pn-ts-panel">
+        <div id="pn-ts-label">Theme</div>
+      </div>
+      <button id="pn-ts-toggle" aria-label="Switch theme" title="Switch theme">🎨</button>
+    `;
+    document.body.appendChild(sw);
+
+    // Build options
+    const THEME_LIST = ${THEMES};
+    const panel = sw.querySelector('#pn-ts-panel');
+    const toggle = sw.querySelector('#pn-ts-toggle');
+    const dotColors = { purple:'#7c5cfc', ocean:'#0ea5e9', sunset:'#f59e0b', emerald:'#10b981' };
+    const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+    const currentVariant = document.documentElement.getAttribute('data-theme-variant') || 'purple';
+
+    THEME_LIST.forEach(t => {
+      const btn = document.createElement('button');
+      btn.className = 'pn-ts-option' + (t.id === currentTheme && t.variant === currentVariant ? ' active' : '');
+      btn.innerHTML = \`<span class="pn-ts-dot" style="background:\${dotColors[t.variant]||'#7c5cfc'};"></span><span>\${t.icon}</span>\${t.label}\`;
+      btn.addEventListener('click', () => {
+        document.documentElement.setAttribute('data-theme', t.id);
+        if (t.variant !== 'purple') {
+          document.documentElement.setAttribute('data-theme-variant', t.variant);
+        } else {
+          document.documentElement.removeAttribute('data-theme-variant');
+        }
+        localStorage.setItem('pn-theme', t.id);
+        localStorage.setItem('pn-theme-variant', t.variant);
+        panel.querySelectorAll('.pn-ts-option').forEach(o => o.classList.remove('active'));
+        btn.classList.add('active');
+        panel.classList.remove('open');
+      });
+      panel.appendChild(btn);
+    });
+
+    toggle.addEventListener('click', e => {
+      e.stopPropagation();
+      panel.classList.toggle('open');
+    });
+    document.addEventListener('click', () => panel.classList.remove('open'));
+
+    // Restore saved theme on page load
+    const saved = localStorage.getItem('pn-theme');
+    const savedVariant = localStorage.getItem('pn-theme-variant');
+    if (saved) document.documentElement.setAttribute('data-theme', saved);
+    if (savedVariant && savedVariant !== 'purple') document.documentElement.setAttribute('data-theme-variant', savedVariant);
+    else if (savedVariant === 'purple') document.documentElement.removeAttribute('data-theme-variant');
+  }
+
+  /* ── Login Streak tracking ── */
+  updateLoginStreak() {
+    const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+    const stored = JSON.parse(localStorage.getItem('pn_streak') || '{"date":"","count":0,"last":""}');
+    if (stored.date === today) return stored.count; // Already logged today
+    const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+    const newCount = (stored.last === yesterday) ? stored.count + 1 : 1;
+    localStorage.setItem('pn_streak', JSON.stringify({ date: today, count: newCount, last: today }));
+    return newCount;
+  }
+
+  getLoginStreak() {
+    const stored = JSON.parse(localStorage.getItem('pn_streak') || '{"date":"","count":0}');
+    const today = new Date().toISOString().slice(0, 10);
+    return stored.date === today ? stored.count : stored.count || 0;
+  }
+
+  showStreakBadge() {
+    const streak = this.updateLoginStreak();
+    const profileSection = document.getElementById('profile-section');
+    if (!profileSection || streak < 1) return;
+    // Remove existing badge
+    profileSection.querySelector('.streak-badge')?.remove();
+    if (streak > 0) {
+      const badge = document.createElement('div');
+      badge.className = 'streak-badge';
+      badge.title = streak + ' day streak! 🔥';
+      badge.innerHTML = streak > 99 ? '99+' : (streak >= 2 ? '🔥' + streak : '🔥');
+      profileSection.style.position = 'relative';
+      profileSection.appendChild(badge);
+    }
+  }
+
   /* ── Build nav HTML ── */
   buildNavHTML() {
     const r = this.rootPfx;
     const p = this.pagesPfx;
     const path = window.location.pathname.replace(/\\/g, '/');
-    const isHome     = path.endsWith('/') || path.endsWith('index.html') || path.endsWith('index');
-    const isCourses  = path.includes('courses');
-    const isFeedback = path.includes('feedback');
-    const isContact  = path.includes('contact-enquiry');
-    const isPamphlet = path.includes('pamphlet');
+    const isHome    = path.endsWith('/') || path.endsWith('index.html') || path.endsWith('index');
+    const isCourses = path.includes('courses');
+    const isEnquiry = path.includes('contact-enquiry');
+    const isVideos  = path.includes('recording-videos');
 
     return `
       <a href="${r}index.html" class="nav-logo" aria-label="SkillUpNow Home">
@@ -85,11 +235,11 @@ class ProfileNavigationManager {
       </a>
 
       <ul class="nav-links" id="nav-links-list" role="navigation" aria-label="Main navigation">
-        <li><a href="${r}index.html"          class="nav-link-item ${isHome     ? 'active' : ''}">Home</a></li>
-        <li><a href="${p}courses.html"         class="nav-link-item ${isCourses  ? 'active' : ''}">Courses</a></li>
-        <li><a href="${p}pamphlet.html"        class="nav-link-item ${isPamphlet ? 'active' : ''}">Brochure</a></li>
-        <li><a href="${p}feedback.html"        class="nav-link-item ${isFeedback ? 'active' : ''}">Reviews</a></li>
-        <li><a href="${p}contact-enquiry.html" class="nav-link-item ${isContact  ? 'active' : ''}">Contact</a></li>
+        <li><a href="${r}index.html"                     class="nav-link-item ${isHome    ? 'active' : ''}">Home</a></li>
+        <li><a href="${p}courses.html"                   class="nav-link-item ${isCourses ? 'active' : ''}">Courses</a></li>
+        <li><a href="${p}recording-videos.html"          class="nav-link-item ${isVideos  ? 'active' : ''}">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="margin-right:.25rem;vertical-align:-1px"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>Videos</a></li>
+        <li><a href="${p}contact-enquiry.html"           class="nav-link-item ${isEnquiry ? 'active' : ''}">Enquiry</a></li>
       </ul>
 
       <div class="nav-actions" id="nav-actions">
@@ -185,7 +335,6 @@ class ProfileNavigationManager {
             <li><a href="${p}pamphlet.html"         class="footer-link">Course Brochure</a></li>
             <li><a href="${p}emi-application.html"  class="footer-link">EMI Options</a></li>
             <li><a href="${p}feedback.html"         class="footer-link">Student Reviews</a></li>
-            <li><a href="${p}contact-enquiry.html"  class="footer-link">Fee Enquiry</a></li>
           </ul>
         </div>
 
@@ -197,10 +346,22 @@ class ProfileNavigationManager {
           </ul>
           <h5 class="footer-col-title" style="margin-top:1.5rem;">Company</h5>
           <ul class="footer-col-links">
-            <li><a href="${r}index.html#about"      class="footer-link">About Us</a></li>
+            <li><a href="${r}index.html#about-us"   class="footer-link">About Us</a></li>
             <li><a href="#"                         class="footer-link">Privacy Policy</a></li>
             <li><a href="#"                         class="footer-link">Terms of Service</a></li>
           </ul>
+        </div>
+
+        <!-- Reviews column -->
+        <div class="footer-links-col" id="footer-reviews-col">
+          <h5 class="footer-col-title">What Students Say</h5>
+          <div id="footer-review-list" style="display:flex;flex-direction:column;gap:.75rem;">
+            <div style="font-size:.8rem;color:var(--txt4);">Loading reviews…</div>
+          </div>
+          <a href="${p}feedback.html" class="footer-link" style="display:inline-flex;align-items:center;gap:.3rem;margin-top:.9rem;font-size:.78rem;font-weight:600;color:var(--v1);">
+            See all reviews
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
         </div>
       </div>
 
@@ -241,6 +402,37 @@ class ProfileNavigationManager {
       footer.removeAttribute('style');
       footer.innerHTML = this.buildFooterHTML();
     });
+    this.loadFooterReviews();
+  }
+
+  /* ── Load 3 recent approved reviews into footer ── */
+  async loadFooterReviews() {
+    const container = document.getElementById('footer-review-list');
+    if (!container) return;
+    try {
+      const client = window.supabaseConfig?.client;
+      if (!client) { container.innerHTML = ''; return; }
+      const { data: reviews } = await client
+        .from('reviews')
+        .select('reviewer_name, rating, comment')
+        .eq('is_approved', true)
+        .order('created_at', { ascending: false })
+        .limit(3);
+      if (!reviews || !reviews.length) {
+        container.innerHTML = '<div style="font-size:.78rem;color:var(--txt4);">Be the first to leave a review!</div>';
+        return;
+      }
+      container.innerHTML = reviews.map(r => `
+        <div style="background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:.75rem .9rem;">
+          <div style="display:flex;align-items:center;gap:.4rem;margin-bottom:.35rem;">
+            <span style="font-size:.75rem;color:#fbbf24;">${'★'.repeat(Math.min(5,Math.max(1,r.rating||5)))}${'☆'.repeat(5-Math.min(5,Math.max(1,r.rating||5)))}</span>
+            <span style="font-size:.72rem;font-weight:700;color:var(--txt2);">${(r.reviewer_name||'Student').split(' ')[0]}</span>
+          </div>
+          <p style="font-size:.78rem;color:var(--txt3);line-height:1.5;margin:0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${r.comment||''}</p>
+        </div>`).join('');
+    } catch (_) {
+      container.innerHTML = '<div style="font-size:.78rem;color:var(--txt4);">Reviews unavailable.</div>';
+    }
   }
 
   /* ── Mobile hamburger ── */
@@ -343,11 +535,20 @@ class ProfileNavigationManager {
     window._pnOtpSend = async (email, name, otp) => {
       if (!window.emailjs) throw new Error('Email service not ready. Please refresh and try again.');
       await window.emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
-        email, name, otp
+        email,
+        name,
+        to_name: name,
+        otp,
+        otp_code: otp
       }, EMAILJS_PUBLIC_KEY);
     };
 
     /* ── CSS ── */
+    const pnEmailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const pnPhoneRe = /^[6-9]\d{9}$/;
+    const pnPasswordRe = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+    const pnNormalizePhone = value => (value || '').replace(/\D/g, '').slice(0, 10);
+
     const style = document.createElement('style');
     style.id = 'pn-auth-modal-style';
     style.textContent = `
@@ -504,6 +705,19 @@ class ProfileNavigationManager {
         color: #6b7280; text-transform: uppercase;
         letter-spacing: .07em; margin-bottom: .38rem;
       }
+      /* Red asterisk for required fields */
+      .pn-field label .req, .pn-field label:has(+ input[required]) .req { color: #ef4444; font-weight: 900; }
+      .pn-req { color: #ef4444 !important; font-weight: 900 !important; margin-left: 1px; }
+      /* Input validation states */
+      .pn-field input.valid { border-color: #22c55e !important; }
+      .pn-field input.invalid { border-color: #ef4444 !important; }
+      .pn-field .pn-field-hint {
+        font-size: .66rem; margin-top: .2rem; padding: .18rem .45rem;
+        border-radius: 6px; display: none;
+      }
+      .pn-field .pn-field-hint.show { display: block; }
+      .pn-field .pn-field-hint.err { color: #ef4444; background: rgba(239,68,68,.08); }
+      .pn-field .pn-field-hint.ok { color: #22c55e; background: rgba(34,197,94,.08); }
       .pn-field-row { display: grid; grid-template-columns: 1fr 1fr; gap: .65rem; }
       .pn-field input, .pn-field select {
         width: 100%; padding: .8rem 1rem;
@@ -829,13 +1043,13 @@ class ProfileNavigationManager {
           <div class="pn-ok"  id="pn-ss-ok"></div>
 
           <div class="pn-field-row">
-            <div class="pn-field"><label>First Name *</label><input type="text" id="pn-ss-fname" placeholder="First name" autocomplete="given-name"></div>
-            <div class="pn-field"><label>Last Name *</label><input type="text" id="pn-ss-lname" placeholder="Last name" autocomplete="family-name"></div>
+            <div class="pn-field"><label>First Name <span class="pn-req">*</span></label><input type="text" id="pn-ss-fname" placeholder="First name" autocomplete="given-name" oninput="window._pnValidateField(this,'text')"><div class="pn-field-hint" id="pn-ss-fname-h"></div></div>
+            <div class="pn-field"><label>Last Name <span class="pn-req">*</span></label><input type="text" id="pn-ss-lname" placeholder="Last name" autocomplete="family-name" oninput="window._pnValidateField(this,'text')"><div class="pn-field-hint" id="pn-ss-lname-h"></div></div>
           </div>
-          <div class="pn-field"><label>Email Address *</label><input type="email" id="pn-ss-email" placeholder="you@example.com" autocomplete="email"></div>
-          <div class="pn-field"><label>Phone Number *</label><input type="tel" id="pn-ss-phone" placeholder="+91 98765 43210" autocomplete="tel"></div>
+          <div class="pn-field"><label>Email Address <span class="pn-req">*</span></label><input type="email" id="pn-ss-email" placeholder="you@example.com" autocomplete="email" oninput="window._pnValidateField(this,'email')"><div class="pn-field-hint" id="pn-ss-email-h"></div></div>
+          <div class="pn-field"><label>Phone Number <span class="pn-req">*</span> <span style="font-size:.62rem;color:#9ca3af;text-transform:none;letter-spacing:0;">(10-digit Indian mobile)</span></label><input type="tel" id="pn-ss-phone" placeholder="9876543210" autocomplete="tel" maxlength="10" oninput="window._pnValidateField(this,'phone')"><div class="pn-field-hint" id="pn-ss-phone-h"></div></div>
           <div class="pn-field">
-            <label>Password * (min. 8 chars)</label>
+            <label>Password <span class="pn-req">*</span> <span style="font-size:.62rem;color:#9ca3af;text-transform:none;letter-spacing:0;">(min. 8 chars, A-Z, a-z, 0-9)</span></label>
             <div class="pn-pw-wrap">
               <input type="password" id="pn-ss-pw" placeholder="Create a strong password" autocomplete="new-password" oninput="window._pnStrength('pn-ss-pw','pn-ss-strength','pn-ss-strength-lbl','pn-ss-hints')">
               <button class="pn-pw-toggle" type="button" onclick="window._pnTogglePw('pn-ss-pw',this)">Show</button>
@@ -878,12 +1092,12 @@ class ProfileNavigationManager {
           <div class="pn-ok"  id="pn-sm-ok"></div>
 
           <div class="pn-field-row">
-            <div class="pn-field"><label>First Name *</label><input type="text" id="pn-sm-fname" placeholder="First name" autocomplete="given-name"></div>
-            <div class="pn-field"><label>Last Name *</label><input type="text" id="pn-sm-lname" placeholder="Last name" autocomplete="family-name"></div>
+            <div class="pn-field"><label>First Name <span class="pn-req">*</span></label><input type="text" id="pn-sm-fname" placeholder="First name" autocomplete="given-name" oninput="window._pnValidateField(this,'text')"></div>
+            <div class="pn-field"><label>Last Name <span class="pn-req">*</span></label><input type="text" id="pn-sm-lname" placeholder="Last name" autocomplete="family-name" oninput="window._pnValidateField(this,'text')"></div>
           </div>
-          <div class="pn-field"><label>Email Address *</label><input type="email" id="pn-sm-email" placeholder="you@example.com" autocomplete="email"></div>
-          <div class="pn-field"><label>Phone Number *</label><input type="tel" id="pn-sm-phone" placeholder="+91 98765 43210" autocomplete="tel"></div>
-          <div class="pn-field"><label>Primary Expertise *</label>
+          <div class="pn-field"><label>Email Address <span class="pn-req">*</span></label><input type="email" id="pn-sm-email" placeholder="you@example.com" autocomplete="email" oninput="window._pnValidateField(this,'email')"></div>
+          <div class="pn-field"><label>Phone Number <span class="pn-req">*</span> <span style="font-size:.62rem;color:#9ca3af;text-transform:none;letter-spacing:0;">(10-digit Indian mobile)</span></label><input type="tel" id="pn-sm-phone" placeholder="9876543210" autocomplete="tel" maxlength="10" oninput="window._pnValidateField(this,'phone')"></div>
+          <div class="pn-field"><label>Primary Expertise <span class="pn-req">*</span></label>
             <select id="pn-sm-expertise">
               <option value="">Select your main domain…</option>
               <option>Web Development</option><option>Data Science / ML</option>
@@ -1037,6 +1251,31 @@ class ProfileNavigationManager {
       }
     };
 
+    /* ── Field inline validation ── */
+    window._pnValidateField = (input, type) => {
+      const val = input.value.trim();
+      const hintEl = document.getElementById(input.id + '-h');
+      const showHint = (msg, isErr) => {
+        if (!hintEl) return;
+        hintEl.textContent = msg; hintEl.className = 'pn-field-hint show ' + (isErr ? 'err' : 'ok');
+      };
+      if (!val) { input.className = input.className.replace(/ ?(valid|invalid)/g,''); if(hintEl) hintEl.className='pn-field-hint'; return; }
+      if (type === 'email') {
+        const ok = pnEmailRe.test(val);
+        input.classList.toggle('valid', ok); input.classList.toggle('invalid', !ok);
+        showHint(ok ? '✓ Valid email' : '✗ Enter a valid email (e.g. you@gmail.com)', !ok);
+      } else if (type === 'phone') {
+        const normalized = val.replace(/\D/g,'');
+        const ok = pnPhoneRe.test(normalized);
+        input.classList.toggle('valid', ok); input.classList.toggle('invalid', !ok);
+        showHint(ok ? '✓ Valid phone number' : '✗ Must be 10 digits starting with 6–9', !ok);
+      } else if (type === 'text') {
+        const ok = val.length >= 2;
+        input.classList.toggle('valid', ok); input.classList.toggle('invalid', !ok);
+        if (!ok) showHint('✗ Too short', true); else if (hintEl) hintEl.className='pn-field-hint';
+      }
+    };
+
     /* ── Password strength ── */
     window._pnStrength = (inputId, barId, lblId, hintsId) => {
       const val = document.getElementById(inputId)?.value || '';
@@ -1123,11 +1362,11 @@ class ProfileNavigationManager {
         window._pnClose();
         // Route: check mentor record
         const { data: mentor } = await window.supabaseConfig.client
-          .from('mentors').select('id,approval_status').eq('user_id', user.id).maybeSingle();
-        if (mentor?.approval_status === 'approved') {
+          .from('mentor_profiles').select('user_id,status').eq('user_id', user.id).maybeSingle();
+        if (mentor?.status === 'approved') {
           window.location.href = self.pagesPfx + 'mentor-dashboard.html';
         } else if (mentor) {
-          alert('Your mentor application is ' + (mentor.approval_status || 'under review') + '. You will be notified once approved.');
+          alert('Your mentor application is ' + (mentor.status || 'under review') + '. You will be notified once approved.');
           window.location.reload();
         } else {
           // Has account but no mentor record — prompt to apply
@@ -1142,8 +1381,8 @@ class ProfileNavigationManager {
     window._pnStudentRegister = async () => {
       const fname  = document.getElementById('pn-ss-fname')?.value?.trim();
       const lname  = document.getElementById('pn-ss-lname')?.value?.trim();
-      const email  = document.getElementById('pn-ss-email')?.value?.trim();
-      const phone  = document.getElementById('pn-ss-phone')?.value?.trim();
+      const email  = document.getElementById('pn-ss-email')?.value?.trim()?.toLowerCase();
+      const phone  = pnNormalizePhone(document.getElementById('pn-ss-phone')?.value?.trim());
       const pw     = document.getElementById('pn-ss-pw')?.value;
       const cpw    = document.getElementById('pn-ss-cpw')?.value;
       const terms  = document.getElementById('pn-ss-terms')?.checked;
@@ -1151,9 +1390,9 @@ class ProfileNavigationManager {
       const btn    = document.getElementById('pn-ss-btn');
 
       if (!fname || !lname) return _pnErr(err, 'Please enter your full name.');
-      if (!email)           return _pnErr(err, 'Email address is required.');
-      if (!phone)           return _pnErr(err, 'Phone number is required.');
-      if (pw.length < 8)    return _pnErr(err, 'Password must be at least 8 characters.');
+      if (!pnEmailRe.test(email || '')) return _pnErr(err, 'Please enter a valid email address.');
+      if (!pnPhoneRe.test(phone || '')) return _pnErr(err, 'Please enter a valid 10-digit phone number.');
+      if (!pnPasswordRe.test(pw || '')) return _pnErr(err, 'Password must be at least 8 characters and include uppercase, lowercase, and a number.');
       if (pw !== cpw)       return _pnErr(err, 'Passwords do not match.');
       if (!terms)           return _pnErr(err, 'Please agree to the Terms of Service to continue.');
 
@@ -1164,52 +1403,28 @@ class ProfileNavigationManager {
 
       try {
         if (!window.supabaseConfig) throw new Error('Auth service not ready. Refresh and try again.');
-
-        // Create account in Supabase
-        const r = await window.supabaseConfig.signUp(email, pw, {
-          full_name: fullName, email, phone, role: 'student'
-        });
-        if (!r.success) throw new Error(r.error || 'Registration failed. This email may already be registered.');
-
-        // If no email confirmation needed → sign in and redirect
-        if (r.data?.session || r.data?.user?.email_confirmed_at) {
-          const lr = await window.supabaseConfig.signIn(email, pw);
-          if (lr.success) { self.currentUser = lr.data?.user || lr.user; self.showLoggedInUI(); }
-          _pnShowSuccess('🎉', "You're In!", 'Your student account is ready. Welcome to SkillUpNow!', () => {
-            window._pnClose();
-            window.location.href = self.pagesPfx + 'profile.html';
-          });
-          return;
-        }
-
-        // Email confirmation required — store pending data then send OTP
+        const otpReq = await window.supabaseConfig.requestSignupOtp(email);
+        if (!otpReq.success || !otpReq.data?.otp) throw new Error(otpReq.error || 'Unable to send verification code right now. Please try again.');
         self._pendingOtpEmail = email;
-        self._pendingOtpRole  = 'student';
-        self._pendingOtpData  = { full_name: fullName, email, phone, pw };
+        self._pendingOtpRole  = 'user';
+        self._pendingOtpData  = { full_name: fullName, email, phone, pw, role: 'user' };
         document.getElementById('pn-otp-back').onclick = () => window._pnView('signup-student');
-
-        try {
-          const otp = window._pnOtpGenerate();
-          window._pnOtpStore(email, otp);
-          await window._pnOtpSend(email, fullName, otp);
-          document.getElementById('pn-otp-sub').textContent = 'We sent a 6-digit code to ' + email + '. Check your inbox.';
-        } catch (_emailErr) {
-          // EmailJS not configured yet — Supabase already sent its own confirmation email
-          document.getElementById('pn-otp-sub').textContent = 'A confirmation link/code was sent to ' + email + '. Check your inbox.';
-        }
+        document.getElementById('pn-otp-btn').textContent = 'Verify & Create Account';
+        await window._pnOtpSend(email, fullName, otpReq.data.otp);
+        document.getElementById('pn-otp-sub').textContent = 'We sent a 6-digit code to ' + email + '. Check your inbox (and spam folder).';
         window._pnView('otp');
       } catch(e) {
         _pnErr(err, e.message);
+        btn.disabled = false; btn.textContent = 'Create Student Account';
       }
-      btn.disabled = false; btn.textContent = 'Create Student Account';
     };
 
     /* ── Mentor Register (basic — then redirect to full signup) ── */
     window._pnMentorRegister = async () => {
       const fname     = document.getElementById('pn-sm-fname')?.value?.trim();
       const lname     = document.getElementById('pn-sm-lname')?.value?.trim();
-      const email     = document.getElementById('pn-sm-email')?.value?.trim();
-      const phone     = document.getElementById('pn-sm-phone')?.value?.trim();
+      const email     = document.getElementById('pn-sm-email')?.value?.trim()?.toLowerCase();
+      const phone     = pnNormalizePhone(document.getElementById('pn-sm-phone')?.value?.trim());
       const expertise = document.getElementById('pn-sm-expertise')?.value;
       const pw        = document.getElementById('pn-sm-pw')?.value;
       const terms     = document.getElementById('pn-sm-terms')?.checked;
@@ -1217,32 +1432,35 @@ class ProfileNavigationManager {
       const btn       = document.getElementById('pn-sm-btn');
 
       if (!fname || !lname)  return _pnErr(err, 'Please enter your full name.');
-      if (!email)            return _pnErr(err, 'Email address is required.');
-      if (!phone)            return _pnErr(err, 'Phone number is required.');
+      if (!pnEmailRe.test(email || '')) return _pnErr(err, 'Please enter a valid email address.');
+      if (!pnPhoneRe.test(phone || '')) return _pnErr(err, 'Please enter a valid 10-digit phone number.');
       if (!expertise)        return _pnErr(err, 'Please select your primary expertise area.');
-      if (pw.length < 8)     return _pnErr(err, 'Password must be at least 8 characters.');
+      if (!pnPasswordRe.test(pw || '')) return _pnErr(err, 'Password must be at least 8 characters and include uppercase, lowercase, and a number.');
       if (!terms)            return _pnErr(err, 'Please agree to the Mentor Terms to continue.');
 
       btn.disabled = true; btn.textContent = 'Creating account…';
       err.style.display = 'none';
       try {
         if (!window.supabaseConfig) throw new Error('Auth service not ready. Refresh and try again.');
-        const r = await window.supabaseConfig.signUp(email, pw, {
-          full_name: fname + ' ' + lname, email, phone, role: 'mentor',
-          expertise_area: expertise,
-        });
-        if (!r.success) throw new Error(r.error || 'Registration failed.');
-
-        // Auto sign-in if possible
-        try {
-          const lr = await window.supabaseConfig.signIn(email, pw);
-          if (lr.success) { const u = lr.data?.user || lr.user; self.currentUser = u; self.showLoggedInUI(); }
-        } catch(_) {}
-
-        _pnShowSuccess('🎓', 'Account Created!',
-          'Now complete your mentor application — upload your qualifications and documents for admin approval.',
-          () => { window._pnClose(); window.location.href = self.pagesPfx + 'mentor-signup.html'; }
-        );
+        const fullName = fname + ' ' + lname;
+        const otpReq = await window.supabaseConfig.requestSignupOtp(email);
+        if (!otpReq.success || !otpReq.data?.otp) throw new Error(otpReq.error || 'Unable to send verification code right now.');
+        self._pendingOtpEmail = email;
+        self._pendingOtpRole  = 'mentor';
+        self._pendingOtpData  = {
+          full_name: fullName,
+          email,
+          phone,
+          pw,
+          role: 'user',
+          requested_role: 'mentor',
+          expertise_area: expertise
+        };
+        document.getElementById('pn-otp-back').onclick = () => window._pnView('signup-mentor');
+        document.getElementById('pn-otp-btn').textContent = 'Verify & Continue to Mentor Form';
+        await window._pnOtpSend(email, fullName, otpReq.data.otp);
+        document.getElementById('pn-otp-sub').textContent = 'Verify your email to continue to the mentor application.';
+        window._pnView('otp');
       } catch(e) { _pnErr(err, e.message); btn.disabled = false; btn.textContent = 'Create & Continue to Application →'; }
     };
 
@@ -1256,33 +1474,47 @@ class ProfileNavigationManager {
       btn.disabled = true; btn.textContent = 'Verifying…';
       err.style.display = 'none';
       try {
-        // Verify our custom OTP
-        if (!window._pnOtpVerify(self._pendingOtpEmail, entered)) {
-          throw new Error('Invalid or expired code. Please try again or resend.');
-        }
-        sessionStorage.removeItem('pn_otp');
-
         if (!window.supabaseConfig) throw new Error('Auth service not ready.');
-        const d = self._pendingOtpData || {};
-
-        // Create the Supabase account now (email confirm OFF in Supabase)
-        const r = await window.supabaseConfig.signUp(d.email, d.pw, {
-          full_name: d.full_name, email: d.email, phone: d.phone, role: 'student'
+        const pendingData = self._pendingOtpData || {};
+        const verifyRes = await window.supabaseConfig.verifySignupOtp(self._pendingOtpEmail, entered);
+        if (!verifyRes.success) throw new Error(verifyRes.error || 'Invalid or expired code. Please try again or resend.');
+        const r2 = await window.supabaseConfig.registerVerifiedUser({
+          email: pendingData.email,
+          password: pendingData.pw,
+          full_name: pendingData.full_name,
+          phone: pendingData.phone,
+          role: pendingData.role || 'user',
+          metadata: {
+            requested_role: pendingData.requested_role || null,
+            expertise_area: pendingData.expertise_area || null
+          }
         });
-        if (!r.success) throw new Error(r.error || 'Account creation failed.');
-
-        // Sign in immediately
-        const lr = await window.supabaseConfig.signIn(d.email, d.pw);
-        if (lr.success) {
-          const user = lr.data?.user || lr.user;
+        if (!r2.success) throw new Error(r2.error || 'Account creation failed.');
+        const lr2 = await window.supabaseConfig.signIn(pendingData.email, pendingData.pw);
+        if (lr2.success) {
+          const user = lr2.data?.user || lr2.user;
+          // Non-fatal: sync profile but don't block on failure
+          window.supabaseConfig.syncUserProfile(user.id, {
+            full_name: pendingData.full_name,
+            email: pendingData.email,
+            phone: pendingData.phone,
+            role: pendingData.role || 'user',
+            is_email_verified: true
+          }).catch(e => console.warn('Profile sync warning:', e));
           self.currentUser = user;
           self.showLoggedInUI();
         }
-
-        _pnShowSuccess('🎉', "You're Verified!", 'Account confirmed! Taking you to your dashboard.', () => {
-          window._pnClose();
-          window.location.href = self.pagesPfx + 'profile.html';
-        });
+        if (self._pendingOtpRole === 'mentor') {
+          _pnShowSuccess('🎓', 'Email Verified!', 'Your account is ready. Taking you to the mentor application form.', () => {
+            window._pnClose();
+            window.location.href = self.pagesPfx + 'mentor-signup.html';
+          });
+        } else {
+          _pnShowSuccess('🎉', "You're Verified!", 'Account confirmed! Taking you to your dashboard.', () => {
+            window._pnClose();
+            window.location.href = self.pagesPfx + 'profile.html';
+          });
+        }
       } catch(e) { _pnErr(err, e.message); btn.disabled = false; btn.textContent = 'Verify & Create Account'; }
     };
 
@@ -1290,10 +1522,10 @@ class ProfileNavigationManager {
     window._pnResendOtp = async () => {
       if (!self._pendingOtpEmail) return;
       try {
-        const d = self._pendingOtpData || {};
-        const otp = window._pnOtpGenerate();
-        window._pnOtpStore(self._pendingOtpEmail, otp);
-        await window._pnOtpSend(self._pendingOtpEmail, d.full_name || 'User', otp);
+        const pendingData = self._pendingOtpData || {};
+        const otpReq = await window.supabaseConfig.requestSignupOtp(self._pendingOtpEmail);
+        if (!otpReq.success || !otpReq.data?.otp) throw new Error(otpReq.error || 'Unable to resend the code.');
+        await window._pnOtpSend(self._pendingOtpEmail, pendingData.full_name || 'User', otpReq.data.otp);
         alert('✅ A new code has been sent to ' + self._pendingOtpEmail);
       } catch(e) { alert('Failed to resend: ' + e.message); }
     };
@@ -1384,6 +1616,7 @@ class ProfileNavigationManager {
     }
     this.checkMentorStatus();
     this.checkAdminStatus();
+    this.showStreakBadge();
   }
 
   showLoggedOutUI() {
@@ -1407,9 +1640,9 @@ class ProfileNavigationManager {
   checkMentorStatus() {
     if (!window.supabaseConfig || !this.currentUser) return;
     window.supabaseConfig.client
-      .from('mentors').select('id,approval_status').eq('user_id', this.currentUser.id).maybeSingle()
+      .from('mentor_profiles').select('user_id,status').eq('user_id', this.currentUser.id).maybeSingle()
       .then(({ data }) => {
-        if (data?.approval_status === 'approved') {
+        if (data?.status === 'approved') {
           const ml = document.getElementById('dd-mentor-link');
           if (ml) ml.style.display = 'flex';
         }

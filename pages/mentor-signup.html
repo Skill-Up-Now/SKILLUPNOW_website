@@ -295,7 +295,7 @@
     <!-- STEP 4: SMS Verification -->
     <div class="form-section" id="step4">
       <div class="form-card" style="text-align:center">
-        <h3>Verify Your Phone Number</h3>
+        <h3>Verify Your Email</h3>
         <p>We've sent a 6-digit OTP to <strong id="phone-display"></strong></p>
         <div class="otp-inputs">
           <input class="otp-digit" maxlength="1" id="otp1" oninput="otpNav(this,'','otp2')">
@@ -334,6 +334,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script src="../config/supabase-config.js"></script>
 <script src="../js/theme.js"></script>
 <script src="../js/profile-nav.js"></script>
@@ -342,6 +343,38 @@ const db = new SupabaseConfig();
 let currentStep = 1;
 const expertiseTags = [];
 let createdUserId = null;
+let existingUser = null;
+const EMAILJS_SERVICE_ID  = 'service_skillupnow';
+const EMAILJS_TEMPLATE_ID = 'template_bjqerns';
+const EMAILJS_PUBLIC_KEY  = '6chiuXaZ_OqXbYyG1';
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const PHONE_RE = /^[6-9]\d{9}$/;
+const USERNAME_RE = /^[a-zA-Z0-9._-]{3,30}$/;
+const PASSWORD_RE = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+const PAN_RE = /^[A-Z]{5}[0-9]{4}[A-Z]$/;
+const AADHAAR_RE = /^[0-9]{12}$/;
+if (window.emailjs) window.emailjs.init(EMAILJS_PUBLIC_KEY);
+
+document.addEventListener('DOMContentLoaded', async () => {
+  try {
+    const session = await db.getSession();
+    existingUser = session?.user || null;
+    if (existingUser) {
+      document.getElementById('m-email').value = existingUser.email || '';
+    }
+  } catch (_) {}
+});
+
+async function sendEmailOtp(email, name, otp) {
+  if (!window.emailjs) throw new Error('Email service not ready. Refresh and try again.');
+  return window.emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+    email,
+    name,
+    to_name: name,
+    otp,
+    otp_code: otp
+  }, EMAILJS_PUBLIC_KEY);
+}
 
 function setStep(n) {
   document.querySelectorAll('.form-section').forEach(s => s.classList.remove('active'));
@@ -365,16 +398,33 @@ function showErr(msg) {
   setTimeout(() => el.classList.remove('show'), 4000);
 }
 
+function normalizePhone(value) {
+  return (value || '').replace(/\D/g, '').slice(0, 10);
+}
+
+function normalizeAadhaar(value) {
+  return (value || '').replace(/\D/g, '').slice(0, 12);
+}
+
 function goStep1() {
   const name = document.getElementById('m-fullname').value.trim();
-  const email = document.getElementById('m-email').value.trim();
-  const phone = document.getElementById('m-phone').value.trim();
+  const email = document.getElementById('m-email').value.trim().toLowerCase();
+  const phone = normalizePhone(document.getElementById('m-phone').value);
+  const username = document.getElementById('m-username').value.trim();
   const pass  = document.getElementById('m-pass').value;
   const pass2 = document.getElementById('m-pass2').value;
-  if (!name || !email || !phone || !pass) return showErr('Please fill all required fields.');
-  if (pass !== pass2) return showErr('Passwords do not match.');
-  if (pass.length < 8) return showErr('Password must be at least 8 characters.');
-  if (!/^\d{10}$/.test(phone)) return showErr('Enter a valid 10-digit phone number.');
+  if (!name || !email || !phone || !username) return showErr('Please fill all required fields.');
+  if (!USERNAME_RE.test(username)) return showErr('Username must be 3-30 characters and can use letters, numbers, dot, underscore, or hyphen.');
+  if (!EMAIL_RE.test(email)) return showErr('Please enter a valid email address.');
+  if (!existingUser && !pass) return showErr('Please create a password for your account.');
+  if (!existingUser && pass !== pass2) return showErr('Passwords do not match.');
+  if (!existingUser && !PASSWORD_RE.test(pass)) return showErr('Password must be at least 8 characters and include uppercase, lowercase, and a number.');
+  if (existingUser && existingUser.email && existingUser.email.toLowerCase() !== email.toLowerCase()) {
+    return showErr('Use the signed-in email address for this mentor application.');
+  }
+  if (!PHONE_RE.test(phone)) return showErr('Enter a valid 10-digit phone number.');
+  document.getElementById('m-email').value = email;
+  document.getElementById('m-phone').value = phone;
   setStep(2);
 }
 
@@ -388,17 +438,30 @@ function goStep2() {
   setStep(3);
 }
 
-function goStep3() {
+async function goStep3() {
+  const panNumber = document.getElementById('m-pan').value.trim().toUpperCase();
+  const aadhaarNumber = normalizeAadhaar(document.getElementById('m-aadhaar').value);
   if (!document.getElementById('m-photo').files[0]) return showErr('Please upload your profile photo.');
-  if (!document.getElementById('m-pan').value.trim()) return showErr('Please enter your PAN number.');
+  if (!panNumber) return showErr('Please enter your PAN number.');
+  if (!PAN_RE.test(panNumber)) return showErr('Please enter a valid PAN number.');
   if (!document.getElementById('m-pan-doc').files[0]) return showErr('Please upload your PAN card.');
-  if (!document.getElementById('m-aadhaar').value.trim()) return showErr('Please enter your Aadhaar number.');
+  if (!aadhaarNumber) return showErr('Please enter your Aadhaar number.');
+  if (!AADHAAR_RE.test(aadhaarNumber)) return showErr('Please enter a valid 12-digit Aadhaar number.');
   if (!document.getElementById('m-aadhaar-doc').files[0]) return showErr('Please upload your Aadhaar card.');
   if (!document.getElementById('m-certs').files[0]) return showErr('Please upload at least one certificate.');
   if (!document.getElementById('agree-kyc').checked) return showErr('Please agree to the document authenticity declaration.');
-  document.getElementById('phone-display').textContent = document.getElementById('m-phone').value;
-  // In production: send OTP via SMS gateway
-  setStep(4);
+  document.getElementById('m-pan').value = panNumber;
+  document.getElementById('m-aadhaar').value = aadhaarNumber;
+  const email = document.getElementById('m-email').value.trim().toLowerCase();
+  document.getElementById('phone-display').textContent = email;
+  try {
+    const otpReq = await db.requestSignupOtp(email);
+    if (!otpReq.success || !otpReq.data?.otp) throw new Error(otpReq.error || 'Failed to send verification email.');
+    await sendEmailOtp(email, document.getElementById('m-fullname').value.trim() || 'Mentor', otpReq.data.otp);
+    setStep(4);
+  } catch (err) {
+    showErr(err.message || 'Unable to send verification email. Please try again.');
+  }
 }
 
 function otpNav(el, prevId, nextId) {
@@ -406,65 +469,94 @@ function otpNav(el, prevId, nextId) {
   if (!el.value && prevId) document.getElementById(prevId)?.focus();
 }
 
-function resendOtp() { alert('OTP resent to ' + document.getElementById('m-phone').value); }
+async function resendOtp() {
+  const email = document.getElementById('m-email').value.trim().toLowerCase();
+  try {
+    const otpReq = await db.requestSignupOtp(email);
+    if (!otpReq.success || !otpReq.data?.otp) throw new Error(otpReq.error || 'Failed to resend OTP.');
+    await sendEmailOtp(email, document.getElementById('m-fullname').value.trim() || 'Mentor', otpReq.data.otp);
+    alert('OTP resent to ' + email);
+  } catch (err) {
+    showErr(err.message || 'Unable to resend OTP right now.');
+  }
+}
 
 async function submitApplication() {
   const otp = ['otp1','otp2','otp3','otp4','otp5','otp6'].map(id => document.getElementById(id).value).join('');
   if (otp.length < 6) return showErr('Please enter the 6-digit OTP.');
-  // In production: verify OTP via backend
 
+  const submitBtn = document.querySelector('#step4 .btn-next');
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Submitting...';
   try {
-    // Create auth account
-    const email    = document.getElementById('m-email').value.trim();
-    const password = document.getElementById('m-pass').value;
-    const { data: authData, error: authErr } = await db.client.auth.signUp({ email, password, options: { data: { full_name: document.getElementById('m-fullname').value.trim(), role: 'mentor' } } });
-    if (authErr) throw authErr;
-    createdUserId = authData.user.id;
+    const email = document.getElementById('m-email').value.trim().toLowerCase();
+    const verifyRes = await db.verifySignupOtp(email, otp);
+    if (!verifyRes.success) throw new Error(verifyRes.error || 'Invalid or expired OTP.');
 
-    // Update user profile
-    await db.client.from('user_profiles').upsert({
-      id: createdUserId,
-      full_name: document.getElementById('m-fullname').value.trim(),
-      username: document.getElementById('m-username').value.trim(),
-      email, phone: document.getElementById('m-phone').value.trim(), role: 'user',
-    }, { onConflict: 'id' });
+    let currentUser = existingUser;
+    if (!currentUser) {
+      const password = document.getElementById('m-pass').value;
+      const signupRes = await db.registerVerifiedUser({
+        email,
+        password,
+        full_name: document.getElementById('m-fullname').value.trim(),
+        username: document.getElementById('m-username').value.trim(),
+        phone: document.getElementById('m-phone').value.trim(),
+        role: 'user',
+        metadata: {
+          requested_role: 'mentor'
+        }
+      });
+      if (!signupRes.success) throw new Error(signupRes.error || 'Unable to create mentor account.');
 
-    // Upload photo to Supabase storage (simplified - production would handle actual upload)
-    const photoFile = document.getElementById('m-photo').files[0];
-    let photoUrl = null;
-    if (photoFile) {
-      const { data: uploadData } = await db.client.storage.from('mentor-docs').upload(`${createdUserId}/photo.${photoFile.name.split('.').pop()}`, photoFile, { upsert: true });
-      if (uploadData) photoUrl = db.client.storage.from('mentor-docs').getPublicUrl(uploadData.path).data.publicUrl;
+      const loginRes = await db.signIn(email, password);
+      if (!loginRes.success) throw new Error(loginRes.error || 'Account created, but automatic sign-in failed.');
+      currentUser = loginRes.data?.user || loginRes.user;
+      existingUser = currentUser;
     }
 
-    // Create mentor record
-    await db.client.from('mentors').insert({
-      user_id: createdUserId,
+    const profileSync = await db.syncUserProfile(currentUser.id, {
+      full_name: document.getElementById('m-fullname').value.trim(),
+      username: document.getElementById('m-username').value.trim(),
+      email,
+      phone: document.getElementById('m-phone').value.trim(),
+      role: 'mentor',
+      is_email_verified: true
+    });
+    if (!profileSync.success) {
+      throw new Error(profileSync.error || 'Unable to save mentor profile details.');
+    }
+
+    createdUserId = currentUser.id;
+    const mentorRes = await db.applyAsMentor(createdUserId, {
+      full_name: document.getElementById('m-fullname').value.trim(),
+      username: document.getElementById('m-username').value.trim(),
+      email,
+      phone: document.getElementById('m-phone').value.trim(),
       designation: document.getElementById('m-designation').value.trim(),
       qualifications: document.getElementById('m-qualifications').value.trim(),
       expertise_areas: expertiseTags,
-      years_experience: parseInt(document.getElementById('m-exp').value),
+      years_experience: document.getElementById('m-exp').value,
       bio: document.getElementById('m-bio').value.trim(),
       linkedin_url: document.getElementById('m-linkedin').value.trim() || null,
       pan_number: document.getElementById('m-pan').value.trim().toUpperCase(),
       aadhaar_number: document.getElementById('m-aadhaar').value.trim(),
-      salary_type: document.getElementById('m-salary-type').value,
-      photo_url: photoUrl,
-      approval_status: 'pending',
+      salary_type: document.getElementById('m-salary-type').value
+    }, {
+      photo: document.getElementById('m-photo').files[0],
+      pan: document.getElementById('m-pan-doc').files[0],
+      aadhaar: document.getElementById('m-aadhaar-doc').files[0],
+      address_proof: document.getElementById('m-addr-doc').files[0] || null,
+      certificates: Array.from(document.getElementById('m-certs').files || [])
     });
 
-    // Log form submission
-    await db.client.from('form_submissions').insert({
-      user_id: createdUserId,
-      form_type: 'mentor_signup',
-      form_data: { name: document.getElementById('m-fullname').value, email, phone: document.getElementById('m-phone').value },
-      status: 'submitted',
-    });
-
-    document.querySelectorAll('.form-section').forEach(s => s.classList.remove('active'));
-    document.getElementById('step-success').classList.add('active');
+    if (!mentorRes.success) throw new Error(mentorRes.error || 'Mentor application submission failed.');
+    window.location.href = 'signup-success.html?type=mentor';
   } catch (err) {
     showErr(err.message || 'Signup failed. Please try again.');
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Submit Application';
   }
 }
 
@@ -514,6 +606,18 @@ function addExpertiseTag(e) {
   document.getElementById('expertise-wrap').insertBefore(tag, e.target);
   e.target.value = '';
 }
+
+document.getElementById('m-phone')?.addEventListener('input', (event) => {
+  event.target.value = normalizePhone(event.target.value);
+});
+
+document.getElementById('m-pan')?.addEventListener('input', (event) => {
+  event.target.value = event.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 10);
+});
+
+document.getElementById('m-aadhaar')?.addEventListener('input', (event) => {
+  event.target.value = normalizeAadhaar(event.target.value);
+});
 </script>
 <footer></footer>
 </body>

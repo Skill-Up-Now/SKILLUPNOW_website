@@ -11,7 +11,7 @@
   <link rel="stylesheet" href="../css/responsive.css">
   <style>
     /* ===== PAGE SHELL ===== */
-    .page-wrap { position: relative; z-index: 1; padding-top: 80px; min-height: 100vh; }
+    .page-wrap { position: relative; z-index: 1; padding-top: 0; min-height: 100vh; }
 
     /* ===== HERO STRIP ===== */
     .courses-hero {
@@ -39,7 +39,7 @@
       flex-wrap: wrap;
       align-items: center;
       position: sticky;
-      top: 72px;
+      top: 78px;
       z-index: 50;
       backdrop-filter: blur(12px);
     }
@@ -390,11 +390,15 @@
   // ===== LOAD COURSES =====
   async function loadCourses() {
     const { data, error } = await db.client.from('courses')
-      .select(`*, mentors(user_id, user_profiles(full_name))`)
-      .eq('is_active', true).eq('is_published', true)
+      .select(`*, course_categories(name, slug), course_pricing(id, sale_price, list_price, pricing_type, is_active, emi_installments)`)
+      .eq('course_status', 'published')
       .order('created_at', { ascending: false });
     if (error) { console.error(error); return; }
-    allCourses = data || [];
+    // Normalize: attach active pricing and category name for easy access
+    allCourses = (data || []).map(c => {
+      const activePricing = (c.course_pricing || []).find(p => p.is_active) || c.course_pricing?.[0] || {};
+      return { ...c, _price: activePricing.sale_price ?? activePricing.list_price ?? 0, _basePrice: activePricing.list_price ?? 0, _pricingType: activePricing.pricing_type || 'full_payment', _catName: c.course_categories?.name || '', _pricingId: activePricing.id };
+    });
     loadCategories();
     applyFilters();
   }
@@ -404,7 +408,7 @@
     const sel = document.getElementById('category-filter');
     (data || []).forEach(c => {
       const o = document.createElement('option');
-      o.value = c.slug; o.textContent = c.name;
+      o.value = c.slug; o.textContent = c.name || c.slug;
       sel.appendChild(o);
     });
   }
@@ -418,19 +422,17 @@
     const activeTag = document.querySelector('.filter-tag.active')?.dataset.filter || 'all';
 
     filteredCourses = allCourses.filter(c => {
-      if (q && !c.name.toLowerCase().includes(q) && !c.description?.toLowerCase().includes(q)) return false;
-      if (cat && c.category?.toLowerCase().replace(/\s+/g,'-') !== cat) return false;
+      if (q && !c.title.toLowerCase().includes(q) && !c.description?.toLowerCase().includes(q) && !c.short_description?.toLowerCase().includes(q)) return false;
+      if (cat && c.course_categories?.slug !== cat) return false;
       if (level && c.level !== level) return false;
       if (activeTag === 'featured' && !c.is_featured) return false;
-      if (activeTag === 'emi' && !c.is_emi_available) return false;
+      if (activeTag === 'emi' && c._pricingType !== 'emi') return false;
       return true;
     });
 
     filteredCourses.sort((a, b) => {
-      if (sort === 'popular') return b.total_enrolled - a.total_enrolled;
-      if (sort === 'rating') return b.rating - a.rating;
-      if (sort === 'price-asc') return (a.discounted_price || a.price) - (b.discounted_price || b.price);
-      if (sort === 'price-desc') return (b.discounted_price || b.price) - (a.discounted_price || a.price);
+      if (sort === 'price-asc') return a._price - b._price;
+      if (sort === 'price-desc') return b._price - a._price;
       return new Date(b.created_at) - new Date(a.created_at);
     });
 
@@ -449,36 +451,29 @@
     }
 
     grid.innerHTML = filteredCourses.map(c => {
-      const price = c.discounted_price || c.price;
-      const stars = '★'.repeat(Math.round(c.rating || 0)) + '☆'.repeat(5 - Math.round(c.rating || 0));
-      const mentorName = c.mentors?.user_profiles?.full_name || 'Expert Mentor';
-      const icons = { 'IT': '💻', 'Cloud': '☁️', 'AI/ML': '🤖', 'DevOps': '⚙️', 'Cybersecurity': '🔐', 'Data Science': '📊' };
-      const icon = icons[c.category] || '📚';
+      const icons = { 'Communication':'💬','Leadership':'👑','Interview':'🎯','Business':'💼','Speaking':'🎤','IT':'💻','Cloud':'☁️','AI/ML':'🤖','DevOps':'⚙️' };
+      const icon = icons[c._catName] || '📚';
+      const hasDiscount = c._price > 0 && c._basePrice > c._price;
+      const durationMo = c.duration_days ? Math.round(c.duration_days / 30) : null;
       return `<div class="course-card" onclick="openEnrollModal('${c.id}')">
         <div class="course-thumb" style="background:var(--grad2)">
-          ${c.thumbnail_url ? `<img src="${c.thumbnail_url}" alt="${c.name}" loading="lazy">` : `<div class="thumb-icon">${icon}</div>`}
+          ${c.thumbnail_url ? `<img src="${c.thumbnail_url}" alt="${c.title}" loading="lazy">` : `<div class="thumb-icon">${icon}</div>`}
           <div class="course-badge">${c.level}</div>
-          ${c.discount_percentage > 0 ? `<div class="discount-badge">${c.discount_percentage}% OFF</div>` : ''}
+          ${hasDiscount ? `<div class="discount-badge">${Math.round((1 - c._price/c._basePrice)*100)}% OFF</div>` : ''}
         </div>
         <div class="course-body">
-          <div class="course-category">${c.category || 'Course'}</div>
-          <div class="course-name">${c.name}</div>
+          <div class="course-category">${c._catName || 'Course'}</div>
+          <div class="course-name">${c.title}</div>
           <div class="course-desc">${c.short_description || c.description?.substring(0, 120) || ''}</div>
           <div class="course-meta">
-            <span>👨‍🏫 ${mentorName}</span>
-            <span>⏱ ${c.duration_months || '—'} months</span>
-            ${c.is_emi_available ? '<span style="color:var(--v1);font-weight:600">EMI Available</span>' : ''}
-          </div>
-          <div class="rating">
-            <span class="stars">${stars}</span>
-            <span style="font-size:0.8rem;color:var(--txt3)">${(c.rating||0).toFixed(1)} (${c.total_reviews || 0})</span>
-            <span style="font-size:0.8rem;color:var(--txt3);margin-left:auto">${c.total_enrolled || 0} enrolled</span>
+            <span>⏱ ${durationMo ? durationMo + ' months' : c.duration_hours ? c.duration_hours + ' hrs' : '—'}</span>
+            ${c._pricingType === 'emi' ? '<span style="color:var(--v1);font-weight:600">EMI Available</span>' : ''}
           </div>
         </div>
         <div class="course-footer">
           <div class="price-block">
-            <div class="price">₹${Number(price).toLocaleString('en-IN')}</div>
-            ${c.discounted_price ? `<div class="original">₹${Number(c.price).toLocaleString('en-IN')}</div>` : ''}
+            <div class="price">${c._price > 0 ? '₹' + Number(c._price).toLocaleString('en-IN') : 'Contact Us'}</div>
+            ${hasDiscount ? `<div class="original">₹${Number(c._basePrice).toLocaleString('en-IN')}</div>` : ''}
           </div>
           <button class="btn-enroll" onclick="event.stopPropagation();openEnrollModal('${c.id}')">Enroll Now</button>
         </div>
@@ -496,30 +491,32 @@
     selectedCourse = allCourses.find(c => c.id === courseId);
     if (!selectedCourse) return;
 
-    document.getElementById('em-title').textContent = selectedCourse.name;
-    document.getElementById('em-subtitle').textContent = selectedCourse.category + ' · ' + (selectedCourse.level || '');
-    const price = selectedCourse.discounted_price || selectedCourse.price;
-    document.getElementById('em-fee').textContent = '₹' + Number(price).toLocaleString('en-IN');
-    document.getElementById('em-duration').textContent = (selectedCourse.duration_months || '—') + ' mo';
-    document.getElementById('em-sessions').textContent = selectedCourse.total_sessions || '—';
+    document.getElementById('em-title').textContent = selectedCourse.title;
+    document.getElementById('em-subtitle').textContent = (selectedCourse._catName || '') + ' · ' + (selectedCourse.level || '');
+    const price = selectedCourse._price;
+    document.getElementById('em-fee').textContent = price > 0 ? '₹' + Number(price).toLocaleString('en-IN') : 'Contact Us';
+    const durationMo = selectedCourse.duration_days ? Math.round(selectedCourse.duration_days / 30) : null;
+    document.getElementById('em-duration').textContent = durationMo ? durationMo + ' mo' : '—';
+    document.getElementById('em-sessions').textContent = selectedCourse.total_live_classes || '—';
 
     // EMI option visibility
+    const isEmi = selectedCourse._pricingType === 'emi';
     const emiOpt = document.getElementById('emi-option');
-    emiOpt.style.display = selectedCourse.is_emi_available ? 'block' : 'none';
+    emiOpt.style.display = isEmi ? 'block' : 'none';
 
     // Build EMI month buttons
-    if (selectedCourse.is_emi_available) {
+    if (isEmi) {
       const months = document.getElementById('emi-months');
       months.innerHTML = '';
-      for (let m = selectedCourse.min_emi_months || 2; m <= (selectedCourse.max_emi_months || 12); m += 2) {
+      for (let m = 2; m <= 12; m += 2) {
         const btn = document.createElement('button');
-        btn.className = 'emi-month-btn' + (m === (selectedCourse.min_emi_months || 2) ? ' active' : '');
+        btn.className = 'emi-month-btn' + (m === 2 ? ' active' : '');
         btn.textContent = m + ' months';
         btn.dataset.months = m;
         btn.onclick = () => { document.querySelectorAll('.emi-month-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); selectedEmiMonths = m; updateEmiBreakdown(); };
         months.appendChild(btn);
       }
-      selectedEmiMonths = selectedCourse.min_emi_months || 2;
+      selectedEmiMonths = 2;
       updateEmiBreakdown();
     }
 
@@ -529,7 +526,7 @@
 
   function updateEmiBreakdown() {
     if (!selectedCourse || !selectedEmiMonths) return;
-    const total = selectedCourse.discounted_price || selectedCourse.price;
+    const total = selectedCourse._price;
     const monthly = Math.ceil(total / selectedEmiMonths);
     document.getElementById('emi-monthly').textContent = '₹' + Number(monthly).toLocaleString('en-IN');
     document.getElementById('emi-total').textContent = '₹' + Number(total).toLocaleString('en-IN');
@@ -556,17 +553,20 @@
     const btn = document.getElementById('btn-pay');
     btn.disabled = true; btn.textContent = 'Processing…';
 
-    const price = selectedCourse.discounted_price || selectedCourse.price;
+    const price = selectedCourse._price;
     const payAmount = selectedPayType === 'emi' ? Math.ceil(price / selectedEmiMonths) : price;
 
     try {
-      // Create enrollment record first
+      // Get or find default pricing_id for this course
+      const activePricing = (selectedCourse.course_pricing || []).find(p => p.is_active) || selectedCourse.course_pricing?.[0];
+      if (!activePricing?.id) { alert('No pricing available for this course. Please contact support.'); btn.disabled = false; btn.textContent = 'Pay Now'; return; }
+
+      // Create enrollment record first (uses student_user_id for the FK)
       const { data: enroll, error: enrollErr } = await db.client.from('enrollments').upsert({
-        user_id: user.id, course_id: selectedCourse.id,
-        payment_type: selectedPayType, payment_status: 'pending',
-        enrollment_status: 'pending', total_amount: price,
-        emi_months: selectedPayType === 'emi' ? selectedEmiMonths : null,
-      }, { onConflict: 'user_id,course_id' }).select().single();
+        student_user_id: user.id, course_id: selectedCourse.id,
+        pricing_id: activePricing.id,
+        enrollment_status: 'pending', net_amount: price,
+      }, { onConflict: 'student_user_id,course_id' }).select().single();
 
       if (enrollErr) throw enrollErr;
 
@@ -576,19 +576,20 @@
         amount: payAmount * 100,
         currency: 'INR',
         name: 'SkillUpNow',
-        description: selectedCourse.name,
+        description: selectedCourse.title,
         prefill: { name: user.user_metadata?.full_name || '', email: user.email },
         theme: { color: '#7c6cff' },
         handler: async (response) => {
           await db.client.from('payments').insert({
-            user_id: user.id, enrollment_id: enroll.id,
-            amount: payAmount, payment_method: 'online',
+            student_user_id: user.id, enrollment_id: enroll.id,
+            course_id: selectedCourse.id,
+            amount: payAmount, payment_method: 'razorpay',
             payment_gateway: 'razorpay',
-            razorpay_order_id: response.razorpay_order_id,
-            razorpay_payment_id: response.razorpay_payment_id,
-            razorpay_signature: response.razorpay_signature,
-            transaction_id: response.razorpay_payment_id,
-            status: 'completed',
+            gateway_order_id: response.razorpay_order_id,
+            gateway_payment_id: response.razorpay_payment_id,
+            gateway_signature: response.razorpay_signature,
+            transaction_reference: response.razorpay_payment_id,
+            payment_status: 'completed',
           });
           closeEnrollModal();
           window.location.href = '/pages/profile.html?tab=learning';

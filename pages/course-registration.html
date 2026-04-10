@@ -314,7 +314,7 @@ async function submitRegistration() {
 
     // Save form submission
     await db.client.from('form_submissions').insert({
-      user_id: session.user.id, course_id: course, form_type: 'course_registration',
+      user_id: session.user.id, course_id: course, form_type: 'registration',
       form_data: {
         name, email, phone,
         qualification: document.getElementById('r-qualification').value,

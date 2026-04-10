@@ -690,11 +690,13 @@
           <div class="table-actions">
             <select id="form-type-filter" onchange="loadForms()">
               <option value="">All Types</option>
-              <option value="quick_registration">Quick Registration</option>
-              <option value="course_registration">Course Registration</option>
-              <option value="emi_application">EMI Application</option>
+              <option value="registration">Registration</option>
               <option value="contact">Contact</option>
               <option value="mentor_signup">Mentor Signup</option>
+              <option value="feedback">Feedback</option>
+              <option value="emi">EMI</option>
+              <option value="complaint">Complaint</option>
+              <option value="custom">Custom</option>
             </select>
           </div>
         </div>
@@ -902,16 +904,30 @@ const db = new SupabaseConfig();
 let adminUser = null;
 
 // ===== AUTH CHECK =====
+const ADMIN_ROLES = ['admin', 'super_admin', 'support'];
+
 async function checkAdminAuth() {
   const { data: { session } } = await db.client.auth.getSession();
-  if (!session) return window.location.href = '/pages/admin-login.html';
-  const { data: adminRow } = await db.client.from('admin_users').select('role,is_active').eq('user_id', session.user.id).single();
-  if (!adminRow?.is_active) return window.location.href = '/pages/admin-login.html';
+  if (!session) return window.location.href = 'admin-login.html';
+
+  const userId = session.user.id;
+
+  // Parallel role check: user_profiles + user_role_assignments
+  const [{ data: profile }, { data: roleRow }] = await Promise.all([
+    db.client.from('user_profiles').select('role, full_name').eq('user_id', userId).maybeSingle(),
+    db.client.from('user_role_assignments')
+      .select('role').eq('user_id', userId)
+      .in('role', ADMIN_ROLES).eq('is_active', true).maybeSingle()
+  ]);
+
+  const isAdmin = ADMIN_ROLES.includes(profile?.role) || ADMIN_ROLES.includes(roleRow?.role);
+  if (!isAdmin) return window.location.href = 'admin-login.html';
+
   adminUser = session.user;
-  const { data: profile } = await db.client.from('user_profiles').select('full_name').eq('id', session.user.id).single();
-  const name = profile?.full_name || session.user.email;
+  const name = profile?.full_name || session.user.email.split('@')[0];
+  const role = profile?.role || roleRow?.role || 'admin';
   document.getElementById('admin-name').textContent = name;
-  document.getElementById('admin-role').textContent = adminRow.role.replace('_', ' ');
+  document.getElementById('admin-role').textContent = role.replace('_', ' ');
   document.getElementById('admin-initial').textContent = name[0].toUpperCase();
 }
 
@@ -964,69 +980,133 @@ function filterTable(tbodyId, q, cols) {
   });
 }
 
+async function fetchProfileMap(userIds) {
+  const ids = [...new Set((userIds || []).filter(Boolean))];
+  if (!ids.length) return {};
+  const { data, error } = await db.client
+    .from('user_profiles')
+    .select('user_id, full_name, email, phone, role, is_active, created_at, account_created_at')
+    .in('user_id', ids);
+  if (error) throw error;
+  return Object.fromEntries((data || []).map(profile => [profile.user_id, profile]));
+}
+
 // ===== DASHBOARD =====
 async function loadDashboard() {
-  const { data } = await db.client.from('v_admin_dashboard').select('*').single();
-  if (!data) return;
-  document.getElementById('s-users').textContent = data.total_users;
-  document.getElementById('s-mentors').textContent = data.total_mentors;
-  document.getElementById('s-courses').textContent = data.active_courses;
-  document.getElementById('s-enrollments').textContent = data.active_enrollments;
-  document.getElementById('s-revenue').textContent = fmtCurr(data.total_revenue);
-  document.getElementById('s-revenue-month').textContent = fmtCurr(data.revenue_this_month);
-  document.getElementById('s-pending-pay').textContent = data.pending_payments;
-  document.getElementById('s-inquiries').textContent = data.open_inquiries;
-  document.getElementById('mentor-badge').textContent = data.pending_mentor_approvals;
-  document.getElementById('review-badge').textContent = data.pending_reviews;
-  document.getElementById('inquiry-badge').textContent = data.open_inquiries;
+  const monthStart = new Date();
+  monthStart.setDate(1);
+  monthStart.setHours(0, 0, 0, 0);
 
-  // Revenue chart
-  const { data: rv } = await db.client.from('v_revenue_by_course').select('*').order('revenue_collected', { ascending: false }).limit(6);
-  if (rv?.length) {
-    const maxRev = Math.max(...rv.map(r => r.revenue_collected));
-    document.getElementById('revenue-chart').innerHTML = rv.map(r => `
+  const [
+    usersRes,
+    mentorsRes,
+    coursesRes,
+    enrollmentsRes,
+    paymentsRes,
+    inquiriesRes,
+    pendingMentorsRes,
+    pendingReviewsRes,
+    recentEnrollmentsRes
+  ] = await Promise.all([
+    db.client.from('user_profiles').select('user_id', { count: 'exact', head: true }).in('role', ['user', 'student']),
+    db.client.from('mentor_profiles').select('user_id', { count: 'exact', head: true }),
+    db.client.from('courses').select('id', { count: 'exact', head: true }).eq('course_status', 'published'),
+    db.client.from('enrollments').select('id', { count: 'exact', head: true }).eq('enrollment_status', 'active'),
+    db.client.from('payments').select('course_id, amount, paid_at, payment_status'),
+    db.client.from('inquiries').select('id, status'),
+    db.client.from('mentor_profiles').select('user_id', { count: 'exact', head: true }).eq('status', 'pending'),
+    db.client.from('reviews').select('id', { count: 'exact', head: true }).eq('is_approved', false),
+    db.client.from('enrollments').select('id, student_user_id, course_id, net_amount, paid_amount, enrollment_status, created_at').order('created_at', { ascending: false }).limit(10)
+  ]);
+
+  [usersRes, mentorsRes, coursesRes, enrollmentsRes, paymentsRes, inquiriesRes, pendingMentorsRes, pendingReviewsRes, recentEnrollmentsRes]
+    .forEach(res => { if (res.error) throw res.error; });
+
+  const completedPayments = (paymentsRes.data || []).filter(p => p.payment_status === 'completed');
+  const totalRevenue = completedPayments.reduce((sum, payment) => sum + Number(payment.amount || 0), 0);
+  const revenueThisMonth = completedPayments
+    .filter(payment => payment.paid_at && new Date(payment.paid_at) >= monthStart)
+    .reduce((sum, payment) => sum + Number(payment.amount || 0), 0);
+  const pendingPayments = (paymentsRes.data || []).filter(p => ['pending', 'processing'].includes(p.payment_status)).length;
+  const openInquiries = (inquiriesRes.data || []).filter(i => ['open', 'in_progress'].includes(i.status)).length;
+
+  document.getElementById('s-users').textContent = usersRes.count || 0;
+  document.getElementById('s-mentors').textContent = mentorsRes.count || 0;
+  document.getElementById('s-courses').textContent = coursesRes.count || 0;
+  document.getElementById('s-enrollments').textContent = enrollmentsRes.count || 0;
+  document.getElementById('s-revenue').textContent = fmtCurr(totalRevenue);
+  document.getElementById('s-revenue-month').textContent = fmtCurr(revenueThisMonth);
+  document.getElementById('s-pending-pay').textContent = pendingPayments;
+  document.getElementById('s-inquiries').textContent = openInquiries;
+  document.getElementById('mentor-badge').textContent = pendingMentorsRes.count || 0;
+  document.getElementById('review-badge').textContent = pendingReviewsRes.count || 0;
+  document.getElementById('inquiry-badge').textContent = openInquiries;
+
+  const revenueByCourse = {};
+  (completedPayments || []).forEach(payment => {
+    if (!payment.course_id) return;
+    revenueByCourse[payment.course_id] = (revenueByCourse[payment.course_id] || 0) + Number(payment.amount || 0);
+  });
+  const chartCourseIds = Object.keys(revenueByCourse);
+  if (chartCourseIds.length) {
+    const { data: chartCourses } = await db.client.from('courses').select('id, title').in('id', chartCourseIds);
+    const titleMap = Object.fromEntries((chartCourses || []).map(course => [course.id, course.title]));
+    const chartRows = Object.entries(revenueByCourse)
+      .map(([courseId, amount]) => ({ course_name: titleMap[courseId] || 'Untitled Course', revenue: amount }))
+      .sort((a, b) => b.revenue - a.revenue)
+      .slice(0, 6);
+    const maxRev = Math.max(...chartRows.map(row => row.revenue), 1);
+    document.getElementById('revenue-chart').innerHTML = chartRows.map(row => `
       <div class="chart-bar-item">
-        <div class="chart-bar-label" title="${r.course_name}">${r.course_name}</div>
-        <div class="chart-bar-track"><div class="chart-bar-fill" style="width:${maxRev ? (r.revenue_collected/maxRev*100) : 0}%"></div></div>
-        <div class="chart-bar-val">${fmtCurr(r.revenue_collected)}</div>
+        <div class="chart-bar-label" title="${row.course_name}">${row.course_name}</div>
+        <div class="chart-bar-track"><div class="chart-bar-fill" style="width:${(row.revenue / maxRev) * 100}%"></div></div>
+        <div class="chart-bar-val">${fmtCurr(row.revenue)}</div>
       </div>`).join('');
+  } else {
+    document.getElementById('revenue-chart').innerHTML = '<div class="table-empty">No completed payments yet</div>';
   }
 
-  // Recent enrollments
-  const { data: re } = await db.client.from('enrollments')
-    .select('*, user_profiles(full_name), courses(name)')
-    .order('enrolled_at', { ascending: false }).limit(10);
-  document.getElementById('recent-enrollments').innerHTML = (re||[]).map(e => `
+  const recentEnrollments = recentEnrollmentsRes.data || [];
+  const enrollmentProfiles = await fetchProfileMap(recentEnrollments.map(item => item.student_user_id));
+  const enrollmentCourseIds = [...new Set(recentEnrollments.map(item => item.course_id).filter(Boolean))];
+  let courseMap = {};
+  if (enrollmentCourseIds.length) {
+    const { data: courses, error: courseError } = await db.client.from('courses').select('id, title').in('id', enrollmentCourseIds);
+    if (courseError) throw courseError;
+    courseMap = Object.fromEntries((courses || []).map(course => [course.id, course]));
+  }
+
+  document.getElementById('recent-enrollments').innerHTML = recentEnrollments.map(item => `
     <tr>
-      <td>${e.user_profiles?.full_name || '—'}</td>
-      <td>${e.courses?.name || '—'}</td>
-      <td>${fmtCurr(e.total_amount)}</td>
-      <td>${e.payment_type}</td>
-      <td>${statusBadge(e.payment_status)}</td>
-      <td>${fmtDate(e.enrolled_at)}</td>
+      <td>${enrollmentProfiles[item.student_user_id]?.full_name || '—'}</td>
+      <td>${courseMap[item.course_id]?.title || '—'}</td>
+      <td>${fmtCurr(item.net_amount)}</td>
+      <td>${fmtCurr(item.paid_amount)}</td>
+      <td>${statusBadge(item.enrollment_status)}</td>
+      <td>${fmtDate(item.created_at)}</td>
     </tr>`).join('') || '<tr><td colspan="6" class="table-empty">No enrollments yet</td></tr>';
 }
 
 // ===== COURSES =====
 async function loadCourses() {
-  const { data } = await db.client.from('courses').select('*, mentors(user_id, user_profiles(full_name))').order('created_at', { ascending: false });
+  const { data } = await db.client.from('courses').select('*, course_categories(name)').order('created_at', { ascending: false });
   document.getElementById('course-tbody').innerHTML = (data||[]).map(c => `
     <tr>
-      <td>${c.name}</td>
-      <td>${c.category}</td>
-      <td>${c.mentors?.user_profiles?.full_name || 'Unassigned'}</td>
-      <td>${fmtCurr(c.discounted_price || c.price)}</td>
-      <td>${c.total_enrolled}</td>
-      <td>⭐ ${(c.rating||0).toFixed(1)}</td>
-      <td>${statusBadge(c.is_published ? 'active' : 'draft')}</td>
+      <td>${c.title}</td>
+      <td>${c.course_categories?.name||'—'}</td>
+      <td>—</td>
+      <td>—</td>
+      <td>—</td>
+      <td>—</td>
+      <td>${statusBadge(c.course_status === 'published' ? 'active' : c.course_status || 'draft')}</td>
       <td><div class="action-btns">
         <button class="action-btn" onclick="editCourse('${c.id}')">Edit</button>
-        <button class="action-btn" onclick="toggleCoursePublish('${c.id}',${c.is_published})">${c.is_published ? 'Unpublish' : 'Publish'}</button>
+        <button class="action-btn" onclick="toggleCoursePublish('${c.id}','${c.course_status}')">${c.course_status === 'published' ? 'Unpublish' : 'Publish'}</button>
         <button class="action-btn danger" onclick="deleteCourse('${c.id}')">Delete</button>
       </div></td>
     </tr>`).join('') || '<tr><td colspan="8" class="table-empty">No courses yet</td></tr>';
   // Populate course dropdowns in modals
-  const opts = (data||[]).map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+  const opts = (data||[]).map(c => `<option value="${c.id}">${c.title}</option>`).join('');
   ['rec-course', 'b-course'].forEach(id => {
     const el = document.getElementById(id); if (el) el.innerHTML = '<option value="">Select…</option>' + opts;
   });
@@ -1050,16 +1130,27 @@ async function loadCategories() {
 }
 
 async function loadUsers() {
-  const { data } = await db.client.from('v_user_enrollment_summary').select('*').order('registration_date', { ascending: false }).limit(100);
-  document.getElementById('user-tbody').innerHTML = (data||[]).filter(u => u.role === 'user').map(u => `
+  const [{ data: users, error: usersError }, { data: enrollments, error: enrollmentsError }] = await Promise.all([
+    db.client.from('user_profiles').select('user_id, full_name, email, phone, role, is_active, created_at, account_created_at').in('role', ['user', 'student']).order('account_created_at', { ascending: false }).limit(100),
+    db.client.from('enrollments').select('student_user_id')
+  ]);
+  if (usersError) throw usersError;
+  if (enrollmentsError) throw enrollmentsError;
+
+  const enrollmentCountMap = {};
+  (enrollments || []).forEach(item => {
+    enrollmentCountMap[item.student_user_id] = (enrollmentCountMap[item.student_user_id] || 0) + 1;
+  });
+
+  document.getElementById('user-tbody').innerHTML = (users || []).map(u => `
     <tr>
       <td>${u.full_name}</td>
       <td>${u.email}</td>
-      <td>${u.phone||'—'}</td>
-      <td>${u.role}</td>
-      <td>${u.total_enrollments}</td>
-      <td>${fmtDate(u.registration_date)}</td>
-      <td>${statusBadge('active')}</td>
+      <td>${u.phone || '—'}</td>
+      <td>${u.role === 'student' ? 'user' : u.role}</td>
+      <td>${enrollmentCountMap[u.user_id] || 0}</td>
+      <td>${fmtDate(u.account_created_at || u.created_at)}</td>
+      <td>${statusBadge(u.is_active === false ? 'inactive' : 'active')}</td>
       <td><div class="action-btns">
         <button class="action-btn" onclick="viewUser('${u.user_id}')">View</button>
       </div></td>
@@ -1068,25 +1159,27 @@ async function loadUsers() {
 
 async function loadMentors() {
   const statusFilter = document.getElementById('mentor-status-filter').value;
-  let q = db.client.from('mentors').select('*, user_profiles(full_name, email)');
-  if (statusFilter) q = q.eq('approval_status', statusFilter);
-  const { data } = await q.order('created_at', { ascending: false });
-  document.getElementById('mentor-tbody').innerHTML = (data||[]).map(m => `
+  let q = db.client.from('mentor_profiles').select('*');
+  if (statusFilter) q = q.eq('status', statusFilter);
+  const { data, error } = await q.order('created_at', { ascending: false });
+  if (error) throw error;
+  const profileMap = await fetchProfileMap((data || []).map(item => item.user_id));
+  document.getElementById('mentor-tbody').innerHTML = (data || []).map(m => `
     <tr>
-      <td>${m.user_profiles?.full_name||'—'}</td>
-      <td>${m.user_profiles?.email||'—'}</td>
+      <td>${profileMap[m.user_id]?.full_name || '—'}</td>
+      <td>${profileMap[m.user_id]?.email || '—'}</td>
       <td>${m.qualifications}</td>
-      <td>${(m.expertise_areas||[]).slice(0,2).join(', ') || '—'}</td>
-      <td>${m.total_students}</td>
-      <td>⭐ ${(m.avg_rating||0).toFixed(1)}</td>
-      <td>${statusBadge(m.approval_status)}</td>
+      <td>${(m.expertise_areas || []).slice(0, 2).join(', ') || '—'}</td>
+      <td>${m.total_students_managed || 0}</td>
+      <td>⭐ ${(m.average_rating || 0).toFixed(1)}</td>
+      <td>${statusBadge(m.status)}</td>
       <td><div class="action-btns">
-        ${m.approval_status === 'pending' ? `<button class="action-btn" onclick="approveMentor('${m.id}','approved')">✓ Approve</button><button class="action-btn danger" onclick="approveMentor('${m.id}','rejected')">✗ Reject</button>` : ''}
-        <button class="action-btn" onclick="viewMentor('${m.id}')">View</button>
+        ${m.status === 'pending' ? `<button class="action-btn" onclick="approveMentor('${m.user_id}','approved')">✓ Approve</button><button class="action-btn danger" onclick="approveMentor('${m.user_id}','rejected')">✗ Reject</button>` : ''}
+        <button class="action-btn" onclick="viewMentor('${m.user_id}')">View</button>
       </div></td>
     </tr>`).join('') || '<tr><td colspan="8" class="table-empty">No mentors</td></tr>';
 
-  const opts = (data||[]).filter(m => m.approval_status === 'approved').map(m => `<option value="${m.id}">${m.user_profiles?.full_name||m.id}</option>`).join('');
+  const opts = (data || []).filter(m => m.status === 'approved').map(m => `<option value="${m.user_id}">${profileMap[m.user_id]?.full_name || m.user_id}</option>`).join('');
   ['c-mentor', 'b-mentor'].forEach(id => {
     const el = document.getElementById(id); if (el) el.innerHTML = '<option value="">Select…</option>' + opts;
   });
@@ -1094,18 +1187,18 @@ async function loadMentors() {
 
 async function loadEnrollments() {
   const statusFilter = document.getElementById('enroll-status-filter').value;
-  let q = db.client.from('enrollments').select('*, user_profiles(full_name), courses(name)');
+  let q = db.client.from('enrollments').select('*, student_profiles(user_profiles(full_name, email)), courses(title)');
   if (statusFilter) q = q.eq('enrollment_status', statusFilter);
-  const { data } = await q.order('enrolled_at', { ascending: false }).limit(100);
+  const { data } = await q.order('created_at', { ascending: false }).limit(100);
   document.getElementById('enrollment-tbody').innerHTML = (data||[]).map(e => `
     <tr>
-      <td>${e.user_profiles?.full_name||'—'}</td>
-      <td>${e.courses?.name||'—'}</td>
-      <td>${e.payment_type}</td>
-      <td>${fmtCurr(e.total_amount)}</td>
+      <td>${e.student_profiles?.user_profiles?.full_name||'—'}</td>
+      <td>${e.courses?.title||'—'}</td>
+      <td>${e.paid_amount >= e.net_amount ? 'Full' : e.paid_amount > 0 ? 'Partial' : 'Pending'}</td>
+      <td>${fmtCurr(e.net_amount)}</td>
       <td>${fmtCurr(e.paid_amount)}</td>
-      <td>${fmtCurr(e.remaining_balance)}</td>
-      <td>${e.access_granted ? '<span class="badge badge-green">Granted</span>' : '<span class="badge badge-red">Restricted</span>'}</td>
+      <td>${fmtCurr(e.due_amount)}</td>
+      <td>${e.access_status === 'active' ? '<span class="badge badge-green">Active</span>' : `<span class="badge badge-red">${e.access_status||'Pending'}</span>`}</td>
       <td>${statusBadge(e.enrollment_status)}</td>
       <td><div class="action-btns">
         <button class="action-btn" onclick="editEnrollment('${JSON.stringify(e).replace(/'/g,'&apos;').replace(/"/g,'&quot;')}')">Edit</button>
@@ -1114,63 +1207,65 @@ async function loadEnrollments() {
 }
 
 async function loadBatches() {
-  const { data } = await db.client.from('mentor_batches').select('*, courses(name), mentors(user_profiles(full_name))').order('created_at', { ascending: false });
+  const { data } = await db.client.from('course_batches')
+    .select('*, courses(title), mentor_profiles:primary_mentor_user_id(user_profiles(full_name))')
+    .order('created_at', { ascending: false });
   document.getElementById('batch-tbody').innerHTML = (data||[]).map(b => `
     <tr>
       <td>${b.batch_name}</td>
-      <td>${b.courses?.name||'—'}</td>
-      <td>${b.mentors?.user_profiles?.full_name||'—'}</td>
-      <td>${fmtDate(b.start_date)}</td>
-      <td>${fmtDate(b.end_date)}</td>
+      <td>${b.courses?.title||'—'}</td>
+      <td>${b.mentor_profiles?.user_profiles?.full_name||'—'}</td>
+      <td>${fmtDate(b.starts_on)}</td>
+      <td>${fmtDate(b.ends_on)}</td>
       <td>${b.max_students}</td>
       <td>${statusBadge(b.is_active ? 'active' : 'paused')}</td>
       <td><div class="action-btns">
         <button class="action-btn" onclick="editBatch('${b.id}')">Edit</button>
       </div></td>
     </tr>`).join('') || '<tr><td colspan="8" class="table-empty">No batches</td></tr>';
-  const opts = (data||[]).map(b => `<option value="${b.id}">${b.batch_name} — ${b.courses?.name||''}</option>`).join('');
+  const opts = (data||[]).map(b => `<option value="${b.id}">${b.batch_name} — ${b.courses?.title||''}</option>`).join('');
   const el = document.getElementById('sch-batch'); if (el) el.innerHTML = '<option value="">Select…</option>' + opts;
 }
 
 async function loadPayments() {
   const statusFilter = document.getElementById('pay-status-filter').value;
-  let q = db.client.from('payments').select('*, user_profiles(full_name), enrollments(course_id, courses(name))');
-  if (statusFilter) q = q.eq('status', statusFilter);
-  const { data } = await q.order('payment_date', { ascending: false }).limit(100);
+  let q = db.client.from('payments').select('*, student_profiles(user_profiles(full_name)), enrollments(courses(title))');
+  if (statusFilter) q = q.eq('payment_status', statusFilter);
+  const { data } = await q.order('paid_at', { ascending: false }).limit(100);
   document.getElementById('payment-tbody').innerHTML = (data||[]).map(p => `
     <tr>
-      <td><code>${p.invoice_number||'—'}</code></td>
-      <td>${p.user_profiles?.full_name||'—'}</td>
-      <td>${p.enrollments?.courses?.name||'—'}</td>
+      <td><code>${p.invoice_id||'—'}</code></td>
+      <td>${p.student_profiles?.user_profiles?.full_name||'—'}</td>
+      <td>${p.enrollments?.courses?.title||'—'}</td>
       <td>${fmtCurr(p.amount)}</td>
       <td>${p.payment_method}</td>
-      <td><code>${(p.razorpay_payment_id||p.transaction_id||'—').substring(0,14)}</code></td>
-      <td>${fmtDate(p.payment_date)}</td>
-      <td>${statusBadge(p.status)}</td>
+      <td><code>${(p.transaction_reference||'—').substring(0,14)}</code></td>
+      <td>${fmtDate(p.paid_at || p.created_at)}</td>
+      <td>${statusBadge(p.payment_status)}</td>
       <td><div class="action-btns">
         <button class="action-btn" onclick="downloadInvoice('${p.id}')">Invoice</button>
-        ${p.status === 'completed' ? `<button class="action-btn danger" onclick="refundPayment('${p.id}')">Refund</button>` : ''}
+        ${p.payment_status === 'completed' ? `<button class="action-btn danger" onclick="refundPayment('${p.id}')">Refund</button>` : ''}
       </div></td>
     </tr>`).join('') || '<tr><td colspan="9" class="table-empty">No payments</td></tr>';
 }
 
 async function loadEmi() {
   const statusFilter = document.getElementById('emi-status-filter').value;
-  let q = db.client.from('emi_schedules').select('*, user_profiles(full_name), enrollments(courses(name))');
-  if (statusFilter) q = q.eq('status', statusFilter);
-  const { data } = await q.order('due_date').limit(100);
+  let q = db.client.from('payment_schedules').select('*, enrollments(student_profiles(user_profiles(full_name)), courses(title))');
+  if (statusFilter) q = q.eq('schedule_status', statusFilter);
+  const { data } = await q.order('due_at').limit(100);
   document.getElementById('emi-tbody').innerHTML = (data||[]).map(e => `
     <tr>
-      <td>${e.user_profiles?.full_name||'—'}</td>
-      <td>${e.enrollments?.courses?.name||'—'}</td>
+      <td>${e.enrollments?.student_profiles?.user_profiles?.full_name||'—'}</td>
+      <td>${e.enrollments?.courses?.title||'—'}</td>
       <td>#${e.installment_number}</td>
-      <td>${fmtDate(e.due_date)}</td>
-      <td>${fmtCurr(e.amount)}</td>
-      <td>${e.late_fee ? fmtCurr(e.late_fee) : '—'}</td>
-      <td>${statusBadge(e.status)}</td>
+      <td>${fmtDate(e.due_at)}</td>
+      <td>${fmtCurr(e.amount_due)}</td>
+      <td>${e.late_fee_amount > 0 ? fmtCurr(e.late_fee_amount) : '—'}</td>
+      <td>${statusBadge(e.schedule_status)}</td>
       <td><div class="action-btns">
-        ${e.status !== 'paid' ? `<button class="action-btn" onclick="markEmiPaid('${e.id}')">Mark Paid</button>` : ''}
-        ${e.status === 'overdue' ? `<button class="action-btn" onclick="addLateFee('${e.id}')">Late Fee</button>` : ''}
+        ${e.schedule_status !== 'paid' ? `<button class="action-btn" onclick="markEmiPaid('${e.id}')">Mark Paid</button>` : ''}
+        ${e.schedule_status === 'overdue' ? `<button class="action-btn" onclick="addLateFee('${e.id}')">Late Fee</button>` : ''}
       </div></td>
     </tr>`).join('') || '<tr><td colspan="8" class="table-empty">No EMI records</td></tr>';
 }
@@ -1213,42 +1308,51 @@ async function loadReports() {
 }
 
 async function loadRecordings() {
-  const { data } = await db.client.from('course_content').select('*, courses(name)').eq('content_type','recording').order('created_at', { ascending: false });
+  const { data } = await db.client.from('live_recordings').select('*, courses(title)').order('created_at', { ascending: false });
   document.getElementById('recording-tbody').innerHTML = (data||[]).map(r => `
     <tr>
       <td>${r.title}</td>
-      <td>${r.courses?.name||'—'}</td>
+      <td>${r.courses?.title||'—'}</td>
+      <td>${r.provider_name||'—'}</td>
+      <td>${fmtDate(r.published_at || r.created_at)}</td>
       <td>—</td>
-      <td>${fmtDate(r.session_date)}</td>
-      <td>${r.drive_url ? `<a href="${r.drive_url}" target="_blank" style="color:#9b8fff">Drive</a>` : '—'}</td>
-      <td>${r.url ? `<a href="${r.url}" target="_blank" style="color:#f87171">YouTube</a>` : '—'}</td>
+      <td>${r.external_url ? `<a href="${r.external_url}" target="_blank" style="color:#f87171">View</a>` : '—'}</td>
       <td><div class="action-btns"><button class="action-btn danger" onclick="deleteRecording('${r.id}')">Delete</button></div></td>
     </tr>`).join('') || '<tr><td colspan="7" class="table-empty">No recordings</td></tr>';
 }
 
 async function loadSchedules() {
-  const { data } = await db.client.from('class_schedules').select('*, mentor_batches(batch_name), mentors(user_profiles(full_name))').order('scheduled_at', { ascending: false }).limit(50);
+  const { data } = await db.client.from('class_sessions')
+    .select('*, course_batches:batch_id(batch_name), mentor_profiles:mentor_user_id(user_profiles(full_name))')
+    .order('scheduled_start_at', { ascending: false }).limit(50);
   document.getElementById('schedule-tbody').innerHTML = (data||[]).map(s => `
     <tr>
-      <td>${s.title}</td>
-      <td>${s.mentor_batches?.batch_name||'—'}</td>
-      <td>${s.mentors?.user_profiles?.full_name||'—'}</td>
-      <td>${fmtDate(s.scheduled_at)} ${new Date(s.scheduled_at).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})}</td>
-      <td>${s.google_meet_link ? `<a href="${s.google_meet_link}" target="_blank" style="color:#9b8fff">Join</a>` : '—'}</td>
-      <td>${statusBadge(s.status)}</td>
+      <td>${s.session_title}</td>
+      <td>${s.course_batches?.batch_name||'—'}</td>
+      <td>${s.mentor_profiles?.user_profiles?.full_name||'—'}</td>
+      <td>${fmtDate(s.scheduled_start_at)} ${new Date(s.scheduled_start_at).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})}</td>
+      <td>${s.meeting_url ? `<a href="${s.meeting_url}" target="_blank" style="color:#9b8fff">Join</a>` : '—'}</td>
+      <td>${statusBadge(s.session_status)}</td>
       <td><div class="action-btns"><button class="action-btn danger" onclick="cancelSchedule('${s.id}')">Cancel</button></div></td>
     </tr>`).join('') || '<tr><td colspan="7" class="table-empty">No scheduled classes</td></tr>';
 }
 
 async function loadReviews() {
   const filter = document.getElementById('review-filter').value;
-  let q = db.client.from('reviews').select('*, user_profiles(full_name), courses(name)');
+  let q = db.client.from('reviews').select('*, courses(title)');
   if (filter !== '') q = q.eq('is_approved', filter === 'true');
   const { data } = await q.order('created_at', { ascending: false }).limit(50);
+  // Fetch user profiles for the review user_ids
+  const reviewUserIds = [...new Set((data||[]).map(r => r.user_id).filter(Boolean))];
+  let reviewProfileMap = {};
+  if (reviewUserIds.length) {
+    const { data: rp } = await db.client.from('user_profiles').select('user_id, full_name').in('user_id', reviewUserIds);
+    reviewProfileMap = Object.fromEntries((rp||[]).map(p => [p.user_id, p]));
+  }
   document.getElementById('review-tbody').innerHTML = (data||[]).map(r => `
     <tr>
-      <td>${r.user_profiles?.full_name||'—'}</td>
-      <td>${r.courses?.name||'—'}</td>
+      <td>${reviewProfileMap[r.user_id]?.full_name||'—'}</td>
+      <td>${r.courses?.title||'—'}</td>
       <td>${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</td>
       <td style="max-width:200px">${r.comment?.substring(0,80)}…</td>
       <td>${fmtDate(r.created_at)}</td>
@@ -1261,15 +1365,15 @@ async function loadReviews() {
 
 async function loadForms() {
   const typeFilter = document.getElementById('form-type-filter').value;
-  let q = db.client.from('form_submissions').select('*, user_profiles(full_name), courses(name)');
+  let q = db.client.from('form_submissions').select('*, courses(title)');
   if (typeFilter) q = q.eq('form_type', typeFilter);
   const { data } = await q.order('created_at', { ascending: false }).limit(100);
   document.getElementById('form-tbody').innerHTML = (data||[]).map(f => `
     <tr>
-      <td><span class="badge badge-blue">${f.form_type.replace(/_/g,' ')}</span></td>
-      <td>${f.form_data?.name || f.user_profiles?.full_name || '—'}</td>
+      <td><span class="badge badge-blue">${(f.form_type||'').replace(/_/g,' ')}</span></td>
+      <td>${f.form_data?.name || f.form_data?.full_name || '—'}</td>
       <td>${f.form_data?.email || '—'}</td>
-      <td>${f.courses?.name || '—'}</td>
+      <td>${f.courses?.title || '—'}</td>
       <td>${fmtDate(f.created_at)}</td>
       <td>${statusBadge(f.status)}</td>
       <td><div class="action-btns">
@@ -1302,8 +1406,15 @@ async function loadInquiries() {
 // ===== ACTIONS =====
 async function approveMentor(id, status) {
   if (!confirm(`${status === 'approved' ? 'Approve' : 'Reject'} this mentor?`)) return;
-  await db.client.from('mentors').update({ approval_status: status, approved_by: adminUser.id, approved_at: new Date().toISOString() }).eq('id', id);
+  const payload = {
+    status,
+    approved_by_admin_id: status === 'approved' ? adminUser.id : null,
+    approved_at: status === 'approved' ? new Date().toISOString() : null,
+    rejection_reason: status === 'rejected' ? 'Rejected by admin' : null
+  };
+  await db.client.from('mentor_profiles').update(payload).eq('user_id', id);
   loadMentors();
+  loadDashboard();
 }
 
 async function approveReview(id) {
@@ -1317,8 +1428,11 @@ async function deleteReview(id) {
   loadReviews();
 }
 
-async function toggleCoursePublish(id, current) {
-  await db.client.from('courses').update({ is_published: !current, is_active: !current, published_at: !current ? new Date().toISOString() : null }).eq('id', id);
+async function toggleCoursePublish(id, currentStatus) {
+  const newStatus = currentStatus === 'published' ? 'draft' : 'published';
+  const payload = { course_status: newStatus };
+  if (newStatus === 'published') payload.published_at = new Date().toISOString();
+  await db.client.from('courses').update(payload).eq('id', id);
   loadCourses();
 }
 
@@ -1330,26 +1444,42 @@ async function deleteCourse(id) {
 
 async function saveCourse() {
   const id = document.getElementById('course-id').value;
+  const titleVal = document.getElementById('c-name').value.trim();
+  if (!titleVal) { alert('Course name is required.'); return; }
+  const months = parseInt(document.getElementById('c-months').value) || null;
+  const isPublished = document.getElementById('c-published').value === 'true';
   const payload = {
-    name: document.getElementById('c-name').value,
-    category: document.getElementById('c-category').value,
+    title: titleVal,
+    category_id: document.getElementById('c-category').value || null,
     level: document.getElementById('c-level').value,
-    mentor_id: document.getElementById('c-mentor').value || null,
-    price: parseFloat(document.getElementById('c-price').value),
-    discounted_price: document.getElementById('c-disc-price').value ? parseFloat(document.getElementById('c-disc-price').value) : null,
-    duration_months: parseInt(document.getElementById('c-months').value) || null,
-    total_sessions: parseInt(document.getElementById('c-sessions').value) || null,
     short_description: document.getElementById('c-short-desc').value,
     description: document.getElementById('c-desc').value,
-    is_emi_available: document.getElementById('c-emi').value === 'true',
-    max_emi_months: parseInt(document.getElementById('c-emi-months').value) || 12,
     is_featured: document.getElementById('c-featured').value === 'true',
-    is_published: document.getElementById('c-published').value === 'true',
-    is_active: document.getElementById('c-published').value === 'true',
-    slug: document.getElementById('c-name').value.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+    course_status: isPublished ? 'published' : 'draft',
+    duration_days: months ? months * 30 : null,
+    total_live_classes: parseInt(document.getElementById('c-sessions').value) || 0,
+    slug: titleVal.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''),
   };
-  if (id) { await db.client.from('courses').update(payload).eq('id', id); }
-  else     { await db.client.from('courses').insert(payload); }
+  if (!id) payload.owner_admin_id = adminUser.id;
+  const { data: saved, error } = id
+    ? await db.client.from('courses').update(payload).eq('id', id).select('id').single()
+    : await db.client.from('courses').insert(payload).select('id').single();
+  if (error) { alert('Error saving course: ' + error.message); return; }
+  // Save pricing if a price was entered
+  const priceVal = parseFloat(document.getElementById('c-price').value);
+  if (!isNaN(priceVal) && priceVal > 0 && saved?.id) {
+    const discVal = document.getElementById('c-disc-price').value ? parseFloat(document.getElementById('c-disc-price').value) : priceVal;
+    const discountedVal = document.getElementById('c-disc-price').value ? parseFloat(document.getElementById('c-disc-price').value) : null;
+    await db.client.from('course_pricing').upsert({
+      course_id: saved.id,
+      pricing_name: 'Standard',
+      pricing_type: document.getElementById('c-emi').value === 'true' ? 'emi' : 'full_payment',
+      list_price: priceVal,
+      sale_price: discountedVal && discountedVal < priceVal ? discountedVal : null,
+      emi_installments: document.getElementById('c-emi').value === 'true' ? (parseInt(document.getElementById('c-emi-months').value) || 12) : null,
+      is_active: true,
+    }, { onConflict: 'course_id,pricing_name' });
+  }
   closeModal('course-modal');
   loadCourses();
 }
@@ -1373,12 +1503,12 @@ function editEnrollment(eData) {
   const e = typeof eData === 'string' ? JSON.parse(eData.replace(/&quot;/g,'"')) : eData;
   document.getElementById('enroll-id').value = e.id;
   document.getElementById('enroll-status-edit').value = e.enrollment_status;
-  document.getElementById('enroll-pay-status').value = e.payment_status;
-  document.getElementById('enroll-pay-type').value = e.payment_type;
-  document.getElementById('enroll-access').value = e.access_granted ? 'true' : 'false';
-  document.getElementById('enroll-total').value = e.total_amount;
+  document.getElementById('enroll-pay-status').value = e.access_status || '';
+  document.getElementById('enroll-pay-type').value = '';
+  document.getElementById('enroll-access').value = e.access_status === 'active' ? 'true' : 'false';
+  document.getElementById('enroll-total').value = e.net_amount;
   document.getElementById('enroll-paid').value = e.paid_amount;
-  document.getElementById('enroll-emi-months').value = e.emi_months || '';
+  document.getElementById('enroll-emi-months').value = '';
   document.getElementById('enroll-progress').value = e.progress_percentage;
   document.getElementById('enroll-notes').value = e.admin_notes || '';
   openModal('enroll-modal');
@@ -1386,71 +1516,80 @@ function editEnrollment(eData) {
 
 async function saveEnrollment() {
   const id = document.getElementById('enroll-id').value;
+  const accessGranted = document.getElementById('enroll-access').value === 'true';
   await db.client.from('enrollments').update({
     enrollment_status: document.getElementById('enroll-status-edit').value,
-    payment_status: document.getElementById('enroll-pay-status').value,
-    payment_type: document.getElementById('enroll-pay-type').value,
-    access_granted: document.getElementById('enroll-access').value === 'true',
-    total_amount: parseFloat(document.getElementById('enroll-total').value),
-    paid_amount: parseFloat(document.getElementById('enroll-paid').value),
-    emi_months: parseInt(document.getElementById('enroll-emi-months').value) || null,
+    access_status: accessGranted ? 'active' : 'pending',
+    net_amount: parseFloat(document.getElementById('enroll-total').value) || 0,
+    paid_amount: parseFloat(document.getElementById('enroll-paid').value) || 0,
     progress_percentage: parseInt(document.getElementById('enroll-progress').value) || 0,
-    admin_notes: document.getElementById('enroll-notes').value,
+    notes: document.getElementById('enroll-notes').value,
   }).eq('id', id);
   closeModal('enroll-modal');
   loadEnrollments();
 }
 
 async function saveBatch() {
-  await db.client.from('mentor_batches').insert({
+  const batchName = document.getElementById('b-name').value.trim();
+  await db.client.from('course_batches').insert({
     course_id: document.getElementById('b-course').value,
-    mentor_id: document.getElementById('b-mentor').value,
-    batch_name: document.getElementById('b-name').value,
-    max_students: parseInt(document.getElementById('b-max').value),
-    start_date: document.getElementById('b-start').value || null,
-    end_date: document.getElementById('b-end').value || null,
-    google_meet_link: document.getElementById('b-meet').value || null,
+    primary_mentor_user_id: document.getElementById('b-mentor').value || null,
+    batch_name: batchName,
+    batch_code: 'B' + Date.now(),
+    max_students: parseInt(document.getElementById('b-max').value) || 30,
+    starts_on: document.getElementById('b-start').value || null,
+    ends_on: document.getElementById('b-end').value || null,
+    is_active: true,
   });
   closeModal('batch-modal');
   loadBatches();
 }
 
 async function saveSchedule() {
-  await db.client.from('class_schedules').insert({
-    batch_id: document.getElementById('sch-batch').value,
-    title: document.getElementById('sch-title').value,
-    scheduled_at: document.getElementById('sch-time').value,
-    duration_minutes: parseInt(document.getElementById('sch-duration').value),
-    google_meet_link: document.getElementById('sch-meet').value || null,
-    description: document.getElementById('sch-desc').value,
-    mentor_id: adminUser.id,
-    course_id: '',
+  const startVal = document.getElementById('sch-time').value;
+  const durationMins = parseInt(document.getElementById('sch-duration').value) || 60;
+  const endAt = startVal ? new Date(new Date(startVal).getTime() + durationMins * 60000).toISOString() : null;
+  const batchId = document.getElementById('sch-batch').value;
+  // Get course_id from the selected batch
+  const { data: batch } = await db.client.from('course_batches').select('course_id, primary_mentor_user_id').eq('id', batchId).maybeSingle();
+  await db.client.from('class_sessions').insert({
+    batch_id: batchId,
+    course_id: batch?.course_id || '',
+    mentor_user_id: batch?.primary_mentor_user_id || adminUser.id,
+    session_title: document.getElementById('sch-title').value || 'Live Class',
+    scheduled_start_at: startVal,
+    scheduled_end_at: endAt,
+    meeting_url: document.getElementById('sch-meet').value || null,
+    session_status: 'scheduled',
   });
   closeModal('schedule-modal');
   loadSchedules();
 }
 
 async function saveRecording() {
-  await db.client.from('course_content').insert({
-    course_id: document.getElementById('rec-course').value,
+  const providerUrl = document.getElementById('rec-yt').value || document.getElementById('rec-drive').value || '';
+  const provider = document.getElementById('rec-yt').value ? 'youtube' : document.getElementById('rec-drive').value ? 'google_drive' : 'other';
+  await db.client.from('live_recordings').insert({
+    course_id: document.getElementById('rec-course').value || null,
     title: document.getElementById('rec-title').value,
-    content_type: 'recording',
-    drive_url: document.getElementById('rec-drive').value || null,
-    url: document.getElementById('rec-yt').value || null,
-    session_date: document.getElementById('rec-date').value ? new Date(document.getElementById('rec-date').value).toISOString() : null,
+    external_url: providerUrl,
+    provider_name: provider,
+    is_published: true,
+    published_by_admin_id: adminUser.id,
+    published_at: new Date().toISOString(),
   });
   closeModal('recording-modal');
   loadRecordings();
 }
 
 async function markEmiPaid(id) {
-  await db.client.from('emi_schedules').update({ status: 'paid', paid_date: new Date().toISOString(), paid_amount: 0 }).eq('id', id);
+  await db.client.from('payment_schedules').update({ schedule_status: 'paid', amount_paid: 0, updated_at: new Date().toISOString() }).eq('id', id);
   loadEmi();
 }
 
 async function cancelSchedule(id) {
   if (!confirm('Cancel this class?')) return;
-  await db.client.from('class_schedules').update({ status: 'cancelled' }).eq('id', id);
+  await db.client.from('class_sessions').update({ session_status: 'cancelled' }).eq('id', id);
   loadSchedules();
 }
 
@@ -1474,7 +1613,39 @@ function downloadInvoice(id) {
 
 async function logout() {
   await db.client.auth.signOut();
-  window.location.href = '/pages/admin-login.html';
+  window.location.href = 'admin-login.html';
+}
+
+async function loadForms() {
+  const typeFilter = document.getElementById('form-type-filter').value;
+  let q = db.client.from('form_submissions').select('*');
+  if (typeFilter) q = q.eq('form_type', typeFilter);
+  const { data, error } = await q.order('created_at', { ascending: false }).limit(100);
+  if (error) throw error;
+
+  const forms = data || [];
+  const profileMap = await fetchProfileMap(forms.map(f => f.user_id || f.submitted_by_user_id));
+  const courseIds = [...new Set(forms.map(f => f.course_id).filter(Boolean))];
+  let courseMap = {};
+  if (courseIds.length) {
+    const { data: courses, error: courseError } = await db.client.from('courses').select('id, title').in('id', courseIds);
+    if (courseError) throw courseError;
+    courseMap = Object.fromEntries((courses || []).map(course => [course.id, course]));
+  }
+
+  document.getElementById('form-tbody').innerHTML = forms.map(f => `
+    <tr>
+      <td><span class="badge badge-blue">${f.form_type.replace(/_/g,' ')}</span></td>
+      <td>${f.form_data?.name || f.submission_data?.name || profileMap[f.user_id || f.submitted_by_user_id]?.full_name || '—'}</td>
+      <td>${f.form_data?.email || f.submission_data?.email || '—'}</td>
+      <td>${courseMap[f.course_id]?.title || '—'}</td>
+      <td>${fmtDate(f.created_at)}</td>
+      <td>${statusBadge(f.status)}</td>
+      <td><div class="action-btns">
+        <button class="action-btn" onclick="viewFormData('${f.id}')">View</button>
+        <button class="action-btn" onclick="updateFormStatus('${f.id}','reviewed')">Mark Reviewed</button>
+      </div></td>
+    </tr>`).join('') || '<tr><td colspan="7" class="table-empty">No form submissions</td></tr>';
 }
 
 // ===== INIT =====

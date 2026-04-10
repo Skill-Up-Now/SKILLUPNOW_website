@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Signup Success - SkillUpNow</title>
+  <link rel="stylesheet" href="../css/variables.css">
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="stylesheet" href="../css/responsive.css">
+  <style>
+    body { min-height: 100vh; margin: 0; background: linear-gradient(135deg, #f7f4ec 0%, #eef4ff 100%); font-family: inherit; }
+    nav { z-index: 30; }
+    .page-wrap { position: relative; z-index: 1; min-height: 100vh; display: flex; flex-direction: column; }
+    .success-area { flex: 1; display: grid; place-items: center; padding: 7.5rem 1rem 3rem; }
+    .success-shell { width: min(92vw, 720px); background: rgba(255,255,255,0.9); border: 1.5px solid rgba(26,61,122,0.12); border-radius: 28px; padding: 3rem 2rem; box-shadow: 0 24px 60px rgba(17,24,39,0.08); text-align: center; }
+    .success-kicker { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.45rem 0.9rem; border-radius: 999px; background: #e8f7ee; color: #1c7c47; font-weight: 700; font-size: 0.82rem; }
+    .success-shell h1 { margin: 1rem 0 0.75rem; font-size: clamp(2rem, 4vw, 3rem); color: #122033; }
+    .success-shell p { margin: 0 auto 1.25rem; max-width: 540px; color: #526071; line-height: 1.7; }
+    .success-actions { display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; margin-top: 1.5rem; }
+    .success-btn { border: none; border-radius: 999px; padding: 0.9rem 1.4rem; font: inherit; font-weight: 700; text-decoration: none; cursor: pointer; }
+    .success-btn.primary { background: linear-gradient(135deg, #0f766e, #2563eb); color: #fff; }
+    .success-btn.secondary { background: #fff; color: #122033; border: 1px solid rgba(18,32,51,0.12); }
+    .success-card { margin-top: 1.5rem; padding: 1.2rem; border-radius: 20px; background: #f8fafc; text-align: left; color: #314155; }
+  </style>
+</head>
+<body>
+  <div class="mesh-bg"></div>
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+  <nav></nav>
+  <div class="page-wrap">
+    <main class="success-area">
+      <section class="success-shell">
+        <div class="success-kicker">Verification complete</div>
+        <h1 id="success-title">Application submitted</h1>
+        <p id="success-copy">Your request has been recorded successfully.</p>
+        <div class="success-card" id="success-details"></div>
+        <div class="success-actions">
+          <a class="success-btn primary" href="../index.html">Return Home</a>
+          <a class="success-btn secondary" href="./profile.html">Open Dashboard</a>
+        </div>
+      </section>
+    </main>
+    <footer></footer>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../config/supabase-config.js"></script>
+  <script src="../js/theme.js"></script>
+  <script src="../js/profile-nav.js"></script>
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const type = params.get('type') || 'user';
+    const title = document.getElementById('success-title');
+    const copy = document.getElementById('success-copy');
+    const details = document.getElementById('success-details');
+
+    if (type === 'mentor') {
+      title.textContent = 'Mentor application submitted';
+      copy.textContent = 'Your account is verified, your mentor profile is saved, and your application is now waiting for admin review.';
+      details.innerHTML = [
+        'Email verification completed successfully.',
+        'Your profile and KYC documents were submitted to the database.',
+        'You will be redirected to the mentor workflow after approval.'
+      ].join('<br>');
+    } else {
+      title.textContent = 'Signup completed';
+      copy.textContent = 'Your email verification is complete and your account is ready to use.';
+      details.innerHTML = [
+        'Your account has been created successfully.',
+        'Your email is marked as verified.',
+        'You can now continue to your dashboard.'
+      ].join('<br>');
+    }
+  </script>
+</body>
+</html>
