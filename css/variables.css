@@ -80,6 +80,84 @@
   --r4: 40px;
 }
 
+:root[data-theme="dark"][data-theme-variant="ocean"] {
+  --bg: #071521;
+  --bg2: #0b1d2d;
+  --bg-secondary: #0f2740;
+  --txt: #eef8ff;
+  --txt2: #c8e6ff;
+  --txt3: #85b6d8;
+  --txt4: #527796;
+  --panel: rgba(8, 28, 44, 0.8);
+  --panel2: rgba(14, 40, 62, 0.88);
+  --glass: rgba(10, 31, 49, 0.72);
+  --border: rgba(54, 162, 235, 0.2);
+  --border2: rgba(54, 162, 235, 0.38);
+  --v1: #38bdf8;
+  --v2: #0ea5e9;
+  --v3: #7dd3fc;
+  --v4: #bae6fd;
+  --v5: rgba(14, 165, 233, 0.16);
+  --b1: #0284c7;
+  --b2: #0ea5e9;
+  --b3: #67e8f9;
+  --grad: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+  --grad2: linear-gradient(135deg, #38bdf8 0%, #0ea5e9 100%);
+  --grad-shine: linear-gradient(105deg, #38bdf8, #0ea5e9, #67e8f9, #38bdf8);
+}
+
+:root[data-theme="dark"][data-theme-variant="sunset"] {
+  --bg: #1a0f14;
+  --bg2: #24131a;
+  --bg-secondary: #321723;
+  --txt: #fff4ef;
+  --txt2: #ffd8cc;
+  --txt3: #d7a28d;
+  --txt4: #966555;
+  --panel: rgba(42, 18, 26, 0.82);
+  --panel2: rgba(55, 23, 31, 0.9);
+  --glass: rgba(54, 22, 30, 0.7);
+  --border: rgba(249, 115, 22, 0.22);
+  --border2: rgba(251, 146, 60, 0.38);
+  --v1: #fb923c;
+  --v2: #f97316;
+  --v3: #fdba74;
+  --v4: #fed7aa;
+  --v5: rgba(249, 115, 22, 0.16);
+  --b1: #ea580c;
+  --b2: #f97316;
+  --b3: #fb7185;
+  --grad: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+  --grad2: linear-gradient(135deg, #fb923c 0%, #f43f5e 100%);
+  --grad-shine: linear-gradient(105deg, #fb923c, #f97316, #fb7185, #fb923c);
+}
+
+:root[data-theme="dark"][data-theme-variant="emerald"] {
+  --bg: #081711;
+  --bg2: #0c1f18;
+  --bg-secondary: #102a20;
+  --txt: #effdf6;
+  --txt2: #c6f6df;
+  --txt3: #81c9a6;
+  --txt4: #4a8063;
+  --panel: rgba(10, 30, 22, 0.8);
+  --panel2: rgba(14, 40, 29, 0.88);
+  --glass: rgba(12, 38, 28, 0.72);
+  --border: rgba(16, 185, 129, 0.2);
+  --border2: rgba(52, 211, 153, 0.36);
+  --v1: #34d399;
+  --v2: #10b981;
+  --v3: #6ee7b7;
+  --v4: #a7f3d0;
+  --v5: rgba(16, 185, 129, 0.16);
+  --b1: #059669;
+  --b2: #10b981;
+  --b3: #34d399;
+  --grad: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  --grad2: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+  --grad-shine: linear-gradient(105deg, #34d399, #10b981, #6ee7b7, #34d399);
+}
+
 /* Global easing and misc */
 :root {
   --ease: cubic-bezier(0.4, 0, 0.2, 1);

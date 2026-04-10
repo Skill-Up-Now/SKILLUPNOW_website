@@ -8,7 +8,13 @@
       "mcp__claude_ai_Supabase__apply_migration",
       "Bash(grep -l \"profile-nav.js\" e:/SKILLUPNOW_website/pages/*.html e:/SKILLUPNOW_website/index.html)",
       "Bash(grep -l \"<nav>\" e:/SKILLUPNOW_website/pages/*.html e:/SKILLUPNOW_website/index.html)",
-      "Bash(grep -l \"<footer>\" e:/SKILLUPNOW_website/pages/*.html e:/SKILLUPNOW_website/index.html)"
+      "Bash(grep -l \"<footer>\" e:/SKILLUPNOW_website/pages/*.html e:/SKILLUPNOW_website/index.html)",
+      "Bash(grep -L \"<nav>\" e:/SKILLUPNOW_website/pages/*.html e:/SKILLUPNOW_website/index.html)",
+      "Bash(grep -L \"profile-nav.js\" e:/SKILLUPNOW_website/pages/*.html e:/SKILLUPNOW_website/index.html)",
+      "Bash(grep -n \"\\\\\\\\\\\\`\" \"e:/SKILLUPNOW_website/js/profile-nav.js\")",
+      "Bash(python3 -c ':*)",
+      "Bash(node -e ':*)",
+      "Bash(node -e \"const fs=require\\('fs'\\);const c=fs.readFileSync\\('e:/SKILLUPNOW_website/js/profile-nav.js','utf8'\\);const lines=c.split\\('\\\\n'\\);lines.forEach\\(\\(l,i\\)=>{if\\(l.includes\\('\\\\\\\\\\\\\\\\'+'\\\\`'\\)\\){console.log\\(\\(i+1\\)+':'+l.substring\\(0,100\\)\\)}}\\);\")"
     ]
   }
 }

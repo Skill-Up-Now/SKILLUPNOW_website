@@ -449,7 +449,7 @@
           <h3>Course Management</h3>
           <div class="table-actions">
             <input class="tbl-search" placeholder="Search courses…" oninput="filterTable('course-tbody', this.value, [0,1])">
-            <button class="btn-primary" onclick="document.getElementById('course-id').value='';document.getElementById('course-modal-title').textContent='Add New Course';openModal('course-modal')">+ Add Course</button>
+            <button class="btn-primary" onclick="document.getElementById('course-id').value='';document.getElementById('course-modal-title').textContent='Add New Course';initDropdowns();openModal('course-modal')">+ Add Course</button>
           </div>
         </div>
         <table class="data-table">
@@ -543,7 +543,7 @@
         <div class="table-header">
           <h3>Batch Management</h3>
           <div class="table-actions">
-            <button class="btn-primary" onclick="document.getElementById('batch-id').value='';document.getElementById('batch-modal').querySelector('.modal-title').textContent='Create Batch';document.querySelector('#batch-modal .btn-primary').textContent='Create Batch';openModal('batch-modal')">+ New Batch</button>
+            <button class="btn-primary" onclick="document.getElementById('batch-id').value='';document.getElementById('batch-modal').querySelector('.modal-title').textContent='Create Batch';document.querySelector('#batch-modal .btn-primary').textContent='Create Batch';initDropdowns();openModal('batch-modal')">+ New Batch</button>
           </div>
         </div>
         <table class="data-table">
@@ -675,7 +675,7 @@
         <div class="table-header">
           <h3>Class Recordings</h3>
           <div class="table-actions">
-            <button class="btn-primary" onclick="openModal('recording-modal')">+ Add Recording</button>
+            <button class="btn-primary" onclick="initDropdowns();openModal('recording-modal')">+ Add Recording</button>
           </div>
         </div>
         <table class="data-table">
@@ -691,7 +691,7 @@
         <div class="table-header">
           <h3>Class Schedules</h3>
           <div class="table-actions">
-            <button class="btn-primary" onclick="openModal('schedule-modal')">+ Schedule Class</button>
+            <button class="btn-primary" onclick="initDropdowns();openModal('schedule-modal')">+ Schedule Class</button>
           </div>
         </div>
         <table class="data-table">
@@ -1037,22 +1037,15 @@ async function checkAdminAuth() {
   const { data: { session } } = await db.client.auth.getSession();
   if (!session) return window.location.href = 'admin-login.html';
 
-  const userId = session.user.id;
-
-  // Parallel role check: user_profiles + user_role_assignments
-  const [{ data: profile }, { data: roleRow }] = await Promise.all([
-    db.client.from('user_profiles').select('role, full_name').eq('user_id', userId).maybeSingle(),
-    db.client.from('user_role_assignments')
-      .select('role').eq('user_id', userId)
-      .in('role', ADMIN_ROLES).eq('is_active', true).maybeSingle()
+  const [{ data: profile }, adminCtx] = await Promise.all([
+    db.client.from('user_profiles').select('full_name').eq('user_id', session.user.id).maybeSingle(),
+    db.getAdminAuthContext()
   ]);
-
-  const isAdmin = ADMIN_ROLES.includes(profile?.role) || ADMIN_ROLES.includes(roleRow?.role);
-  if (!isAdmin) return window.location.href = 'admin-login.html';
+  if (!adminCtx?.success || !adminCtx?.isAdmin) return window.location.href = 'admin-login.html';
 
   adminUser = session.user;
   const name = profile?.full_name || session.user.email.split('@')[0];
-  const role = profile?.role || roleRow?.role || 'admin';
+  const role = adminCtx.role || 'admin';
   document.getElementById('admin-name').textContent = name;
   document.getElementById('admin-role').textContent = role.replace('_', ' ');
   document.getElementById('admin-initial').textContent = name[0].toUpperCase();
@@ -1217,13 +1210,17 @@ async function loadDashboard() {
 
 // ===== COURSES =====
 async function loadCourses() {
-  const { data } = await db.client.from('courses').select('*, course_categories(name)').order('created_at', { ascending: false });
-  document.getElementById('course-tbody').innerHTML = (data||[]).map(c => `
-    <tr>
+  const { data, error } = await db.client.from('courses')
+    .select('*, course_categories(name), course_pricing(list_price, sale_price, is_active)')
+    .order('created_at', { ascending: false });
+  if (error) { console.error('loadCourses:', error.message); return; }
+  document.getElementById('course-tbody').innerHTML = (data||[]).map(c => {
+    const pricing = (c.course_pricing||[]).find(p => p.is_active);
+    return `<tr>
       <td>${c.title}</td>
       <td>${c.course_categories?.name||'—'}</td>
       <td>—</td>
-      <td>—</td>
+      <td>${pricing ? fmtCurr(pricing.sale_price || pricing.list_price) : '—'}</td>
       <td>—</td>
       <td>—</td>
       <td>${statusBadge(c.course_status === 'published' ? 'active' : c.course_status || 'draft')}</td>
@@ -1232,19 +1229,24 @@ async function loadCourses() {
         <button class="action-btn" onclick="toggleCoursePublish('${c.id}','${c.course_status}')">${c.course_status === 'published' ? 'Unpublish' : 'Publish'}</button>
         <button class="action-btn danger" onclick="deleteCourse('${c.id}')">Delete</button>
       </div></td>
-    </tr>`).join('') || '<tr><td colspan="8" class="table-empty">No courses yet</td></tr>';
-  // Populate course dropdowns in modals
+    </tr>`;
+  }).join('') || '<tr><td colspan="8" class="table-empty">No courses yet</td></tr>';
+  // Refresh course dropdowns in other modals
   const opts = (data||[]).map(c => `<option value="${c.id}">${c.title}</option>`).join('');
   ['rec-course', 'b-course'].forEach(id => {
     const el = document.getElementById(id); if (el) el.innerHTML = '<option value="">Select…</option>' + opts;
   });
+  // Refresh pricing course dropdown too
+  const prEl = document.getElementById('pr-course');
+  if (prEl) prEl.innerHTML = '<option value="">Select course…</option>' + opts;
 }
 
 async function loadCategories() {
-  const { data } = await db.client.from('course_categories').select('*').order('sort_order');
+  const { data, error } = await db.client.from('course_categories').select('*').order('sort_order');
+  if (error) { console.error('loadCategories:', error.message); return; }
   document.getElementById('category-tbody').innerHTML = (data||[]).map(c => `
     <tr>
-      <td>${c.icon||''} ${c.name}</td>
+      <td>${c.icon_name || c.icon || ''} ${c.name}</td>
       <td><code>${c.slug}</code></td>
       <td>—</td>
       <td>${statusBadge(c.is_active ? 'active' : 'draft')}</td>
@@ -1253,8 +1255,8 @@ async function loadCategories() {
         <button class="action-btn danger" onclick="deleteCategory('${c.id}')">Delete</button>
       </div></td>
     </tr>`).join('') || '<tr><td colspan="5" class="table-empty">No categories</td></tr>';
-  // Use UUID as value (not slug) to match category_id FK on courses table
-  const opts = (data||[]).map(c => `<option value="${c.id}">${c.icon||''} ${c.name}</option>`).join('');
+  // Refresh category dropdown in course modal (UUID as value for FK match)
+  const opts = (data||[]).map(c => `<option value="${c.id}">${c.icon_name || c.icon || ''} ${c.name}</option>`).join('');
   const el = document.getElementById('c-category'); if (el) el.innerHTML = '<option value="">None</option>' + opts;
 }
 
@@ -1354,6 +1356,9 @@ async function loadBatches() {
     </tr>`).join('') || '<tr><td colspan="8" class="table-empty">No batches</td></tr>';
   const opts = (data||[]).map(b => `<option value="${b.id}">${b.batch_name} — ${b.courses?.title||''}</option>`).join('');
   const el = document.getElementById('sch-batch'); if (el) el.innerHTML = '<option value="">Select…</option>' + opts;
+  // Also refresh discount batch dropdown if it exists
+  const discBatch = document.getElementById('disc-batch');
+  if (discBatch) discBatch.innerHTML = '<option value="">All Batches</option>' + opts;
 }
 
 async function loadPayments() {
@@ -1555,11 +1560,14 @@ async function saveCourse() {
   const id = document.getElementById('course-id').value;
   const titleVal = document.getElementById('c-name').value.trim();
   if (!titleVal) { alert('Course name is required.'); return; }
+  const categoryId = document.getElementById('c-category').value || null;
+  if (!categoryId) { alert('Category is required.'); return; }
+  if (!adminUser?.id) { alert('Admin session not found. Please log in again.'); return; }
   const months = parseInt(document.getElementById('c-months').value) || null;
   const isPublished = document.getElementById('c-published').value === 'true';
   const payload = {
     title: titleVal,
-    category_id: document.getElementById('c-category').value || null,
+    category_id: categoryId,
     level: document.getElementById('c-level').value,
     short_description: document.getElementById('c-short-desc').value,
     description: document.getElementById('c-desc').value,
@@ -1577,9 +1585,8 @@ async function saveCourse() {
   // Save pricing if a price was entered
   const priceVal = parseFloat(document.getElementById('c-price').value);
   if (!isNaN(priceVal) && priceVal > 0 && saved?.id) {
-    const discVal = document.getElementById('c-disc-price').value ? parseFloat(document.getElementById('c-disc-price').value) : priceVal;
     const discountedVal = document.getElementById('c-disc-price').value ? parseFloat(document.getElementById('c-disc-price').value) : null;
-    await db.client.from('course_pricing').upsert({
+    const pricingPayload = {
       course_id: saved.id,
       pricing_name: 'Standard',
       pricing_type: document.getElementById('c-emi').value === 'true' ? 'emi' : 'full_payment',
@@ -1587,25 +1594,49 @@ async function saveCourse() {
       sale_price: discountedVal && discountedVal < priceVal ? discountedVal : null,
       emi_installments: document.getElementById('c-emi').value === 'true' ? (parseInt(document.getElementById('c-emi-months').value) || 12) : null,
       is_active: true,
-    }, { onConflict: 'course_id,pricing_name' });
+      is_default: true,
+      created_by_admin_id: adminUser.id,
+    };
+    const { data: existingPricing, error: pricingLookupError } = await db.client
+      .from('course_pricing')
+      .select('id')
+      .eq('course_id', saved.id)
+      .eq('pricing_name', 'Standard')
+      .maybeSingle();
+    if (pricingLookupError) { alert('Error saving course pricing: ' + pricingLookupError.message); return; }
+    const { error: pricingSaveError } = existingPricing?.id
+      ? await db.client.from('course_pricing').update(pricingPayload).eq('id', existingPricing.id)
+      : await db.client.from('course_pricing').insert(pricingPayload);
+    if (pricingSaveError) { alert('Error saving course pricing: ' + pricingSaveError.message); return; }
   }
   closeModal('course-modal');
-  loadCourses();
+  await Promise.all([loadCourses(), loadCategories()]);
 }
 
 async function saveCategory() {
   const id = document.getElementById('cat-id').value;
+  const nameVal = document.getElementById('cat-name').value.trim();
+  if (!nameVal) { alert('Category name is required.'); return; }
+  if (!adminUser?.id) { alert('Admin session not found. Please log in again.'); return; }
+  const slugVal = document.getElementById('cat-slug').value.trim()
+    || nameVal.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
   const payload = {
-    name: document.getElementById('cat-name').value,
-    slug: document.getElementById('cat-slug').value,
+    name: nameVal,
+    slug: slugVal,
     description: document.getElementById('cat-desc').value,
-    icon: document.getElementById('cat-icon').value,
+    icon_name: document.getElementById('cat-icon').value,
     is_active: document.getElementById('cat-active').value === 'true',
   };
-  if (id) await db.client.from('course_categories').update(payload).eq('id', id);
-  else    await db.client.from('course_categories').insert(payload);
+  if (!id) {
+    payload.sort_order = 999;
+    payload.created_by_admin_id = adminUser.id;
+  }
+  const { error } = id
+    ? await db.client.from('course_categories').update(payload).eq('id', id)
+    : await db.client.from('course_categories').insert(payload);
+  if (error) { alert('Error saving category: ' + error.message); return; }
   closeModal('category-modal');
-  loadCategories();
+  await Promise.all([loadCategories(), loadCourses()]);
 }
 
 function editEnrollment(eData) {
@@ -1626,52 +1657,59 @@ function editEnrollment(eData) {
 async function saveEnrollment() {
   const id = document.getElementById('enroll-id').value;
   const accessGranted = document.getElementById('enroll-access').value === 'true';
-  await db.client.from('enrollments').update({
+  const { error } = await db.client.from('enrollments').update({
     enrollment_status: document.getElementById('enroll-status-edit').value,
     access_status: accessGranted ? 'active' : 'pending',
     net_amount: parseFloat(document.getElementById('enroll-total').value) || 0,
     paid_amount: parseFloat(document.getElementById('enroll-paid').value) || 0,
     progress_percentage: parseInt(document.getElementById('enroll-progress').value) || 0,
-    notes: document.getElementById('enroll-notes').value,
+    admin_notes: document.getElementById('enroll-notes').value,
   }).eq('id', id);
+  if (error) { alert('Error updating enrollment: ' + error.message); return; }
   closeModal('enroll-modal');
   loadEnrollments();
 }
 
 
 async function saveSchedule() {
-  const startVal = document.getElementById('sch-time').value;
-  const durationMins = parseInt(document.getElementById('sch-duration').value) || 60;
-  const endAt = startVal ? new Date(new Date(startVal).getTime() + durationMins * 60000).toISOString() : null;
   const batchId = document.getElementById('sch-batch').value;
+  if (!batchId) { alert('Please select a batch.'); return; }
+  const startVal = document.getElementById('sch-time').value;
+  if (!startVal) { alert('Start date/time is required.'); return; }
+  const durationMins = parseInt(document.getElementById('sch-duration').value) || 60;
+  const endAt = new Date(new Date(startVal).getTime() + durationMins * 60000).toISOString();
   // Get course_id from the selected batch
   const { data: batch } = await db.client.from('course_batches').select('course_id, primary_mentor_user_id').eq('id', batchId).maybeSingle();
-  await db.client.from('class_sessions').insert({
+  const { error } = await db.client.from('class_sessions').insert({
     batch_id: batchId,
-    course_id: batch?.course_id || '',
-    mentor_user_id: batch?.primary_mentor_user_id || adminUser.id,
+    course_id: batch?.course_id || null,
+    mentor_user_id: batch?.primary_mentor_user_id || null,
     session_title: document.getElementById('sch-title').value || 'Live Class',
     scheduled_start_at: startVal,
     scheduled_end_at: endAt,
     meeting_url: document.getElementById('sch-meet').value || null,
     session_status: 'scheduled',
   });
+  if (error) { alert('Error saving schedule: ' + error.message); return; }
   closeModal('schedule-modal');
   loadSchedules();
 }
 
 async function saveRecording() {
+  const title = document.getElementById('rec-title').value.trim();
+  if (!title) { alert('Recording title is required.'); return; }
   const providerUrl = document.getElementById('rec-yt').value || document.getElementById('rec-drive').value || '';
-  const provider = document.getElementById('rec-yt').value ? 'youtube' : document.getElementById('rec-drive').value ? 'google_drive' : 'other';
-  await db.client.from('live_recordings').insert({
+  if (!providerUrl) { alert('Please enter a YouTube or Google Drive URL.'); return; }
+  const provider = document.getElementById('rec-yt').value ? 'youtube' : 'google_drive';
+  const { error } = await db.client.from('live_recordings').insert({
     course_id: document.getElementById('rec-course').value || null,
-    title: document.getElementById('rec-title').value,
+    title,
     external_url: providerUrl,
     provider_name: provider,
     is_published: true,
-    published_by_admin_id: adminUser.id,
     published_at: new Date().toISOString(),
   });
+  if (error) { alert('Error saving recording: ' + error.message); return; }
   closeModal('recording-modal');
   loadRecordings();
 }
@@ -1776,7 +1814,7 @@ async function editCategory(id) {
   document.getElementById('cat-name').value = c.name || '';
   document.getElementById('cat-slug').value = c.slug || '';
   document.getElementById('cat-desc').value = c.description || '';
-  document.getElementById('cat-icon').value = c.icon || '';
+  document.getElementById('cat-icon').value = c.icon_name || c.icon || '';
   document.getElementById('cat-active').value = c.is_active ? 'true' : 'false';
   document.getElementById('category-modal').querySelector('.modal-title').textContent = 'Edit Category';
   openModal('category-modal');
@@ -2097,10 +2135,11 @@ async function saveBatch() {
     course_id: courseId,
     primary_mentor_user_id: document.getElementById('b-mentor').value || null,
     batch_name: batchName,
-    batch_code: batchName.toUpperCase().replace(/[^A-Z0-9]/g,'-').slice(0,20) + '-' + Date.now().toString().slice(-4),
+    batch_code: batchName.toUpperCase().replace(/[^A-Z0-9]/g,'-').slice(0,16) + '-' + Date.now().toString().slice(-4),
     max_students: parseInt(document.getElementById('b-max').value) || 30,
     starts_on: document.getElementById('b-start').value || null,
     ends_on: document.getElementById('b-end').value || null,
+    meet_link: document.getElementById('b-meet').value || null,
     is_active: true,
   };
   const { error } = id
@@ -2112,10 +2151,48 @@ async function saveBatch() {
 }
 
 
+// ===== DROPDOWN PRE-LOAD =====
+// Loads all dropdown data once so modals work immediately on open
+async function initDropdowns() {
+  try {
+    // Load courses for batch + recording dropdowns
+    const { data: courses } = await db.client.from('courses').select('id, title').order('title');
+    const courseOpts = (courses||[]).map(c => `<option value="${c.id}">${c.title}</option>`).join('');
+    ['rec-course','b-course'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.innerHTML = '<option value="">Select…</option>' + courseOpts;
+    });
+
+    // Load categories for course dropdown
+    const { data: cats } = await db.client.from('course_categories').select('id, name, icon_name').order('sort_order');
+    const catOpts = (cats||[]).map(c => `<option value="${c.id}">${c.icon_name || ''} ${c.name}</option>`).join('');
+    const catEl = document.getElementById('c-category');
+    if (catEl) catEl.innerHTML = '<option value="">None</option>' + catOpts;
+
+    // Load approved mentors for course + batch dropdowns
+    const { data: mentors } = await db.client.from('mentor_profiles').select('user_id, user_profiles(full_name)').eq('status', 'approved');
+    const mentorOpts = (mentors||[]).map(m => `<option value="${m.user_id}">${m.user_profiles?.full_name || m.user_id}</option>`).join('');
+    ['c-mentor','b-mentor'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.innerHTML = '<option value="">Select…</option>' + mentorOpts;
+    });
+
+    // Load batches for schedule dropdown
+    const { data: batches } = await db.client.from('course_batches')
+      .select('id, batch_name, courses(title)').eq('is_active', true).order('created_at', { ascending: false });
+    const batchOpts = (batches||[]).map(b => `<option value="${b.id}">${b.batch_name} — ${b.courses?.title||''}</option>`).join('');
+    const batchEl = document.getElementById('sch-batch');
+    if (batchEl) batchEl.innerHTML = '<option value="">Select…</option>' + batchOpts;
+  } catch (e) {
+    console.warn('initDropdowns:', e.message);
+  }
+}
+
 // ===== INIT =====
 (async () => {
   await checkAdminAuth();
   loadDashboard();
+  initDropdowns();
 })();
 </script>
 </body>

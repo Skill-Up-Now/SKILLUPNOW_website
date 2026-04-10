@@ -1561,6 +1561,7 @@
     const EMAILJS_SERVICE_ID  = 'service_nrucv1s';
     const EMAILJS_TEMPLATE_ID = 'template_bjqerns';
     const EMAILJS_PUBLIC_KEY  = '6chiuXaZ_OqXbYyG1';
+    if (window.emailjs) window.emailjs.init(EMAILJS_PUBLIC_KEY);
 
     /* EmailJS Template HTML (paste this into your EmailJS template editor):
     ─────────────────────────────────────────────────────────────────────────
@@ -1623,6 +1624,25 @@
       document.querySelectorAll('#' + formId + ' input, #' + formId + ' select').forEach(f => f.style.borderColor = '');
     }
 
+    async function sendSignupOtpEmail({ name, email, otp }) {
+      if (!window.emailjs) {
+        throw new Error('Email service is not ready. Please refresh and try again.');
+      }
+      return window.emailjs.send(
+        EMAILJS_SERVICE_ID,
+        EMAILJS_TEMPLATE_ID,
+        {
+          name,
+          to_name: name,
+          email,
+          otp,
+          otp_code: otp,
+          time: new Date().toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })
+        },
+        EMAILJS_PUBLIC_KEY
+      );
+    }
+
     async function submitRegister() {
       clearAllErrors('rf');
       const name     = document.getElementById('reg-name').value.trim();
@@ -1668,20 +1688,7 @@
         const otp = otpReq.data.otp;
 
         if (emailjsReady) {
-          // Production: send email via EmailJS (custom address / Gmail)
-          await emailjs.send(
-            EMAILJS_SERVICE_ID,
-            EMAILJS_TEMPLATE_ID,
-            {
-              name,
-              to_name: name,
-              email,
-              otp,
-              otp_code: otp,
-              time: new Date().toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })
-            },
-            EMAILJS_PUBLIC_KEY
-          );
+          await sendSignupOtpEmail({ name, email, otp });
         } else {
           // Dev fallback: show OTP in notification (remove this once EmailJS is configured)
           console.warn('⚠️ EmailJS not configured — using dev fallback. OTP:', otp);
@@ -1737,14 +1744,18 @@
         btn.textContent = 'Creating account...';
         const p = window._pendingRegister;
 
-        // Step 1: Sign up (email confirmation disabled in Supabase dashboard)
-        const signUpResult = await window.supabaseConfig.signUp(p.email, p.password, {
-          full_name: p.name,
+        // Step 1: Create the verified account only after OTP validation
+        const signUpResult = await window.supabaseConfig.registerVerifiedUser({
           email: p.email,
+          password: p.password,
+          full_name: p.name,
           phone: p.phone,
-          city: p.city || null,
-          state: p.state || null,
-          gender: p.gender || null
+          role: 'user',
+          metadata: {
+            city: p.city || null,
+            state: p.state || null,
+            gender: p.gender || null
+          }
         });
 
         if (!signUpResult.success) {

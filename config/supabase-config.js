@@ -1204,12 +1204,13 @@ class SupabaseConfig {
       const { data, error } = await this.client
         .from('course_categories')
         .insert([{
-          name:       categoryData.name,
-          slug:       categoryData.slug || slug,
-          icon:       categoryData.icon || '📘',
-          color:      categoryData.color || '#7c5cfc',
-          sort_order: categoryData.sort_order || 99,
-          is_active:  true
+          name:                categoryData.name,
+          slug:                categoryData.slug || slug,
+          icon_name:           categoryData.icon_name || categoryData.icon || '📘',
+          color_hex:           categoryData.color_hex || categoryData.color || '#7c5cfc',
+          sort_order:          categoryData.sort_order || 99,
+          created_by_admin_id: categoryData.created_by_admin_id || null,
+          is_active:           true
         }])
         .select()
         .single();
@@ -1223,10 +1224,17 @@ class SupabaseConfig {
 
   async updateCategory(categoryId, updates) {
     try {
-      updates.updated_at = new Date().toISOString();
+      const normalizedUpdates = {
+        ...updates,
+        icon_name: updates.icon_name ?? updates.icon,
+        color_hex: updates.color_hex ?? updates.color,
+        updated_at: new Date().toISOString()
+      };
+      delete normalizedUpdates.icon;
+      delete normalizedUpdates.color;
       const { data, error } = await this.client
         .from('course_categories')
-        .update(updates)
+        .update(normalizedUpdates)
         .eq('id', categoryId)
         .select()
         .single();

@@ -20,8 +20,9 @@ class ProfileNavigationManager {
   async init() {
     this.injectNeuralCursor(); // Always inject cursor — including admin and mentor pages
     if (this.isAdminPage || this.isMentorPage) return;
-    this.injectThemeSwitcher();
-    this.rebuildNav();
+    this.injectThemeSwitcher(); // restores saved theme + injects CSS; setupBtn() is no-op (nav not built yet)
+    this.rebuildNav();          // builds nav including #pn-theme-nav-btn
+    this.injectThemeSwitcher(); // second call: CSS already injected (guard skips), theme already set, NOW wires btn
     this.replaceFooter();
     this.updateYearFields();
     this.setupMobileMenu();
@@ -100,14 +101,14 @@ class ProfileNavigationManager {
         /* Theme picker dropdown panel */
         #pn-theme-nav-panel {
           position: absolute; top: calc(100% + 10px); right: 0;
-          background: rgba(14,10,34,0.96);
+          background: color-mix(in srgb, var(--bg) 72%, rgba(10, 10, 18, 0.96));
           backdrop-filter: blur(20px) saturate(2);
           -webkit-backdrop-filter: blur(20px) saturate(2);
-          border: 1px solid rgba(124,92,252,0.3);
+          border: 1px solid var(--border2);
           border-radius: 16px; padding: .5rem;
           display: flex; flex-direction: column; gap: .25rem;
-          box-shadow: 0 16px 48px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.06);
-          min-width: 150px; z-index: 9999;
+          box-shadow: 0 16px 48px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.06);
+          min-width: 190px; z-index: 9999;
           transform-origin: top right;
           transform: scale(0); opacity: 0;
           transition: transform .25s cubic-bezier(.34,1.56,.64,1), opacity .22s ease;
@@ -123,15 +124,23 @@ class ProfileNavigationManager {
           display: flex; align-items: center; gap: .55rem;
           padding: .48rem .75rem; border-radius: 10px;
           cursor: pointer; font-size: .78rem; font-weight: 600;
-          color: rgba(200,191,255,0.7);
+          color: var(--txt2);
           border: 1px solid transparent; transition: all .16s;
-          background: none; font-family: inherit; white-space: nowrap;
+          background: transparent; font-family: inherit; white-space: nowrap;
+          width: 100%;
         }
-        .pn-tn-option:hover { background: rgba(124,92,252,0.12); border-color: rgba(124,92,252,0.28); }
-        .pn-tn-option.active { background: rgba(124,92,252,0.18); border-color: rgba(124,92,252,0.5); color: #b5adff; }
-        :root[data-theme="light"] .pn-tn-option { color: #374151; }
-        :root[data-theme="light"] .pn-tn-option.active { color: #7c5cfc; }
+        .pn-tn-option:hover {
+          background: color-mix(in srgb, var(--v1) 14%, transparent);
+          border-color: color-mix(in srgb, var(--v1) 36%, transparent);
+        }
+        .pn-tn-option.active {
+          background: color-mix(in srgb, var(--v1) 18%, var(--panel));
+          border-color: color-mix(in srgb, var(--v1) 50%, transparent);
+          color: var(--txt);
+        }
         .pn-tn-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+        .pn-tn-label { display: inline-flex; align-items: center; gap: .55rem; }
+        .pn-tn-text { display: inline-flex; align-items: center; gap: .45rem; }
       `;
       document.head.appendChild(s);
     }
@@ -175,7 +184,8 @@ class ProfileNavigationManager {
       themes.forEach(t => {
         const opt = document.createElement('button');
         opt.className = 'pn-tn-option' + (t.id === currentTh && t.variant === currentVr ? ' active' : '');
-        opt.innerHTML = \`<span class="pn-tn-dot" style="background:\${dotColors[t.variant]||'#7c5cfc'};border:1.5px solid rgba(255,255,255,.2);"></span><span>\${t.icon}</span> \${t.label}\`;
+        opt.type = 'button';
+        opt.innerHTML = `<span class="pn-tn-label"><span class="pn-tn-dot" style="background:${dotColors[t.variant] || '#7c5cfc'};border:1.5px solid color-mix(in srgb, ${dotColors[t.variant] || '#7c5cfc'} 35%, rgba(255,255,255,.2));"></span><span class="pn-tn-text"><span>${t.icon}</span><span>${t.label}</span></span></span>`;
         opt.addEventListener('click', e => {
           e.stopPropagation();
           document.documentElement.setAttribute('data-theme', t.id);
@@ -541,22 +551,6 @@ class ProfileNavigationManager {
       document.head.appendChild(ejs);
     }
 
-    // OTP helpers (stored on window for cross-function access)
-    window._pnOtpGenerate = () => Math.floor(100000 + Math.random() * 900000).toString();
-    window._pnOtpStore = (email, otp) => {
-      sessionStorage.setItem('pn_otp', JSON.stringify({
-        otp, email, expires: Date.now() + 10 * 60 * 1000
-      }));
-    };
-    window._pnOtpVerify = (email, entered) => {
-      try {
-        const stored = JSON.parse(sessionStorage.getItem('pn_otp') || '{}');
-        if (!stored.otp) return false;
-        if (stored.email !== email) return false;
-        if (Date.now() > stored.expires) { sessionStorage.removeItem('pn_otp'); return false; }
-        return stored.otp === entered;
-      } catch { return false; }
-    };
     window._pnOtpSend = async (email, name, otp) => {
       if (!window.emailjs) throw new Error('Email service not ready. Please refresh and try again.');
       await window.emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
@@ -1535,22 +1529,21 @@ class ProfileNavigationManager {
       if (pw !== cpw)       return _pnErr(err, 'Passwords do not match.');
       if (!terms)           return _pnErr(err, 'Please agree to the Terms of Service to continue.');
 
-      btn.disabled = true; btn.textContent = 'Creating account…';
+      btn.disabled = true; btn.textContent = 'Sending OTP…';
       err.style.display = 'none';
 
       const fullName = fname + ' ' + lname;
 
       try {
-        if (!window.emailjs && !window._emailjsLoaded) throw new Error('Email service not ready. Please refresh and try again.');
-        // Generate OTP client-side — no server RPC needed
-        const otp = window._pnOtpGenerate();
-        window._pnOtpStore(email, otp);
+        if (!window.supabaseConfig) throw new Error('Auth service not ready. Please refresh and try again.');
+        const otpReq = await window.supabaseConfig.requestSignupOtp(email);
+        if (!otpReq.success || !otpReq.data?.otp) throw new Error(otpReq.error || 'Failed to send verification code.');
         self._pendingOtpEmail = email;
         self._pendingOtpRole  = 'user';
         self._pendingOtpData  = { full_name: fullName, email, phone, pw, role: 'user' };
         document.getElementById('pn-otp-back').onclick = () => window._pnView('signup-student');
         document.getElementById('pn-otp-btn').textContent = 'Verify & Create Account';
-        await window._pnOtpSend(email, fullName, otp);
+        await window._pnOtpSend(email, fullName, otpReq.data.otp);
         document.getElementById('pn-otp-sub').textContent = 'We sent a 6-digit code to ' + email + '. Check your inbox (and spam folder).';
         window._pnView('otp');
       } catch(e) {
@@ -1581,10 +1574,10 @@ class ProfileNavigationManager {
       btn.disabled = true; btn.textContent = 'Sending code…';
       err.style.display = 'none';
       try {
+        if (!window.supabaseConfig) throw new Error('Auth service not ready. Please refresh and try again.');
         const fullName = fname + ' ' + lname;
-        // Generate OTP client-side — no server RPC needed
-        const otp = window._pnOtpGenerate();
-        window._pnOtpStore(email, otp);
+        const otpReq = await window.supabaseConfig.requestSignupOtp(email);
+        if (!otpReq.success || !otpReq.data?.otp) throw new Error(otpReq.error || 'Failed to send verification code.');
         self._pendingOtpEmail = email;
         self._pendingOtpRole  = 'mentor';
         self._pendingOtpData  = {
@@ -1598,13 +1591,13 @@ class ProfileNavigationManager {
         };
         document.getElementById('pn-otp-back').onclick = () => window._pnView('signup-mentor');
         document.getElementById('pn-otp-btn').textContent = 'Verify & Continue to Mentor Form';
-        await window._pnOtpSend(email, fullName, otp);
+        await window._pnOtpSend(email, fullName, otpReq.data.otp);
         document.getElementById('pn-otp-sub').textContent = 'Verify your email to continue to the mentor application.';
         window._pnView('otp');
       } catch(e) { _pnErr(err, e.message); btn.disabled = false; btn.textContent = 'Create & Continue to Application →'; }
     };
 
-    /* ── OTP Verify — client-side check, then direct Supabase signUp ── */
+    /* ── OTP Verify — server check, then create verified account ── */
     window._pnVerifyOtp = async () => {
       const entered = [0,1,2,3,4,5].map(i => document.getElementById('pn-otp-'+i)?.value || '').join('');
       const err     = document.getElementById('pn-otp-err');
@@ -1612,39 +1605,31 @@ class ProfileNavigationManager {
       if (entered.length < 6) return _pnErr(err, 'Please enter the complete 6-digit code.');
       if (!self._pendingOtpEmail) return _pnErr(err, 'Session expired. Please start again.');
 
-      // Client-side OTP verification — no server round-trip needed
-      const isValid = window._pnOtpVerify(self._pendingOtpEmail, entered);
-      if (!isValid) return _pnErr(err, 'Incorrect or expired code. Please check and try again, or resend.');
-
       btn.disabled = true; btn.textContent = 'Creating account…';
       err.style.display = 'none';
       try {
         if (!window.supabaseConfig) throw new Error('Auth service not ready.');
         const pendingData = self._pendingOtpData || {};
+        const verifyRes = await window.supabaseConfig.verifySignupOtp(self._pendingOtpEmail, entered);
+        if (!verifyRes.success) throw new Error(verifyRes.error || 'Incorrect or expired code. Please check and try again.');
 
-        // Create account directly via Supabase — email already verified via OTP
-        const { data: signUpData, error: signUpErr } = await window.supabaseConfig.client.auth.signUp({
+        const registerRes = await window.supabaseConfig.registerVerifiedUser({
           email: pendingData.email,
           password: pendingData.pw,
-          options: {
-            data: {
-              full_name: pendingData.full_name,
-              phone: pendingData.phone,
-              role: pendingData.role || 'user',
-              requested_role: pendingData.requested_role || null,
-              expertise_area: pendingData.expertise_area || null
-            },
-            emailRedirectTo: null
+          full_name: pendingData.full_name,
+          phone: pendingData.phone,
+          role: pendingData.role || 'user',
+          metadata: {
+            requested_role: pendingData.requested_role || null,
+            expertise_area: pendingData.expertise_area || null
           }
         });
-        if (signUpErr) throw new Error(signUpErr.message || 'Account creation failed.');
+        if (!registerRes.success) throw new Error(registerRes.error || 'Account creation failed.');
 
-        // Auto sign-in (works when email confirmation is disabled, or if user is created)
         const lr = await window.supabaseConfig.signIn(pendingData.email, pendingData.pw);
         if (lr.success) {
           const user = lr.data?.user || lr.user;
           if (user) {
-            // Sync extended profile — non-fatal
             window.supabaseConfig.syncUserProfile?.(user.id, {
               full_name: pendingData.full_name,
               email: pendingData.email,
@@ -1657,7 +1642,6 @@ class ProfileNavigationManager {
           }
         }
 
-        sessionStorage.removeItem('pn_otp'); // Clean up OTP
         if (self._pendingOtpRole === 'mentor') {
           _pnShowSuccess('🎓', 'Email Verified!', 'Account ready. Taking you to the mentor application.', () => {
             window._pnClose();
@@ -1677,9 +1661,10 @@ class ProfileNavigationManager {
       if (!self._pendingOtpEmail) return;
       try {
         const pendingData = self._pendingOtpData || {};
-        const otp = window._pnOtpGenerate();
-        window._pnOtpStore(self._pendingOtpEmail, otp);
-        await window._pnOtpSend(self._pendingOtpEmail, pendingData.full_name || 'User', otp);
+        if (!window.supabaseConfig) throw new Error('Auth service not ready.');
+        const otpReq = await window.supabaseConfig.requestSignupOtp(self._pendingOtpEmail);
+        if (!otpReq.success || !otpReq.data?.otp) throw new Error(otpReq.error || 'Failed to resend code.');
+        await window._pnOtpSend(self._pendingOtpEmail, pendingData.full_name || 'User', otpReq.data.otp);
         alert('✅ A new code has been sent to ' + self._pendingOtpEmail);
       } catch(e) { alert('Failed to resend: ' + e.message); }
     };
