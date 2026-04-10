@@ -1,729 +1,279 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Fee Enquiry — SkillUpNow Professional Training">
-  <title>Fee Enquiry — SkillUpNow</title>
+  <title>Contact Us — SkillUpNow</title>
   <link rel="stylesheet" href="../css/variables.css">
-  <link rel="stylesheet" href="../css/animations.css">
   <link rel="stylesheet" href="../css/main.css">
   <link rel="stylesheet" href="../css/responsive.css">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,700&family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <script>
-    if (window.location.protocol !== 'file:') {
-      var p = window.location.pathname;
-      if (p.endsWith('.html')) history.replaceState(null, '', p.replace(/\.html$/, ''));
-    }
-  </script>
   <style>
-    /* ── Page Container ── */
-    .contact-page {
-      min-height: 100vh;
-      background: linear-gradient(135deg, #4a2d8a 0%, #5a3ba0 50%, #7c5cfc 100%);
-      position: relative;
-      overflow-x: hidden;
+    .page-wrap { position:relative; z-index:1; padding-top:80px; min-height:100vh; }
+    .contact-hero { background:var(--grad); padding:3rem 2rem; text-align:center; position:relative; overflow:hidden; }
+    .contact-hero::before { content:''; position:absolute; inset:0; background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='rgba(255,255,255,0.06)' stroke-width='1'%3E%3Ccircle cx='30' cy='30' r='25'/%3E%3C/g%3E%3C/svg%3E") repeat; }
+    .contact-hero h1 { color:#fff; font-size:2.2rem; font-weight:800; position:relative; }
+    .contact-hero p  { color:rgba(255,255,255,0.82); position:relative; max-width:500px; margin:0.5rem auto 0; }
+
+    .contact-wrap { max-width:1100px; margin:2.5rem auto; padding:0 1.5rem 4rem; display:grid; grid-template-columns:1fr 380px; gap:2rem; }
+
+    /* Form */
+    .form-card { background:var(--panel); border:1.5px solid var(--border); border-radius:var(--r3); padding:2rem; }
+    .form-card h2 { font-size:1.2rem; font-weight:800; margin-bottom:0.25rem; }
+    .form-card p  { font-size:0.85rem; color:var(--txt3); margin-bottom:1.5rem; }
+    .form-row { display:grid; grid-template-columns:1fr 1fr; gap:0.85rem; }
+    .f-group { margin-bottom:0.85rem; }
+    .f-group label { display:block; font-size:0.8rem; font-weight:700; color:var(--txt2); margin-bottom:0.35rem; }
+    .f-group label span { color:#ef4444; }
+    .f-group input, .f-group select, .f-group textarea {
+      width:100%; background:var(--bg); border:1.5px solid var(--border); border-radius:var(--r1);
+      padding:0.65rem 0.9rem; color:var(--txt); font-size:0.88rem; outline:none; font-family:inherit; transition:border-color 0.2s;
     }
-    :root[data-theme="light"] .contact-page {
-      background: linear-gradient(135deg, #5c3fb8 0%, #4a2e9c 50%, #3d6bff 100%);
-    }
+    .f-group input:focus, .f-group select:focus, .f-group textarea:focus { border-color:var(--v1); box-shadow:0 0 0 3px var(--v5); }
+    .f-group textarea { resize:vertical; min-height:120px; }
+    .f-group.full { grid-column:1/-1; }
+    .btn-submit { background:var(--grad); color:#fff; border:none; border-radius:var(--r1); padding:0.8rem 2rem; font-size:0.93rem; font-weight:700; cursor:pointer; transition:all 0.25s; font-family:inherit; display:flex; align-items:center; gap:0.5rem; }
+    .btn-submit:hover:not(:disabled) { opacity:0.88; transform:scale(1.01); }
+    .btn-submit:disabled { opacity:0.5; cursor:not-allowed; }
 
-    .contact-page::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background:
-        radial-gradient(circle at 30% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
-        radial-gradient(circle at 70% 80%, rgba(120, 219, 255, 0.3) 0%, transparent 50%),
-        radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
-      pointer-events: none;
-    }
+    /* Alert */
+    .alert { padding:0.75rem 1rem; border-radius:var(--r1); font-size:0.83rem; margin-bottom:1rem; display:none; }
+    .alert.success { background:rgba(34,197,94,0.1); border:1px solid rgba(34,197,94,0.25); color:#16a34a; }
+    .alert.error   { background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.25); color:#dc2626; }
+    .alert.show { display:block; }
 
-    /* ── Hero Section ── */
-    .contact-hero {
-      padding: 6rem 2rem 4rem;
-      text-align: center;
-      position: relative;
-      z-index: 2;
-    }
+    /* Sidebar info */
+    .info-card { background:var(--panel); border:1.5px solid var(--border); border-radius:var(--r3); padding:1.75rem; margin-bottom:1.25rem; }
+    .info-card h3 { font-size:1rem; font-weight:800; margin-bottom:1.25rem; }
+    .contact-item { display:flex; gap:0.85rem; align-items:flex-start; margin-bottom:1.1rem; }
+    .ci-icon { width:40px; height:40px; background:var(--v5); border:1px solid var(--v3); border-radius:var(--r1); display:flex; align-items:center; justify-content:center; font-size:1.1rem; flex-shrink:0; }
+    .ci-info .label { font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:var(--txt4); margin-bottom:0.15rem; }
+    .ci-info .value { font-size:0.88rem; font-weight:600; color:var(--txt2); }
+    .ci-info .sub   { font-size:0.75rem; color:var(--txt4); }
 
-    .contact-hero h1 {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: clamp(2.5rem, 6vw, 4.5rem);
-      font-weight: 700;
-      color: #fff;
-      margin-bottom: 1.5rem;
-      text-shadow: 0 2px 20px rgba(0,0,0,0.3);
-      letter-spacing: -0.02em;
-    }
+    /* Quick FAQ */
+    .faq-item { border-bottom:1px solid var(--border); }
+    .faq-q { padding:0.85rem 0; font-size:0.87rem; font-weight:700; cursor:pointer; display:flex; justify-content:space-between; align-items:center; gap:0.5rem; }
+    .faq-q:hover { color:var(--v1); }
+    .faq-a { font-size:0.83rem; color:var(--txt3); padding-bottom:0.85rem; display:none; line-height:1.7; }
+    .faq-a.open { display:block; }
 
-    .contact-hero p {
-      font-size: clamp(1.1rem, 2.5vw, 1.4rem);
-      color: rgba(255,255,255,0.9);
-      max-width: 600px;
-      margin: 0 auto 3rem;
-      line-height: 1.6;
-      font-weight: 300;
-    }
-
-    /* ── Main Content Grid ── */
-    .contact-main {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 2rem 4rem;
-      display: grid;
-      grid-template-columns: 1fr 400px;
-      gap: 3rem;
-      position: relative;
-      z-index: 2;
-    }
-
-    /* ── Contact Form ── */
-    .contact-form-card {
-      background: var(--panel);
-      backdrop-filter: blur(20px);
-      border: 1.5px solid var(--border);
-      border-radius: 24px;
-      padding: 3rem;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.25), 0 0 0 1px rgba(124,92,252,0.12);
-      animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
-    }
-    :root[data-theme="light"] .contact-form-card {
-      background: rgba(255,255,255,0.97);
-      border-color: rgba(124,92,252,0.2);
-    }
-
-    .form-title {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 2.2rem;
-      font-weight: 700;
-      color: var(--txt);
-      margin-bottom: 0.5rem;
-      background: linear-gradient(135deg, var(--v1), var(--v2));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    .form-subtitle {
-      color: var(--txt3);
-      font-size: 1rem;
-      margin-bottom: 2.5rem;
-      line-height: 1.6;
-    }
-
-    .form-group {
-      margin-bottom: 1.5rem;
-    }
-
-    .form-label {
-      display: block;
-      font-size: 0.9rem;
-      font-weight: 600;
-      color: var(--txt2);
-      margin-bottom: 0.5rem;
-    }
-
-    .form-input, .form-select, .form-textarea {
-      width: 100%;
-      padding: 0.8rem 1rem;
-      border: 2px solid var(--border);
-      border-radius: 12px;
-      background: var(--bg);
-      font-size: 1rem;
-      color: var(--txt);
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      font-family: inherit;
-    }
-    :root[data-theme="light"] .form-input,
-    :root[data-theme="light"] .form-select,
-    :root[data-theme="light"] .form-textarea {
-      background: rgba(255,255,255,0.9);
-      border-color: rgba(124,92,252,0.2);
-    }
-
-    .form-input:focus, .form-select:focus, .form-textarea:focus {
-      outline: none;
-      border-color: var(--v1);
-      box-shadow: 0 0 0 3px rgba(124,92,252,0.15);
-    }
-    .form-select option {
-      background: var(--panel);
-      color: var(--txt);
-    }
-
-    .form-textarea {
-      min-height: 120px;
-      resize: vertical;
-      line-height: 1.6;
-    }
-
-    .form-submit {
-      width: 100%;
-      padding: 1rem 2rem;
-      background: linear-gradient(135deg, #7c5cfc, #3d6bff);
-      color: #fff;
-      border: none;
-      border-radius: 14px;
-      font-size: 1rem;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      box-shadow: 0 8px 25px rgba(124,92,252,0.35);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-      font-family: inherit;
-    }
-
-    .form-submit:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 16px 40px rgba(124,92,252,0.5);
-    }
-
-    .form-submit:disabled {
-      opacity: 0.7;
-      cursor: not-allowed;
-      transform: none;
-    }
-
-    /* ── Sidebar ── */
-    .contact-sidebar {
-      display: flex;
-      flex-direction: column;
-      gap: 2rem;
-    }
-
-    .sidebar-card {
-      background: var(--panel);
-      backdrop-filter: blur(20px);
-      border: 1.5px solid var(--border);
-      border-radius: 20px;
-      padding: 2rem;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.22), 0 0 0 1px rgba(124,92,252,0.1);
-      animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both;
-    }
-    :root[data-theme="light"] .sidebar-card {
-      background: rgba(255,255,255,0.97);
-      border-color: rgba(124,92,252,0.2);
-    }
-
-    .sidebar-title {
-      font-size: 1.3rem;
-      font-weight: 700;
-      color: var(--txt);
-      margin-bottom: 1.5rem;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .contact-info-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 1rem;
-      margin-bottom: 1.5rem;
-    }
-
-    .contact-icon {
-      width: 40px;
-      height: 40px;
-      border-radius: 12px;
-      background: linear-gradient(135deg, #7c5cfc, #3d6bff);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #fff;
-      font-size: 1.1rem;
-      flex-shrink: 0;
-    }
-
-    .contact-details h4 {
-      font-size: 0.95rem;
-      font-weight: 600;
-      color: var(--txt);
-      margin-bottom: 0.25rem;
-    }
-
-    .contact-details p {
-      font-size: 0.9rem;
-      color: var(--txt3);
-      line-height: 1.5;
-    }
-
-    .stats-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1.5rem;
-    }
-
-    .stat-item {
-      text-align: center;
-    }
-
-    .stat-number {
-      font-size: 2rem;
-      font-weight: 800;
-      background: linear-gradient(135deg, var(--v1), var(--v2));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      line-height: 1;
-      margin-bottom: 0.5rem;
-    }
-
-    .stat-label {
-      font-size: 0.85rem;
-      color: var(--txt3);
-      font-weight: 600;
-    }
-
-    /* ── Toast Notifications ── */
-    .toast {
-      position: fixed;
-      top: 2rem;
-      right: 2rem;
-      z-index: 1000;
-      padding: 1rem 1.5rem;
-      border-radius: 12px;
-      font-size: 0.9rem;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      transform: translateX(400px);
-      opacity: 0;
-      transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-      backdrop-filter: blur(10px);
-    }
-
-    .toast.show {
-      transform: translateX(0);
-      opacity: 1;
-    }
-
-    .toast.success {
-      background: rgba(34, 197, 94, 0.95);
-      border: 1px solid rgba(34, 197, 94, 0.3);
-      color: #fff;
-    }
-
-    .toast.error {
-      background: rgba(239, 68, 68, 0.95);
-      border: 1px solid rgba(239, 68, 68, 0.3);
-      color: #fff;
-    }
-
-    /* ── Loading Spinner ── */
-    .loading-spinner {
-      width: 20px;
-      height: 20px;
-      border: 2px solid rgba(255,255,255,0.3);
-      border-top: 2px solid #fff;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-
-    /* ── Animations ── */
-    @keyframes slideUp {
-      from {
-        opacity: 0;
-        transform: translateY(30px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    /* ── Responsive ── */
-    @media (max-width: 1024px) {
-      .contact-main {
-        grid-template-columns: 1fr;
-        gap: 2rem;
-      }
-      /* Form on top, contact info below on mobile */
-      .contact-sidebar { order: 2; }
-      .contact-form-card { order: 1; }
-    }
-
-    @media (max-width: 768px) {
-      .contact-hero {
-        padding: 4rem 1rem 3rem;
-      }
-
-      .contact-hero h1 {
-        font-size: 2.5rem;
-      }
-
-      .contact-main {
-        padding: 0 1rem 3rem;
-      }
-
-      .contact-form-card {
-        padding: 2rem 1.5rem;
-      }
-
-      .sidebar-card {
-        padding: 1.5rem;
-      }
-
-      .stats-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    @media (max-width: 480px) {
-      .contact-hero h1 {
-        font-size: 2rem;
-      }
-
-      .contact-form-card {
-        padding: 1.5rem 1rem;
-      }
-
-      .sidebar-card {
-        padding: 1.5rem 1rem;
-      }
-
-      .form-submit {
-        padding: 0.8rem 1.5rem;
-        font-size: 0.95rem;
-      }
+    @media(max-width:768px) {
+      .contact-wrap { grid-template-columns:1fr; }
+      .form-row { grid-template-columns:1fr; }
+      .contact-hero h1 { font-size:1.7rem; }
     }
   </style>
 </head>
 <body>
-  <!-- Background Elements -->
-  <div class="mesh-bg"></div>
-  <div class="orb orb1"></div>
-  <div class="orb orb2"></div>
-  <div class="contact-page">
-    <!-- Navigation — rebuilt by profile-nav.js -->
-    <nav></nav>
+<div class="mesh-bg"></div>
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+<nav></nav>
 
-    <!-- ── Hero Section ── */
-    <div class="contact-hero">
-      <h1>Get Fee Quote<br><span style="background: linear-gradient(135deg, #fff, #e0e7ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">For Your Course</span></h1>
-      <p>Ready to invest in your career? Get personalized fee quotes for our premium training programs with flexible EMI options.</p>
-    </div>
+<div class="page-wrap">
+  <section class="contact-hero">
+    <h1>Get in Touch</h1>
+    <p>Have questions about our courses, payments, or anything else? We're here to help.</p>
+  </section>
 
-    <!-- ── Main Content ── */
-    <div class="contact-main">
-      <!-- Contact Form -->
-      <div class="contact-form-card">
-        <h2 class="form-title">Request Fee Quote</h2>
-        <p class="form-subtitle">Select your preferred course and get a detailed quote with EMI options.</p>
+  <div class="contact-wrap">
+    <!-- Form -->
+    <div>
+      <div class="form-card">
+        <h2>Send Us an Enquiry</h2>
+        <p>We respond to all enquiries within 24 hours on business days.</p>
+        <div class="alert success" id="suc-alert"></div>
+        <div class="alert error"   id="err-alert"></div>
 
-        <form id="contactForm" onsubmit="handleEnquirySubmit(event)" novalidate>
-          <div class="form-group">
-            <label class="form-label">Full Name *</label>
-            <input type="text" id="fullName" class="form-input" placeholder="Your full name" required>
+        <form id="contact-form">
+          <div class="form-row">
+            <div class="f-group"><label>Full Name <span>*</span></label><input type="text" id="c-name" placeholder="Your full name" required></div>
+            <div class="f-group"><label>Email <span>*</span></label><input type="email" id="c-email" placeholder="you@email.com" required></div>
           </div>
-
-          <div class="form-group">
-            <label class="form-label">Email Address *</label>
-            <input type="email" id="email" class="form-input" placeholder="your.email@example.com" required>
+          <div class="form-row">
+            <div class="f-group"><label>Phone</label><input type="tel" id="c-phone" placeholder="10-digit number"></div>
+            <div class="f-group"><label>Enquiry Type <span>*</span></label>
+              <select id="c-type" required>
+                <option value="">Select type…</option>
+                <option value="course">Course Enquiry</option>
+                <option value="payment">Payment / Fee</option>
+                <option value="admission">Admission</option>
+                <option value="technical">Technical Support</option>
+                <option value="complaint">Complaint</option>
+                <option value="general">General</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
           </div>
-
-          <div class="form-group">
-            <label class="form-label">Phone Number</label>
-            <input type="tel" id="phone" class="form-input" placeholder="+91 98765 43210">
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">Course of Interest *</label>
-            <select id="courseInterest" class="form-select" required>
-              <option value="">Select a course</option>
+          <div class="f-group"><label>Related Course (optional)</label>
+            <select id="c-course">
+              <option value="">Not applicable</option>
             </select>
           </div>
-
-          <div class="form-group">
-            <label class="form-label">Preferred Contact Method</label>
-            <select id="contactMethod" class="form-select">
-              <option value="email">Email</option>
-              <option value="phone">Phone Call</option>
-              <option value="whatsapp">WhatsApp</option>
-            </select>
+          <div class="f-group full"><label>Subject <span>*</span></label><input type="text" id="c-subject" placeholder="Brief subject of your enquiry" required></div>
+          <div class="f-group full"><label>Message <span>*</span></label><textarea id="c-message" placeholder="Describe your enquiry in detail…" required></textarea></div>
+          <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap">
+            <button type="submit" class="btn-submit" id="submit-btn">
+              <span id="submit-label">Send Message</span>
+            </button>
+            <span style="font-size:0.78rem;color:var(--txt4)">🔒 Your data is safe and never shared.</span>
           </div>
-
-          <div class="form-group">
-            <label class="form-label">Message *</label>
-            <textarea id="message" class="form-textarea" placeholder="Tell us about your goals, current experience, and how we can help you..." required></textarea>
-          </div>
-
-          <button type="submit" class="form-submit" id="submitBtn">
-            <span>Send Message</span>
-          </button>
         </form>
       </div>
+    </div>
 
-      <!-- Sidebar -->
-      <div class="contact-sidebar">
-        <!-- Contact Information -->
-        <div class="sidebar-card">
-          <h3 class="sidebar-title">
-            <span>📞</span>
-            Contact Information
-          </h3>
-
-          <div class="contact-info-item">
-            <div class="contact-icon">📧</div>
-            <div class="contact-details">
-              <h4>Email</h4>
-              <p><a href="mailto:skillupnowoff@gmail.com" style="color: var(--txt2); text-decoration: none;">skillupnowoff@gmail.com</a></p>
-            </div>
-          </div>
-
-          <div class="contact-info-item">
-            <div class="contact-icon">📱</div>
-            <div class="contact-details">
-              <h4>Phone & WhatsApp</h4>
-              <p><a href="https://wa.me/919876543210" target="_blank" style="color: var(--txt2); text-decoration: none;">+91 98765 43210</a><br>
-              <a href="https://wa.me/918765432109" target="_blank" style="color: var(--txt2); text-decoration: none;">+91 87654 32109</a></p>
-            </div>
-          </div>
-
-          <div class="contact-info-item">
-            <div class="contact-icon">📍</div>
-            <div class="contact-details">
-              <h4>Address</h4>
-              <p>123 Business District<br>Mumbai, Maharashtra 400001<br>India</p>
-            </div>
-          </div>
-
-          <div class="contact-info-item">
-            <div class="contact-icon">🕒</div>
-            <div class="contact-details">
-              <h4>Business Hours</h4>
-              <p>Mon - Fri: 9:00 AM - 6:00 PM<br>Sat: 10:00 AM - 4:00 PM<br>Sun: Closed</p>
-            </div>
+    <!-- Sidebar -->
+    <div>
+      <div class="info-card">
+        <h3>Contact Information</h3>
+        <div class="contact-item">
+          <div class="ci-icon">📧</div>
+          <div class="ci-info">
+            <div class="label">Email</div>
+            <div class="value">support@skillupnow.com</div>
+            <div class="sub">admin@skillupnowadmin.org</div>
           </div>
         </div>
-
-        <!-- Stats -->
-        <div class="sidebar-card">
-          <h3 class="sidebar-title">
-            <span>📊</span>
-            Our Impact
-          </h3>
-
-          <div class="stats-grid">
-            <div class="stat-item">
-              <div class="stat-number" id="students-count">500+</div>
-              <div class="stat-label">Students Trained</div>
-            </div>
-            <div class="stat-item">
-              <div class="stat-number" id="courses-count">10+</div>
-              <div class="stat-label">Courses Offered</div>
-            </div>
-            <div class="stat-item">
-              <div class="stat-number" id="rating-count">4.9</div>
-              <div class="stat-label">Average Rating</div>
-            </div>
-            <div class="stat-item">
-              <div class="stat-number" id="response-count">2hrs</div>
-              <div class="stat-label">Avg Response Time</div>
-            </div>
+        <div class="contact-item">
+          <div class="ci-icon">📞</div>
+          <div class="ci-info">
+            <div class="label">Phone</div>
+            <div class="value">+91 00000 00000</div>
+            <div class="sub">Mon–Sat, 9 AM – 6 PM IST</div>
+          </div>
+        </div>
+        <div class="contact-item">
+          <div class="ci-icon">💬</div>
+          <div class="ci-info">
+            <div class="label">WhatsApp</div>
+            <div class="value">+91 00000 00000</div>
+            <div class="sub">Quick support available</div>
+          </div>
+        </div>
+        <div class="contact-item">
+          <div class="ci-icon">📍</div>
+          <div class="ci-info">
+            <div class="label">Office</div>
+            <div class="value">SkillUpNow Learning</div>
+            <div class="sub">Chennai, Tamil Nadu, India</div>
           </div>
         </div>
       </div>
+
+      <div class="info-card">
+        <h3>Quick FAQs</h3>
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">How do I enroll in a course? <span>+</span></div>
+          <div class="faq-a">Browse our courses page, click "Enroll Now", log in or create an account, choose full or EMI payment, and pay via Razorpay to get instant access.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">What payment methods are accepted? <span>+</span></div>
+          <div class="faq-a">We accept UPI, Credit/Debit Cards, Net Banking, Wallets (via Razorpay), Bank Transfer, and Cash at our office. EMI is available on select courses.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">Can I get a refund? <span>+</span></div>
+          <div class="faq-a">Refunds are processed within 7 days of request if within the first 3 days of enrollment. Please contact us for specific cases.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">How are live classes conducted? <span>+</span></div>
+          <div class="faq-a">All live classes are conducted via Google Meet. Links are sent by email before each session. Recordings are uploaded to your dashboard after class.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">How do I become a mentor? <span>+</span></div>
+          <div class="faq-a">Visit our <a href="mentor-signup.html" style="color:var(--v1)">Mentor Signup</a> page, complete your profile, upload credentials, and await admin approval.</div>
+        </div>
+      </div>
     </div>
-
-    <!-- Toast Notifications -->
-    <div class="toast" id="contact-toast"></div>
   </div>
+</div>
 
-  <!-- Footer — rebuilt by profile-nav.js -->
-  <footer></footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../config/supabase-config.js"></script>
+<script src="../js/theme.js"></script>
+<script src="../js/profile-nav.js"></script>
+<script>
+const db = new SupabaseConfig();
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="../config/supabase-config.js"></script>
-  <script src="../js/theme.js"></script>
-  <script src="../js/profile-nav.js"></script>
+// Load courses for dropdown
+async function loadCourses() {
+  const { data } = await db.client.from('courses').select('id,name').eq('is_active',true).order('name');
+  const sel = document.getElementById('c-course');
+  (data||[]).forEach(c => { const o = document.createElement('option'); o.value = c.id; o.textContent = c.name; sel.appendChild(o); });
+}
 
-  <script>
-    /* ── Load Courses ── */
-    async function loadCourses() {
-      try {
-        if (!window.supabaseConfig) throw new Error('Database not ready');
-        const result = await window.supabaseConfig.getAllCourses();
-        if (result.success && result.data) {
-          populateCourseSelect(result.data);
-        } else {
-          populateFallbackCourses();
-        }
-      } catch (e) {
-        console.warn('Failed to load courses:', e);
-        populateFallbackCourses();
-      }
+// Pre-fill if logged in
+(async () => {
+  const { data: { session } } = await db.client.auth.getSession();
+  if (session) {
+    const { data: p } = await db.client.from('user_profiles').select('full_name,email,phone').eq('id', session.user.id).single();
+    if (p) {
+      document.getElementById('c-name').value  = p.full_name || '';
+      document.getElementById('c-email').value = p.email || '';
+      document.getElementById('c-phone').value = p.phone || '';
     }
+  }
+  loadCourses();
+})();
 
-    function populateCourseSelect(courses) {
-      const select = document.getElementById('courseInterest');
-      select.innerHTML = '<option value="">Select a course</option>' +
-        courses.map(course => `<option value="${course.id}">${course.name}</option>`).join('');
-    }
+document.getElementById('contact-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById('submit-btn');
+  const label = document.getElementById('submit-label');
+  btn.disabled = true;
+  label.innerHTML = '<span style="display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.7s linear infinite"></span> Sending…';
 
-    function populateFallbackCourses() {
-      const select = document.getElementById('courseInterest');
-      select.innerHTML = `
-        <option value="">Select a course</option>
-        <option value="1">Communication Mastery</option>
-        <option value="2">Leadership Excellence</option>
-        <option value="3">Public Speaking Pro</option>
-        <option value="4">Soft Skills Development</option>
-        <option value="5">Business Etiquette</option>
-        <option value="6">Presentation Skills</option>
-        <option value="7">Negotiation Mastery</option>
-        <option value="8">Team Building</option>
-        <option value="9">Time Management</option>
-        <option value="10">Emotional Intelligence</option>
-      `;
-    }
-
-    /* ── Form Submission ── */
-    async function handleEnquirySubmit(e) {
-      e.preventDefault();
-
-      const fullName = document.getElementById('fullName').value.trim();
-      const email = document.getElementById('email').value.trim();
-      const phone = document.getElementById('phone').value.trim();
-      const courseId = document.getElementById('courseInterest').value;
-      const contactMethod = document.getElementById('contactMethod').value;
-      const message = document.getElementById('message').value.trim();
-
-      // Validation
-      if (!fullName || fullName.length < 2) {
-        showToast('Please enter your full name (at least 2 characters)', 'error');
-        return;
-      }
-
-      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        showToast('Please enter a valid email address', 'error');
-        return;
-      }
-
-      if (phone && !/^\+?\d{7,15}$/.test(phone.replace(/[\s\-()]/g, ''))) {
-        showToast('Please enter a valid phone number (7–15 digits)', 'error');
-        return;
-      }
-
-      if (!message || message.length < 10) {
-        showToast('Please write at least 10 characters in your message', 'error');
-        return;
-      }
-
-      // Submit
-      const submitBtn = document.getElementById('submitBtn');
-      submitBtn.disabled = true;
-      submitBtn.innerHTML = '<div class="loading-spinner"></div><span>Sending...</span>';
-
-      try {
-        if (!window.supabaseConfig) throw new Error('Database not available');
-        const client = window.supabaseConfig.getClient();
-
-        const enquiryData = {
-          full_name: fullName,
-          email: email,
-          phone: phone || null,
-          course_id: courseId,
-          contact_method: contactMethod,
-          message: message,
-          status: 'new',
-          created_at: new Date().toISOString()
-        };
-
-        const { error } = await client.from('contact_enquiries').insert(enquiryData);
-        if (error) throw error;
-
-        // Success
-        document.getElementById('contactForm').reset();
-        showToast('Message sent successfully! We\'ll get back to you within 24 hours.', 'success');
-
-      } catch (error) {
-        console.error('Enquiry submission error:', error);
-        showToast('Failed to send message. Please try again or contact us directly.', 'error');
-      } finally {
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = '<span>Send Message</span>';
-      }
-    }
-
-    /* ── Load Stats ── */
-    async function loadStats() {
-      try {
-        if (!window.supabaseConfig) throw new Error('Database not ready');
-        const client = window.supabaseConfig.getClient();
-
-        // Get student count
-        const { count: studentCount } = await client
-          .from('user_enrollments')
-          .select('*', { count: 'exact', head: true });
-
-        // Get course count
-        const { count: courseCount } = await client
-          .from('courses')
-          .select('*', { count: 'exact', head: true });
-
-        // Get average rating
-        const { data: ratings } = await client
-          .from('feedback')
-          .select('rating')
-          .eq('is_approved', true);
-
-        const avgRating = ratings && ratings.length ?
-          (ratings.reduce((s, r) => s + (parseInt(r.rating) || 5), 0) / ratings.length).toFixed(1) : '4.9';
-
-        // Update stats
-        document.getElementById('students-count').textContent = studentCount || '500+';
-        document.getElementById('courses-count').textContent = courseCount || '10+';
-        document.getElementById('rating-count').textContent = avgRating;
-
-      } catch (e) {
-        console.warn('Failed to load stats:', e);
-        // Keep default values
-      }
-    }
-
-    /* ── Toast Notifications ── */
-    function showToast(message, type) {
-      const toast = document.getElementById('contact-toast');
-      toast.className = `toast ${type}`;
-      toast.innerHTML = `
-        <span>${type === 'success' ? '✅' : '❌'}</span>
-        <span>${message}</span>
-      `;
-      setTimeout(() => toast.classList.add('show'), 100);
-      setTimeout(() => toast.classList.remove('show'), 5000);
-    }
-
-    /* ── Enter Key Submission ── */
-    function setupEnterKey() {
-      const form = document.getElementById('contactForm');
-      if (!form) return;
-      form.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
-          e.preventDefault();
-          form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
-        }
-      });
-    }
-
-    /* ── Initialize ── */
-    document.addEventListener('DOMContentLoaded', () => {
-      loadCourses();
-      loadStats();
-      setupEnterKey();
+  try {
+    const { data: { session } } = await db.client.auth.getSession();
+    const courseId = document.getElementById('c-course').value || null;
+    await db.client.from('inquiries').insert({
+      user_id: session?.user?.id || null,
+      name:            document.getElementById('c-name').value.trim(),
+      email:           document.getElementById('c-email').value.trim(),
+      phone:           document.getElementById('c-phone').value.trim() || null,
+      inquiry_type:    document.getElementById('c-type').value,
+      course_id:       courseId,
+      subject:         document.getElementById('c-subject').value.trim(),
+      inquiry_details: document.getElementById('c-message').value.trim(),
+      source:          'website',
+      status:          'open',
+      priority:        'normal',
     });
-  </script>
+    // Also save as form_submission
+    await db.client.from('form_submissions').insert({
+      user_id: session?.user?.id || null,
+      form_type: 'contact',
+      course_id: courseId,
+      form_data: {
+        name: document.getElementById('c-name').value.trim(),
+        email: document.getElementById('c-email').value.trim(),
+        phone: document.getElementById('c-phone').value.trim(),
+        type: document.getElementById('c-type').value,
+        subject: document.getElementById('c-subject').value.trim(),
+        message: document.getElementById('c-message').value.trim(),
+      },
+    });
+    const el = document.getElementById('suc-alert');
+    el.textContent = '✅ Your message has been received! We\'ll respond within 24 hours.';
+    el.classList.add('show');
+    document.getElementById('contact-form').reset();
+  } catch (err) {
+    const el = document.getElementById('err-alert');
+    el.textContent = 'Error: ' + err.message;
+    el.classList.add('show');
+  }
+  btn.disabled = false;
+  label.textContent = 'Send Message';
+});
+
+function toggleFaq(el) {
+  const answer = el.nextElementSibling;
+  const icon   = el.querySelector('span');
+  const isOpen = answer.classList.contains('open');
+  document.querySelectorAll('.faq-a').forEach(a => a.classList.remove('open'));
+  document.querySelectorAll('.faq-q span').forEach(s => s.textContent = '+');
+  if (!isOpen) { answer.classList.add('open'); icon.textContent = '−'; }
+}
+</script>
+<footer></footer>
 </body>
 </html>

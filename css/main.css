@@ -109,135 +109,8 @@ section, nav, footer {
   z-index: 1;
 }
 
-/* ── Premium 3D Liquid Chrome Cursor ── */
-*, a, button, input, select, textarea, label {
-  cursor: none !important;
-}
-
-/* 3D metallic sphere */
-#cursor {
-  width: 11px;
-  height: 11px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 32% 28%,
-    #ffffff 0%,
-    #dcdcff 20%,
-    #9898e8 45%,
-    #5050bb 72%,
-    #1a1a6a 100%
-  );
-  box-shadow:
-    0 0 10px 3px rgba(124,92,252,0.45),
-    inset 0 1px 2px rgba(255,255,255,0.85);
-  position: fixed;
-  pointer-events: none;
-  z-index: 99999;
-  transform: translate(-50%, -50%);
-  transition: width 0.14s ease, height 0.14s ease, opacity 0.15s, box-shadow 0.2s;
-  will-change: left, top;
-  animation: cursor-sphere-pulse 2.5s ease-in-out infinite;
-}
-@keyframes cursor-sphere-pulse {
-  0%, 100% { box-shadow: 0 0 10px 3px rgba(124,92,252,0.45), inset 0 1px 2px rgba(255,255,255,0.85); }
-  50%       { box-shadow: 0 0 18px 6px rgba(124,92,252,0.25), inset 0 1px 2px rgba(255,255,255,0.85); }
-}
-
-/* Diamond-shaped outer ring */
-#cursor-ring {
-  width: 36px;
-  height: 36px;
-  position: fixed;
-  pointer-events: none;
-  z-index: 99998;
-  transform: translate(-50%, -50%) rotate(45deg);
-  border-radius: 7px;
-  border: 1.5px solid rgba(140,100,255,0.55);
-  box-shadow: 0 0 8px rgba(124,92,252,0.2), inset 0 0 5px rgba(124,92,252,0.08);
-  transition: width 0.26s cubic-bezier(.23,1,.32,1), height 0.26s cubic-bezier(.23,1,.32,1), border-color 0.22s, opacity 0.15s;
-  will-change: left, top;
-  animation: cursor-ring-3d 4s ease-in-out infinite;
-}
-@keyframes cursor-ring-3d {
-  0%, 100% { transform: translate(-50%, -50%) rotate(45deg) scaleY(1);   border-color: rgba(124,92,252,0.55); }
-  50%       { transform: translate(-50%, -50%) rotate(48deg) scaleY(0.88); border-color: rgba(180,140,255,0.75); }
-}
-
-/* Conic shimmer sweep on hover */
-#cursor-ring::after {
-  content: '';
-  position: absolute;
-  inset: -2px;
-  border-radius: 8px;
-  background: conic-gradient(
-    rgba(124,92,252,0.7) 0deg,
-    rgba(255,255,255,0.35) 80deg,
-    rgba(0,207,238,0.5) 180deg,
-    rgba(124,92,252,0.7) 280deg,
-    transparent 360deg
-  );
-  animation: cursor-conic-spin 2.8s linear infinite;
-  opacity: 0;
-  transition: opacity 0.22s;
-}
-@keyframes cursor-conic-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-
-/* Hover state */
-body.cursor-hover #cursor {
-  width: 15px;
-  height: 15px;
-  background: radial-gradient(circle at 32% 28%, #ffffff 0%, #e0e0ff 15%, #a0a0f8 42%, #6868d8 70%, #2020a0 100%);
-  box-shadow: 0 0 16px 5px rgba(124,92,252,0.6), inset 0 1px 3px rgba(255,255,255,0.9);
-}
-body.cursor-hover #cursor-ring {
-  width: 50px;
-  height: 50px;
-  border-color: rgba(180,140,255,0.85);
-  box-shadow: 0 0 16px rgba(124,92,252,0.35), inset 0 0 8px rgba(124,92,252,0.12);
-}
-body.cursor-hover #cursor-ring::after { opacity: 1; }
-
-/* Click state — elastic snap */
-body.cursor-click #cursor {
-  width: 6px;
-  height: 6px;
-  box-shadow: 0 0 22px 8px rgba(124,92,252,0.75);
-}
-body.cursor-click #cursor-ring {
-  width: 24px;
-  height: 24px;
-  border-color: rgba(200,180,255,0.9);
-}
-
-/* Input focus — blinking bar */
-body.cursor-input #cursor {
-  width: 2px;
-  height: 20px;
-  border-radius: 1px;
-  background: linear-gradient(to bottom, #b0a0ff, #7060ee);
-  box-shadow: 0 0 8px 3px rgba(124,92,252,0.45);
-  animation: cursor-blink 1s ease infinite;
-}
-@keyframes cursor-blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
-
-/* Light mode */
-:root[data-theme="light"] #cursor {
-  background: radial-gradient(circle at 32% 28%, #ffffff 0%, #e8e8ff 20%, #8080d0 48%, #4040a0 76%, #101060 100%);
-  box-shadow: 0 0 10px 3px rgba(90,60,200,0.4), inset 0 1px 2px rgba(255,255,255,0.85);
-}
-:root[data-theme="light"] #cursor-ring { border-color: rgba(100,70,220,0.5); }
-
-/* Tablet */
-@media (min-width: 769px) and (max-width: 1024px) {
-  #cursor { width: 9px; height: 9px; }
-  #cursor-ring { width: 28px; height: 28px; }
-  #cursor-ring::after { display: none; }
-}
-
-/* Mobile: disable custom cursor */
-@media (hover: none) and (pointer: coarse) {
-  #cursor, #cursor-ring { display: none !important; }
-  *, a, button, input, select, textarea, label { cursor: auto !important; }
-}
+/* ── Neural Pointer cursor — injected on all pages via profile-nav.js ── */
+/* Neural cursor canvas is self-contained; no extra CSS needed here */
 
 /* ── Admin Nav Link ── */
 .nav-admin-link {
@@ -1551,3 +1424,108 @@ select.styled-select:focus {
   line-height: 1.4;
   margin: 0;
 }
+
+/* ═══════════════════════════════════════════
+   SITE FOOTER — canonical footer styles
+   ═══════════════════════════════════════════ */
+.site-footer {
+  position: relative;
+  z-index: 1;
+  background: rgba(8,6,24,0.96);
+  border-top: 1px solid rgba(124,92,252,0.15);
+}
+:root[data-theme="light"] .site-footer {
+  background: rgba(248,246,255,0.98);
+  border-top-color: rgba(107,63,216,0.12);
+}
+
+.footer-brand-col {}
+.footer-links-col {}
+
+.footer-col-title {
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--txt4);
+  margin-bottom: 0.9rem;
+}
+.footer-col-links {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.footer-link {
+  font-size: 0.84rem;
+  color: var(--txt3);
+  text-decoration: none;
+  transition: color 0.2s;
+  font-weight: 500;
+}
+.footer-link:hover { color: var(--v2); }
+
+.footer-contact-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  color: var(--txt3);
+  text-decoration: none;
+  transition: color 0.2s;
+  font-weight: 500;
+}
+.footer-contact-link:hover { color: var(--v2); }
+
+.footer-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  border-top: 1px solid rgba(124,92,252,0.1);
+  max-width: 1100px;
+  margin: 0 auto;
+}
+.footer-copy {
+  font-size: 0.78rem;
+  color: var(--txt4);
+  font-weight: 500;
+}
+.footer-socials {
+  display: flex;
+  gap: 0.6rem;
+}
+.footer-social-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--txt3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  font-size: 0.85rem;
+  transition: all 0.22s;
+}
+.footer-social-icon:hover {
+  background: rgba(124,92,252,0.1);
+  border-color: rgba(124,92,252,0.4);
+  color: var(--v2);
+  transform: translateY(-2px);
+}
+
+/* ── Login wrapper display ── */
+#login-wrapper { gap: 0.6rem; }
+
+/* ── nav.scrolled elevation ── */
+nav.scrolled {
+  height: 66px !important;
+  box-shadow: 0 4px 24px rgba(0,0,0,.35);
+}
+
+/* ── Signup button: always visible inside login-wrapper (login-wrapper is hidden when logged in) ── */
+#cta-btn { display: inline-flex; }

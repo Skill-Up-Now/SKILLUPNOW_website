@@ -1234,6 +1234,614 @@ class SupabaseConfig {
       return { total_users: 0, new_enquiries: 0, pending_emi: 0, total_revenue: 0 };
     }
   }
+
+  // ==================== MENTOR MANAGEMENT ====================
+
+  async getMentorByUserId(userId) {
+    try {
+      const { data, error } = await this.client
+        .from('mentors')
+        .select('*, user_profiles(full_name, email, phone, profile_picture_url)')
+        .eq('user_id', userId)
+        .maybeSingle();
+      if (error) throw error;
+      return { success: true, data };
+    } catch (error) {
+      console.error('Error fetching mentor:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  async applyAsMentor(userId, mentorData, files = {}) {
+    try {
+      // Upload documents to Supabase Storage
+      const uploads = {};
+      const bucket = 'mentor-docs';
+      const uploadFile = async (key, file) => {
+        if (!file) return null;
+        const ext = file.name.split('.').pop();
+        const path = `${userId}/${key}.${ext}`;
+        const { error } = await this.client.storage.from(bucket).upload(path, file, { upsert: true });
+        if (error) throw error;
+        return this.client.storage.from(bucket).getPublicUrl(path).data.publicUrl;
+      };
+
+      uploads.photo_url       = await uploadFile('photo', files.photo);
+      uploads.pan_url         = await uploadFile('pan', files.pan);
+      uploads.aadhaar_url     = await uploadFile('aadhaar', files.aadhaar);
+      uploads.address_proof_url = await uploadFile('address_proof', files.address_proof);
+
+      if (files.certificates?.length) {
+        const certUrls = [];
+        for (let i = 0; i < files.certificates.length; i++) {
+          const url = await uploadFile(`cert_${i}`, files.certificates[i]);
+          if (url) certUrls.push(url);
+        }
+        uploads.certificate_urls = certUrls;
+      }
+
+      const { data, error } = await this.client
+        .from('mentors')
+        .upsert({
+          user_id:              userId,
+          bio:                  mentorData.bio || null,
+          linkedin_url:         mentorData.linkedin_url || null,
+          years_of_experience:  parseInt(mentorData.years_of_experience) || null,
+          areas_of_expertise:   mentorData.areas_of_expertise || [],
+          highest_qualification: mentorData.highest_qualification || null,
+          current_employer:     mentorData.current_employer || null,
+          pan_number:           mentorData.pan_number || null,
+          aadhaar_number:       mentorData.aadhaar_number || null,
+          address:              mentorData.address || null,
+          ...uploads,
+          approval_status:      'pending',
+        }, { onConflict: 'user_id' })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Log form submission
+      await this.saveFormSubmission(userId, 'mentor_signup', null, {
+        ...mentorData,
+        mentor_id: data.id,
+      });
+
+      await this.logAuditEvent(userId, 'mentor_applied', 'mentor', data.id);
+      return { success: true, data, message: 'Application submitted! Awaiting admin approval.' };
+    } catch (error) {
+      console.error('Error applying as mentor:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  async getAllMentors(statusFilter = null) {
+    try {
+      let query = this.client
+        .from('mentors')
+        .select('*, user_profiles(full_name, email, phone, profile_picture_url)')
+        .order('created_at', { ascending: false });
+      if (statusFilter) query = query.eq('approval_status', statusFilter);
+      const { data, error } = await query;
+      if (error) throw error;
+      return { success: true, data: data || [] };
+    } catch (error) {
+      console.error('Error fetching mentors:', error);
+      return { success: false, data: [], error: error.message };
+    }
+  }
+
+  async approveMentor(mentorId, status, adminUserId, notes = null) {
+    try {
+      const updates = {
+        approval_status: status,
+        approved_by:     adminUserId,
+        approved_at:     new Date().toISOString(),
+        admin_notes:     notes,
+        updated_at:      new Date().toISOString(),
+      };
+      const { data, error } = await this.client
+        .from('mentors')
+        .update(updates)
+        .eq('id', mentorId)
+        .select()
+        .single();
+      if (error) throw error;
+      await this.logAuditEvent(adminUserId, `mentor_${status}`, 'mentor', mentorId);
+      return { success: true, data, message: `Mentor ${status} successfully.` };
+    } catch (error) {
+      console.error('Error approving mentor:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  async updateMentorSalary(mentorId, salaryData, adminUserId) {
+    try {
+      const { data, error } = await this.client
+        .from('mentors')
+        .update({
+          salary_per_month: parseFloat(salaryData.salary_per_month) || null,
+          salary_type:      salaryData.salary_type || 'monthly',
+          updated_at:       new Date().toISOString(),
+        })
+        .eq('id', mentorId)
+        .select()
+        .single();
+      if (error) throw error;
+      await this.logAuditEvent(adminUserId, 'mentor_salary_updated', 'mentor', mentorId);
+      return { success: true, data };
+    } catch (error) {
+      console.error('Error updating mentor salary:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // ==================== MENTOR BATCHES ====================
+
+  async getMentorBatches(mentorId) {
+    try {
+      const { data, error } = await this.client
+        .from('mentor_batches')
+        .select('*, courses(name,fee,duration_weeks), enrollments(count)')
+        .eq('mentor_id', mentorId)
+        .order('start_date', { ascending: false });
+      if (error) throw error;
+      return { success: true, data: data || [] };
+    } catch (error) {
+      console.error('Error fetching mentor batches:', error);
+      return { success: false, data: [], error: error.message };
+    }
+  }
+
+  async createBatch(batchData, adminUserId) {
+    try {
+      const { data, error } = await this.client
+        .from('mentor_batches')
+        .insert([{
+          course_id:      batchData.course_id,
+          mentor_id:      batchData.mentor_id,
+          batch_name:     batchData.batch_name || `Batch ${Date.now()}`,
+          start_date:     batchData.start_date || null,
+          end_date:       batchData.end_date || null,
+          max_students:   parseInt(batchData.max_students) || 30,
+          schedule_info:  batchData.schedule_info || null,
+          status:         batchData.status || 'upcoming',
+          created_by:     adminUserId,
+        }])
+        .select()
+        .single();
+      if (error) throw error;
+      await this.logAuditEvent(adminUserId, 'batch_created', 'mentor_batch', data.id);
+      return { success: true, data };
+    } catch (error) {
+      console.error('Error creating batch:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  async updateBatch(batchId, updates, adminUserId) {
+    try {
+      updates.updated_at = new Date().toISOString();
+      const { data, error } = await this.client
+        .from('mentor_batches')
+        .update(updates)
+        .eq('id', batchId)
+        .select()
+        .single();
+      if (error) throw error;
+      await this.logAuditEvent(adminUserId, 'batch_updated', 'mentor_batch', batchId);
+      return { success: true, data };
+    } catch (error) {
+      console.error('Error updating batch:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // ==================== CLASS SCHEDULES ====================
+
+  async getClassSchedules(batchId = null, mentorId = null, userId = null) {
+    try {
+      let query = this.client
+        .from('class_schedules')
+        .select('*, mentor_batches(batch_name, courses(name)), mentors(user_profiles(full_name))')
+        .order('scheduled_at', { ascending: true });
+      if (batchId)   query = query.eq('batch_id', batchId);
+      if (mentorId)  query = query.eq('mentor_id', mentorId);
+      const { data, error } = await query;
+      if (error) throw error;
+      return { success: true, data: data || [] };
+    } catch (error) {
+      console.error('Error fetching schedules:', error);
+      return { success: false, data: [], error: error.message };
+    }
+  }
+
+  async createSchedule(scheduleData, createdBy) {
+    try {
+      const { data, error } = await this.client
+        .from('class_schedules')
+        .insert([{
+          batch_id:        scheduleData.batch_id,
+          mentor_id:       scheduleData.mentor_id,
+          title:           scheduleData.title || 'Live Class',
+          description:     scheduleData.description || null,
+          scheduled_at:    scheduleData.scheduled_at,
+          duration_minutes: parseInt(scheduleData.duration_minutes) || 60,
+          meet_link:       scheduleData.meet_link || null,
+          recording_url:   scheduleData.recording_url || null,
+          status:          scheduleData.status || 'scheduled',
+          created_by:      createdBy,
+        }])
+        .select()
+        .single();
+      if (error) throw error;
+      return { success: true, data };
+    } catch (error) {
+      console.error('Error creating schedule:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  async updateSchedule(scheduleId, updates) {
+    try {
+      updates.updated_at = new Date().toISOString();
+      const { data, error } = await this.client
+        .from('class_schedules')
+        .update(updates)
+        .eq('id', scheduleId)
+        .select()
+        .single();
+      if (error) throw error;
+      return { success: true, data };
+    } catch (error) {
+      console.error('Error updating schedule:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  async markAttendance(scheduleId, userId, status = 'present') {
+    try {
+      const { data, error } = await this.client
+        .from('class_attendance')
+        .upsert({ schedule_id: scheduleId, user_id: userId, status }, { onConflict: 'schedule_id,user_id' })
+        .select()
+        .single();
+      if (error) throw error;
+      return { success: true, data };
+    } catch (error) {
+      console.error('Error marking attendance:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  async getAttendanceForClass(scheduleId) {
+    try {
+      const { data, error } = await this.client
+        .from('class_attendance')
+        .select('*, user_profiles(full_name, email, profile_picture_url)')
+        .eq('schedule_id', scheduleId);
+      if (error) throw error;
+      return { success: true, data: data || [] };
+    } catch (error) {
+      console.error('Error fetching attendance:', error);
+      return { success: false, data: [], error: error.message };
+    }
+  }
+
+  // ==================== FORM SUBMISSIONS ====================
+
+  async saveFormSubmission(userId, formType, courseId, formData) {
+    try {
+      const { data, error } = await this.client
+        .from('form_submissions')
+        .insert([{
+          user_id:   userId || null,
+          form_type: formType,
+          course_id: courseId || null,
+          form_data: formData || {},
+          status:    'received',
+        }])
+        .select()
+        .single();
+      if (error) throw error;
+      return { success: true, data };
+    } catch (error) {
+      console.error('Error saving form submission:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  async getFormSubmissions(formType = null, limit = 100) {
+    try {
+      let query = this.client
+        .from('form_submissions')
+        .select('*, user_profiles(full_name, email)')
+        .order('submitted_at', { ascending: false })
+        .limit(limit);
+      if (formType) query = query.eq('form_type', formType);
+      const { data, error } = await query;
+      if (error) throw error;
+      return { success: true, data: data || [] };
+    } catch (error) {
+      console.error('Error fetching form submissions:', error);
+      return { success: false, data: [], error: error.message };
+    }
+  }
+
+  async updateFormSubmissionStatus(submissionId, status, adminNotes = null) {
+    try {
+      const { data, error } = await this.client
+        .from('form_submissions')
+        .update({ status, admin_notes: adminNotes, updated_at: new Date().toISOString() })
+        .eq('id', submissionId)
+        .select()
+        .single();
+      if (error) throw error;
+      return { success: true, data };
+    } catch (error) {
+      console.error('Error updating form submission:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // ==================== REVIEWS ====================
+
+  async getReviews(courseId = null, approvedOnly = false, limit = 50) {
+    try {
+      let query = this.client
+        .from('reviews')
+        .select('*, user_profiles(full_name, profile_picture_url), courses(name)')
+        .order('created_at', { ascending: false })
+        .limit(limit);
+      if (courseId)    query = query.eq('course_id', courseId);
+      if (approvedOnly) query = query.eq('is_approved', true);
+      const { data, error } = await query;
+      if (error) throw error;
+      return { success: true, data: data || [] };
+    } catch (error) {
+      console.error('Error fetching reviews:', error);
+      return { success: false, data: [], error: error.message };
+    }
+  }
+
+  async approveReview(reviewId, adminUserId) {
+    try {
+      const { data, error } = await this.client
+        .from('reviews')
+        .update({ is_approved: true, updated_at: new Date().toISOString() })
+        .eq('id', reviewId)
+        .select()
+        .single();
+      if (error) throw error;
+      await this.logAuditEvent(adminUserId, 'review_approved', 'review', reviewId);
+      return { success: true, data };
+    } catch (error) {
+      console.error('Error approving review:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  async deleteReview(reviewId, adminUserId) {
+    try {
+      const { error } = await this.client.from('reviews').delete().eq('id', reviewId);
+      if (error) throw error;
+      await this.logAuditEvent(adminUserId, 'review_deleted', 'review', reviewId);
+      return { success: true };
+    } catch (error) {
+      console.error('Error deleting review:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // ==================== INQUIRIES ====================
+
+  async getInquiries(statusFilter = null, limit = 100) {
+    try {
+      let query = this.client
+        .from('inquiries')
+        .select('*, courses(name)')
+        .order('created_at', { ascending: false })
+        .limit(limit);
+      if (statusFilter) query = query.eq('status', statusFilter);
+      const { data, error } = await query;
+      if (error) throw error;
+      return { success: true, data: data || [] };
+    } catch (error) {
+      console.error('Error fetching inquiries:', error);
+      return { success: false, data: [], error: error.message };
+    }
+  }
+
+  async updateInquiryStatus(inquiryId, status, adminNotes = null) {
+    try {
+      const { data, error } = await this.client
+        .from('inquiries')
+        .update({ status, admin_notes: adminNotes, updated_at: new Date().toISOString() })
+        .eq('id', inquiryId)
+        .select()
+        .single();
+      if (error) throw error;
+      return { success: true, data };
+    } catch (error) {
+      console.error('Error updating inquiry:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // ==================== REPORTS & ANALYTICS ====================
+
+  async getAdminDashboardView() {
+    try {
+      const { data, error } = await this.client
+        .from('v_admin_dashboard')
+        .select('*')
+        .single();
+      if (error) throw error;
+      return { success: true, data };
+    } catch (error) {
+      console.error('Error fetching admin dashboard view:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  async getRevenueByCourse() {
+    try {
+      const { data, error } = await this.client
+        .from('v_revenue_by_course')
+        .select('*')
+        .order('total_revenue', { ascending: false })
+        .limit(20);
+      if (error) throw error;
+      return { success: true, data: data || [] };
+    } catch (error) {
+      console.error('Error fetching revenue by course:', error);
+      return { success: false, data: [], error: error.message };
+    }
+  }
+
+  async getRevenueByMonth() {
+    try {
+      const { data, error } = await this.client
+        .from('v_revenue_by_month')
+        .select('*')
+        .order('month', { ascending: false })
+        .limit(12);
+      if (error) throw error;
+      return { success: true, data: data || [] };
+    } catch (error) {
+      console.error('Error fetching revenue by month:', error);
+      return { success: false, data: [], error: error.message };
+    }
+  }
+
+  async getMentorPerformance() {
+    try {
+      const { data, error } = await this.client
+        .from('v_mentor_performance')
+        .select('*')
+        .order('avg_rating', { ascending: false });
+      if (error) throw error;
+      return { success: true, data: data || [] };
+    } catch (error) {
+      console.error('Error fetching mentor performance:', error);
+      return { success: false, data: [], error: error.message };
+    }
+  }
+
+  async getUserEnrollmentSummary(userId = null) {
+    try {
+      let query = this.client.from('v_user_enrollment_summary').select('*');
+      if (userId) query = query.eq('user_id', userId);
+      const { data, error } = await query;
+      if (error) throw error;
+      return { success: true, data: userId ? (data?.[0] || null) : (data || []) };
+    } catch (error) {
+      console.error('Error fetching user enrollment summary:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  async getPaymentReport(startDate = null, endDate = null) {
+    try {
+      let query = this.client
+        .from('payments')
+        .select('*, user_profiles(full_name, email), courses(name)')
+        .eq('payment_status', 'completed')
+        .order('payment_date', { ascending: false });
+      if (startDate) query = query.gte('payment_date', startDate);
+      if (endDate)   query = query.lte('payment_date', endDate);
+      const { data, error } = await query;
+      if (error) throw error;
+
+      const total = (data || []).reduce((sum, p) => sum + parseFloat(p.amount || 0), 0);
+      return { success: true, data: data || [], total };
+    } catch (error) {
+      console.error('Error fetching payment report:', error);
+      return { success: false, data: [], total: 0, error: error.message };
+    }
+  }
+
+  async getEmiReport(statusFilter = null) {
+    try {
+      let query = this.client
+        .from('emi_schedules')
+        .select('*, enrollments(user_id, course_id, user_profiles(full_name, email), courses(name))')
+        .order('due_date', { ascending: true });
+      if (statusFilter) query = query.eq('status', statusFilter);
+      const { data, error } = await query;
+      if (error) throw error;
+      return { success: true, data: data || [] };
+    } catch (error) {
+      console.error('Error fetching EMI report:', error);
+      return { success: false, data: [], error: error.message };
+    }
+  }
+
+  async getStudentReport() {
+    try {
+      const { data, error } = await this.client
+        .from('user_profiles')
+        .select('id, full_name, email, phone, role, account_created_at, last_login_at, enrollments(count)')
+        .eq('role', 'student')
+        .order('account_created_at', { ascending: false });
+      if (error) throw error;
+      return { success: true, data: data || [] };
+    } catch (error) {
+      console.error('Error fetching student report:', error);
+      return { success: false, data: [], error: error.message };
+    }
+  }
+
+  // ==================== NOTIFICATIONS ====================
+
+  async sendNotification(userId, title, message, type = 'info', link = null) {
+    try {
+      const { data, error } = await this.client
+        .from('notifications')
+        .insert([{ user_id: userId, title, message, type, link }])
+        .select()
+        .single();
+      if (error) throw error;
+      return { success: true, data };
+    } catch (error) {
+      console.error('Error sending notification:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  async getUserNotifications(userId, unreadOnly = false) {
+    try {
+      let query = this.client
+        .from('notifications')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(50);
+      if (unreadOnly) query = query.eq('is_read', false);
+      const { data, error } = await query;
+      if (error) throw error;
+      return { success: true, data: data || [] };
+    } catch (error) {
+      console.error('Error fetching notifications:', error);
+      return { success: false, data: [], error: error.message };
+    }
+  }
+
+  async markNotificationRead(notificationId) {
+    try {
+      const { data, error } = await this.client
+        .from('notifications')
+        .update({ is_read: true, read_at: new Date().toISOString() })
+        .eq('id', notificationId)
+        .select()
+        .single();
+      if (error) throw error;
+      return { success: true, data };
+    } catch (error) {
+      console.error('Error marking notification read:', error);
+      return { success: false, error: error.message };
+    }
+  }
 }
 
 // Initialize and export

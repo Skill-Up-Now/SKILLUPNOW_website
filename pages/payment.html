@@ -1,227 +1,513 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Secure Payment - SkillUpNow">
-  <title>Payment & Checkout - SkillUpNow</title>
-  
+  <title>Payment — SkillUpNow</title>
   <link rel="stylesheet" href="../css/variables.css">
-  <link rel="stylesheet" href="../css/animations.css">
   <link rel="stylesheet" href="../css/main.css">
-  <link rel="stylesheet" href="../css/forms.css">
   <link rel="stylesheet" href="../css/responsive.css">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  <script>
-    if (window.location.protocol !== 'file:') {
-      var p = window.location.pathname;
-      if (p.endsWith('.html')) history.replaceState(null, '', p.replace(/\.html$/, ''));
+  <style>
+    .page-wrap { position:relative; z-index:1; padding-top:80px; min-height:100vh; }
+    .pay-hero { background:var(--grad); padding:2.5rem 2rem; text-align:center; position:relative; }
+    .pay-hero::before { content:''; position:absolute; inset:0; background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='rgba(255,255,255,0.06)' stroke-width='1'%3E%3Ccircle cx='30' cy='30' r='25'/%3E%3C/g%3E%3C/svg%3E") repeat; }
+    .pay-hero h1 { color:#fff; font-size:1.8rem; font-weight:800; position:relative; }
+    .pay-hero p  { color:rgba(255,255,255,0.8); position:relative; font-size:0.9rem; margin-top:0.3rem; }
+
+    .pay-wrap { max-width:900px; margin:2rem auto; padding:0 1.5rem 3rem; display:grid; grid-template-columns:1fr 360px; gap:1.5rem; }
+    .pay-main {}
+    .pay-sidebar {}
+
+    .card { background:var(--panel); border:1.5px solid var(--border); border-radius:var(--r2); padding:1.5rem; margin-bottom:1.25rem; }
+    .card-title { font-size:0.95rem; font-weight:800; margin-bottom:1.25rem; color:var(--txt); }
+
+    /* Pay method tabs */
+    .pay-methods { display:flex; gap:0.5rem; margin-bottom:1.25rem; }
+    .pay-method { flex:1; border:2px solid var(--border); border-radius:var(--r1); padding:0.85rem 0.5rem; text-align:center; cursor:pointer; transition:all 0.2s; background:var(--bg); }
+    .pay-method:hover   { border-color:var(--v2); }
+    .pay-method.active  { border-color:var(--v1); background:var(--v5); }
+    .pay-method .pm-icon { font-size:1.4rem; margin-bottom:0.25rem; }
+    .pay-method .pm-label{ font-size:0.78rem; font-weight:700; color:var(--txt2); }
+
+    /* Form */
+    .f-group { margin-bottom:1rem; }
+    .f-group label { display:block; font-size:0.8rem; font-weight:700; color:var(--txt2); margin-bottom:0.4rem; }
+    .f-group input, .f-group select {
+      width:100%; background:var(--bg); border:1.5px solid var(--border); border-radius:var(--r1);
+      padding:0.65rem 0.9rem; color:var(--txt); font-size:0.88rem; outline:none; font-family:inherit; transition:border-color 0.2s;
     }
-  </script>
+    .f-group input:focus, .f-group select:focus { border-color:var(--v1); box-shadow:0 0 0 3px var(--v5); }
+    .form-row { display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; }
+
+    /* Card number field */
+    .card-num-wrap { position:relative; }
+    .card-num-wrap input { padding-right:3rem; letter-spacing:0.08em; font-size:1rem; font-weight:600; }
+    .card-network { position:absolute; right:0.75rem; top:50%; transform:translateY(-50%); font-size:1.25rem; }
+
+    /* EMI selector */
+    .emi-plans { display:grid; grid-template-columns:repeat(auto-fill,minmax(100px,1fr)); gap:0.65rem; margin-bottom:1rem; }
+    .emi-plan { border:2px solid var(--border); border-radius:var(--r1); padding:0.75rem 0.5rem; text-align:center; cursor:pointer; transition:all 0.2s; background:var(--bg); }
+    .emi-plan:hover  { border-color:var(--v2); }
+    .emi-plan.active { border-color:var(--v1); background:var(--v5); }
+    .emi-plan .ep-months { font-size:1.1rem; font-weight:800; color:var(--v1); }
+    .emi-plan .ep-label  { font-size:0.7rem; color:var(--txt4); }
+    .emi-plan .ep-amount { font-size:0.78rem; font-weight:700; color:var(--txt2); margin-top:0.25rem; }
+
+    /* Order summary */
+    .summary-row { display:flex; justify-content:space-between; align-items:center; padding:0.6rem 0; font-size:0.87rem; }
+    .summary-row:not(:last-child) { border-bottom:1px solid var(--border); }
+    .summary-row .label { color:var(--txt3); }
+    .summary-row .value { font-weight:700; color:var(--txt); }
+    .summary-row.total  { font-size:1rem; }
+    .summary-row.total .value { color:var(--v1); font-size:1.2rem; }
+    .summary-row.discount .value { color:#16a34a; }
+
+    .btn-pay {
+      width:100%; background:var(--grad); color:#fff; border:none; border-radius:var(--r2);
+      padding:1rem; font-size:1rem; font-weight:800; cursor:pointer; transition:all 0.25s; font-family:inherit;
+      display:flex; align-items:center; justify-content:center; gap:0.5rem;
+      box-shadow:var(--shadow-btn); margin-bottom:0.75rem;
+    }
+    .btn-pay:hover:not(:disabled) { opacity:0.88; transform:scale(1.01); }
+    .btn-pay:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
+    .security-badges { display:flex; gap:0.5rem; flex-wrap:wrap; justify-content:center; font-size:0.73rem; color:var(--txt4); }
+    .security-badges span { display:flex; align-items:center; gap:0.25rem; }
+
+    /* Invoice / Success view */
+    .invoice-view { display:none; }
+    .invoice-view.show { display:block; }
+    .payment-form { }
+    .invoice-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1.5rem; padding-bottom:1rem; border-bottom:1.5px solid var(--border); }
+    .inv-brand h3 { font-size:1.2rem; font-weight:800; color:var(--v1); }
+    .inv-brand p  { font-size:0.78rem; color:var(--txt3); }
+    .inv-meta { text-align:right; font-size:0.8rem; color:var(--txt3); }
+    .inv-meta strong { display:block; font-size:0.95rem; color:var(--txt); }
+    .inv-table { width:100%; border-collapse:collapse; font-size:0.85rem; }
+    .inv-table th { padding:0.6rem 0.75rem; background:var(--bg2); color:var(--txt3); font-size:0.78rem; text-align:left; }
+    .inv-table td { padding:0.7rem 0.75rem; border-bottom:1px solid var(--border); }
+    .inv-table tr:last-child td { border:none; }
+    .inv-total { display:flex; justify-content:flex-end; margin-top:1rem; }
+    .inv-total-box { background:var(--v5); border:1px solid var(--v3); border-radius:var(--r1); padding:0.75rem 1.25rem; text-align:right; }
+    .inv-total-box .it-label { font-size:0.8rem; color:var(--txt3); }
+    .inv-total-box .it-value { font-size:1.4rem; font-weight:800; color:var(--v1); }
+    .inv-footer { margin-top:1.25rem; padding-top:1rem; border-top:1px solid var(--border); font-size:0.78rem; color:var(--txt4); text-align:center; }
+    .btn-download { background:var(--grad); color:#fff; border:none; border-radius:var(--r1); padding:0.65rem 1.5rem; font-size:0.88rem; font-weight:700; cursor:pointer; transition:all 0.2s; font-family:inherit; }
+    .btn-download:hover { opacity:0.88; }
+    .btn-outline { background:transparent; border:1.5px solid var(--border); border-radius:var(--r1); padding:0.65rem 1.5rem; font-size:0.88rem; font-weight:600; cursor:pointer; transition:all 0.2s; color:var(--txt3); font-family:inherit; }
+    .btn-outline:hover { border-color:var(--v1); color:var(--v1); }
+
+    /* Spinner */
+    .spinner { width:18px; height:18px; border:2.5px solid rgba(255,255,255,0.3); border-top-color:#fff; border-radius:50%; animation:spin 0.7s linear infinite; display:inline-block; }
+    @keyframes spin { to{ transform:rotate(360deg); } }
+
+    @media(max-width:768px) {
+      .pay-wrap { grid-template-columns:1fr; }
+      .pay-sidebar { order:-1; }
+      .pay-methods { flex-wrap:wrap; }
+    }
+  </style>
 </head>
 <body>
-  <div class="mesh-bg"></div>
-  <div class="orb orb1"></div>
-  <div class="orb orb2"></div>
-  <div class="orb orb3"></div>
+<div class="mesh-bg"></div>
+<div class="orb orb1"></div>
+<nav></nav>
 
-  <!-- Navigation — rebuilt by profile-nav.js -->
-  <nav></nav>
+<div class="page-wrap">
+  <div class="pay-hero">
+    <h1>Secure Payment</h1>
+    <p>Complete your enrollment — SSL encrypted · Powered by Razorpay</p>
+  </div>
 
-  <section style="padding: 3rem 5vw; min-height: calc(100vh - 200px);">
-    <div style="max-width: 1200px; margin: 0 auto;">
-      <h1 style="font-family: 'Cormorant Garamond', serif; font-size: 3rem; text-align: center; margin-bottom: 3rem;">Secure Payment & Checkout</h1>
-
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; animation: fadeUp 0.6s ease;">
-        <!-- Order Summary -->
-        <div class="form-container" style="height: fit-content;">
-          <h2 style="margin-bottom: 1.5rem;">Order Summary</h2>
-
-          <div id="orderItems" style="border-bottom: 1px solid var(--border); padding-bottom: 1rem; margin-bottom: 1rem;">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.8rem;">
-              <div>
-                <h4 id="order-course-name" style="font-weight: 700; color: var(--txt);">Course Enrollment</h4>
-                <p id="order-course-meta" style="font-size: 0.85rem; color: var(--txt3);">SkillUpNow Programme</p>
-              </div>
-              <!-- Fee amount intentionally hidden per policy -->
-            </div>
-          </div>
-
-          <div style="background:rgba(124,92,252,0.07);border:1px solid rgba(124,92,252,0.18);border-radius:var(--r2);padding:1rem 1.2rem;margin-bottom:1.2rem;display:flex;align-items:center;gap:0.75rem;">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7c5cfc" stroke-width="2" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-            <p style="margin:0;font-size:0.87rem;color:var(--txt3);line-height:1.5;">Fee details are communicated directly by our admissions team. Our counsellors will guide you through the best payment plan for your situation.</p>
-          </div>
-
-          <hr style="border: none; border-top: 1px solid var(--border); margin: 1.5rem 0;">
-
-          <div style="background: rgba(124,92,252,0.1); border-left: 4px solid var(--v1); padding: 1rem; border-radius: 0 var(--r2) var(--r2) 0;">
-            <p style="margin: 0; font-size: 0.9rem; color: var(--txt);">Lifetime access to course content, live sessions, and resources.</p>
-          </div>
+  <!-- Invoice view (shown after payment or via ?invoice= param) -->
+  <div class="pay-wrap" id="invoice-view" style="display:none;grid-template-columns:1fr">
+    <div class="card" id="invoice-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem;flex-wrap:wrap;gap:0.75rem">
+        <div class="card-title" style="margin:0">Payment Invoice</div>
+        <div style="display:flex;gap:0.5rem">
+          <button class="btn-download" onclick="printInvoice()">🖨 Print / PDF</button>
+          <button class="btn-outline" onclick="window.location.href='profile.html'">← Back to Profile</button>
         </div>
-
-        <!-- Payment Form -->
-        <form class="form-container" id="paymentForm" onsubmit="processPayment(event)">
-          <h2 style="margin-bottom: 1.5rem;">Payment Details</h2>
-
-          <div class="form-group">
-            <label>Full Name *</label>
-            <input type="text" name="fullName" placeholder="Enter your full name" required data-validate="required"/>
-          </div>
-
-          <div class="form-group">
-            <label>Email Address *</label>
-            <input type="email" name="email" placeholder="your@email.com" required data-validate="required|email"/>
-          </div>
-
-          <div class="form-group">
-            <label>Phone Number *</label>
-            <input type="tel" name="phone" placeholder="+91 XXXXXXXXXX" required data-validate="required|phone"/>
-          </div>
-
-          <div class="form-group">
-            <label>Payment Method *</label>
-            <select name="paymentMethod" required style="background: var(--panel); border: 1.5px solid var(--border); color: var(--txt); padding: 0.9rem 1.1rem; border-radius: var(--r2); font-size: 0.95rem;">
-              <option value="">Select a payment method</option>
-              <option value="credit-card">Credit / Debit Card</option>
-              <option value="upi">UPI</option>
-              <option value="netbanking">Net Banking</option>
-              <option value="wallet">Digital Wallet</option>
-              <option value="emi">NO-COST EMI</option>
-            </select>
-          </div>
-
-          <div id="cardDetails" style="display: none;">
-            <div class="form-group">
-              <label>Card Number *</label>
-              <input type="text" name="cardNumber" placeholder="1234 5678 9012 3456" maxlength="19" data-validate="creditcard"/>
-            </div>
-
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-              <div class="form-group">
-                <label>Expiry Date *</label>
-                <input type="text" name="expiry" placeholder="MM/YY" maxlength="5"/>
-              </div>
-              <div class="form-group">
-                <label>CVV *</label>
-                <input type="password" name="cvv" placeholder="•••" maxlength="4"/>
-              </div>
-            </div>
-          </div>
-
-          <div id="upiDetails" style="display: none;">
-            <div class="form-group">
-              <label>UPI ID *</label>
-              <input type="text" name="upiId" placeholder="yourname@upi"/>
-            </div>
-          </div>
-
-          <div style="display: flex; gap: 1rem; margin: 1.5rem 0;">
-            <input type="checkbox" name="terms" required/>
-            <label style="margin: 0; font-size: 0.9rem;">I agree to the terms and conditions and privacy policy</label>
-          </div>
-
-          <button type="submit" class="btn-grad" style="width: 100%; padding: 1rem; font-size: 1rem;">
-            Complete Payment
-          </button>
-        </form>
       </div>
 
-      <!-- EMI Section -->
-      <div style="margin-top: 4rem; padding: 2rem; background: var(--panel); border: 1px solid var(--border); border-radius: var(--r3);">
-        <h2 style="margin-bottom: 2rem;">NO-COST EMI OPTIONS</h2>
-        
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem;">
-          <div class="feature-card" onclick="selectEMI(3, 4999)" style="background: var(--panel2); padding: 1.5rem; border: 2px solid var(--border); border-radius: var(--r2); cursor: pointer; transition: all 0.3s;">
-            <h4 style="color: var(--v1); margin-bottom: 0.5rem;">3 Months</h4>
-            <p style="font-size: 2rem; font-weight: 700; color: var(--txt); margin-bottom: 0.5rem;">₹4,999</p>
-            <p style="font-size: 0.85rem; color: var(--txt3);">Per month • 0% interest</p>
-          </div>
+      <div class="invoice-header">
+        <div class="inv-brand">
+          <h3>SkillUpNow</h3>
+          <p>skillupnowadmin.org · contact@skillupnow.com</p>
+          <p style="margin-top:0.25rem;font-size:0.78rem;color:var(--txt3)">GSTIN: 27AAAAA0000A1Z5</p>
+        </div>
+        <div class="inv-meta">
+          <div>Invoice No:</div>
+          <strong id="inv-number">—</strong>
+          <div style="margin-top:0.5rem">Date:</div>
+          <strong id="inv-date">—</strong>
+          <div style="margin-top:0.5rem">Status:</div>
+          <strong id="inv-status" style="color:#16a34a">Paid</strong>
+        </div>
+      </div>
 
-          <div class="feature-card" onclick="selectEMI(6, 2499)" style="background: var(--panel2); padding: 1.5rem; border: 2px solid var(--border); border-radius: var(--r2); cursor: pointer; transition: all 0.3s;">
-            <h4 style="color: var(--v1); margin-bottom: 0.5rem;">6 Months</h4>
-            <p style="font-size: 2rem; font-weight: 700; color: var(--txt); margin-bottom: 0.5rem;">₹2,499</p>
-            <p style="font-size: 0.85rem; color: var(--txt3);">Per month • 0% interest</p>
-          </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.25rem;font-size:0.85rem">
+        <div>
+          <div style="font-weight:700;margin-bottom:0.4rem">Bill To:</div>
+          <div id="inv-name">—</div>
+          <div id="inv-email" style="color:var(--txt3)">—</div>
+          <div id="inv-phone" style="color:var(--txt3)">—</div>
+        </div>
+        <div>
+          <div style="font-weight:700;margin-bottom:0.4rem">Payment Details:</div>
+          <div>Method: <span id="inv-method">—</span></div>
+          <div>Transaction ID: <code id="inv-txn" style="font-size:0.78rem;color:var(--txt3)">—</code></div>
+          <div>Gateway: <span id="inv-gateway">Razorpay</span></div>
+        </div>
+      </div>
 
-          <div class="feature-card" onclick="selectEMI(12, 1249)" style="background: var(--panel2); padding: 1.5rem; border: 2px solid var(--border); border-radius: var(--r2); cursor: pointer; transition: all 0.3s;">
-            <h4 style="color: var(--v1); margin-bottom: 0.5rem;">12 Months</h4>
-            <p style="font-size: 2rem; font-weight: 700; color: var(--txt); margin-bottom: 0.5rem;">₹1,249</p>
-            <p style="font-size: 0.85rem; color: var(--txt3);">Per month • 0% interest</p>
+      <table class="inv-table">
+        <thead><tr><th>#</th><th>Description</th><th>Course</th><th>Payment Type</th><th>Amount</th></tr></thead>
+        <tbody id="inv-items"></tbody>
+      </table>
+
+      <div class="inv-total">
+        <div class="inv-total-box">
+          <div class="it-label">Total Paid</div>
+          <div class="it-value" id="inv-total">₹0</div>
+        </div>
+      </div>
+      <div class="inv-footer">
+        Thank you for learning with SkillUpNow! For support: support@skillupnow.com · +91 00000 00000<br>
+        This is a computer-generated invoice. No signature required.
+      </div>
+    </div>
+  </div>
+
+  <!-- Payment Form -->
+  <div class="pay-wrap" id="payment-form-wrap">
+    <!-- Left: payment -->
+    <div class="pay-main">
+
+      <!-- Select payment type -->
+      <div class="card">
+        <div class="card-title">Payment Method</div>
+        <div class="pay-methods">
+          <div class="pay-method active" data-method="razorpay" onclick="selectMethod('razorpay',this)">
+            <div class="pm-icon">💳</div>
+            <div class="pm-label">Online</div>
+          </div>
+          <div class="pay-method" data-method="emi" onclick="selectMethod('emi',this)">
+            <div class="pm-icon">📅</div>
+            <div class="pm-label">EMI</div>
+          </div>
+          <div class="pay-method" data-method="bank" onclick="selectMethod('bank',this)">
+            <div class="pm-icon">🏦</div>
+            <div class="pm-label">Bank Transfer</div>
+          </div>
+          <div class="pay-method" data-method="cash" onclick="selectMethod('cash',this)">
+            <div class="pm-icon">💵</div>
+            <div class="pm-label">Cash</div>
           </div>
         </div>
 
-        <div id="emiDetails" style="margin-top: 2rem;">
-          <h3 style="margin-bottom: 1rem;">Selected EMI Plan:</h3>
-          <div style="background: rgba(124,92,252,0.1); border-left: 4px solid var(--v1); padding: 1rem; border-radius: 0 var(--r2) var(--r2) 0;">
-            <p id="emiSelected" style="margin: 0; font-weight: 600;">Select an EMI plan above</p>
+        <!-- Online / Razorpay -->
+        <div id="section-razorpay">
+          <p style="font-size:0.83rem;color:var(--txt3);margin-bottom:1rem">Pay securely via UPI, Card, Net Banking, or Wallet through Razorpay.</p>
+          <div style="display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;font-size:0.8rem;color:var(--txt4)">
+            <span>🔒 SSL Encrypted</span>
+            <span>✅ PCI DSS Compliant</span>
+            <span>⚡ Instant Confirmation</span>
           </div>
+        </div>
+
+        <!-- EMI -->
+        <div id="section-emi" style="display:none">
+          <div class="card-title" style="font-size:0.88rem;margin-bottom:0.75rem">Select EMI Duration</div>
+          <div class="emi-plans" id="emi-plan-grid"></div>
+          <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r1);padding:0.85rem;font-size:0.83rem">
+            <div style="display:flex;justify-content:space-between;margin-bottom:0.4rem"><span>Monthly Installment</span><strong id="emi-monthly" style="color:var(--v1)">—</strong></div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:0.4rem"><span>Total Amount</span><strong id="emi-total-disp">—</strong></div>
+            <div style="display:flex;justify-content:space-between"><span>First Payment</span><strong>Today</strong></div>
+          </div>
+        </div>
+
+        <!-- Bank Transfer -->
+        <div id="section-bank" style="display:none">
+          <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r1);padding:1rem;font-size:0.85rem">
+            <div style="font-weight:700;margin-bottom:0.75rem">Bank Transfer Details</div>
+            <div style="display:grid;gap:0.4rem;color:var(--txt3)">
+              <div><strong>Account Name:</strong> SkillUpNow Learning Pvt. Ltd.</div>
+              <div><strong>Account No:</strong> 0000 0000 0000 0000</div>
+              <div><strong>IFSC:</strong> SBIN0000000</div>
+              <div><strong>Bank:</strong> State Bank of India</div>
+              <div><strong>Branch:</strong> Chennai Main Branch</div>
+            </div>
+          </div>
+          <div class="f-group" style="margin-top:1rem"><label>UTR / Transaction Reference *</label><input type="text" id="utr-ref" placeholder="Enter UTR number after transfer"></div>
+        </div>
+
+        <!-- Cash -->
+        <div id="section-cash" style="display:none">
+          <div style="background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);border-radius:var(--r1);padding:1rem;font-size:0.85rem;color:var(--txt2)">
+            <div style="font-weight:700;margin-bottom:0.5rem">Cash Payment Instructions</div>
+            <p>Visit our office with the exact cash amount. Our admin will issue a receipt and activate your course access.</p>
+            <p style="margin-top:0.5rem;color:var(--txt3)">📍 Address: SkillUpNow Office, Chennai, Tamil Nadu</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Billing info -->
+      <div class="card">
+        <div class="card-title">Billing Information</div>
+        <div class="form-row">
+          <div class="f-group"><label>Full Name *</label><input type="text" id="bill-name" placeholder="Full name as on ID"></div>
+          <div class="f-group"><label>Email *</label><input type="email" id="bill-email" placeholder="Email address"></div>
+        </div>
+        <div class="f-group"><label>Phone *</label><input type="tel" id="bill-phone" placeholder="10-digit mobile number"></div>
+      </div>
+    </div>
+
+    <!-- Right: order summary -->
+    <div class="pay-sidebar">
+      <div class="card" style="position:sticky;top:90px">
+        <div class="card-title">Order Summary</div>
+        <div id="order-loading" style="text-align:center;padding:1.5rem;color:var(--txt3)">Loading…</div>
+        <div id="order-details" style="display:none">
+          <div style="display:flex;gap:0.75rem;align-items:center;margin-bottom:1rem;padding-bottom:1rem;border-bottom:1px solid var(--border)">
+            <div style="width:44px;height:44px;background:var(--grad2);border-radius:var(--r1);display:flex;align-items:center;justify-content:center;font-size:1.25rem;flex-shrink:0" id="order-icon">📚</div>
+            <div>
+              <div style="font-size:0.9rem;font-weight:700" id="order-course">—</div>
+              <div style="font-size:0.75rem;color:var(--txt3)" id="order-category">—</div>
+            </div>
+          </div>
+          <div id="summary-rows"></div>
+          <button class="btn-pay" id="pay-btn" onclick="initiatePayment()">
+            <span id="pay-btn-label">Pay Now</span>
+          </button>
+          <div class="security-badges">
+            <span>🔒 SSL</span>
+            <span>✅ PCI DSS</span>
+            <span>⚡ Instant</span>
+            <span>🔄 Secure</span>
+          </div>
+          <p style="text-align:center;font-size:0.73rem;color:var(--txt4);margin-top:0.75rem">
+            By paying you agree to our <a href="#" style="color:var(--v1)">Terms</a> & <a href="#" style="color:var(--v1)">Refund Policy</a>
+          </p>
         </div>
       </div>
     </div>
-  </section>
+  </div><!-- /pay-wrap -->
+</div>
 
-  <footer style="background: rgba(8,6,18,0.95); border-top: 1px solid var(--border); padding: 3rem 5vw; text-align: center; margin-top: 4rem;">
-    <p style="color: var(--txt4); font-size: 0.9rem;">© <span class="site-year"></span> SkillUpNow. Secure payments powered by Razorpay.</p>
-  </footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script src="../config/supabase-config.js"></script>
+<script src="../js/theme.js"></script>
+<script src="../js/profile-nav.js"></script>
+<script>
+const db = new SupabaseConfig();
+const params = new URLSearchParams(window.location.search);
+const enrollmentId = params.get('enrollment');
+const emiId        = params.get('emi');
+const invoiceId    = params.get('invoice');
+let currentUser = null, enrollmentData = null, courseData = null, selectedMethod = 'razorpay', selectedEmiMonths = 0;
+const fmtCurr = v => '₹' + Number(v||0).toLocaleString('en-IN');
+const fmtDate = d => d ? new Date(d).toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' }) : '—';
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="../config/supabase-config.js"></script>
-  <script src="../js/validations.js"></script>
-  <script src="../js/theme.js"></script>
-  <script src="../js/profile-nav.js"></script>
-  <script src="../js/emi-calculator.js"></script>
-  <script src="../js/payment.js"></script>
-  <script src="../js/main.js"></script>
+async function init() {
+  const { data: { session } } = await db.client.auth.getSession();
+  if (!session) { window.location.href = '../index.html?login=1'; return; }
+  currentUser = session.user;
 
-  <script>
-    const form = document.getElementById('paymentForm');
-    const validator = new FormValidator(form);
-    
-    // Payment method toggle
-    document.querySelector('select[name="paymentMethod"]').addEventListener('change', (e) => {
-      document.getElementById('cardDetails').style.display = e.target.value === 'credit-card' ? 'block' : 'none';
-      document.getElementById('upiDetails').style.display = e.target.value === 'upi' ? 'block' : 'none';
-    });
+  // Pre-fill billing info
+  const { data: profile } = await db.client.from('user_profiles').select('full_name,email,phone').eq('id', session.user.id).single();
+  if (profile) {
+    document.getElementById('bill-name').value  = profile.full_name || '';
+    document.getElementById('bill-email').value = profile.email || '';
+    document.getElementById('bill-phone').value = profile.phone || '';
+  }
 
-    function processPayment(e) {
-      e.preventDefault();
-      
-      if (!validator.validateAll()) {
-        if (window.app) window.app.showNotification('Please correct the errors', 'error');
-        return;
-      }
+  // Invoice view mode
+  if (invoiceId) { loadInvoice(invoiceId); return; }
 
-      const formData = validator.getFormData();
-      
-      // Simulate payment processing
-      const userData = {
-        name: formData.fullName,
-        email: formData.email,
-        phone: formData.phone
+  // Load enrollment / EMI
+  if (emiId) { await loadEmiPayment(emiId); }
+  else if (enrollmentId) { await loadEnrollment(enrollmentId); }
+  else { document.getElementById('order-loading').textContent = 'No order specified. Please enroll from the courses page.'; }
+}
+
+async function loadEnrollment(id) {
+  const { data, error } = await db.client.from('enrollments').select('*, courses(name, category, duration_months, price, discounted_price, is_emi_available, min_emi_months, max_emi_months)').eq('id', id).single();
+  if (error || !data) { document.getElementById('order-loading').textContent = 'Enrollment not found.'; return; }
+  enrollmentData = data;
+  courseData = data.courses;
+  showOrderSummary();
+}
+
+async function loadEmiPayment(id) {
+  const { data } = await db.client.from('emi_schedules').select('*, enrollments(*, courses(name, category))').eq('id', id).single();
+  if (!data) { document.getElementById('order-loading').textContent = 'EMI record not found.'; return; }
+  enrollmentData = data.enrollments;
+  courseData = enrollmentData.courses;
+  // Override amount for EMI payment
+  enrollmentData._emiAmount = data.amount;
+  enrollmentData._emiScheduleId = id;
+  selectMethod('razorpay', document.querySelector('.pay-method[data-method="razorpay"]'));
+  showOrderSummary();
+}
+
+function showOrderSummary() {
+  document.getElementById('order-loading').style.display = 'none';
+  document.getElementById('order-details').style.display = 'block';
+  const icons = {'IT':'💻','Cloud':'☁️','AI/ML':'🤖','DevOps':'⚙️','Cybersecurity':'🔐','Data Science':'📊'};
+  document.getElementById('order-course').textContent = courseData?.name || '—';
+  document.getElementById('order-category').textContent = courseData?.category || '';
+  document.getElementById('order-icon').textContent = icons[courseData?.category] || '📚';
+
+  const price = courseData?.discounted_price || courseData?.price || enrollmentData.total_amount;
+  const emiAmount = enrollmentData._emiAmount;
+  const payNow = emiAmount || price;
+
+  document.getElementById('summary-rows').innerHTML = `
+    <div class="summary-row"><span class="label">Course Fee</span><span class="value">${fmtCurr(price)}</span></div>
+    ${courseData?.discounted_price ? `<div class="summary-row discount"><span class="label">Discount</span><span class="value">- ${fmtCurr(courseData.price - courseData.discounted_price)}</span></div>` : ''}
+    ${enrollmentData.payment_type === 'emi' && !emiAmount ? `<div class="summary-row"><span class="label">EMI Months</span><span class="value">${enrollmentData.emi_months || '—'}</span></div>` : ''}
+    <div class="summary-row total"><span class="label">${emiAmount ? 'Installment Due' : 'Total Due'}</span><span class="value">${fmtCurr(payNow)}</span></div>`;
+
+  document.getElementById('pay-btn-label').textContent = `Pay ${fmtCurr(payNow)}`;
+
+  // Build EMI plans if available
+  if (courseData?.is_emi_available) {
+    const min = courseData.min_emi_months || 2;
+    const max = courseData.max_emi_months || 12;
+    let html = '';
+    for (let m = min; m <= max; m += 2) {
+      const monthly = Math.ceil(price / m);
+      html += `<div class="emi-plan${m === min ? ' active' : ''}" data-months="${m}" onclick="selectEmi(${m},${price},this)">
+        <div class="ep-months">${m}</div>
+        <div class="ep-label">months</div>
+        <div class="ep-amount">${fmtCurr(monthly)}/mo</div>
+      </div>`;
+    }
+    document.getElementById('emi-plan-grid').innerHTML = html;
+    selectedEmiMonths = min;
+    updateEmiDisplay(price, min);
+  }
+}
+
+function selectEmi(months, price, el) {
+  document.querySelectorAll('.emi-plan').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  selectedEmiMonths = months;
+  updateEmiDisplay(price, months);
+}
+
+function updateEmiDisplay(price, months) {
+  const monthly = Math.ceil(price / months);
+  document.getElementById('emi-monthly').textContent = fmtCurr(monthly);
+  document.getElementById('emi-total-disp').textContent = fmtCurr(price);
+  document.getElementById('pay-btn-label').textContent = `Pay ${fmtCurr(monthly)} (1st of ${months})`;
+}
+
+function selectMethod(method, el) {
+  selectedMethod = method;
+  document.querySelectorAll('.pay-method').forEach(m => m.classList.remove('active'));
+  el?.classList.add('active');
+  ['razorpay','emi','bank','cash'].forEach(s => {
+    const sec = document.getElementById('section-' + s);
+    if (sec) sec.style.display = s === method ? 'block' : 'none';
+  });
+}
+
+async function initiatePayment() {
+  const btn = document.getElementById('pay-btn');
+  const label = document.getElementById('pay-btn-label');
+  btn.disabled = true;
+  label.innerHTML = '<span class="spinner"></span> Processing…';
+
+  const price    = courseData?.discounted_price || courseData?.price || enrollmentData.total_amount;
+  const emiAmt   = enrollmentData._emiAmount;
+  const payAmount = selectedMethod === 'emi' ? Math.ceil(price / selectedEmiMonths) : (emiAmt || price);
+
+  try {
+    if (selectedMethod === 'razorpay' || selectedMethod === 'emi') {
+      const options = {
+        key: 'YOUR_RAZORPAY_KEY_ID',
+        amount: Math.round(payAmount * 100),
+        currency: 'INR',
+        name: 'SkillUpNow',
+        description: courseData?.name || 'Course Enrollment',
+        prefill: {
+          name: document.getElementById('bill-name').value,
+          email: document.getElementById('bill-email').value,
+          contact: document.getElementById('bill-phone').value,
+        },
+        theme: { color: '#7c6cff' },
+        handler: async (response) => {
+          const { data: payment } = await db.client.from('payments').insert({
+            user_id: currentUser.id,
+            enrollment_id: enrollmentData.id,
+            emi_schedule_id: enrollmentData._emiScheduleId || null,
+            amount: payAmount,
+            payment_method: selectedMethod === 'emi' ? 'emi' : 'online',
+            payment_gateway: 'razorpay',
+            razorpay_order_id:   response.razorpay_order_id,
+            razorpay_payment_id: response.razorpay_payment_id,
+            razorpay_signature:  response.razorpay_signature,
+            transaction_id: response.razorpay_payment_id,
+            status: 'completed',
+          }).select().single();
+          if (payment) window.location.href = `payment.html?invoice=${payment.data?.id}`;
+          else window.location.href = 'profile.html?tab=payments';
+        },
       };
-
-      if (window.paymentProcessor) {
-        window.paymentProcessor.mockPaymentProcess(14999, { title: 'AWS Solutions Architect Pro', id: 1 }, userData)
-          .then(payment => {
-            if (window.app) {
-              window.app.showNotification('Payment successful! You have been enrolled.', 'success');
-              setTimeout(() => window.location.href = '../index.html', 2000);
-            }
-          });
-      }
+      new window.Razorpay(options).open();
+    } else if (selectedMethod === 'bank') {
+      const utr = document.getElementById('utr-ref').value.trim();
+      if (!utr) { alert('Please enter the UTR/Transaction reference number.'); return; }
+      await db.client.from('payments').insert({
+        user_id: currentUser.id, enrollment_id: enrollmentData.id,
+        amount: payAmount, payment_method: 'bank_transfer', payment_gateway: 'bank',
+        transaction_id: utr, status: 'processing',
+      });
+      alert('Bank transfer recorded. Admin will verify and activate your access within 24 hours.');
+      window.location.href = 'profile.html';
+    } else if (selectedMethod === 'cash') {
+      await db.client.from('payments').insert({
+        user_id: currentUser.id, enrollment_id: enrollmentData.id,
+        amount: payAmount, payment_method: 'cash', payment_gateway: 'cash',
+        status: 'pending',
+      });
+      alert('Cash payment recorded. Please visit our office with the exact amount.');
+      window.location.href = 'profile.html';
     }
+  } catch (err) {
+    alert('Payment error: ' + err.message);
+  }
+  btn.disabled = false;
+  label.textContent = 'Pay ' + fmtCurr(payAmount);
+}
 
-    function selectEMI(months, emiAmount) {
-      const total = emiAmount * months;
-      document.getElementById('emiSelected').textContent = `₹${emiAmount.toLocaleString()} × ${months} months = ₹${total.toLocaleString()} total`;
-      document.querySelector('select[name="paymentMethod"]').value = 'emi';
-    }
+async function loadInvoice(id) {
+  document.getElementById('payment-form-wrap').style.display = 'none';
+  document.getElementById('invoice-view').style.display = 'block';
 
-    function goBack() {
-      window.location.href = '../index.html';
-    }
-  </script>
+  const { data: p } = await db.client.from('payments').select('*, user_profiles(full_name,email,phone), enrollments(courses(name,category))').eq('id', id).single();
+  if (!p) { document.getElementById('invoice-card').innerHTML = '<p style="text-align:center;padding:2rem;color:var(--txt3)">Invoice not found.</p>'; return; }
+
+  document.getElementById('inv-number').textContent  = p.invoice_number || '—';
+  document.getElementById('inv-date').textContent    = fmtDate(p.payment_date);
+  document.getElementById('inv-status').textContent  = p.status.toUpperCase();
+  document.getElementById('inv-status').style.color  = p.status === 'completed' ? '#16a34a' : '#b45309';
+  document.getElementById('inv-name').textContent    = p.user_profiles?.full_name || '—';
+  document.getElementById('inv-email').textContent   = p.user_profiles?.email || '—';
+  document.getElementById('inv-phone').textContent   = p.user_profiles?.phone || '—';
+  document.getElementById('inv-method').textContent  = p.payment_method;
+  document.getElementById('inv-txn').textContent     = p.razorpay_payment_id || p.transaction_id || '—';
+  document.getElementById('inv-total').textContent   = fmtCurr(p.amount);
+  document.getElementById('inv-items').innerHTML = `
+    <tr><td>1</td><td>Course Enrollment</td><td>${p.enrollments?.courses?.name||'—'}</td><td>${p.payment_method}</td><td><strong>${fmtCurr(p.amount)}</strong></td></tr>`;
+}
+
+function printInvoice() { window.print(); }
+
+init();
+</script>
+<footer></footer>
 </body>
 </html>

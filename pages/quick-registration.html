@@ -1,146 +1,313 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Quick Registration - SkillUpNow">
-  <title>Quick Registration - SkillUpNow</title>
+  <title>Quick Registration — SkillUpNow</title>
   <link rel="stylesheet" href="../css/variables.css">
-  <link rel="stylesheet" href="../css/animations.css">
   <link rel="stylesheet" href="../css/main.css">
-  <link rel="stylesheet" href="../css/forms.css">
   <link rel="stylesheet" href="../css/responsive.css">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  <script>
-    if (window.location.protocol !== 'file:') {
-      var p = window.location.pathname;
-      if (p.endsWith('.html')) history.replaceState(null, '', p.replace(/\.html$/, ''));
+  <style>
+    body { display:flex; flex-direction:column; min-height:100vh; }
+    .page-wrap { position:relative; z-index:1; padding-top:80px; min-height:100vh; display:flex; align-items:center; justify-content:center; padding-bottom:3rem; }
+    .reg-card {
+      background:var(--panel); border:1.5px solid var(--border); border-radius:var(--r3);
+      padding:2.5rem; width:100%; max-width:500px; margin:1.5rem;
+      box-shadow:var(--shadow-glow);
     }
-  </script>
+    .reg-header { text-align:center; margin-bottom:2rem; }
+    .reg-icon { width:56px; height:56px; background:var(--grad); border-radius:var(--r2); display:inline-flex; align-items:center; justify-content:center; font-size:1.6rem; margin-bottom:0.75rem; box-shadow:var(--shadow-btn); }
+    .reg-header h2 { font-size:1.5rem; font-weight:800; }
+    .reg-header p  { font-size:0.85rem; color:var(--txt3); margin-top:0.3rem; }
+
+    .f-group { margin-bottom:1rem; }
+    .f-group label { display:block; font-size:0.8rem; font-weight:700; color:var(--txt2); margin-bottom:0.4rem; }
+    .f-group label span { color:#ef4444; }
+    .input-wrap { position:relative; }
+    .f-group input, .f-group select {
+      width:100%; background:var(--bg); border:1.5px solid var(--border); border-radius:var(--r1);
+      padding:0.7rem 1rem; color:var(--txt); font-size:0.9rem; outline:none; font-family:inherit; transition:border-color 0.2s;
+    }
+    .f-group input:focus, .f-group select:focus { border-color:var(--v1); box-shadow:0 0 0 3px var(--v5); }
+    .f-group input::placeholder { color:var(--txt4); }
+
+    .form-row { display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; }
+
+    /* Role tabs */
+    .role-tabs { display:flex; gap:0; background:var(--bg2); border-radius:var(--r1); padding:3px; margin-bottom:1.25rem; }
+    .role-tab { flex:1; padding:0.55rem; border-radius:calc(var(--r1) - 2px); text-align:center; font-size:0.85rem; font-weight:700; cursor:pointer; transition:all 0.2s; color:var(--txt3); }
+    .role-tab.active { background:var(--bg); color:var(--v1); box-shadow:var(--shadow-card); }
+
+    /* Password strength */
+    .pass-strength { display:flex; gap:4px; margin-top:0.4rem; }
+    .pass-bar { height:3px; flex:1; background:var(--border); border-radius:999px; transition:background 0.3s; }
+    .pass-bar.weak   { background:#ef4444; }
+    .pass-bar.medium { background:#f59e0b; }
+    .pass-bar.strong { background:#22c55e; }
+    .pass-label { font-size:0.72rem; color:var(--txt4); margin-top:0.25rem; }
+
+    /* Show/hide pass */
+    .pass-toggle { position:absolute; right:0.9rem; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; color:var(--txt3); font-size:0.8rem; font-family:inherit; }
+
+    .btn-reg { width:100%; background:var(--grad); color:#fff; border:none; border-radius:var(--r1); padding:0.85rem; font-size:0.95rem; font-weight:800; cursor:pointer; transition:all 0.25s; font-family:inherit; margin-top:0.5rem; box-shadow:var(--shadow-btn); }
+    .btn-reg:hover:not(:disabled) { opacity:0.88; transform:scale(1.01); }
+    .btn-reg:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
+
+    .divider { display:flex; align-items:center; gap:0.75rem; color:var(--txt4); font-size:0.8rem; margin:1.25rem 0; }
+    .divider::before, .divider::after { content:''; flex:1; height:1px; background:var(--border); }
+
+    .login-link { text-align:center; font-size:0.85rem; color:var(--txt3); }
+    .login-link a { color:var(--v1); font-weight:700; text-decoration:none; }
+
+    .alert { padding:0.75rem 1rem; border-radius:var(--r1); font-size:0.83rem; margin-bottom:1rem; display:none; }
+    .alert.error   { background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.25); color:#dc2626; }
+    .alert.success { background:rgba(34,197,94,0.1); border:1px solid rgba(34,197,94,0.25); color:#16a34a; }
+    .alert.show { display:block; }
+
+    /* OTP */
+    .otp-wrap { display:none; }
+    .otp-inputs { display:flex; gap:0.65rem; justify-content:center; margin:1rem 0; }
+    .otp-digit { width:48px; height:52px; border:2px solid var(--border); border-radius:var(--r1); text-align:center; font-size:1.4rem; font-weight:800; color:var(--txt); background:var(--bg); outline:none; transition:border-color 0.2s; font-family:inherit; }
+    .otp-digit:focus { border-color:var(--v1); box-shadow:0 0 0 3px var(--v5); }
+
+    .spinner { display:inline-block; width:16px; height:16px; border:2.5px solid rgba(255,255,255,0.3); border-top-color:#fff; border-radius:50%; animation:spin 0.7s linear infinite; }
+    @keyframes spin { to{ transform:rotate(360deg); } }
+  </style>
 </head>
 <body>
-  <div class="mesh-bg"></div>
-  <div class="orb orb1"></div>
-  <div class="orb orb2"></div>
-  <div class="orb orb3"></div>
+<div class="mesh-bg"></div>
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+<nav></nav>
 
-  <!-- Navigation — rebuilt by profile-nav.js -->
-  <nav></nav>
+<div class="page-wrap">
+  <div class="reg-card">
+    <div class="reg-header">
+      <div class="reg-icon">🚀</div>
+      <h2>Create Your Account</h2>
+      <p>Join 12,000+ learners and start your journey today</p>
+    </div>
 
-  <section style="padding: 4rem 5vw; min-height: calc(100vh - 220px);">
-    <div style="max-width: 780px; margin: 0 auto;">
-      <h1 style="font-family: 'Cormorant Garamond', serif; font-size: 3rem; text-align: center; margin-bottom: 0.8rem;">Quick Registration</h1>
-      <p style="text-align: center; color: var(--txt3); margin-bottom: 2.5rem; font-size: 1.05rem;">Register fast with your contact details and password. Submit the form to start your course enrollment.</p>
+    <!-- Role selector -->
+    <div class="role-tabs">
+      <div class="role-tab active" data-role="user" onclick="setRole('user',this)">🎓 Student</div>
+      <div class="role-tab" data-role="mentor" onclick="setRole('mentor',this)">👨‍🏫 Mentor</div>
+    </div>
 
-      <form class="form-container" id="quickRegForm" onsubmit="submitQuickRegistration(event)">
-        <div class="form-row">
-          <div class="form-group">
-            <label>First Name *</label>
-            <input type="text" name="firstName" required />
-          </div>
-          <div class="form-group">
-            <label>Last Name *</label>
-            <input type="text" name="lastName" required />
-          </div>
+    <div class="alert error"   id="err-alert"></div>
+    <div class="alert success" id="suc-alert"></div>
+
+    <!-- Registration form -->
+    <div id="reg-form">
+      <div class="form-row">
+        <div class="f-group"><label>Full Name <span>*</span></label><input type="text" id="r-name" placeholder="Full name" autocomplete="name"></div>
+        <div class="f-group"><label>Username <span>*</span></label><input type="text" id="r-username" placeholder="username123" autocomplete="username"></div>
+      </div>
+      <div class="f-group"><label>Email Address <span>*</span></label><input type="email" id="r-email" placeholder="you@email.com" autocomplete="email"></div>
+      <div class="f-group"><label>Phone Number <span>*</span></label><input type="tel" id="r-phone" placeholder="10-digit mobile number" maxlength="10"></div>
+
+      <!-- Interested course (for students) -->
+      <div class="f-group" id="course-interest-wrap">
+        <label>Interested In</label>
+        <select id="r-interest">
+          <option value="">Select a course or category…</option>
+        </select>
+      </div>
+
+      <div class="f-group">
+        <label>Password <span>*</span></label>
+        <div class="input-wrap">
+          <input type="password" id="r-pass" placeholder="Minimum 8 characters" oninput="checkStrength(this.value)" autocomplete="new-password">
+          <button type="button" class="pass-toggle" onclick="togglePass('r-pass',this)">Show</button>
         </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label>Phone Number *</label>
-            <input type="tel" name="phone" required pattern="[0-9+\-() ]{7,20}" placeholder="e.g. +91 98765 43210" />
-          </div>
-          <div class="form-group">
-            <label>Email ID *</label>
-            <input type="email" name="email" required placeholder="name@example.com" />
-          </div>
+        <div class="pass-strength">
+          <div class="pass-bar" id="pb1"></div>
+          <div class="pass-bar" id="pb2"></div>
+          <div class="pass-bar" id="pb3"></div>
+          <div class="pass-bar" id="pb4"></div>
         </div>
-
-        <div class="form-group">
-          <label>Password *</label>
-          <input type="password" name="password" required minlength="6" placeholder="Enter a secure password" />
-        </div>
-
-        <div style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; margin-top: 1rem;">
-          <button type="submit" class="btn-grad" style="flex: 1; min-width: 180px;">Submit Registration</button>
-          <button type="reset" class="btn-outline" style="flex: 1; min-width: 180px; border: 1.5px solid var(--border2);">Reset</button>
-        </div>
-      </form>
-
-      <div id="quickRegStatus" style="display: none; margin-top: 1rem; padding: 1rem; border-radius: var(--r2); background: rgba(249,250,251,0.9); color: var(--txt); font-size: 0.95rem;"></div>
-
-      <div id="quickSuccess" style="display: none; margin-top: 2rem;">
-        <div style="background: rgba(16,185,129,0.1); border-left: 4px solid #10b981; padding: 2rem; border-radius: 0 var(--r2) var(--r2) 0; text-align: center;">
-          <h3 style="color: #10b981; font-size: 1.5rem; margin-bottom: 1rem;">Registration Submitted!</h3>
-          <p style="color: var(--txt3); margin-bottom: 1rem;">Thank you for registering. We will contact you with next steps shortly.</p>
-          <a href="../index.html" class="btn-grad">Back to Home</a>
+        <div class="pass-label" id="pass-label">Enter password</div>
+      </div>
+      <div class="f-group">
+        <label>Confirm Password <span>*</span></label>
+        <div class="input-wrap">
+          <input type="password" id="r-pass2" placeholder="Repeat password" autocomplete="new-password">
+          <button type="button" class="pass-toggle" onclick="togglePass('r-pass2',this)">Show</button>
         </div>
       </div>
+
+      <div style="display:flex;align-items:flex-start;gap:0.6rem;margin-bottom:1rem;font-size:0.8rem;color:var(--txt3)">
+        <input type="checkbox" id="r-terms" style="flex-shrink:0;margin-top:2px;accent-color:var(--v1)">
+        <label for="r-terms">I agree to the <a href="#" style="color:var(--v1)">Terms of Service</a> and <a href="#" style="color:var(--v1)">Privacy Policy</a></label>
+      </div>
+
+      <button class="btn-reg" id="reg-btn" onclick="submitReg()">
+        <span id="reg-label">Create Account</span>
+      </button>
+
+      <div class="divider">or</div>
+      <div class="login-link">Already have an account? <a href="../index.html" onclick="window.profileNav?.openLoginModal?.();return false">Sign In</a></div>
+      <div class="login-link" id="mentor-link" style="display:none;margin-top:0.5rem">Becoming a mentor? <a href="mentor-signup.html">Full Mentor Registration →</a></div>
     </div>
-  </section>
 
-  <footer style="background: rgba(8,6,18,0.95); border-top: 1px solid var(--border); padding: 3rem 5vw; text-align: center; margin-top: 4rem;">
-    <p style="color: var(--txt4); font-size: 0.9rem;">© <span class="site-year"></span> SkillUpNow. Start learning today!</p>
-  </footer>
+    <!-- OTP verification -->
+    <div class="otp-wrap" id="otp-wrap">
+      <div style="text-align:center;margin-bottom:1rem">
+        <div style="font-size:1.5rem;margin-bottom:0.5rem">📧</div>
+        <div style="font-weight:700">Verify Your Email</div>
+        <div style="font-size:0.83rem;color:var(--txt3);margin-top:0.3rem">We've sent a 6-digit code to <strong id="otp-email-display"></strong></div>
+      </div>
+      <div class="otp-inputs">
+        <input class="otp-digit" maxlength="1" id="o1" oninput="otpNav(this,'','o2')">
+        <input class="otp-digit" maxlength="1" id="o2" oninput="otpNav(this,'o1','o3')">
+        <input class="otp-digit" maxlength="1" id="o3" oninput="otpNav(this,'o2','o4')">
+        <input class="otp-digit" maxlength="1" id="o4" oninput="otpNav(this,'o3','o5')">
+        <input class="otp-digit" maxlength="1" id="o5" oninput="otpNav(this,'o4','o6')">
+        <input class="otp-digit" maxlength="1" id="o6" oninput="otpNav(this,'o5','')">
+      </div>
+      <button class="btn-reg" onclick="verifyOtp()"><span id="otp-label">Verify & Activate</span></button>
+      <div style="text-align:center;margin-top:0.75rem;font-size:0.82rem;color:var(--txt3)">
+        Didn't get it? <button onclick="resendOtp()" style="background:none;border:none;color:var(--v1);cursor:pointer;font-weight:700;font-family:inherit">Resend</button>
+      </div>
+    </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="../config/supabase-config.js"></script>
-  <script src="../js/theme.js"></script>
-  <script src="../js/profile-nav.js"></script>
-  <script>
-    const quickRegForm = document.getElementById('quickRegForm');
-    const quickRegStatus = document.getElementById('quickRegStatus');
+  </div>
+</div>
 
-    function setQuickRegStatus(message, type = 'info') {
-      quickRegStatus.textContent = message;
-      quickRegStatus.style.display = 'block';
-      quickRegStatus.style.background = type === 'error' ? 'rgba(254,226,226,0.9)' : 'rgba(220,252,231,0.9)';
-      quickRegStatus.style.color = type === 'error' ? '#991b1b' : '#166534';
-      quickRegStatus.style.border = type === 'error' ? '1px solid rgba(239,68,68,0.25)' : '1px solid rgba(34,197,94,0.25)';
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../config/supabase-config.js"></script>
+<script src="../js/theme.js"></script>
+<script src="../js/profile-nav.js"></script>
+<script>
+const db = new SupabaseConfig();
+let selectedRole = 'user';
+
+// Load courses for interest dropdown
+(async () => {
+  const { data } = await db.client.from('courses').select('id,name').eq('is_active',true).order('name');
+  const sel = document.getElementById('r-interest');
+  (data||[]).forEach(c => { const o = document.createElement('option'); o.value = c.id; o.textContent = c.name; sel.appendChild(o); });
+})();
+
+function setRole(role, el) {
+  selectedRole = role;
+  document.querySelectorAll('.role-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('course-interest-wrap').style.display = role === 'user' ? 'block' : 'none';
+  document.getElementById('mentor-link').style.display = role === 'mentor' ? 'block' : 'none';
+}
+
+function togglePass(id, btn) {
+  const inp = document.getElementById(id);
+  const show = inp.type === 'password';
+  inp.type = show ? 'text' : 'password';
+  btn.textContent = show ? 'Hide' : 'Show';
+}
+
+function checkStrength(pass) {
+  let strength = 0;
+  if (pass.length >= 8) strength++;
+  if (/[A-Z]/.test(pass)) strength++;
+  if (/[0-9]/.test(pass)) strength++;
+  if (/[^A-Za-z0-9]/.test(pass)) strength++;
+  const bars  = ['pb1','pb2','pb3','pb4'];
+  const label = ['Enter password','Weak','Medium','Strong','Very Strong'][strength];
+  const cls   = [null,'weak','weak','medium','strong'][strength];
+  bars.forEach((b,i) => { const el = document.getElementById(b); el.className = 'pass-bar'; if (i < strength && cls) el.classList.add(cls); });
+  document.getElementById('pass-label').textContent = label;
+}
+
+function showAlert(type, msg) {
+  document.querySelectorAll('.alert').forEach(a => a.classList.remove('show'));
+  const el = document.getElementById(type + '-alert');
+  el.textContent = msg; el.classList.add('show');
+}
+
+async function submitReg() {
+  const name  = document.getElementById('r-name').value.trim();
+  const uname = document.getElementById('r-username').value.trim();
+  const email = document.getElementById('r-email').value.trim();
+  const phone = document.getElementById('r-phone').value.trim();
+  const pass  = document.getElementById('r-pass').value;
+  const pass2 = document.getElementById('r-pass2').value;
+  if (!name || !uname || !email || !phone || !pass) { showAlert('err', 'Please fill all required fields.'); return; }
+  if (pass !== pass2) { showAlert('err', 'Passwords do not match.'); return; }
+  if (pass.length < 8) { showAlert('err', 'Password must be at least 8 characters.'); return; }
+  if (!/^\d{10}$/.test(phone)) { showAlert('err', 'Enter a valid 10-digit phone number.'); return; }
+  if (!document.getElementById('r-terms').checked) { showAlert('err', 'Please accept the Terms of Service.'); return; }
+
+  const btn = document.getElementById('reg-btn');
+  const label = document.getElementById('reg-label');
+  btn.disabled = true;
+  label.innerHTML = '<span class="spinner"></span> Creating account…';
+
+  try {
+    const { data, error } = await db.client.auth.signUp({
+      email, password: pass,
+      options: { data: { full_name: name, username: uname, role: selectedRole } }
+    });
+    if (error) throw error;
+
+    // Save quick form submission
+    await db.client.from('form_submissions').insert({
+      user_id: data.user?.id || null,
+      form_type: 'quick_registration',
+      form_data: { name, username: uname, email, phone, role: selectedRole, interest: document.getElementById('r-interest').value },
+    });
+
+    // Check if email confirmation is needed
+    if (data.session) {
+      // No OTP — redirect to profile
+      window.location.href = 'profile.html';
+    } else {
+      // Show OTP screen
+      document.getElementById('otp-email-display').textContent = email;
+      document.getElementById('reg-form').style.display = 'none';
+      document.getElementById('otp-wrap').style.display = 'block';
     }
+  } catch (err) {
+    showAlert('err', err.message || 'Registration failed.');
+  }
+  btn.disabled = false;
+  label.textContent = 'Create Account';
+}
 
-    async function submitQuickRegistration(event) {
-      event.preventDefault();
+async function verifyOtp() {
+  const code = ['o1','o2','o3','o4','o5','o6'].map(id => document.getElementById(id).value).join('');
+  if (code.length < 6) { showAlert('err', 'Enter the full 6-digit code.'); return; }
+  const email = document.getElementById('r-email').value.trim();
+  const btn = document.querySelector('#otp-wrap .btn-reg');
+  document.getElementById('otp-label').innerHTML = '<span class="spinner"></span> Verifying…';
+  btn.disabled = true;
 
-      if (!window.supabaseConfig) {
-        setQuickRegStatus('Supabase is not initialized. Please refresh the page.', 'error');
-        return;
-      }
+  try {
+    const { error } = await db.client.auth.verifyOtp({ email, token: code, type: 'signup' });
+    if (error) throw error;
 
-      const formData = new FormData(quickRegForm);
-      const firstName = formData.get('firstName').trim();
-      const lastName = formData.get('lastName').trim();
-      const phone = formData.get('phone').trim();
-      const email = formData.get('email').trim();
-      const password = formData.get('password').trim();
-
-      if (!firstName || !lastName || !phone || !email || !password) {
-        setQuickRegStatus('Please fill in all required fields.', 'error');
-        return;
-      }
-
-      setQuickRegStatus('Submitting registration...');
-
-      try {
-        const result = await window.supabaseConfig.signUp(email, password, {
-          full_name: `${firstName} ${lastName}`,
-          email,
-          phone_number: phone,
-          learning_interest: 'Quick Registration'
-        });
-
-        if (!result.success) {
-          setQuickRegStatus(result.error || 'Unable to register. Please try again.', 'error');
-          return;
-        }
-
-        quickRegForm.style.display = 'none';
-        quickRegStatus.style.display = 'none';
-        document.getElementById('quickSuccess').style.display = 'block';
-      } catch (error) {
-        setQuickRegStatus(error.message || 'Registration failed. Please try again.', 'error');
-      }
+    // Redirect based on role
+    if (selectedRole === 'mentor') {
+      window.location.href = 'mentor-signup.html';
+    } else {
+      window.location.href = 'profile.html';
     }
-  </script>
+  } catch (err) {
+    showAlert('err', err.message || 'Invalid OTP. Please try again.');
+  }
+  document.getElementById('otp-label').textContent = 'Verify & Activate';
+  btn.disabled = false;
+}
+
+function resendOtp() {
+  const email = document.getElementById('r-email').value.trim();
+  db.client.auth.resend({ type: 'signup', email });
+  showAlert('suc', 'OTP resent! Check your email.');
+}
+
+function otpNav(el, prevId, nextId) {
+  if (el.value && nextId) document.getElementById(nextId)?.focus();
+  if (!el.value && prevId) document.getElementById(prevId)?.focus();
+}
+</script>
+<footer></footer>
 </body>
 </html>

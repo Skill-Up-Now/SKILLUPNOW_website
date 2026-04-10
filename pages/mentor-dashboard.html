@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mentor Dashboard — SkillUpNow</title>
+  <link rel="stylesheet" href="../css/variables.css">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    :root { --sidebar-w:220px; --header-h:60px; }
+    body { font-family:'Plus Jakarta Sans','Inter',sans-serif; background:#0d0b1a; color:#f0eeff; min-height:100vh; display:flex; -webkit-font-smoothing:antialiased; }
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+    .sidebar { width:var(--sidebar-w); min-height:100vh; background:rgba(255,255,255,0.03); border-right:1px solid rgba(124,92,252,0.15); display:flex; flex-direction:column; position:fixed; left:0; top:0; bottom:0; z-index:100; transition:transform 0.3s; }
+    .sidebar-brand { padding:1.25rem; border-bottom:1px solid rgba(124,92,252,0.12); display:flex; align-items:center; gap:0.75rem; }
+    .brand-icon { width:36px; height:36px; border-radius:10px; background:linear-gradient(135deg,#9b8fff,#7c6cff); display:flex; align-items:center; justify-content:center; font-size:1rem; flex-shrink:0; box-shadow:0 4px 12px rgba(124,108,255,0.4); }
+    .brand-text .name { font-size:0.95rem; font-weight:800; }
+    .brand-text .sub  { font-size:0.7rem; color:rgba(200,191,255,0.4); }
+    .nav-section { padding:0.75rem; }
+    .nav-label { font-size:0.65rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:rgba(200,191,255,0.3); padding:0.5rem 0.5rem 0.25rem; }
+    .nav-item { display:flex; align-items:center; gap:0.7rem; padding:0.6rem 0.75rem; border-radius:10px; cursor:pointer; font-size:0.85rem; font-weight:500; color:rgba(200,191,255,0.55); margin-bottom:2px; transition:all 0.2s; }
+    .nav-item:hover  { background:rgba(124,92,252,0.1); color:#c8bfff; }
+    .nav-item.active { background:rgba(124,92,252,0.18); color:#b5adff; font-weight:700; }
+    .nav-item .nav-icon { font-size:1rem; width:20px; text-align:center; }
+    .sidebar-footer { margin-top:auto; padding:1rem 0.75rem; border-top:1px solid rgba(124,92,252,0.12); }
+    .mentor-info { display:flex; align-items:center; gap:0.65rem; padding:0.6rem 0.75rem; border-radius:10px; }
+    .mentor-avatar { width:36px; height:36px; border-radius:50%; background:linear-gradient(135deg,#9b8fff,#7c6cff); display:flex; align-items:center; justify-content:center; font-size:1rem; font-weight:700; flex-shrink:0; }
+    .mentor-meta .mname { font-size:0.82rem; font-weight:700; }
+    .mentor-meta .mbadge { font-size:0.68rem; color:rgba(200,191,255,0.4); }
+
+    .main { margin-left:var(--sidebar-w); flex:1; display:flex; flex-direction:column; }
+    .topbar { height:var(--header-h); padding:0 1.5rem; background:rgba(255,255,255,0.02); border-bottom:1px solid rgba(124,92,252,0.12); display:flex; align-items:center; gap:1rem; position:sticky; top:0; z-index:50; backdrop-filter:blur(10px); }
+    .topbar-title { font-size:1rem; font-weight:700; flex:1; }
+    .topbar-btn { background:rgba(124,92,252,0.15); border:1px solid rgba(124,92,252,0.25); border-radius:10px; padding:0.4rem 0.85rem; color:#c8bfff; font-size:0.82rem; cursor:pointer; transition:all 0.2s; font-family:inherit; }
+    .topbar-btn:hover { background:rgba(124,92,252,0.25); }
+    .topbar-btn.primary { background:linear-gradient(135deg,#9b8fff,#7c6cff); border-color:transparent; color:#fff; font-weight:700; }
+
+    .content { padding:1.5rem; flex:1; }
+    .section { display:none; }
+    .section.active { display:block; }
+
+    .stats-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:1rem; margin-bottom:1.5rem; }
+    .stat-card { background:rgba(255,255,255,0.04); border:1px solid rgba(124,92,252,0.15); border-radius:16px; padding:1.25rem; transition:all 0.2s; }
+    .stat-card:hover { border-color:rgba(124,92,252,0.35); transform:translateY(-2px); }
+    .stat-card::before { content:''; display:block; height:2px; background:linear-gradient(135deg,#9b8fff,#7c6cff); border-radius:2px; margin-bottom:0.85rem; }
+    .stat-icon { font-size:1.5rem; margin-bottom:0.5rem; }
+    .stat-value { font-size:1.6rem; font-weight:800; color:#b5adff; }
+    .stat-label { font-size:0.75rem; color:rgba(200,191,255,0.4); }
+
+    .table-card { background:rgba(255,255,255,0.03); border:1px solid rgba(124,92,252,0.15); border-radius:16px; overflow:hidden; margin-bottom:1.5rem; }
+    .table-header { padding:1rem 1.25rem; border-bottom:1px solid rgba(124,92,252,0.12); display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap; }
+    .table-header h3 { font-size:0.95rem; font-weight:700; }
+    .data-table { width:100%; border-collapse:collapse; font-size:0.83rem; }
+    .data-table th { padding:0.65rem 1rem; text-align:left; color:rgba(200,191,255,0.4); font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; border-bottom:1px solid rgba(124,92,252,0.1); }
+    .data-table td { padding:0.75rem 1rem; border-bottom:1px solid rgba(124,92,252,0.07); color:#c8bfff; }
+    .data-table tr:last-child td { border-bottom:none; }
+    .data-table tr:hover td { background:rgba(124,92,252,0.05); }
+    .table-empty { text-align:center; padding:2rem; color:rgba(200,191,255,0.3); font-size:0.85rem; }
+
+    .badge { display:inline-flex; align-items:center; padding:0.2rem 0.6rem; border-radius:999px; font-size:0.7rem; font-weight:700; }
+    .badge-green  { background:rgba(34,197,94,0.15);  color:#4ade80; }
+    .badge-yellow { background:rgba(234,179,8,0.15);  color:#facc15; }
+    .badge-red    { background:rgba(239,68,68,0.15);  color:#f87171; }
+    .badge-blue   { background:rgba(59,130,246,0.15); color:#60a5fa; }
+    .badge-gray   { background:rgba(100,116,139,0.2); color:#94a3b8; }
+
+    .action-btn { background:none; border:1px solid rgba(124,92,252,0.2); border-radius:6px; padding:0.25rem 0.5rem; color:#9b8fff; font-size:0.75rem; cursor:pointer; transition:all 0.2s; font-family:inherit; }
+    .action-btn:hover { background:rgba(124,92,252,0.15); }
+    .action-btn.success { border-color:rgba(34,197,94,0.3); color:#4ade80; }
+    .btn-primary { background:linear-gradient(135deg,#9b8fff,#7c6cff); color:#fff; border:none; border-radius:8px; padding:0.4rem 0.9rem; font-size:0.8rem; font-weight:700; cursor:pointer; font-family:inherit; transition:all 0.2s; }
+    .btn-primary:hover { opacity:0.88; }
+    .btn-secondary { background:rgba(124,92,252,0.15); border:1px solid rgba(124,92,252,0.25); border-radius:8px; padding:0.4rem 0.8rem; color:#c8bfff; font-size:0.8rem; cursor:pointer; font-family:inherit; transition:all 0.2s; }
+    .btn-secondary:hover { background:rgba(124,92,252,0.25); }
+
+    /* Schedule card */
+    .schedule-list { display:flex; flex-direction:column; gap:0.75rem; }
+    .schedule-card { background:rgba(255,255,255,0.04); border:1px solid rgba(124,92,252,0.15); border-radius:14px; padding:1rem 1.25rem; display:flex; align-items:center; gap:1rem; }
+    .schedule-time { text-align:center; min-width:60px; }
+    .schedule-time .date { font-size:1.25rem; font-weight:800; color:#9b8fff; }
+    .schedule-time .month { font-size:0.7rem; color:rgba(200,191,255,0.4); text-transform:uppercase; }
+    .schedule-info { flex:1; }
+    .schedule-info h4 { font-size:0.9rem; font-weight:700; margin-bottom:0.2rem; }
+    .schedule-info p  { font-size:0.78rem; color:rgba(200,191,255,0.5); }
+    .schedule-actions { display:flex; gap:0.5rem; flex-shrink:0; }
+
+    /* Attendance */
+    .attendance-filter { display:flex; gap:0.75rem; margin-bottom:1rem; flex-wrap:wrap; }
+    .att-select { background:rgba(255,255,255,0.05); border:1px solid rgba(124,92,252,0.2); border-radius:8px; padding:0.4rem 0.75rem; color:#f0eeff; font-size:0.82rem; outline:none; font-family:inherit; }
+
+    /* Modal */
+    .modal-overlay { position:fixed; inset:0; z-index:1000; background:rgba(0,0,0,0.7); backdrop-filter:blur(8px); display:flex; align-items:center; justify-content:center; opacity:0; visibility:hidden; transition:all 0.3s; }
+    .modal-overlay.open { opacity:1; visibility:visible; }
+    .modal-box { background:#130f2a; border:1.5px solid rgba(124,92,252,0.25); border-radius:20px; padding:1.75rem; width:92vw; max-width:480px; max-height:85vh; overflow-y:auto; transform:scale(0.95); transition:transform 0.3s; position:relative; }
+    .modal-overlay.open .modal-box { transform:scale(1); }
+    .modal-title { font-size:1.05rem; font-weight:800; margin-bottom:1.25rem; }
+    .modal-close { position:absolute; top:1rem; right:1rem; background:rgba(124,92,252,0.15); border:1px solid rgba(124,92,252,0.25); border-radius:50%; width:30px; height:30px; display:flex; align-items:center; justify-content:center; cursor:pointer; color:#9b8fff; font-size:0.9rem; }
+    .modal-close:hover { background:rgba(124,92,252,0.3); }
+    .f-group { margin-bottom:1rem; }
+    .f-group label { display:block; font-size:0.78rem; font-weight:600; color:rgba(200,191,255,0.55); margin-bottom:0.35rem; }
+    .f-group input, .f-group select, .f-group textarea { width:100%; background:rgba(255,255,255,0.05); border:1.5px solid rgba(124,92,252,0.2); border-radius:10px; padding:0.6rem 0.85rem; color:#f0eeff; font-size:0.85rem; outline:none; font-family:inherit; transition:border-color 0.2s; }
+    .f-group input:focus, .f-group select:focus { border-color:rgba(155,143,255,0.5); }
+    .f-group select option { background:#130f2a; }
+    .modal-actions { display:flex; gap:0.65rem; justify-content:flex-end; margin-top:1.25rem; }
+
+    .mob-menu { display:none; }
+    .hamburger { background:rgba(124,92,252,0.15); border:1px solid rgba(124,92,252,0.25); border-radius:8px; padding:0.4rem 0.6rem; cursor:pointer; color:#9b8fff; font-size:1.1rem; }
+    @media(max-width:768px) {
+      .sidebar { transform:translateX(-100%); }
+      .sidebar.open { transform:translateX(0); }
+      .main { margin-left:0; }
+      .mob-menu { display:block; }
+    }
+  </style>
+</head>
+<body>
+
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-icon">📚</div>
+    <div class="brand-text"><div class="name">SkillUpNow</div><div class="sub">Mentor Portal</div></div>
+  </div>
+  <nav>
+    <div class="nav-section">
+      <div class="nav-label">Overview</div>
+      <div class="nav-item active" data-section="overview"><span class="nav-icon">📊</span> Overview</div>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">My Classes</div>
+      <div class="nav-item" data-section="schedule"><span class="nav-icon">📆</span> Class Schedule</div>
+      <div class="nav-item" data-section="students"><span class="nav-icon">👥</span> My Students</div>
+      <div class="nav-item" data-section="attendance"><span class="nav-icon">✅</span> Attendance</div>
+      <div class="nav-item" data-section="recordings"><span class="nav-icon">🎬</span> Recordings</div>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Payments</div>
+      <div class="nav-item" data-section="payments"><span class="nav-icon">💳</span> Student Payments</div>
+      <div class="nav-item" data-section="emi"><span class="nav-icon">📅</span> EMI Tracker</div>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Reports</div>
+      <div class="nav-item" data-section="reports"><span class="nav-icon">📈</span> My Reports</div>
+    </div>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="mentor-info">
+      <div class="mentor-avatar" id="m-initial">M</div>
+      <div class="mentor-meta">
+        <div class="mname" id="m-name">Mentor</div>
+        <div class="mbadge">✅ Approved Mentor</div>
+      </div>
+    </div>
+    <div class="nav-item" style="margin-top:0.5rem" onclick="logout()"><span class="nav-icon">🚪</span> Sign Out</div>
+  </div>
+</aside>
+
+<main class="main">
+  <header class="topbar">
+    <button class="hamburger mob-menu" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+    <div class="topbar-title" id="topbar-title">Overview</div>
+    <button class="topbar-btn primary" onclick="openScheduleModal()">+ Schedule Class</button>
+    <button class="topbar-btn" onclick="window.open('../index.html','_blank')">↗ Website</button>
+  </header>
+
+  <div class="content">
+
+    <!-- OVERVIEW -->
+    <div class="section active" id="section-overview">
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-icon">👥</div><div class="stat-value" id="ov-students">—</div><div class="stat-label">Total Students</div></div>
+        <div class="stat-card"><div class="stat-icon">📚</div><div class="stat-value" id="ov-courses">—</div><div class="stat-label">Active Courses</div></div>
+        <div class="stat-card"><div class="stat-icon">🎓</div><div class="stat-value" id="ov-sessions">—</div><div class="stat-label">Sessions Completed</div></div>
+        <div class="stat-card"><div class="stat-icon">⭐</div><div class="stat-value" id="ov-rating">—</div><div class="stat-label">Avg Rating</div></div>
+      </div>
+
+      <!-- Upcoming classes -->
+      <div class="table-card">
+        <div class="table-header"><h3>Upcoming Classes</h3></div>
+        <div style="padding:1.25rem" id="upcoming-list">
+          <div class="table-empty">Loading schedule…</div>
+        </div>
+      </div>
+
+      <!-- Recent attendance -->
+      <div class="table-card">
+        <div class="table-header"><h3>Recent Attendance</h3></div>
+        <table class="data-table">
+          <thead><tr><th>Student</th><th>Class</th><th>Date</th><th>Status</th><th>Duration</th></tr></thead>
+          <tbody id="recent-attendance"><tr><td colspan="5" class="table-empty">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- SCHEDULE -->
+    <div class="section" id="section-schedule">
+      <div class="table-card">
+        <div class="table-header">
+          <h3>Class Schedule</h3>
+          <div style="display:flex;gap:0.5rem">
+            <button class="btn-primary" onclick="openScheduleModal()">+ New Class</button>
+          </div>
+        </div>
+        <div style="padding:1.25rem" id="schedule-list">
+          <div class="table-empty">Loading…</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STUDENTS -->
+    <div class="section" id="section-students">
+      <div class="table-card">
+        <div class="table-header">
+          <h3>My Students</h3>
+          <div style="display:flex;gap:0.5rem;align-items:center">
+            <select class="att-select" id="batch-filter-students" onchange="loadStudents()">
+              <option value="">All Batches</option>
+            </select>
+          </div>
+        </div>
+        <table class="data-table">
+          <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Course</th><th>Batch</th><th>Payment</th><th>Progress</th><th>Access</th><th>Actions</th></tr></thead>
+          <tbody id="student-tbody"><tr><td colspan="9" class="table-empty">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ATTENDANCE -->
+    <div class="section" id="section-attendance">
+      <div class="table-card">
+        <div class="table-header">
+          <h3>Mark Attendance</h3>
+          <div class="attendance-filter">
+            <select class="att-select" id="att-class-select" onchange="loadAttendanceForClass()">
+              <option value="">Select Class…</option>
+            </select>
+          </div>
+        </div>
+        <div id="attendance-panel" style="padding:1.25rem">
+          <div class="table-empty">Select a class to mark attendance</div>
+        </div>
+      </div>
+
+      <div class="table-card">
+        <div class="table-header"><h3>Attendance History</h3></div>
+        <table class="data-table">
+          <thead><tr><th>Student</th><th>Class</th><th>Date</th><th>Status</th><th>Duration (min)</th></tr></thead>
+          <tbody id="att-history"><tr><td colspan="5" class="table-empty">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- RECORDINGS -->
+    <div class="section" id="section-recordings">
+      <div class="table-card">
+        <div class="table-header">
+          <h3>Class Recordings</h3>
+          <div style="font-size:0.78rem;color:rgba(200,191,255,0.4)">Uploaded by admin · Drive/YouTube links</div>
+        </div>
+        <table class="data-table">
+          <thead><tr><th>Title</th><th>Course</th><th>Date</th><th>Drive</th><th>YouTube</th></tr></thead>
+          <tbody id="rec-tbody"><tr><td colspan="5" class="table-empty">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- STUDENT PAYMENTS -->
+    <div class="section" id="section-payments">
+      <div class="table-card">
+        <div class="table-header"><h3>Student Fee Status</h3></div>
+        <table class="data-table">
+          <thead><tr><th>Student</th><th>Course</th><th>Total Fee</th><th>Paid</th><th>Balance</th><th>Type</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="pay-tbody"><tr><td colspan="8" class="table-empty">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- EMI TRACKER -->
+    <div class="section" id="section-emi">
+      <div class="table-card">
+        <div class="table-header">
+          <h3>EMI Installments</h3>
+          <div style="display:flex;gap:0.5rem">
+            <select class="att-select" id="emi-status-select" onchange="loadEmi()">
+              <option value="">All</option>
+              <option value="pending">Pending</option>
+              <option value="overdue">Overdue</option>
+              <option value="paid">Paid</option>
+            </select>
+          </div>
+        </div>
+        <table class="data-table">
+          <thead><tr><th>Student</th><th>Course</th><th>Installment</th><th>Due Date</th><th>Amount</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="emi-tbody"><tr><td colspan="7" class="table-empty">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- REPORTS -->
+    <div class="section" id="section-reports">
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-icon">📊</div><div class="stat-value" id="rpt-att-rate">—</div><div class="stat-label">Avg Attendance Rate</div></div>
+        <div class="stat-card"><div class="stat-icon">✅</div><div class="stat-value" id="rpt-sessions-done">—</div><div class="stat-label">Sessions Completed</div></div>
+        <div class="stat-card"><div class="stat-icon">📚</div><div class="stat-value" id="rpt-enrolled">—</div><div class="stat-label">Students Enrolled</div></div>
+        <div class="stat-card"><div class="stat-icon">🎓</div><div class="stat-value" id="rpt-completed">—</div><div class="stat-label">Course Completions</div></div>
+      </div>
+      <div class="table-card">
+        <div class="table-header">
+          <h3>Student Progress Report</h3>
+          <button class="btn-secondary" onclick="window.print()">🖨 Print Report</button>
+        </div>
+        <table class="data-table">
+          <thead><tr><th>Student</th><th>Course</th><th>Progress</th><th>Attendance</th><th>Payment</th><th>Status</th></tr></thead>
+          <tbody id="rpt-tbody"><tr><td colspan="6" class="table-empty">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<!-- Schedule Modal -->
+<div class="modal-overlay" id="schedule-modal">
+  <div class="modal-box">
+    <div class="modal-close" onclick="closeModal('schedule-modal')">✕</div>
+    <div class="modal-title">Schedule New Class</div>
+    <div class="f-group"><label>Batch *</label><select id="sch-batch"><option value="">Select batch…</option></select></div>
+    <div class="f-group"><label>Class Title *</label><input type="text" id="sch-title" placeholder="e.g. AWS Module 3 — S3 Deep Dive"></div>
+    <div class="f-group"><label>Date & Time *</label><input type="datetime-local" id="sch-datetime"></div>
+    <div class="f-group"><label>Duration (minutes)</label><input type="number" id="sch-dur" value="60" min="30" max="240"></div>
+    <div class="f-group"><label>Google Meet Link</label><input type="url" id="sch-meet" placeholder="https://meet.google.com/xxx-xxxx-xxx"></div>
+    <div class="f-group"><label>Class Description / Agenda</label><textarea id="sch-desc" placeholder="Topics to be covered…" rows="3"></textarea></div>
+    <div style="background:rgba(124,92,252,0.1);border:1px solid rgba(124,92,252,0.2);border-radius:10px;padding:0.75rem;font-size:0.8rem;color:rgba(200,191,255,0.6);margin-bottom:1rem">
+      📧 All enrolled students will receive an automatic email invite with the Google Meet link.
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal('schedule-modal')">Cancel</button>
+      <button class="btn-primary" onclick="saveSchedule()">Schedule & Send Invites</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../config/supabase-config.js"></script>
+<script>
+const db = new SupabaseConfig();
+let mentorId = null, mentorUserId = null, myBatches = [];
+
+async function checkAuth() {
+  const { data: { session } } = await db.client.auth.getSession();
+  if (!session) return window.location.href = '/pages/admin-login.html';
+  mentorUserId = session.user.id;
+  const { data: m } = await db.client.from('mentors').select('id,approval_status').eq('user_id', session.user.id).single();
+  if (!m || m.approval_status !== 'approved') {
+    document.body.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;gap:1rem;color:#f0eeff;font-family:inherit">
+      <div style="font-size:3rem">⏳</div>
+      <h2>Pending Approval</h2>
+      <p style="color:rgba(200,191,255,0.5)">Your mentor application is under review by the admin.</p>
+      <a href="../index.html" style="color:#9b8fff">← Back to Website</a>
+    </div>`;
+    return;
+  }
+  mentorId = m.id;
+  const { data: profile } = await db.client.from('user_profiles').select('full_name').eq('id', session.user.id).single();
+  const name = profile?.full_name || session.user.email;
+  document.getElementById('m-name').textContent = name;
+  document.getElementById('m-initial').textContent = name[0].toUpperCase();
+  loadMyBatches();
+}
+
+async function loadMyBatches() {
+  const { data } = await db.client.from('mentor_batches').select('*, courses(name)').eq('mentor_id', mentorId).eq('is_active', true);
+  myBatches = data || [];
+  const opts = myBatches.map(b => `<option value="${b.id}">${b.batch_name} — ${b.courses?.name||''}</option>`).join('');
+  ['sch-batch','batch-filter-students','att-class-select'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.innerHTML = '<option value="">Select…</option>' + opts;
+  });
+  loadOverview();
+}
+
+async function loadOverview() {
+  // Stats
+  const { data: students } = await db.client.from('enrollments').select('id').in('batch_id', myBatches.map(b => b.id));
+  document.getElementById('ov-students').textContent = students?.length || 0;
+  document.getElementById('ov-courses').textContent = [...new Set(myBatches.map(b => b.course_id))].length;
+  const { data: sessions } = await db.client.from('class_schedules').select('id').eq('mentor_id', mentorId).eq('status','completed');
+  document.getElementById('ov-sessions').textContent = sessions?.length || 0;
+  const { data: m } = await db.client.from('mentors').select('avg_rating').eq('id', mentorId).single();
+  document.getElementById('ov-rating').textContent = (m?.avg_rating||0).toFixed(1) + '★';
+
+  // Upcoming
+  const { data: upcoming } = await db.client.from('class_schedules').select('*').eq('mentor_id', mentorId).eq('status','scheduled').gte('scheduled_at', new Date().toISOString()).order('scheduled_at').limit(5);
+  const upEl = document.getElementById('upcoming-list');
+  if (!upcoming?.length) { upEl.innerHTML = '<div class="table-empty">No upcoming classes. <button class="btn-primary" onclick="openScheduleModal()" style="margin-left:0.5rem">Schedule Now</button></div>'; }
+  else {
+    upEl.innerHTML = '<div class="schedule-list">' + upcoming.map(s => {
+      const d = new Date(s.scheduled_at);
+      return `<div class="schedule-card">
+        <div class="schedule-time"><div class="date">${d.getDate()}</div><div class="month">${d.toLocaleString('en-IN',{month:'short'})}</div></div>
+        <div class="schedule-info">
+          <h4>${s.title}</h4>
+          <p>${d.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})} · ${s.duration_minutes} min</p>
+        </div>
+        <div class="schedule-actions">
+          ${s.google_meet_link ? `<a href="${s.google_meet_link}" target="_blank"><button class="btn-primary">Join Meet</button></a>` : '<span style="font-size:0.78rem;color:rgba(200,191,255,0.4)">No link set</span>'}
+        </div>
+      </div>`;
+    }).join('') + '</div>';
+  }
+}
+
+async function loadScheduleSection() {
+  const { data } = await db.client.from('class_schedules').select('*').eq('mentor_id', mentorId).order('scheduled_at', { ascending: false }).limit(30);
+  const el = document.getElementById('schedule-list');
+  if (!data?.length) { el.innerHTML = '<div class="table-empty">No classes scheduled yet.</div>'; return; }
+  el.innerHTML = '<div class="schedule-list">' + data.map(s => {
+    const d = new Date(s.scheduled_at);
+    const badge = { scheduled:'badge-blue', completed:'badge-green', cancelled:'badge-red', ongoing:'badge-yellow' }[s.status] || 'badge-gray';
+    return `<div class="schedule-card">
+      <div class="schedule-time"><div class="date">${d.getDate()}</div><div class="month">${d.toLocaleString('en-IN',{month:'short'})}</div></div>
+      <div class="schedule-info">
+        <h4>${s.title}</h4>
+        <p>${d.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})} · ${s.duration_minutes} min · <span class="badge ${badge}">${s.status}</span></p>
+      </div>
+      <div class="schedule-actions">
+        ${s.google_meet_link && s.status === 'scheduled' ? `<a href="${s.google_meet_link}" target="_blank"><button class="btn-primary">Join</button></a>` : ''}
+        ${s.status === 'scheduled' ? `<button class="action-btn success" onclick="markComplete('${s.id}')">✓ Mark Done</button>` : ''}
+      </div>
+    </div>`;
+  }).join('') + '</div>';
+}
+
+async function loadStudents() {
+  const batchFilter = document.getElementById('batch-filter-students').value;
+  const batchIds = batchFilter ? [batchFilter] : myBatches.map(b => b.id);
+  if (!batchIds.length) { document.getElementById('student-tbody').innerHTML = '<tr><td colspan="9" class="table-empty">No batches assigned</td></tr>'; return; }
+  const { data } = await db.client.from('enrollments').select('*, user_profiles(full_name,email,phone), courses(name), mentor_batches(batch_name)').in('batch_id', batchIds).limit(100);
+  const fmt = v => '₹' + Number(v||0).toLocaleString('en-IN');
+  document.getElementById('student-tbody').innerHTML = (data||[]).map(e => `
+    <tr>
+      <td>${e.user_profiles?.full_name||'—'}</td>
+      <td>${e.user_profiles?.email||'—'}</td>
+      <td>${e.user_profiles?.phone||'—'}</td>
+      <td>${e.courses?.name||'—'}</td>
+      <td>${e.mentor_batches?.batch_name||'—'}</td>
+      <td><span class="badge ${e.payment_status==='completed'?'badge-green':e.payment_status==='partial'?'badge-yellow':'badge-red'}">${e.payment_status}</span></td>
+      <td>
+        <div style="display:flex;align-items:center;gap:0.5rem">
+          <div style="flex:1;height:4px;background:rgba(124,92,252,0.2);border-radius:999px">
+            <div style="height:100%;width:${e.progress_percentage||0}%;background:linear-gradient(90deg,#7c6cff,#9b8fff);border-radius:999px"></div>
+          </div>
+          <span style="font-size:0.75rem;color:#9b8fff">${e.progress_percentage||0}%</span>
+        </div>
+      </td>
+      <td><span class="badge ${e.access_granted?'badge-green':'badge-red'}">${e.access_granted?'Active':'Restricted'}</span></td>
+      <td>
+        ${!e.access_granted ? `<button class="action-btn" onclick="toggleAccess('${e.id}',true)">Grant</button>` :
+          `<button class="action-btn" style="border-color:rgba(239,68,68,0.3);color:#f87171" onclick="toggleAccess('${e.id}',false)">Restrict</button>`}
+      </td>
+    </tr>`).join('') || '<tr><td colspan="9" class="table-empty">No students found</td></tr>';
+}
+
+async function loadAttendanceForClass() {
+  const classId = document.getElementById('att-class-select').value;
+  if (!classId) { document.getElementById('attendance-panel').innerHTML = '<div class="table-empty">Select a class above</div>'; return; }
+  const batchIds = myBatches.map(b => b.id);
+  const { data: enrollments } = await db.client.from('enrollments').select('*, user_profiles(full_name,email)').in('batch_id', batchIds).eq('enrollment_status','active');
+  const { data: existing } = await db.client.from('class_attendance').select('*').eq('schedule_id', classId);
+  const attMap = {};
+  (existing||[]).forEach(a => attMap[a.user_id] = a);
+  const panel = document.getElementById('attendance-panel');
+  if (!enrollments?.length) { panel.innerHTML = '<div class="table-empty">No enrolled students in this batch</div>'; return; }
+  panel.innerHTML = `<table class="data-table"><thead><tr><th>Student</th><th>Email</th><th>Status</th><th>Mark</th></tr></thead><tbody>` +
+    (enrollments||[]).map(e => {
+      const att = attMap[e.user_id];
+      const status = att?.status || 'absent';
+      const badge = { present:'badge-green', absent:'badge-red', late:'badge-yellow', excused:'badge-blue' }[status];
+      return `<tr>
+        <td>${e.user_profiles?.full_name||'—'}</td>
+        <td>${e.user_profiles?.email||'—'}</td>
+        <td><span class="badge ${badge}" id="att-badge-${e.user_id}">${status}</span></td>
+        <td><div style="display:flex;gap:0.4rem">
+          ${['present','absent','late','excused'].map(s => `<button class="action-btn ${s==='present'?'success':''}" onclick="markAttendance('${classId}','${e.user_id}','${s}')" style="padding:0.2rem 0.5rem;font-size:0.72rem">${s}</button>`).join('')}
+        </div></td>
+      </tr>`;
+    }).join('') + '</tbody></table>';
+}
+
+async function markAttendance(classId, userId, status) {
+  await db.client.from('class_attendance').upsert({ schedule_id: classId, user_id: userId, status, joined_at: status==='present'?new Date().toISOString():null }, { onConflict:'schedule_id,user_id' });
+  const badge = document.getElementById('att-badge-' + userId);
+  if (badge) { badge.textContent = status; badge.className = 'badge ' + ({'present':'badge-green','absent':'badge-red','late':'badge-yellow','excused':'badge-blue'}[status]||'badge-gray'); }
+}
+
+async function toggleAccess(enrollId, grant) {
+  await db.client.from('enrollments').update({ access_granted: grant }).eq('id', enrollId);
+  loadStudents();
+}
+
+async function markComplete(scheduleId) {
+  await db.client.from('class_schedules').update({ status: 'completed' }).eq('id', scheduleId);
+  loadScheduleSection();
+}
+
+async function loadEmi() {
+  const status = document.getElementById('emi-status-select').value;
+  const batchIds = myBatches.map(b => b.id);
+  const { data: enrollIds } = await db.client.from('enrollments').select('id').in('batch_id', batchIds);
+  const eIds = (enrollIds||[]).map(e => e.id);
+  if (!eIds.length) { document.getElementById('emi-tbody').innerHTML = '<tr><td colspan="7" class="table-empty">No EMI records</td></tr>'; return; }
+  let q = db.client.from('emi_schedules').select('*, user_profiles(full_name), enrollments(courses(name))').in('enrollment_id', eIds);
+  if (status) q = q.eq('status', status);
+  const { data } = await q.order('due_date').limit(100);
+  document.getElementById('emi-tbody').innerHTML = (data||[]).map(e => {
+    const badge = {paid:'badge-green',pending:'badge-yellow',overdue:'badge-red',waived:'badge-gray'}[e.status]||'badge-gray';
+    return `<tr>
+      <td>${e.user_profiles?.full_name||'—'}</td>
+      <td>${e.enrollments?.courses?.name||'—'}</td>
+      <td>#${e.installment_number}</td>
+      <td>${new Date(e.due_date).toLocaleDateString('en-IN')}</td>
+      <td>₹${Number(e.amount).toLocaleString('en-IN')}</td>
+      <td><span class="badge ${badge}">${e.status}</span></td>
+      <td>${e.status==='overdue' ? '<button class="action-btn" style="border-color:rgba(239,68,68,0.3);color:#f87171">Notify Student</button>' : '—'}</td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="7" class="table-empty">No EMI records</td></tr>';
+}
+
+async function loadReports() {
+  const batchIds = myBatches.map(b => b.id);
+  const { data: enrollments } = await db.client.from('enrollments').select('*, user_profiles(full_name), courses(name), class_attendance(status)').in('batch_id', batchIds);
+  document.getElementById('rpt-enrolled').textContent = enrollments?.length || 0;
+  document.getElementById('rpt-completed').textContent = (enrollments||[]).filter(e => e.enrollment_status === 'completed').length;
+  const { data: sessions } = await db.client.from('class_schedules').select('id,status').eq('mentor_id', mentorId);
+  document.getElementById('rpt-sessions-done').textContent = (sessions||[]).filter(s => s.status === 'completed').length;
+  document.getElementById('rpt-att-rate').textContent = '—';
+  document.getElementById('rpt-tbody').innerHTML = (enrollments||[]).map(e => `
+    <tr>
+      <td>${e.user_profiles?.full_name||'—'}</td>
+      <td>${e.courses?.name||'—'}</td>
+      <td>${e.progress_percentage||0}%</td>
+      <td>—</td>
+      <td><span class="badge ${e.payment_status==='completed'?'badge-green':'badge-yellow'}">${e.payment_status}</span></td>
+      <td><span class="badge ${e.enrollment_status==='active'?'badge-green':'badge-gray'}">${e.enrollment_status}</span></td>
+    </tr>`).join('') || '<tr><td colspan="6" class="table-empty">No data</td></tr>';
+}
+
+function openScheduleModal() { openModal('schedule-modal'); }
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-overlay').forEach(m => m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); }));
+
+async function saveSchedule() {
+  const batch = document.getElementById('sch-batch').value;
+  if (!batch) { alert('Please select a batch'); return; }
+  const b = myBatches.find(x => x.id === batch);
+  await db.client.from('class_schedules').insert({
+    batch_id: batch, mentor_id: mentorId, course_id: b?.course_id,
+    title: document.getElementById('sch-title').value,
+    scheduled_at: document.getElementById('sch-datetime').value,
+    duration_minutes: parseInt(document.getElementById('sch-dur').value),
+    google_meet_link: document.getElementById('sch-meet').value || null,
+    description: document.getElementById('sch-desc').value,
+    status: 'scheduled',
+  });
+  closeModal('schedule-modal');
+  loadScheduleSection();
+  alert('Class scheduled! Email invites would be sent to enrolled students.');
+}
+
+document.querySelectorAll('.nav-item[data-section]').forEach(item => {
+  item.addEventListener('click', () => {
+    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    item.classList.add('active');
+    const sec = item.dataset.section;
+    document.getElementById('section-' + sec).classList.add('active');
+    document.getElementById('topbar-title').textContent = item.textContent.trim();
+    const loaders = { schedule: loadScheduleSection, students: loadStudents, emi: loadEmi, reports: loadReports };
+    loaders[sec]?.();
+  });
+});
+
+async function logout() {
+  await db.client.auth.signOut();
+  window.location.href = '../index.html';
+}
+
+checkAuth();
+</script>
+</body>
+</html>

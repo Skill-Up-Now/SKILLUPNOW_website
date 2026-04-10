@@ -1,554 +1,435 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="SkillUpNow Course Pamphlet — Interactive Professional Brochure">
-  <title>Course Pamphlet — SkillUpNow</title>
+  <title>Course Brochure — SkillUpNow</title>
   <link rel="stylesheet" href="../css/variables.css">
-  <link rel="stylesheet" href="../css/animations.css">
   <link rel="stylesheet" href="../css/main.css">
   <link rel="stylesheet" href="../css/responsive.css">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,700&family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <script>
-    if (window.location.protocol !== 'file:') {
-      var p = window.location.pathname;
-      if (p.endsWith('.html')) history.replaceState(null, '', p.replace(/\.html$/, ''));
-    }
-  </script>
   <style>
-    /* ── Page ── */
-    .pamphlet-page { min-height: 100vh; background: var(--bg); overflow-x: hidden; }
+    .page-wrap { position:relative; z-index:1; padding-top:80px; min-height:100vh; }
 
-    /* ── Hero ── */
+    /* ---- Hero ---- */
     .pamphlet-hero {
+      background: var(--grad);
+      padding: 4rem 2rem 3rem;
       text-align: center;
-      padding: 7rem 5vw 5rem;
       position: relative;
-      background: linear-gradient(180deg, rgba(124,92,252,0.08) 0%, transparent 100%);
-      border-bottom: 1px solid var(--border);
       overflow: hidden;
     }
     .pamphlet-hero::before {
       content: '';
       position: absolute; inset: 0;
-      background: radial-gradient(circle at 30% 40%, rgba(124,92,252,0.15), transparent 60%),
-                  radial-gradient(circle at 70% 60%, rgba(0,207,238,0.1), transparent 60%);
-      pointer-events: none;
+      background: url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='rgba(255,255,255,0.05)' stroke-width='1'%3E%3Ccircle cx='40' cy='40' r='35'/%3E%3Ccircle cx='40' cy='40' r='20'/%3E%3C/g%3E%3C/svg%3E") repeat;
     }
-    .pamphlet-hero h1 {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: clamp(3rem, 8vw, 5.5rem);
-      font-weight: 700;
-      background: linear-gradient(135deg, var(--v1), var(--v2), #00cfee);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      margin-bottom: 1.2rem;
-      animation: fadeUp 0.7s ease both;
-      line-height: 1.05;
-    }
-    .pamphlet-hero p {
-      font-size: clamp(1rem, 2.5vw, 1.3rem);
-      color: var(--txt3);
-      max-width: 680px;
-      margin: 0 auto 3rem;
-      line-height: 1.75;
-      animation: fadeUp 0.7s 0.1s ease both;
-    }
+    .pamphlet-hero .badge-row { display:flex; justify-content:center; gap:0.6rem; flex-wrap:wrap; margin-bottom:1.25rem; position:relative; }
+    .pamphlet-hero .badge { background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.3); border-radius:999px; padding:0.3rem 0.85rem; font-size:0.78rem; font-weight:700; color:#fff; backdrop-filter:blur(6px); }
+    .pamphlet-hero h1 { color:#fff; font-size:2.8rem; font-weight:900; line-height:1.15; position:relative; }
+    .pamphlet-hero h1 span { color:rgba(255,255,255,0.75); }
+    .pamphlet-hero p  { color:rgba(255,255,255,0.82); font-size:1rem; max-width:520px; margin:0.75rem auto 0; position:relative; }
+    .hero-actions { display:flex; justify-content:center; gap:1rem; flex-wrap:wrap; margin-top:2rem; position:relative; }
+    .btn-white { background:#fff; color:var(--v1); border:none; border-radius:var(--r1); padding:0.75rem 1.75rem; font-size:0.9rem; font-weight:700; cursor:pointer; transition:all 0.2s; font-family:inherit; }
+    .btn-white:hover { background:rgba(255,255,255,0.9); transform:scale(1.02); }
+    .btn-outline-white { background:transparent; color:#fff; border:2px solid rgba(255,255,255,0.6); border-radius:var(--r1); padding:0.75rem 1.75rem; font-size:0.9rem; font-weight:700; cursor:pointer; transition:all 0.2s; font-family:inherit; }
+    .btn-outline-white:hover { background:rgba(255,255,255,0.1); border-color:#fff; }
 
-    /* ── Download Buttons ── */
-    .download-section {
-      display: flex;
-      gap: 1rem;
-      justify-content: center;
-      flex-wrap: wrap;
-      animation: fadeUp 0.7s 0.2s ease both;
+    /* ---- Stats strip ---- */
+    .stats-strip { background:var(--panel); border-bottom:1px solid var(--border); }
+    .stats-inner { max-width:1100px; margin:0 auto; padding:1.5rem 1.5rem; display:grid; grid-template-columns:repeat(4,1fr); }
+    .stat-item { text-align:center; padding:0 1rem; border-right:1px solid var(--border); }
+    .stat-item:last-child { border-right:none; }
+    .stat-num { font-size:1.9rem; font-weight:900; background:var(--grad); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; line-height:1.1; }
+    .stat-lbl { font-size:0.75rem; font-weight:700; color:var(--txt3); text-transform:uppercase; letter-spacing:0.08em; margin-top:0.15rem; }
+
+    /* ---- Toolbar ---- */
+    .toolbar { max-width:1100px; margin:2rem auto 0; padding:0 1.5rem; display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap; }
+    .toolbar h2 { font-size:1.5rem; font-weight:900; }
+    .toolbar-right { display:flex; gap:0.6rem; flex-wrap:wrap; }
+    .cat-pill { background:var(--bg); border:1.5px solid var(--border); border-radius:999px; padding:0.35rem 1rem; font-size:0.8rem; font-weight:700; cursor:pointer; transition:all 0.2s; color:var(--txt2); }
+    .cat-pill.active { background:var(--v1); border-color:var(--v1); color:#fff; }
+    .btn-print { background:var(--grad); color:#fff; border:none; border-radius:var(--r1); padding:0.5rem 1.25rem; font-size:0.82rem; font-weight:700; cursor:pointer; transition:opacity 0.2s; font-family:inherit; }
+    .btn-print:hover { opacity:0.85; }
+
+    /* ---- Course grid ---- */
+    .courses-wrap { max-width:1100px; margin:1.5rem auto 4rem; padding:0 1.5rem; }
+    .courses-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(320px,1fr)); gap:1.5rem; }
+
+    /* ---- Course card ---- */
+    .pam-card {
+      background:var(--panel);
+      border:1.5px solid var(--border);
+      border-radius:var(--r3);
+      overflow:hidden;
+      display:flex; flex-direction:column;
+      transition:transform 0.2s, box-shadow 0.2s;
+      position:relative;
     }
-    .download-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.6rem;
-      padding: 0.95rem 2rem;
-      border-radius: var(--r4);
-      font-size: 0.96rem;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
-      text-decoration: none;
-      border: none;
-      font-family: inherit;
-    }
-    .download-btn-primary {
+    .pam-card:hover { transform:translateY(-4px); box-shadow:0 12px 40px rgba(0,0,0,0.1); }
+
+    .pam-card-header {
       background: var(--grad);
-      color: #fff;
-      box-shadow: 0 0 24px rgba(124,92,252,0.4), 0 8px 28px rgba(124,92,252,0.28);
-    }
-    .download-btn-primary:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 0 40px rgba(124,92,252,0.6), 0 14px 40px rgba(124,92,252,0.4);
-    }
-    .download-btn-outline {
-      background: transparent;
-      color: var(--txt2);
-      border: 1.5px solid var(--border);
-    }
-    .download-btn-outline:hover {
-      border-color: var(--v1);
-      color: var(--v1);
-      transform: translateY(-3px);
-      box-shadow: 0 8px 28px rgba(124,92,252,0.15);
-    }
-
-    /* ── Section ── */
-    .pamphlet-section {
-      max-width: 1300px;
-      margin: 0 auto;
-      padding: 5rem 5vw;
-    }
-    .section-label {
-      display: inline-block;
-      padding: 0.3rem 1rem;
-      background: rgba(124,92,252,0.1);
-      border: 1px solid rgba(124,92,252,0.25);
-      border-radius: 50px;
-      font-size: 0.72rem;
-      font-weight: 700;
-      color: var(--v1);
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      margin-bottom: 1rem;
-    }
-    .section-title {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: clamp(2rem, 4.5vw, 3.2rem);
-      font-weight: 700;
-      color: var(--txt);
-      margin-bottom: 1rem;
-      letter-spacing: -0.02em;
-      line-height: 1.15;
-    }
-    .section-desc {
-      font-size: 1.05rem;
-      color: var(--txt3);
-      max-width: 580px;
-      line-height: 1.75;
-      margin-bottom: 3.5rem;
-    }
-
-    /* ── Highlights Grid ── */
-    .highlights-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 2rem;
-    }
-    .highlight-card {
-      background: var(--panel);
-      border: 1.5px solid var(--border);
-      border-radius: var(--r3);
-      padding: 2.5rem;
-      text-align: center;
-      transition: all 0.4s cubic-bezier(0.4,0,0.2,1);
+      padding: 1.5rem;
       position: relative;
       overflow: hidden;
+      min-height: 120px;
+      display: flex; flex-direction: column; justify-content: flex-end;
     }
-    .highlight-card::before {
+    .pam-card-header::before {
       content: '';
       position: absolute; inset: 0;
-      background: linear-gradient(135deg, rgba(124,92,252,0.06), transparent);
-      opacity: 0;
-      transition: opacity 0.4s;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='rgba(255,255,255,0.08)' stroke-width='1'%3E%3Ccircle cx='30' cy='30' r='25'/%3E%3C/g%3E%3C/svg%3E") repeat;
     }
-    .highlight-card:hover::before { opacity: 1; }
-    .highlight-card:hover {
-      transform: translateY(-10px) scale(1.02);
-      border-color: var(--v1);
-      box-shadow: 0 25px 60px rgba(124,92,252,0.2), 0 0 0 1px rgba(124,92,252,0.15);
-    }
-    .highlight-icon {
-      font-size: 3.5rem;
-      margin-bottom: 1.4rem;
-      display: block;
-      transition: transform 0.3s ease;
-    }
-    .highlight-card:hover .highlight-icon { transform: scale(1.25) rotate(-5deg); }
-    .highlight-title {
-      font-size: 1.25rem;
-      font-weight: 700;
-      color: var(--txt);
-      margin-bottom: 0.7rem;
-    }
-    .highlight-desc {
-      font-size: 0.9rem;
-      color: var(--txt3);
-      line-height: 1.7;
-    }
-    .highlight-badge {
-      display: inline-block;
-      margin-top: 1.2rem;
-      padding: 0.28rem 0.85rem;
-      background: var(--grad);
-      color: #fff;
-      border-radius: 50px;
-      font-size: 0.72rem;
-      font-weight: 700;
-    }
+    .pam-card-header .course-icon { font-size:2.5rem; position:absolute; top:1rem; right:1rem; opacity:0.35; }
+    .pam-cat-badge { background:rgba(255,255,255,0.2); border:1px solid rgba(255,255,255,0.3); border-radius:999px; padding:0.2rem 0.65rem; font-size:0.7rem; font-weight:700; color:#fff; width:fit-content; margin-bottom:0.5rem; position:relative; text-transform:uppercase; letter-spacing:0.05em; }
+    .pam-card-header h3 { color:#fff; font-size:1.1rem; font-weight:800; line-height:1.3; position:relative; margin:0; }
 
-    /* ── Courses Grid ── */
-    .courses-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 1.75rem;
-    }
-    .pam-course-card {
-      background: var(--panel);
-      border: 1.5px solid var(--border);
-      border-radius: var(--r3);
-      overflow: hidden;
-      transition: all 0.4s cubic-bezier(0.4,0,0.2,1);
-      display: flex;
-      flex-direction: column;
-    }
-    .pam-course-card:hover {
-      transform: translateY(-8px);
-      border-color: var(--v1);
-      box-shadow: 0 24px 56px rgba(124,92,252,0.2);
-    }
-    .pam-course-header {
-      padding: 1.8rem 1.8rem 1.2rem;
-      background: linear-gradient(135deg, rgba(124,92,252,0.12), rgba(61,107,255,0.06));
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: flex-start;
-      gap: 1rem;
-    }
-    .pam-course-icon {
-      width: 48px; height: 48px;
-      border-radius: 14px;
-      background: var(--grad);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1.4rem;
-      flex-shrink: 0;
-      box-shadow: 0 6px 20px rgba(124,92,252,0.3);
-    }
-    .pam-course-title {
-      font-size: 1.05rem;
-      font-weight: 700;
-      color: var(--txt);
-      margin-bottom: 0.3rem;
-      line-height: 1.3;
-    }
-    .pam-course-cat {
-      font-size: 0.72rem;
-      font-weight: 700;
-      color: var(--v1);
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-    }
-    .pam-course-body {
-      padding: 1.2rem 1.8rem 1.5rem;
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-    }
-    .pam-course-desc {
-      font-size: 0.88rem;
-      color: var(--txt3);
-      line-height: 1.65;
-      flex: 1;
-      margin-bottom: 1rem;
-    }
-    .pam-course-meta {
-      display: flex;
-      gap: 0.85rem;
-      flex-wrap: wrap;
-    }
-    .pam-meta-item {
-      font-size: 0.75rem;
-      color: var(--txt4);
-      display: flex;
-      align-items: center;
-      gap: 0.25rem;
-      font-weight: 500;
-    }
-    .pam-course-footer {
-      padding: 1rem 1.8rem;
-      border-top: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 0.75rem;
-    }
-    .pam-enroll-btn {
-      background: var(--grad);
-      color: #fff;
-      padding: 0.6rem 1.4rem;
-      border-radius: 50px;
-      font-size: 0.82rem;
-      font-weight: 700;
-      text-decoration: none;
-      transition: all 0.25s ease;
-      box-shadow: 0 4px 14px rgba(124,92,252,0.3);
-      display: inline-block;
-    }
-    .pam-enroll-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(124,92,252,0.45); }
+    /* discount ribbon */
+    .discount-ribbon { position:absolute; top:0; right:0; background:#f59e0b; color:#fff; font-size:0.7rem; font-weight:900; padding:0.3rem 0.6rem; border-radius:0 0 0 var(--r1); }
 
-    /* ── CTA Strip ── */
-    .cta-strip {
-      background: linear-gradient(135deg, rgba(124,92,252,0.1), rgba(61,107,255,0.08));
-      border-top: 1px solid var(--border);
-      border-bottom: 1px solid var(--border);
-      padding: 5rem 5vw;
-      text-align: center;
-    }
-    .cta-strip h2 {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: clamp(2rem, 4vw, 3rem);
-      font-weight: 700;
-      color: var(--txt);
-      margin-bottom: 1rem;
-    }
-    .cta-strip p {
-      color: var(--txt3);
-      font-size: 1.05rem;
-      max-width: 540px;
-      margin: 0 auto 2.5rem;
-      line-height: 1.7;
-    }
-    .cta-buttons { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+    .pam-card-body { padding:1.25rem; flex:1; display:flex; flex-direction:column; gap:0.6rem; }
+    .pam-desc { font-size:0.82rem; color:var(--txt3); line-height:1.6; flex:1; }
 
-    /* ── Print styles for PDF ── */
+    .pam-meta { display:flex; flex-wrap:wrap; gap:0.5rem; }
+    .pam-tag { display:flex; align-items:center; gap:0.3rem; background:var(--bg); border:1px solid var(--border); border-radius:var(--r1); padding:0.25rem 0.55rem; font-size:0.73rem; font-weight:600; color:var(--txt2); }
+
+    .pam-rating { display:flex; align-items:center; gap:0.35rem; font-size:0.8rem; }
+    .stars { color:#f59e0b; letter-spacing:-1px; }
+    .rating-count { color:var(--txt3); font-size:0.75rem; }
+
+    .pam-card-footer {
+      padding:1rem 1.25rem;
+      border-top:1px solid var(--border);
+      display:flex; align-items:center; justify-content:space-between; gap:0.75rem;
+    }
+    .price-block .original { font-size:0.75rem; color:var(--txt4); text-decoration:line-through; }
+    .price-block .price { font-size:1.35rem; font-weight:900; color:var(--v1); line-height:1; }
+    .price-block .emi-hint { font-size:0.72rem; color:var(--txt3); margin-top:0.1rem; }
+    .btn-enroll { background:var(--grad); color:#fff; border:none; border-radius:var(--r1); padding:0.55rem 1.1rem; font-size:0.82rem; font-weight:700; cursor:pointer; white-space:nowrap; transition:opacity 0.2s; font-family:inherit; text-decoration:none; display:inline-block; }
+    .btn-enroll:hover { opacity:0.85; }
+
+    /* ---- Mentor spotlight ---- */
+    .section-title { font-size:1.5rem; font-weight:900; margin-bottom:1.5rem; }
+    .mentors-wrap { max-width:1100px; margin:0 auto 4rem; padding:0 1.5rem; }
+    .mentors-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(220px,1fr)); gap:1rem; }
+    .mentor-card { background:var(--panel); border:1.5px solid var(--border); border-radius:var(--r3); padding:1.5rem; text-align:center; transition:transform 0.2s; }
+    .mentor-card:hover { transform:translateY(-3px); }
+    .mentor-avatar { width:72px; height:72px; border-radius:50%; object-fit:cover; margin:0 auto 0.75rem; display:block; background:var(--v5); border:3px solid var(--v3); }
+    .mentor-avatar-placeholder { width:72px; height:72px; border-radius:50%; background:var(--grad); display:flex; align-items:center; justify-content:center; font-size:1.6rem; font-weight:900; color:#fff; margin:0 auto 0.75rem; }
+    .mentor-name { font-size:0.95rem; font-weight:800; }
+    .mentor-exp  { font-size:0.75rem; color:var(--txt3); margin-top:0.2rem; }
+    .mentor-tags { display:flex; flex-wrap:wrap; gap:0.3rem; justify-content:center; margin-top:0.5rem; }
+    .mentor-tag  { background:var(--v5); border:1px solid var(--v3); border-radius:999px; padding:0.15rem 0.5rem; font-size:0.68rem; font-weight:700; color:var(--v1); }
+
+    /* ---- Why SkillUpNow ---- */
+    .why-wrap { max-width:1100px; margin:0 auto 4rem; padding:0 1.5rem; }
+    .why-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(200px,1fr)); gap:1rem; }
+    .why-card { background:var(--panel); border:1.5px solid var(--border); border-radius:var(--r3); padding:1.5rem; text-align:center; }
+    .why-icon { font-size:2.2rem; margin-bottom:0.75rem; }
+    .why-card h4 { font-size:0.92rem; font-weight:800; margin-bottom:0.3rem; }
+    .why-card p  { font-size:0.78rem; color:var(--txt3); line-height:1.6; }
+
+    /* ---- CTA banner ---- */
+    .cta-banner { background:var(--grad); padding:3.5rem 2rem; text-align:center; position:relative; overflow:hidden; }
+    .cta-banner::before { content:''; position:absolute; inset:0; background:url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='rgba(255,255,255,0.06)' stroke-width='1'%3E%3Crect x='10' y='10' width='60' height='60' rx='5'/%3E%3C/g%3E%3C/svg%3E") repeat; }
+    .cta-banner h2 { color:#fff; font-size:2rem; font-weight:900; position:relative; }
+    .cta-banner p  { color:rgba(255,255,255,0.82); margin:0.75rem auto 2rem; max-width:500px; position:relative; }
+    .cta-actions { display:flex; justify-content:center; gap:1rem; flex-wrap:wrap; position:relative; }
+
+    /* ---- Skeleton ---- */
+    .skeleton { background: linear-gradient(90deg, var(--border) 25%, var(--border2) 50%, var(--border) 75%); background-size:200% 100%; animation:shimmer 1.5s infinite; border-radius:var(--r1); }
+    @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+    .skel-card { background:var(--panel); border:1.5px solid var(--border); border-radius:var(--r3); overflow:hidden; }
+    .skel-header { height:120px; }
+    .skel-body { padding:1.25rem; }
+    .skel-line { height:12px; margin-bottom:8px; }
+
+    /* ---- Print styles ---- */
     @media print {
-      nav, footer, .download-section, .cta-strip, .mesh-bg, .orb { display: none !important; }
-      .pamphlet-hero { padding: 2rem 1rem 1.5rem; }
-      .pamphlet-hero h1 { font-size: 3rem; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-      .pamphlet-hero::before { display: none; }
-      .pamphlet-section { padding: 2rem 1rem; }
-      .highlight-card, .pam-course-card { break-inside: avoid; }
-      * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .mesh-bg, .orb, nav, .navbar, .hero-actions, .toolbar, .btn-enroll, .cat-pill, .btn-print, .cta-banner, .mentors-wrap, .why-wrap { display:none !important; }
+      body { background:#fff !important; }
+      .page-wrap { padding-top:0 !important; }
+      .pamphlet-hero { -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+      .pam-card { break-inside:avoid; page-break-inside:avoid; }
+      .pam-card:hover { transform:none; box-shadow:none; }
+      .courses-grid { grid-template-columns:repeat(2,1fr); }
     }
 
-    /* ── Loading state ── */
-    .courses-loading {
-      grid-column: 1/-1;
-      text-align: center;
-      padding: 3rem;
-      color: var(--txt4);
+    @media(max-width:768px) {
+      .pamphlet-hero h1 { font-size:1.9rem; }
+      .stats-inner { grid-template-columns:repeat(2,1fr); }
+      .stat-item:nth-child(2) { border-right:none; }
+      .toolbar { flex-direction:column; align-items:flex-start; }
     }
-
-    /* ── Responsive ── */
-    @media (max-width: 768px) {
-      .highlights-grid { grid-template-columns: 1fr 1fr; }
-      .courses-grid { grid-template-columns: 1fr; }
-      .pamphlet-hero h1 { font-size: 2.8rem; }
-    }
-    @media (max-width: 480px) {
-      .highlights-grid { grid-template-columns: 1fr; }
+    @media(max-width:480px) {
+      .stats-inner { grid-template-columns:1fr 1fr; gap:0.5rem; }
     }
   </style>
 </head>
 <body>
-  <!-- Background Elements -->
-  <div class="mesh-bg"></div>
-  <div class="orb orb1"></div>
-  <div class="orb orb2"></div>
-  <div class="orb orb3"></div>
+<div class="mesh-bg"></div>
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+<nav></nav>
 
-  <div class="pamphlet-page">
-    <!-- Navigation -->
-    <nav></nav>
+<div class="page-wrap">
+  <!-- Hero -->
+  <section class="pamphlet-hero">
+    <div class="badge-row">
+      <span class="badge">🎓 Industry-Aligned</span>
+      <span class="badge">💳 EMI Available</span>
+      <span class="badge">🏆 Certified</span>
+      <span class="badge">📹 Live + Recorded</span>
+    </div>
+    <h1>Unlock Your Potential<br><span>with SkillUpNow</span></h1>
+    <p>Practical, mentor-led courses designed to get you job-ready. Start today with flexible payment options.</p>
+    <div class="hero-actions">
+      <button class="btn-white" onclick="document.getElementById('courses-section').scrollIntoView({behavior:'smooth'})">Browse Courses</button>
+      <button class="btn-outline-white" onclick="window.print()">🖨️ Print Brochure</button>
+    </div>
+  </section>
 
-    <!-- Hero -->
-    <section class="pamphlet-hero">
-      <span class="section-label" style="margin-bottom:1.4rem;">Official Course Brochure</span>
-      <h1>SkillUpNow<br>Course Pamphlet</h1>
-      <p>Discover our professional training programmes — live sessions, expert mentors, flexible EMI, and skills that last a lifetime.</p>
-
-      <div class="download-section">
-        <button class="download-btn download-btn-primary" onclick="downloadPDF()">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          Download PDF
-        </button>
-        <button class="download-btn download-btn-outline" onclick="window.print()">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-          Print Brochure
-        </button>
-      </div>
-    </section>
-
-    <!-- Company Highlights -->
-    <section class="pamphlet-section" style="border-bottom: 1px solid var(--border);">
-      <div style="text-align:center;margin-bottom:3.5rem;">
-        <span class="section-label">Why Choose Us</span>
-        <h2 class="section-title">Built for Professional Growth</h2>
-        <p class="section-desc" style="margin-left:auto;margin-right:auto;text-align:center;">Everything we do is designed to help you communicate better, lead with confidence, and grow your career.</p>
-      </div>
-      <div class="highlights-grid">
-        <div class="highlight-card">
-          <span class="highlight-icon">🎓</span>
-          <div class="highlight-title">Expert Mentors</div>
-          <p class="highlight-desc">Learn directly from certified trainers with deep corporate coaching experience — every session is live and personalised.</p>
-          <span class="highlight-badge">Live Mentorship</span>
-        </div>
-        <div class="highlight-card">
-          <span class="highlight-icon">🖥️</span>
-          <div class="highlight-title">Live Sessions</div>
-          <p class="highlight-desc">100% live training — not pre-recorded videos. Practice real scenarios, get immediate feedback, and build lasting skills.</p>
-          <span class="highlight-badge">100% Live</span>
-        </div>
-        <div class="highlight-card">
-          <span class="highlight-icon">💳</span>
-          <div class="highlight-title">Flexible EMI</div>
-          <p class="highlight-desc">Invest in yourself without financial stress. Split your course fee into 3, 6, or 12 easy monthly instalments — zero interest.</p>
-          <span class="highlight-badge">Zero-Cost EMI</span>
-        </div>
-        <div class="highlight-card">
-          <span class="highlight-icon">📜</span>
-          <div class="highlight-title">Verified Certificate</div>
-          <p class="highlight-desc">Earn a digital certificate upon completion. Share it on LinkedIn to stand out and validate your professional growth.</p>
-          <span class="highlight-badge">Certificate</span>
-        </div>
-        <div class="highlight-card">
-          <span class="highlight-icon">🧑‍🤝‍🧑</span>
-          <div class="highlight-title">1-on-1 Coaching</div>
-          <p class="highlight-desc">Individual attention from your mentor — personalised feedback sessions tailored to your career goals and challenges.</p>
-          <span class="highlight-badge">Personal</span>
-        </div>
-        <div class="highlight-card">
-          <span class="highlight-icon">🌱</span>
-          <div class="highlight-title">Career Focus</div>
-          <p class="highlight-desc">From communication to leadership — every skill we teach is chosen because employers actively look for it.</p>
-          <span class="highlight-badge">Career-Ready</span>
-        </div>
-      </div>
-    </section>
-
-    <!-- Courses Section -->
-    <section class="pamphlet-section">
-      <div style="text-align:center;margin-bottom:3.5rem;">
-        <span class="section-label">Our Programmes</span>
-        <h2 class="section-title">Explore Our Courses</h2>
-        <p class="section-desc" style="margin-left:auto;margin-right:auto;text-align:center;">Live, mentor-driven programmes designed to transform how you communicate, lead, and perform in the workplace.</p>
-      </div>
-      <div class="courses-grid" id="pamphlet-courses-grid">
-        <div class="courses-loading">
-          <div style="width:30px;height:30px;border:2.5px solid var(--border);border-top-color:var(--v1);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto .8rem;"></div>
-          Loading courses…
-        </div>
-      </div>
-      <div style="text-align:center;margin-top:2.5rem;">
-        <a href="courses.html" class="btn-grad" style="display:inline-flex;align-items:center;gap:0.5rem;padding:0.95rem 2.2rem;font-size:0.95rem;font-weight:700;text-decoration:none;">
-          View All Courses
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-        </a>
-      </div>
-    </section>
-
-    <!-- CTA Strip -->
-    <section class="cta-strip">
-      <h2>Ready to Transform Your Career?</h2>
-      <p>Get in touch with our team for a personalised fee quote and start your journey with SkillUpNow today.</p>
-      <div class="cta-buttons">
-        <a href="contact-enquiry.html" class="btn-grad" style="padding:0.95rem 2.2rem;font-size:0.95rem;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:0.5rem;">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
-          Get Fee Quote
-        </a>
-        <a href="courses.html" class="btn-outline" style="padding:0.95rem 2.2rem;font-size:0.95rem;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:0.5rem;">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-          Browse Courses
-        </a>
-      </div>
-    </section>
+  <!-- Stats strip -->
+  <div class="stats-strip">
+    <div class="stats-inner">
+      <div class="stat-item"><div class="stat-num" id="stat-courses">—</div><div class="stat-lbl">Courses</div></div>
+      <div class="stat-item"><div class="stat-num" id="stat-students">—</div><div class="stat-lbl">Students Enrolled</div></div>
+      <div class="stat-item"><div class="stat-num" id="stat-mentors">—</div><div class="stat-lbl">Expert Mentors</div></div>
+      <div class="stat-item"><div class="stat-num" id="stat-rating">4.8★</div><div class="stat-lbl">Avg Rating</div></div>
+    </div>
   </div>
 
-  <!-- Footer -->
-  <footer></footer>
+  <!-- Toolbar -->
+  <div class="toolbar" id="courses-section">
+    <h2>Our Courses</h2>
+    <div class="toolbar-right">
+      <div id="cat-pills" style="display:flex;gap:0.6rem;flex-wrap:wrap;"></div>
+      <button class="btn-print" onclick="window.print()">🖨️ Print</button>
+    </div>
+  </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="../config/supabase-config.js"></script>
-  <script src="../js/theme.js"></script>
-  <script src="../js/profile-nav.js"></script>
+  <!-- Courses grid -->
+  <div class="courses-wrap">
+    <div class="courses-grid" id="courses-grid">
+      <!-- Skeleton placeholders -->
+      <div class="skel-card"><div class="skeleton skel-header"></div><div class="skel-body"><div class="skeleton skel-line" style="width:60%"></div><div class="skeleton skel-line" style="width:90%"></div><div class="skeleton skel-line" style="width:75%"></div></div></div>
+      <div class="skel-card"><div class="skeleton skel-header"></div><div class="skel-body"><div class="skeleton skel-line" style="width:55%"></div><div class="skeleton skel-line" style="width:80%"></div><div class="skeleton skel-line" style="width:65%"></div></div></div>
+      <div class="skel-card"><div class="skeleton skel-header"></div><div class="skel-body"><div class="skeleton skel-line" style="width:70%"></div><div class="skeleton skel-line" style="width:85%"></div><div class="skeleton skel-line" style="width:50%"></div></div></div>
+    </div>
+  </div>
 
-  <script>
-    /* ── Spin keyframes ── */
-    const s = document.createElement('style');
-    s.textContent = '@keyframes spin{to{transform:rotate(360deg)}}';
-    document.head.appendChild(s);
+  <!-- Why SkillUpNow -->
+  <div class="why-wrap">
+    <div class="section-title">Why SkillUpNow?</div>
+    <div class="why-grid">
+      <div class="why-card"><div class="why-icon">🎯</div><h4>Goal-Oriented Learning</h4><p>Courses are structured around industry job roles and real project outcomes.</p></div>
+      <div class="why-card"><div class="why-icon">👨‍🏫</div><h4>Expert Mentors</h4><p>Learn from practitioners with 5+ years of industry experience, not just academics.</p></div>
+      <div class="why-card"><div class="why-icon">📹</div><h4>Live + Recorded</h4><p>Attend live sessions and revisit recordings anytime. Learn at your own pace.</p></div>
+      <div class="why-card"><div class="why-icon">💳</div><h4>Flexible EMI</h4><p>0% interest EMI over 2–12 months. No hidden charges, instant approval.</p></div>
+      <div class="why-card"><div class="why-icon">🏆</div><h4>Industry Certificate</h4><p>Earn a verifiable certificate upon course completion to boost your resume.</p></div>
+      <div class="why-card"><div class="why-icon">🤝</div><h4>Placement Support</h4><p>Resume review, mock interviews, and job referrals through our alumni network.</p></div>
+    </div>
+  </div>
 
-    /* ── Category icons ── */
-    const catIcons = {
-      'cloud': '☁️', 'devops': '⚙️', 'ai': '🤖', 'machine': '🧠',
-      'cyber': '🔒', 'data': '📊', 'communication': '💬',
-      'leadership': '🏆', 'soft': '🌟', 'public': '🎤',
-      'presentation': '📊', 'business': '💼', 'emotion': '❤️',
-      'negotiation': '🤝', 'team': '👥', 'time': '⏱️', 'default': '📚'
-    };
-    function getCatIcon(cat) {
-      const c = (cat||'').toLowerCase();
-      return Object.keys(catIcons).find(k => c.includes(k) && k !== 'default')
-        ? catIcons[Object.keys(catIcons).find(k => c.includes(k))]
-        : catIcons['default'];
-    }
+  <!-- Mentor spotlight -->
+  <div class="mentors-wrap">
+    <div class="section-title">Meet Our Mentors</div>
+    <div class="mentors-grid" id="mentors-grid">
+      <div class="mentor-card"><div class="skeleton" style="width:72px;height:72px;border-radius:50%;margin:0 auto 0.75rem"></div><div class="skeleton" style="height:12px;width:70%;margin:0 auto 6px"></div><div class="skeleton" style="height:10px;width:55%;margin:0 auto"></div></div>
+      <div class="mentor-card"><div class="skeleton" style="width:72px;height:72px;border-radius:50%;margin:0 auto 0.75rem"></div><div class="skeleton" style="height:12px;width:70%;margin:0 auto 6px"></div><div class="skeleton" style="height:10px;width:55%;margin:0 auto"></div></div>
+      <div class="mentor-card"><div class="skeleton" style="width:72px;height:72px;border-radius:50%;margin:0 auto 0.75rem"></div><div class="skeleton" style="height:12px;width:70%;margin:0 auto 6px"></div><div class="skeleton" style="height:10px;width:55%;margin:0 auto"></div></div>
+    </div>
+  </div>
 
-    /* ── Load & Render Courses ── */
-    async function loadPamphletCourses() {
-      const grid = document.getElementById('pamphlet-courses-grid');
-      try {
-        if (!window.supabaseConfig) throw new Error('DB not ready');
-        const result = await window.supabaseConfig.getAllCourses();
-        if (!result.success || !result.data || !result.data.length) throw new Error('No courses');
+  <!-- CTA -->
+  <section class="cta-banner">
+    <h2>Ready to Skill Up?</h2>
+    <p>Join thousands of learners who have already transformed their careers with SkillUpNow.</p>
+    <div class="cta-actions">
+      <a href="quick-registration.html"><button class="btn-white">Start Free Today</button></a>
+      <a href="contact-enquiry.html"><button class="btn-outline-white">Talk to Us</button></a>
+    </div>
+  </section>
+</div>
 
-        const courses = result.data.slice(0, 12);
-        grid.innerHTML = courses.map((c, i) => {
-          const name = c.name || 'Untitled Course';
-          const cat = c.category || c.course_category || '';
-          const icon = getCatIcon(cat);
-          const desc = c.short_description || c.description || 'A comprehensive professional development programme.';
-          const dur = c.duration_months ? c.duration_months + ' months' : (c.duration_hours ? c.duration_hours + ' hrs' : '');
-          const level = c.level || '';
-          const enrolled = c.total_enrolled || 0;
-          return `<div class="pam-course-card" style="animation:fadeUp 0.5s ease ${i*0.06}s both">
-            <div class="pam-course-header">
-              <div class="pam-course-icon">${icon}</div>
-              <div>
-                <div class="pam-course-title">${name}</div>
-                ${cat ? `<div class="pam-course-cat">${cat}</div>` : ''}
-              </div>
-            </div>
-            <div class="pam-course-body">
-              <p class="pam-course-desc">${desc.length > 120 ? desc.slice(0,120)+'…' : desc}</p>
-              <div class="pam-course-meta">
-                ${dur ? `<span class="pam-meta-item">⏱ ${dur}</span>` : ''}
-                ${level ? `<span class="pam-meta-item">📈 ${level}</span>` : ''}
-                ${enrolled ? `<span class="pam-meta-item">👥 ${enrolled} enrolled</span>` : ''}
-              </div>
-            </div>
-            <div class="pam-course-footer">
-              <span style="font-size:0.75rem;color:var(--txt4);font-weight:500;">Enquire for pricing</span>
-              <a href="courses.html" class="pam-enroll-btn">Enroll Now</a>
-            </div>
-          </div>`;
-        }).join('');
-      } catch(e) {
-        grid.innerHTML = `<div class="courses-loading">
-          <div style="font-size:2rem;opacity:0.3;margin-bottom:0.75rem;">📚</div>
-          <div>Could not load courses.</div>
-          <a href="courses.html" style="color:var(--v1);font-weight:600;font-size:0.9rem;">View all courses →</a>
-        </div>`;
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../config/supabase-config.js"></script>
+<script src="../js/theme.js"></script>
+<script src="../js/profile-nav.js"></script>
+<script>
+const db = new SupabaseConfig();
+
+// Category icons map
+const catIcons = { 'web': '🌐', 'data': '📊', 'design': '🎨', 'marketing': '📣', 'finance': '💰', 'cloud': '☁️', 'mobile': '📱', 'ai': '🤖', 'devops': '⚙️', 'cyber': '🛡️', 'default': '📚' };
+
+function getCatIcon(name = '') {
+  const n = name.toLowerCase();
+  for (const [k, v] of Object.entries(catIcons)) { if (n.includes(k)) return v; }
+  return catIcons.default;
+}
+
+function stars(r) {
+  r = Math.round(r || 0);
+  return '★'.repeat(r) + '☆'.repeat(5 - r);
+}
+
+function fmtINR(n) {
+  return '₹' + Number(n).toLocaleString('en-IN');
+}
+
+let allCourses = [];
+let activeCategory = 'all';
+
+async function init() {
+  try {
+    // Load stats
+    const [
+      { count: courseCount },
+      { count: studentCount },
+      { count: mentorCount }
+    ] = await Promise.all([
+      db.client.from('courses').select('id', { count: 'exact', head: true }).eq('is_active', true),
+      db.client.from('enrollments').select('id', { count: 'exact', head: true }),
+      db.client.from('mentors').select('id', { count: 'exact', head: true }).eq('approval_status', 'approved'),
+    ]);
+    document.getElementById('stat-courses').textContent = courseCount ?? '—';
+    document.getElementById('stat-students').textContent = (studentCount ?? 0) > 999 ? ((studentCount/1000).toFixed(1)+'K') : (studentCount ?? '—');
+    document.getElementById('stat-mentors').textContent = mentorCount ?? '—';
+
+    // Load courses with mentor + category info
+    const { data: courses, error } = await db.client
+      .from('courses')
+      .select('id,name,description,fee,discount_percentage,level,duration_weeks,total_sessions,is_emi_available,min_emi_months,rating_average,rating_count,enrolled_count,category_id,course_categories(name,slug),mentors(id,user_id,user_profiles(full_name,profile_picture_url),areas_of_expertise)')
+      .eq('is_active', true)
+      .order('is_featured', { ascending: false })
+      .order('enrolled_count', { ascending: false });
+
+    if (error) throw error;
+    allCourses = courses || [];
+
+    // Build category pills
+    const cats = [...new Set(allCourses.map(c => c.course_categories?.name).filter(Boolean))];
+    const pillsEl = document.getElementById('cat-pills');
+    const allPill = document.createElement('button');
+    allPill.className = 'cat-pill active';
+    allPill.textContent = 'All';
+    allPill.dataset.cat = 'all';
+    allPill.onclick = () => filterCat('all', allPill);
+    pillsEl.appendChild(allPill);
+    cats.forEach(cat => {
+      const p = document.createElement('button');
+      p.className = 'cat-pill';
+      p.textContent = cat;
+      p.dataset.cat = cat;
+      p.onclick = () => filterCat(cat, p);
+      pillsEl.appendChild(p);
+    });
+
+    renderCourses(allCourses);
+    loadMentors();
+
+  } catch (err) {
+    console.error('Init error:', err);
+    document.getElementById('courses-grid').innerHTML = '<p style="color:var(--txt3);grid-column:1/-1;text-align:center;padding:2rem">Failed to load courses. Please try again.</p>';
+  }
+}
+
+function filterCat(cat, el) {
+  activeCategory = cat;
+  document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  const filtered = cat === 'all' ? allCourses : allCourses.filter(c => c.course_categories?.name === cat);
+  renderCourses(filtered);
+}
+
+function renderCourses(courses) {
+  const grid = document.getElementById('courses-grid');
+  if (!courses.length) {
+    grid.innerHTML = '<p style="color:var(--txt3);grid-column:1/-1;text-align:center;padding:2rem;font-size:0.9rem">No courses found in this category.</p>';
+    return;
+  }
+
+  grid.innerHTML = courses.map(c => {
+    const catName  = c.course_categories?.name || 'General';
+    const icon     = getCatIcon(catName);
+    const discount = parseFloat(c.discount_percentage || 0);
+    const origFee  = parseFloat(c.fee || 0);
+    const finalFee = discount > 0 ? Math.round(origFee * (1 - discount/100)) : origFee;
+    const mentorName = c.mentors?.user_profiles?.full_name || 'Expert Mentor';
+    const emiMonthly = c.is_emi_available && c.min_emi_months ? Math.ceil(finalFee / c.min_emi_months) : null;
+    const rating   = parseFloat(c.rating_average || 0).toFixed(1);
+    const rCount   = c.rating_count || 0;
+
+    return `
+    <div class="pam-card">
+      ${discount > 0 ? `<div class="discount-ribbon">${Math.round(discount)}% OFF</div>` : ''}
+      <div class="pam-card-header">
+        <div class="course-icon">${icon}</div>
+        <div class="pam-cat-badge">${catName}</div>
+        <h3>${c.name}</h3>
+      </div>
+      <div class="pam-card-body">
+        <p class="pam-desc">${(c.description || '').slice(0, 140)}${(c.description||'').length > 140 ? '…' : ''}</p>
+        <div class="pam-meta">
+          ${c.duration_weeks ? `<span class="pam-tag">📅 ${c.duration_weeks}w</span>` : ''}
+          ${c.total_sessions ? `<span class="pam-tag">🎬 ${c.total_sessions} sessions</span>` : ''}
+          ${c.level ? `<span class="pam-tag">📶 ${c.level}</span>` : ''}
+          ${c.is_emi_available ? `<span class="pam-tag" style="border-color:var(--v3);color:var(--v1)">💳 EMI</span>` : ''}
+        </div>
+        <div class="pam-rating">
+          <span class="stars">${stars(Math.round(rating))}</span>
+          <span style="font-weight:700">${rating > 0 ? rating : 'New'}</span>
+          ${rCount ? `<span class="rating-count">(${rCount})</span>` : ''}
+          <span style="color:var(--txt4);margin-left:auto;font-size:0.73rem">👨‍🎓 ${c.enrolled_count || 0} enrolled</span>
+        </div>
+        <div style="font-size:0.78rem;color:var(--txt3)">Mentor: <strong style="color:var(--txt2)">${mentorName}</strong></div>
+      </div>
+      <div class="pam-card-footer">
+        <div class="price-block">
+          ${discount > 0 ? `<div class="original">${fmtINR(origFee)}</div>` : ''}
+          <div class="price">${fmtINR(finalFee)}</div>
+          ${emiMonthly ? `<div class="emi-hint">or ${fmtINR(emiMonthly)}/mo EMI</div>` : ''}
+        </div>
+        <a href="courses.html?enroll=${c.id}" class="btn-enroll">Enroll Now</a>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function loadMentors() {
+  const { data } = await db.client
+    .from('mentors')
+    .select('id,years_of_experience,areas_of_expertise,user_profiles(full_name,profile_picture_url)')
+    .eq('approval_status', 'approved')
+    .limit(8);
+
+  const grid = document.getElementById('mentors-grid');
+  if (!data?.length) { grid.innerHTML = '<p style="color:var(--txt3);grid-column:1/-1;text-align:center">No mentors available yet.</p>'; return; }
+
+  grid.innerHTML = data.map(m => {
+    const name = m.user_profiles?.full_name || 'Expert Mentor';
+    const pic  = m.user_profiles?.profile_picture_url;
+    const initials = name.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+    const expertise = (m.areas_of_expertise || []).slice(0, 3);
+
+    return `
+    <div class="mentor-card">
+      ${pic
+        ? `<img class="mentor-avatar" src="${pic}" alt="${name}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
+        : ''
       }
-    }
+      <div class="mentor-avatar-placeholder" ${pic ? 'style="display:none"' : ''}>${initials}</div>
+      <div class="mentor-name">${name}</div>
+      ${m.years_of_experience ? `<div class="mentor-exp">${m.years_of_experience}+ yrs experience</div>` : ''}
+      <div class="mentor-tags">
+        ${expertise.map(e => `<span class="mentor-tag">${e}</span>`).join('')}
+      </div>
+    </div>`;
+  }).join('');
+}
 
-    /* ── PDF Download (print-to-PDF) ── */
-    function downloadPDF() {
-      const orig = document.title;
-      document.title = 'SkillUpNow — Course Pamphlet';
-      window.print();
-      document.title = orig;
-    }
-
-    /* ── Initialize ── */
-    document.addEventListener('DOMContentLoaded', loadPamphletCourses);
-  </script>
+init();
+</script>
+<footer></footer>
 </body>
 </html>

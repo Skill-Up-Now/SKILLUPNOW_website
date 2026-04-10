@@ -22,55 +22,8 @@ class SkillUpNowApp {
   }
 
   // ==================== CUSTOM CURSOR ====================
-  setupCursor() {
-    const dot  = document.getElementById('cursor');
-    const ring = document.getElementById('cursor-ring');
-    if (!dot || !ring) return;
-
-    let mx = -100, my = -100, rx = -100, ry = -100;
-    let raf;
-
-    document.addEventListener('mousemove', e => {
-      mx = e.clientX;
-      my = e.clientY;
-    });
-
-    // Smooth ring follows dot with lerp
-    const lerp = (a, b, t) => a + (b - a) * t;
-    function animate() {
-      rx = lerp(rx, mx, 0.14);
-      ry = lerp(ry, my, 0.14);
-      dot.style.left  = mx + 'px';
-      dot.style.top   = my + 'px';
-      ring.style.left = rx + 'px';
-      ring.style.top  = ry + 'px';
-      raf = requestAnimationFrame(animate);
-    }
-    animate();
-
-    // Hover state on interactive elements
-    const hoverSel = 'a, button, [role="button"], input, select, textarea, label, .course-card, .ftab, .hero-cta, .nav-signin, .nav-cta, #login-btn, #cta-btn';
-    document.addEventListener('mouseover', e => {
-      if (e.target.closest(hoverSel)) document.body.classList.add('cursor-hover');
-    });
-    document.addEventListener('mouseout', e => {
-      if (e.target.closest(hoverSel)) document.body.classList.remove('cursor-hover');
-    });
-
-    // Input focus state
-    document.addEventListener('focusin',  e => {
-      if (['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName)) document.body.classList.add('cursor-input');
-    });
-    document.addEventListener('focusout', () => document.body.classList.remove('cursor-input'));
-
-    // Click state
-    document.addEventListener('mousedown', () => document.body.classList.add('cursor-click'));
-    document.addEventListener('mouseup',   () => document.body.classList.remove('cursor-click'));
-
-    // Hide when cursor leaves window
-    document.addEventListener('mouseleave', () => { dot.style.opacity = '0'; ring.style.opacity = '0'; });
-    document.addEventListener('mouseenter', () => { dot.style.opacity = ''; ring.style.opacity = ''; });
-  }
+  // Neural Pointer cursor is handled by js/neural-cursor.js
+  setupCursor() {}
 
   // ==================== MODAL FUNCTIONALITY ====================
   setupModalFunctionality() {

@@ -1,695 +1,277 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Student Reviews & Feedback — SkillUpNow">
-  <title>Reviews & Feedback — SkillUpNow</title>
+  <title>Course Feedback — SkillUpNow</title>
   <link rel="stylesheet" href="../css/variables.css">
-  <link rel="stylesheet" href="../css/animations.css">
   <link rel="stylesheet" href="../css/main.css">
   <link rel="stylesheet" href="../css/responsive.css">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,700&family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <script>
-    if (window.location.protocol !== 'file:') {
-      var p = window.location.pathname;
-      if (p.endsWith('.html')) history.replaceState(null, '', p.replace(/\.html$/, ''));
-    }
-  </script>
   <style>
-    /* ── Reviews Page ── */
-    .reviews-page { min-height: 100vh; background: var(--bg); }
+    .page-wrap { position:relative; z-index:1; padding-top:80px; min-height:100vh; }
+    .feedback-hero { background:var(--grad); padding:3rem 2rem; text-align:center; position:relative; overflow:hidden; }
+    .feedback-hero::before { content:''; position:absolute; inset:0; background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='rgba(255,255,255,0.06)' stroke-width='1'%3E%3Ccircle cx='30' cy='30' r='25'/%3E%3C/g%3E%3C/svg%3E") repeat; }
+    .feedback-hero h1 { color:#fff; font-size:2.2rem; font-weight:800; position:relative; }
+    .feedback-hero p  { color:rgba(255,255,255,0.82); position:relative; margin-top:0.5rem; }
 
-    /* ── Hero ── */
-    .reviews-hero {
-      padding: 7rem 5vw 4rem;
-      text-align: center;
-      background: linear-gradient(180deg, rgba(124,92,252,0.07) 0%, transparent 100%);
-      border-bottom: 1px solid var(--border);
-      position: relative;
-      overflow: hidden;
-    }
-    .reviews-hero::before {
-      content: '';
-      position: absolute; inset: 0;
-      background: radial-gradient(circle at 50% 0%, rgba(124,92,252,0.12), transparent 70%);
-      pointer-events: none;
-    }
-    .reviews-hero h1 {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: clamp(2.8rem, 7vw, 4.5rem);
-      font-weight: 700;
-      color: var(--txt);
-      margin-bottom: 1.2rem;
-      background: linear-gradient(135deg, var(--v1), var(--v2), #00cfee);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      animation: fadeUp 0.7s ease both;
-    }
-    .reviews-hero p {
-      font-size: clamp(1rem, 2.5vw, 1.25rem);
-      color: var(--txt3);
-      max-width: 640px;
-      margin: 0 auto;
-      line-height: 1.75;
-      animation: fadeUp 0.7s 0.1s ease both;
-    }
+    .feedback-wrap { max-width:720px; margin:2.5rem auto; padding:0 1.5rem 4rem; }
 
-    /* ── Rating Summary ── */
-    .rating-summary {
-      max-width: 860px;
-      margin: 3rem auto;
-      padding: 0 5vw;
-    }
-    .summary-card {
-      background: var(--panel);
-      border: 1.5px solid var(--border);
-      border-radius: var(--r3);
-      padding: 2.5rem;
-      box-shadow: var(--shadow);
-      animation: fadeUp 0.8s ease both;
-    }
-    .summary-main {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 4rem;
-      flex-wrap: wrap;
-    }
-    .overall-rating { text-align: center; }
-    .rating-number {
-      font-size: 4rem;
-      font-weight: 800;
-      background: var(--grad);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      line-height: 1;
-      margin-bottom: 0.4rem;
-    }
-    .rating-stars-display {
-      display: flex;
-      justify-content: center;
-      gap: 3px;
-      margin-bottom: 0.5rem;
-    }
-    .rating-stars-display span { font-size: 1.4rem; color: #fbbf24; }
-    .rating-text { font-size: 0.9rem; color: var(--txt3); font-weight: 500; }
-    .rating-breakdown {
-      display: flex;
-      flex-direction: column;
-      gap: 0.65rem;
-      min-width: 220px;
-    }
-    .rating-bar { display: flex; align-items: center; gap: 0.75rem; }
-    .bar-label { font-size: 0.82rem; font-weight: 600; color: var(--txt2); width: 28px; }
-    .bar-track { flex: 1; height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
-    .bar-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--v1), var(--v2)); transition: width 1.2s cubic-bezier(0.4,0,0.2,1); width: 0; }
-    .bar-count { font-size: 0.82rem; color: var(--txt4); width: 22px; text-align: right; }
+    .card { background:var(--panel); border:1.5px solid var(--border); border-radius:var(--r3); padding:2rem; margin-bottom:1.25rem; }
+    .card h2 { font-size:1.15rem; font-weight:800; margin-bottom:0.3rem; }
+    .card p.sub { font-size:0.85rem; color:var(--txt3); margin-bottom:1.5rem; }
 
-    /* ── Filter Bar ── */
-    .reviews-filters {
-      display: flex;
-      justify-content: center;
-      gap: 0.6rem;
-      flex-wrap: wrap;
-      margin-bottom: 2rem;
-    }
-    .filter-btn {
-      padding: 0.45rem 1.1rem;
-      border: 1.5px solid var(--border);
-      background: var(--panel);
-      color: var(--txt2);
-      border-radius: 50px;
-      font-size: 0.85rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      font-family: inherit;
-    }
-    .filter-btn:hover, .filter-btn.active {
-      border-color: var(--v1);
-      background: rgba(124,92,252,0.12);
-      color: var(--v1);
-    }
+    /* Star rating */
+    .star-rating { display:flex; flex-direction:row-reverse; justify-content:flex-end; gap:0.25rem; margin-bottom:1.5rem; }
+    .star-rating input { display:none; }
+    .star-rating label { font-size:2.2rem; cursor:pointer; color:var(--border2); transition:color 0.1s; line-height:1; }
+    .star-rating input:checked ~ label,
+    .star-rating label:hover,
+    .star-rating label:hover ~ label { color:#f59e0b; }
+    .rating-text { font-size:0.85rem; color:var(--txt3); margin-top:0.35rem; }
 
-    /* ── Reviews Section ── */
-    .reviews-section {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 1rem 5vw 4rem;
+    /* Form */
+    .f-group { margin-bottom:1rem; }
+    .f-group label { display:block; font-size:0.82rem; font-weight:700; color:var(--txt2); margin-bottom:0.4rem; }
+    .f-group input, .f-group select, .f-group textarea {
+      width:100%; background:var(--bg); border:1.5px solid var(--border); border-radius:var(--r1);
+      padding:0.65rem 0.9rem; color:var(--txt); font-size:0.88rem; outline:none; font-family:inherit; transition:border-color 0.2s;
     }
-    .reviews-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-      gap: 2rem;
-      margin-bottom: 2rem;
-    }
-    .review-card {
-      background: var(--panel);
-      border: 1.5px solid var(--border);
-      border-radius: var(--r3);
-      padding: 2rem;
-      transition: all 0.35s cubic-bezier(0.4,0,0.2,1);
-      animation: fadeUp 0.6s ease both;
-    }
-    .review-card:hover {
-      transform: translateY(-6px);
-      border-color: var(--v1);
-      box-shadow: 0 20px 50px rgba(124,92,252,0.18);
-    }
-    .review-header {
-      display: flex; align-items: center;
-      gap: 1rem; margin-bottom: 1rem;
-    }
-    .review-avatar {
-      width: 46px; height: 46px;
-      border-radius: 50%;
-      background: var(--grad);
-      display: flex; align-items: center; justify-content: center;
-      color: #fff; font-weight: 700; font-size: 1.1rem; flex-shrink: 0;
-    }
-    .review-info h4 { font-size: 0.98rem; font-weight: 700; color: var(--txt); margin: 0 0 0.2rem; }
-    .review-meta { font-size: 0.78rem; color: var(--txt4); }
-    .review-rating { display: flex; gap: 2px; margin-bottom: 0.9rem; }
-    .review-star { font-size: 1rem; color: #fbbf24; }
-    .review-text { color: var(--txt3); line-height: 1.7; font-size: 0.93rem; margin-bottom: 0.9rem; }
-    .review-course-badge {
-      display: inline-block;
-      padding: 0.2rem 0.7rem;
-      background: rgba(124,92,252,0.12);
-      border: 1px solid rgba(124,92,252,0.25);
-      border-radius: 20px;
-      font-size: 0.72rem;
-      font-weight: 600;
-      color: var(--v1);
-    }
+    .f-group input:focus, .f-group select:focus, .f-group textarea:focus { border-color:var(--v1); box-shadow:0 0 0 3px var(--v5); }
+    .f-group textarea { resize:vertical; min-height:130px; }
 
-    /* ── No Reviews State ── */
-    .no-reviews {
-      grid-column: 1 / -1;
-      text-align: center;
-      padding: 3rem;
-      color: var(--txt4);
-    }
+    /* Aspect ratings */
+    .aspect-grid { display:grid; grid-template-columns:1fr 1fr; gap:0.85rem; margin-bottom:1rem; }
+    .aspect-item { background:var(--bg); border:1.5px solid var(--border); border-radius:var(--r1); padding:0.85rem; }
+    .aspect-label { font-size:0.8rem; font-weight:700; color:var(--txt2); margin-bottom:0.5rem; }
+    .aspect-stars { display:flex; gap:0.3rem; }
+    .aspect-star { font-size:1.3rem; cursor:pointer; color:var(--border2); transition:color 0.1s; }
+    .aspect-star.active { color:#f59e0b; }
 
-    /* ── Submit Review Section ── */
-    .submit-review-section {
-      background: rgba(124,92,252,0.04);
-      border-top: 1px solid var(--border);
-      border-bottom: 1px solid var(--border);
-      padding: 5rem 5vw;
-    }
-    .submit-form-wrap {
-      max-width: 640px;
-      margin: 0 auto;
-    }
-    .submit-form-wrap h2 {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: clamp(2rem, 4vw, 2.8rem);
-      font-weight: 700;
-      color: var(--txt);
-      margin-bottom: 0.5rem;
-      text-align: center;
-    }
-    .submit-form-wrap .sub-txt {
-      text-align: center;
-      color: var(--txt3);
-      font-size: 1rem;
-      margin-bottom: 2.5rem;
-      line-height: 1.65;
-    }
-    .review-form {
-      background: var(--panel);
-      border: 1.5px solid var(--border);
-      border-radius: var(--r3);
-      padding: 2.5rem;
-      box-shadow: var(--shadow);
-    }
-    .form-group { margin-bottom: 1.4rem; }
-    .form-label { display: block; font-size: 0.87rem; font-weight: 600; color: var(--txt2); margin-bottom: 0.45rem; }
-    .form-input, .form-select, .form-textarea {
-      width: 100%;
-      padding: 0.8rem 1rem;
-      border: 1.5px solid var(--border);
-      border-radius: var(--r2);
-      background: var(--bg);
-      color: var(--txt);
-      font-size: 0.96rem;
-      font-family: inherit;
-      transition: border-color 0.25s, box-shadow 0.25s;
-    }
-    .form-input:focus, .form-select:focus, .form-textarea:focus {
-      outline: none;
-      border-color: var(--v1);
-      box-shadow: 0 0 0 3px rgba(124,92,252,0.12);
-    }
-    .form-select option { background: var(--panel); color: var(--txt); }
-    .form-textarea { min-height: 110px; resize: vertical; line-height: 1.65; }
+    /* Submit btn */
+    .btn-submit { background:var(--grad); color:#fff; border:none; border-radius:var(--r1); padding:0.8rem 2.5rem; font-size:0.95rem; font-weight:700; cursor:pointer; transition:all 0.25s; font-family:inherit; }
+    .btn-submit:hover:not(:disabled) { opacity:0.88; transform:scale(1.01); }
+    .btn-submit:disabled { opacity:0.5; cursor:not-allowed; }
 
-    /* ── Star Rating Input ── */
-    .rating-input-group { text-align: center; margin-bottom: 1.8rem; }
-    .rating-input-label { display: block; font-size: 0.87rem; font-weight: 600; color: var(--txt2); margin-bottom: 0.75rem; }
-    .rating-stars-input { display: flex; gap: 0.5rem; justify-content: center; margin-bottom: 0.4rem; }
-    .rating-star-btn {
-      font-size: 2.2rem;
-      color: var(--border2);
-      cursor: pointer;
-      transition: all 0.18s ease;
-      background: none; border: none;
-      padding: 0; line-height: 1;
-    }
-    .rating-star-btn.active, .rating-star-btn:hover { color: #fbbf24; transform: scale(1.2); }
-    .rating-hint { font-size: 0.82rem; color: var(--txt4); min-height: 1.2em; font-weight: 500; }
+    /* Alert */
+    .alert { padding:0.85rem 1rem; border-radius:var(--r1); font-size:0.85rem; margin-bottom:1rem; display:none; }
+    .alert.success { background:rgba(34,197,94,0.1); border:1px solid rgba(34,197,94,0.25); color:#16a34a; }
+    .alert.error   { background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.25); color:#dc2626; }
+    .alert.show { display:block; }
 
-    /* ── Submit Button ── */
-    .submit-btn {
-      width: 100%;
-      padding: 1rem 2rem;
-      background: var(--grad);
-      color: #fff;
-      border: none;
-      border-radius: var(--r2);
-      font-size: 1rem;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      box-shadow: 0 8px 28px rgba(124,92,252,0.35);
-      font-family: inherit;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-      margin-top: 0.5rem;
-    }
-    .submit-btn:hover { transform: translateY(-3px); box-shadow: 0 16px 40px rgba(124,92,252,0.5); }
-    .submit-btn:disabled { opacity: 0.65; cursor: not-allowed; transform: none; }
+    /* Success screen */
+    .success-screen { display:none; text-align:center; padding:3rem 2rem; }
+    .success-screen.show { display:block; }
+    .success-icon { font-size:4rem; margin-bottom:1rem; }
+    .success-screen h2 { font-size:1.6rem; margin-bottom:0.5rem; }
+    .success-screen p { color:var(--txt3); margin-bottom:1.5rem; }
 
-    /* ── Toast ── */
-    .toast {
-      position: fixed; top: 1.5rem; right: 1.5rem; z-index: 9999;
-      padding: 0.9rem 1.4rem;
-      border-radius: 12px;
-      font-size: 0.9rem; font-weight: 600;
-      display: flex; align-items: center; gap: 0.5rem;
-      transform: translateX(450px); opacity: 0;
-      transition: all 0.4s cubic-bezier(0.68,-0.55,0.265,1.55);
-      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-      backdrop-filter: blur(10px);
-      max-width: 360px;
-    }
-    .toast.show { transform: translateX(0); opacity: 1; }
-    .toast.success { background: rgba(34,197,94,0.95); border: 1px solid rgba(34,197,94,0.3); color: #fff; }
-    .toast.error { background: rgba(239,68,68,0.95); border: 1px solid rgba(239,68,68,0.3); color: #fff; }
-
-    /* ── Responsive ── */
-    @media (max-width: 768px) {
-      .summary-main { flex-direction: column; gap: 2rem; }
-      .reviews-grid { grid-template-columns: 1fr; gap: 1.5rem; }
-      .review-form { padding: 1.8rem 1.2rem; }
+    @media(max-width:640px) {
+      .aspect-grid { grid-template-columns:1fr; }
     }
   </style>
 </head>
 <body>
-  <!-- Background Elements -->
-  <div class="mesh-bg"></div>
-  <div class="orb orb1"></div>
-  <div class="orb orb2"></div>
+<div class="mesh-bg"></div>
+<div class="orb orb1"></div>
+<nav></nav>
 
-  <div class="reviews-page">
-    <!-- Navigation -->
-    <nav></nav>
+<div class="page-wrap">
+  <section class="feedback-hero">
+    <h1>Share Your Feedback</h1>
+    <p>Your review helps other learners and helps us improve our courses</p>
+  </section>
 
-    <!-- Hero -->
-    <section class="reviews-hero">
-      <h1>Student Reviews</h1>
-      <p>Real feedback from real learners who transformed their professional journey with SkillUpNow.</p>
-    </section>
+  <div class="feedback-wrap">
+    <div class="alert error" id="err-alert"></div>
 
-    <!-- Rating Summary -->
-    <section class="rating-summary">
-      <div class="summary-card">
-        <div class="summary-main">
-          <div class="overall-rating">
-            <div class="rating-number" id="overall-rating">—</div>
-            <div class="rating-stars-display" id="overall-stars"></div>
-            <div class="rating-text" id="rating-count">Loading reviews…</div>
-          </div>
-          <div class="rating-breakdown">
-            <div class="rating-bar">
-              <span class="bar-label">5★</span>
-              <div class="bar-track"><div class="bar-fill" id="bar-5"></div></div>
-              <span class="bar-count" id="count-5">0</span>
-            </div>
-            <div class="rating-bar">
-              <span class="bar-label">4★</span>
-              <div class="bar-track"><div class="bar-fill" id="bar-4"></div></div>
-              <span class="bar-count" id="count-4">0</span>
-            </div>
-            <div class="rating-bar">
-              <span class="bar-label">3★</span>
-              <div class="bar-track"><div class="bar-fill" id="bar-3"></div></div>
-              <span class="bar-count" id="count-3">0</span>
-            </div>
-            <div class="rating-bar">
-              <span class="bar-label">2★</span>
-              <div class="bar-track"><div class="bar-fill" id="bar-2"></div></div>
-              <span class="bar-count" id="count-2">0</span>
-            </div>
-            <div class="rating-bar">
-              <span class="bar-label">1★</span>
-              <div class="bar-track"><div class="bar-fill" id="bar-1"></div></div>
-              <span class="bar-count" id="count-1">0</span>
-            </div>
-          </div>
+    <!-- Main feedback form -->
+    <div class="card" id="feedback-form-card">
+      <h2>Course Review</h2>
+      <p class="sub">You must be enrolled in the course to submit a review.</p>
+
+      <!-- Course selector -->
+      <div class="f-group">
+        <label>Select Course *</label>
+        <select id="fb-course" onchange="onCourseChange()">
+          <option value="">Choose a course you're enrolled in…</option>
+        </select>
+      </div>
+
+      <!-- Overall rating -->
+      <div style="margin-bottom:1.25rem">
+        <label style="display:block;font-size:0.82rem;font-weight:700;color:var(--txt2);margin-bottom:0.5rem">Overall Rating *</label>
+        <div class="star-rating">
+          <input type="radio" id="star5" name="rating" value="5"><label for="star5" title="Excellent">★</label>
+          <input type="radio" id="star4" name="rating" value="4"><label for="star4" title="Very Good">★</label>
+          <input type="radio" id="star3" name="rating" value="3"><label for="star3" title="Good">★</label>
+          <input type="radio" id="star2" name="rating" value="2"><label for="star2" title="Fair">★</label>
+          <input type="radio" id="star1" name="rating" value="1"><label for="star1" title="Poor">★</label>
+        </div>
+        <div class="rating-text" id="rating-text">Click stars to rate</div>
+      </div>
+
+      <!-- Aspect ratings -->
+      <label style="display:block;font-size:0.82rem;font-weight:700;color:var(--txt2);margin-bottom:0.75rem">Rate Individual Aspects</label>
+      <div class="aspect-grid">
+        <div class="aspect-item">
+          <div class="aspect-label">📚 Course Content</div>
+          <div class="aspect-stars" data-aspect="content"></div>
+        </div>
+        <div class="aspect-item">
+          <div class="aspect-label">👨‍🏫 Mentor / Instructor</div>
+          <div class="aspect-stars" data-aspect="mentor"></div>
+        </div>
+        <div class="aspect-item">
+          <div class="aspect-label">🎬 Recordings / Resources</div>
+          <div class="aspect-stars" data-aspect="recordings"></div>
+        </div>
+        <div class="aspect-item">
+          <div class="aspect-label">💰 Value for Money</div>
+          <div class="aspect-stars" data-aspect="value"></div>
         </div>
       </div>
-    </section>
 
-    <!-- Reviews Section -->
-    <section class="reviews-section">
-      <div class="reviews-filters" id="review-filters">
-        <button class="filter-btn active" data-filter="0">All Reviews</button>
-        <button class="filter-btn" data-filter="5">5 Stars</button>
-        <button class="filter-btn" data-filter="4">4 Stars</button>
-        <button class="filter-btn" data-filter="3">3 Stars</button>
+      <!-- Title & comment -->
+      <div class="f-group"><label>Review Title *</label><input type="text" id="fb-title" placeholder="Summarise your experience in a sentence…"></div>
+      <div class="f-group"><label>Detailed Review *</label><textarea id="fb-comment" placeholder="Share what you liked, what could be improved, how the course helped your career…"></textarea></div>
+
+      <!-- Would recommend -->
+      <div class="f-group">
+        <label>Would you recommend this course? *</label>
+        <select id="fb-recommend">
+          <option value="">Select…</option>
+          <option value="yes">Yes, definitely!</option>
+          <option value="maybe">Maybe, with some improvements</option>
+          <option value="no">No, not at this time</option>
+        </select>
       </div>
-      <div class="reviews-grid" id="reviews-grid">
-        <div class="no-reviews" style="padding: 4rem; grid-column:1/-1; color:var(--txt4);">
-          <div style="font-size:2rem;margin-bottom:0.7rem;opacity:0.4;">⭐</div>
-          <div>Loading reviews…</div>
-        </div>
+
+      <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin-top:0.5rem">
+        <button class="btn-submit" id="submit-btn" onclick="submitFeedback()">Submit Review</button>
+        <span style="font-size:0.78rem;color:var(--txt4)">Reviews are reviewed by admin before publishing</span>
       </div>
-    </section>
+    </div>
 
-    <!-- Submit Review -->
-    <section class="submit-review-section">
-      <div class="submit-form-wrap">
-        <h2>Share Your Experience</h2>
-        <p class="sub-txt">Help future learners by sharing your honest feedback about your learning journey with SkillUpNow.</p>
-
-        <div class="review-form">
-          <form id="reviewForm" novalidate>
-            <!-- Star Rating -->
-            <div class="rating-input-group">
-              <label class="rating-input-label">Your Rating *</label>
-              <div class="rating-stars-input" id="star-input">
-                <button type="button" class="rating-star-btn" data-val="1">★</button>
-                <button type="button" class="rating-star-btn" data-val="2">★</button>
-                <button type="button" class="rating-star-btn" data-val="3">★</button>
-                <button type="button" class="rating-star-btn" data-val="4">★</button>
-                <button type="button" class="rating-star-btn" data-val="5">★</button>
-              </div>
-              <div class="rating-hint" id="rating-hint">Click to rate</div>
-              <input type="hidden" id="review-rating" value="0">
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">Course Completed *</label>
-              <select id="review-course" class="form-select" required>
-                <option value="">Select the course you completed</option>
-              </select>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">Your Name</label>
-              <input type="text" id="review-name" class="form-input" placeholder="Your name (leave blank for anonymous)">
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">Your Review *</label>
-              <textarea id="review-text" class="form-textarea" placeholder="Share what you learned, what you loved, and how it impacted your career…" required></textarea>
-            </div>
-
-            <button type="submit" class="submit-btn" id="review-submit">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-              Submit Review
-            </button>
-          </form>
-        </div>
-      </div>
-    </section>
+    <!-- Success screen -->
+    <div class="card success-screen" id="success-screen">
+      <div class="success-icon">⭐</div>
+      <h2>Thank You!</h2>
+      <p>Your review has been submitted and will be visible after admin approval. We appreciate your feedback!</p>
+      <a href="courses.html"><button class="btn-submit">Browse More Courses</button></a>
+    </div>
   </div>
+</div>
 
-  <!-- Footer -->
-  <footer></footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../config/supabase-config.js"></script>
+<script src="../js/theme.js"></script>
+<script src="../js/profile-nav.js"></script>
+<script>
+const db = new SupabaseConfig();
+let currentUser = null, enrolledCourses = [];
+const ratingLabels = { 1:'Poor', 2:'Fair', 3:'Good', 4:'Very Good', 5:'Excellent' };
+const aspectRatings = {};
 
-  <!-- Toast -->
-  <div class="toast" id="review-toast"></div>
+async function init() {
+  const { data: { session } } = await db.client.auth.getSession();
+  if (!session) { window.location.href = '../index.html?login=1'; return; }
+  currentUser = session.user;
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="../config/supabase-config.js"></script>
-  <script src="../js/theme.js"></script>
-  <script src="../js/profile-nav.js"></script>
+  // Load enrolled active courses
+  const { data } = await db.client.from('enrollments').select('id,course_id,courses(name)').eq('user_id', session.user.id).eq('enrollment_status','active');
+  enrolledCourses = data || [];
+  const sel = document.getElementById('fb-course');
+  if (!enrolledCourses.length) {
+    sel.innerHTML = '<option value="">No active enrollments found</option>';
+    sel.disabled = true;
+  } else {
+    enrolledCourses.forEach(e => {
+      const o = document.createElement('option');
+      o.value = e.course_id;
+      o.dataset.enrollId = e.id;
+      o.textContent = e.courses?.name || e.course_id;
+      sel.appendChild(o);
+    });
+  }
 
-  <script>
-    /* ── State ── */
-    let allReviews = [];
-    let selectedRating = 0;
-    const ratingLabels = ['','Terrible','Poor','Fair','Good','Excellent'];
+  // Check URL for course param
+  const courseId = new URLSearchParams(window.location.search).get('course');
+  if (courseId) sel.value = courseId;
 
-    /* ── Star Rating Input ── */
-    document.querySelectorAll('.rating-star-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        selectedRating = parseInt(btn.dataset.val);
-        document.getElementById('review-rating').value = selectedRating;
-        document.getElementById('rating-hint').textContent = ratingLabels[selectedRating];
-        document.querySelectorAll('.rating-star-btn').forEach((b, i) => {
-          b.classList.toggle('active', i < selectedRating);
-        });
-      });
-      // Hover preview
-      btn.addEventListener('mouseenter', () => {
-        const v = parseInt(btn.dataset.val);
-        document.querySelectorAll('.rating-star-btn').forEach((b, i) => {
-          b.style.color = i < v ? '#fbbf24' : '';
-        });
-        document.getElementById('rating-hint').textContent = ratingLabels[v];
-      });
-      btn.addEventListener('mouseleave', () => {
-        document.querySelectorAll('.rating-star-btn').forEach((b, i) => {
-          b.style.color = '';
-          b.classList.toggle('active', i < selectedRating);
-        });
-        document.getElementById('rating-hint').textContent = selectedRating ? ratingLabels[selectedRating] : 'Click to rate';
-      });
+  // Build aspect star pickers
+  document.querySelectorAll('.aspect-stars').forEach(wrap => {
+    const aspect = wrap.dataset.aspect;
+    aspectRatings[aspect] = 0;
+    for (let i = 1; i <= 5; i++) {
+      const s = document.createElement('span');
+      s.className = 'aspect-star'; s.textContent = '★'; s.dataset.val = i;
+      s.onclick = () => {
+        aspectRatings[aspect] = i;
+        wrap.querySelectorAll('.aspect-star').forEach((st,idx) => st.classList.toggle('active', idx < i));
+      };
+      wrap.appendChild(s);
+    }
+  });
+
+  // Overall star rating label update
+  document.querySelectorAll('.star-rating input').forEach(r => {
+    r.addEventListener('change', () => {
+      document.getElementById('rating-text').textContent = ratingLabels[r.value] + ' — ' + '★'.repeat(r.value);
+    });
+  });
+}
+
+function onCourseChange() {}
+
+async function submitFeedback() {
+  const courseId = document.getElementById('fb-course').value;
+  const ratingEl = document.querySelector('.star-rating input:checked');
+  const title   = document.getElementById('fb-title').value.trim();
+  const comment = document.getElementById('fb-comment').value.trim();
+
+  if (!courseId)    { showErr('Please select a course.'); return; }
+  if (!ratingEl)    { showErr('Please provide an overall star rating.'); return; }
+  if (!title)       { showErr('Please enter a review title.'); return; }
+  if (!comment || comment.length < 20) { showErr('Please write a review of at least 20 characters.'); return; }
+
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true; btn.textContent = 'Submitting…';
+
+  const sel = document.getElementById('fb-course');
+  const enrollId = sel.options[sel.selectedIndex]?.dataset.enrollId;
+
+  try {
+    await db.client.from('reviews').upsert({
+      user_id: currentUser.id,
+      course_id: courseId,
+      enrollment_id: enrollId || null,
+      rating: parseInt(ratingEl.value),
+      title, comment,
+      is_approved: false,
+    }, { onConflict: 'user_id,course_id' });
+
+    // Also log as form submission
+    await db.client.from('form_submissions').insert({
+      user_id: currentUser.id, course_id: courseId, form_type: 'feedback',
+      form_data: { rating: ratingEl.value, title, comment, aspects: aspectRatings, recommend: document.getElementById('fb-recommend').value },
     });
 
-    /* ── Load Reviews from DB ── */
-    async function loadReviews() {
-      try {
-        if (!window.supabaseConfig) throw new Error('DB not ready');
-        const client = window.supabaseConfig.getClient();
-        if (!client) throw new Error('No client');
+    document.getElementById('feedback-form-card').style.display = 'none';
+    document.getElementById('success-screen').classList.add('show');
+  } catch (err) {
+    showErr(err.message || 'Failed to submit review.');
+  }
+  btn.disabled = false; btn.textContent = 'Submit Review';
+}
 
-        const { data, error } = await client
-          .from('feedback')
-          .select('id, feedback_text, rating, created_at, reviewer_name, course_id, user_profiles(full_name, city), courses(name)')
-          .eq('is_approved', true)
-          .order('created_at', { ascending: false })
-          .limit(60);
+function showErr(msg) {
+  const el = document.getElementById('err-alert');
+  el.textContent = msg; el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 4000);
+}
 
-        if (error) throw error;
-        allReviews = data || [];
-        updateRatingSummary(allReviews);
-        renderReviews(allReviews);
-      } catch (e) {
-        console.warn('Reviews load error:', e);
-        renderReviews([]);
-      }
-    }
-
-    /* ── Update Summary ── */
-    function updateRatingSummary(reviews) {
-      if (!reviews.length) {
-        document.getElementById('overall-rating').textContent = '—';
-        document.getElementById('rating-count').textContent = 'No reviews yet';
-        document.getElementById('overall-stars').innerHTML = [1,2,3,4,5].map(()=>'<span style="color:var(--border2)">★</span>').join('');
-        return;
-      }
-      const total = reviews.length;
-      const avg = reviews.reduce((s, r) => s + (parseInt(r.rating) || 5), 0) / total;
-      document.getElementById('overall-rating').textContent = avg.toFixed(1);
-      document.getElementById('rating-count').textContent = `Based on ${total} review${total !== 1 ? 's' : ''}`;
-      const rounded = Math.round(avg);
-      document.getElementById('overall-stars').innerHTML = [1,2,3,4,5].map(n =>
-        `<span style="color:${n<=rounded?'#fbbf24':'var(--border2)'}">★</span>`
-      ).join('');
-
-      const counts = [0,0,0,0,0];
-      reviews.forEach(r => { const v = Math.min(5,Math.max(1,parseInt(r.rating)||5)); counts[v-1]++; });
-      [5,4,3,2,1].forEach(n => {
-        const c = counts[n-1];
-        const pct = total > 0 ? (c / total) * 100 : 0;
-        document.getElementById(`bar-${n}`).style.width = pct + '%';
-        document.getElementById(`count-${n}`).textContent = c;
-      });
-    }
-
-    /* ── Render Reviews ── */
-    const _gradients = [
-      'linear-gradient(135deg,var(--v1),var(--v2))',
-      'linear-gradient(135deg,#00cfee,#0090b8)',
-      'linear-gradient(135deg,#4ade80,#16a34a)',
-      'linear-gradient(135deg,#f59e0b,#d97706)',
-      'linear-gradient(135deg,#ec4899,#be185d)',
-      'linear-gradient(135deg,#3b82f6,#1d4ed8)',
-    ];
-
-    function renderReviews(reviews) {
-      const grid = document.getElementById('reviews-grid');
-      if (!reviews.length) {
-        grid.innerHTML = `<div class="no-reviews" style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--txt4);">
-          <div style="font-size:2.5rem;opacity:0.3;margin-bottom:0.75rem;">⭐</div>
-          <div style="font-weight:600;color:var(--txt3);">No reviews yet</div>
-          <div style="font-size:0.85rem;margin-top:0.35rem;">Be the first to share your experience!</div>
-        </div>`;
-        return;
-      }
-      grid.innerHTML = reviews.map((r, i) => {
-        const name = r.reviewer_name || r.user_profiles?.full_name || 'Anonymous';
-        const initials = name.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
-        const rating = Math.min(5, Math.max(1, parseInt(r.rating) || 5));
-        const stars = [1,2,3,4,5].map(n=>`<span class="review-star" style="color:${n<=rating?'#fbbf24':'var(--border2)'}">★</span>`).join('');
-        const courseName = r.courses?.name || '';
-        const date = r.created_at ? new Date(r.created_at).toLocaleDateString('en-IN', {day:'numeric',month:'short',year:'numeric'}) : '';
-        const gradient = _gradients[i % _gradients.length];
-        const text = r.feedback_text || r.feedback || r.comment || '';
-        return `<div class="review-card" style="animation-delay:${(i%9)*0.07}s">
-          <div class="review-header">
-            <div class="review-avatar" style="background:${gradient}">${initials||'?'}</div>
-            <div class="review-info">
-              <h4>${name}</h4>
-              <div class="review-meta">${date}</div>
-            </div>
-          </div>
-          <div class="review-rating">${stars}</div>
-          ${text ? `<p class="review-text">"${text}"</p>` : ''}
-          ${courseName ? `<span class="review-course-badge">📚 ${courseName}</span>` : ''}
-        </div>`;
-      }).join('');
-    }
-
-    /* ── Filter Reviews ── */
-    document.getElementById('review-filters').addEventListener('click', e => {
-      const btn = e.target.closest('.filter-btn');
-      if (!btn) return;
-      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      const f = parseInt(btn.dataset.filter);
-      renderReviews(f === 0 ? allReviews : allReviews.filter(r => parseInt(r.rating) === f));
-    });
-
-    /* ── Load Courses ── */
-    async function loadCoursesForReview() {
-      const select = document.getElementById('review-course');
-      try {
-        if (!window.supabaseConfig) throw new Error();
-        const result = await window.supabaseConfig.getAllCourses();
-        if (result.success && result.data && result.data.length) {
-          select.innerHTML = '<option value="">Select the course you completed</option>' +
-            result.data.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
-          return;
-        }
-      } catch(e) {}
-      select.innerHTML = `<option value="">Select the course you completed</option>
-        <option value="comm">Communication Mastery</option>
-        <option value="lead">Leadership Excellence</option>
-        <option value="public">Public Speaking Pro</option>
-        <option value="soft">Soft Skills Development</option>
-        <option value="biz">Business Etiquette</option>
-        <option value="pres">Presentation Skills</option>`;
-    }
-
-    /* ── Show Toast ── */
-    function showToast(msg, type) {
-      const t = document.getElementById('review-toast');
-      t.className = `toast ${type}`;
-      t.innerHTML = `<span>${type==='success'?'✅':'❌'}</span><span>${msg}</span>`;
-      setTimeout(() => t.classList.add('show'), 80);
-      setTimeout(() => t.classList.remove('show'), 5000);
-    }
-
-    /* ── Submit Review ── */
-    async function handleReviewSubmit(e) {
-      e.preventDefault();
-
-      const rating = parseInt(document.getElementById('review-rating').value);
-      const courseId = document.getElementById('review-course').value;
-      const name = document.getElementById('review-name').value.trim();
-      const text = document.getElementById('review-text').value.trim();
-
-      if (!rating || rating < 1) { showToast('Please select a star rating', 'error'); return; }
-      if (!courseId) { showToast('Please select the course you completed', 'error'); return; }
-      if (!text || text.length < 10) { showToast('Please write at least 10 characters in your review', 'error'); return; }
-
-      const btn = document.getElementById('review-submit');
-      btn.disabled = true;
-      btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin .7s linear infinite"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg> Submitting…';
-
-      try {
-        if (!window.supabaseConfig) throw new Error('Database not available');
-        const client = window.supabaseConfig.getClient();
-
-        // Try to get logged-in user
-        let userId = null;
-        try {
-          const user = await window.supabaseConfig.getCurrentUser();
-          if (user) userId = user.id;
-        } catch(e) {}
-
-        const payload = {
-          reviewer_name: name || 'Anonymous',
-          rating: rating,
-          feedback_text: text,
-          course_id: courseId || null,
-          user_id: userId || null,
-          is_approved: false,
-          created_at: new Date().toISOString()
-        };
-
-        const { error } = await client.from('feedback').insert(payload);
-        if (error) throw error;
-
-        showToast('Thank you! Your review will appear after approval.', 'success');
-        document.getElementById('reviewForm').reset();
-        selectedRating = 0;
-        document.getElementById('review-rating').value = '0';
-        document.getElementById('rating-hint').textContent = 'Click to rate';
-        document.querySelectorAll('.rating-star-btn').forEach(b => b.classList.remove('active'));
-
-      } catch (err) {
-        console.error('Review submit error:', err);
-        showToast('Could not submit review. Please try again.', 'error');
-      } finally {
-        btn.disabled = false;
-        btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Submit Review';
-      }
-    }
-
-    /* ── Enter Key: submit form on Enter (not in textarea) ── */
-    document.getElementById('reviewForm').addEventListener('keydown', e => {
-      if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
-        e.preventDefault();
-        handleReviewSubmit(e);
-      }
-    });
-
-    /* ── Attach form submit handler ── */
-    document.getElementById('reviewForm').addEventListener('submit', handleReviewSubmit);
-
-    /* ── Initialize ── */
-    document.addEventListener('DOMContentLoaded', () => {
-      loadReviews();
-      loadCoursesForReview();
-    });
-
-    /* ── @keyframes spin ── */
-    const spinStyle = document.createElement('style');
-    spinStyle.textContent = '@keyframes spin{to{transform:rotate(360deg)}}';
-    document.head.appendChild(spinStyle);
-  </script>
+init();
+</script>
+<footer></footer>
 </body>
 </html>

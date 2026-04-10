@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Become a Mentor — SkillUpNow</title>
+  <link rel="stylesheet" href="../css/variables.css">
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="stylesheet" href="../css/responsive.css">
+  <style>
+    .page-wrap { position:relative; z-index:1; padding-top:80px; min-height:100vh; }
+    .mentor-hero { background:var(--grad); padding:3.5rem 2rem; text-align:center; position:relative; overflow:hidden; }
+    .mentor-hero::before { content:''; position:absolute; inset:0; background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='rgba(255,255,255,0.07)' stroke-width='1'%3E%3Ccircle cx='30' cy='30' r='25'/%3E%3C/g%3E%3C/svg%3E") repeat; }
+    .mentor-hero h1 { color:#fff; font-size:2.5rem; margin-bottom:0.5rem; position:relative; }
+    .mentor-hero p  { color:rgba(255,255,255,0.8); max-width:560px; margin:0 auto; position:relative; }
+    .mentor-hero-badges { display:flex; gap:0.75rem; justify-content:center; margin-top:1.5rem; position:relative; flex-wrap:wrap; }
+    .hero-badge { background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.25); border-radius:999px; padding:0.35rem 1rem; color:#fff; font-size:0.82rem; font-weight:600; }
+
+    .form-wrap { max-width:760px; margin:2.5rem auto; padding:0 1.5rem 3rem; }
+    .step-indicator { display:flex; justify-content:center; gap:0; margin-bottom:2.5rem; }
+    .step { display:flex; align-items:center; gap:0; }
+    .step-num { width:36px; height:36px; border-radius:50%; border:2.5px solid var(--border); background:var(--bg); display:flex; align-items:center; justify-content:center; font-size:0.85rem; font-weight:800; color:var(--txt3); transition:all 0.3s; z-index:1; }
+    .step-num.active { border-color:var(--v1); background:var(--v1); color:#fff; }
+    .step-num.done   { border-color:var(--v1); background:var(--v1); color:#fff; }
+    .step-label { font-size:0.72rem; color:var(--txt3); margin-top:0.35rem; white-space:nowrap; text-align:center; }
+    .step-wrap { display:flex; flex-direction:column; align-items:center; }
+    .step-line { width:80px; height:2px; background:var(--border); margin-bottom:12px; transition:background 0.3s; }
+    .step-line.done { background:var(--v1); }
+
+    .form-section { display:none; }
+    .form-section.active { display:block; }
+    .form-card { background:var(--panel); border:1.5px solid var(--border); border-radius:var(--r3); padding:2rem; }
+    .form-card h3 { font-size:1.15rem; font-weight:800; margin-bottom:0.35rem; }
+    .form-card p  { font-size:0.85rem; color:var(--txt3); margin-bottom:1.75rem; }
+    .form-row { display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1rem; }
+    .f-group { margin-bottom:1rem; }
+    .f-group label { display:block; font-size:0.82rem; font-weight:700; color:var(--txt2); margin-bottom:0.4rem; }
+    .f-group label span { color:#ef4444; }
+    .f-group input, .f-group select, .f-group textarea {
+      width:100%; background:var(--bg); border:1.5px solid var(--border); border-radius:var(--r1);
+      padding:0.7rem 1rem; color:var(--txt); font-size:0.9rem; outline:none; font-family:inherit;
+      transition:border-color 0.2s;
+    }
+    .f-group input:focus, .f-group select:focus, .f-group textarea:focus {
+      border-color:var(--v1); box-shadow:0 0 0 3px var(--v5);
+    }
+    .f-group textarea { resize:vertical; min-height:80px; }
+    .f-group .hint { font-size:0.75rem; color:var(--txt4); margin-top:0.3rem; }
+
+    /* File Upload */
+    .upload-zone { border:2px dashed var(--border); border-radius:var(--r2); padding:1.25rem 1rem; text-align:center; cursor:pointer; transition:all 0.2s; position:relative; background:var(--bg); }
+    .upload-zone:hover, .upload-zone.dragover { border-color:var(--v1); background:var(--v5); }
+    .upload-zone input[type=file] { position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%; }
+    .upload-icon { font-size:1.75rem; margin-bottom:0.35rem; line-height:1; }
+    .upload-label { font-size:0.82rem; font-weight:700; color:var(--txt2); }
+    .upload-hint  { font-size:0.72rem; color:var(--txt4); margin-top:0.2rem; }
+    .upload-preview { display:flex; align-items:center; gap:0.5rem; margin-top:0.5rem; font-size:0.78rem; color:var(--v1); font-weight:600; flex-wrap:wrap; }
+    /* Doc grid layout */
+    .doc-grid { display:grid; grid-template-columns:1fr 1fr; gap:1.25rem; margin-bottom:1rem; }
+    .doc-card { background:var(--panel); border:1.5px solid var(--border); border-radius:var(--r2); padding:1.1rem; }
+    .doc-card-label { font-size:0.78rem; font-weight:700; color:var(--txt2); margin-bottom:0.5rem; display:flex; align-items:center; gap:0.35rem; }
+    .doc-card-label span.req { color:#ef4444; }
+    .doc-num-input { width:100%; background:var(--bg); border:1.5px solid var(--border); border-radius:var(--r1); padding:0.55rem 0.85rem; color:var(--txt); font-size:0.85rem; outline:none; font-family:inherit; margin-bottom:0.65rem; transition:border-color 0.2s; }
+    .doc-num-input:focus { border-color:var(--v1); box-shadow:0 0 0 3px var(--v5); }
+    .photo-center { display:flex; flex-direction:column; align-items:center; gap:0.75rem; margin-bottom:1.25rem; }
+    .photo-upload-box { width:160px; height:160px; border:2px dashed var(--border); border-radius:50%; position:relative; cursor:pointer; background:var(--bg); display:flex; flex-direction:column; align-items:center; justify-content:center; transition:all 0.2s; overflow:hidden; }
+    .photo-upload-box:hover { border-color:var(--v1); background:var(--v5); }
+    .photo-upload-box input[type=file] { position:absolute; inset:0; opacity:0; cursor:pointer; }
+    .photo-upload-box img { width:100%; height:100%; object-fit:cover; border-radius:50%; }
+    .photo-upload-box .upload-icon { font-size:2.5rem; margin:0; }
+    .photo-upload-box .upload-label { font-size:0.75rem; font-weight:600; color:var(--txt3); margin-top:0.3rem; }
+    .cert-zone-full { border:2px dashed var(--border); border-radius:var(--r2); padding:1.5rem; text-align:center; cursor:pointer; transition:all 0.2s; position:relative; background:var(--bg); margin-bottom:1rem; }
+    .cert-zone-full:hover { border-color:var(--v1); background:var(--v5); }
+    .cert-zone-full input[type=file] { position:absolute; inset:0; opacity:0; cursor:pointer; }
+    @media(max-width:600px) { .doc-grid { grid-template-columns:1fr; } }
+
+    /* Expertise tags */
+    .tag-input-wrap { display:flex; gap:0.5rem; flex-wrap:wrap; padding:0.5rem; border:1.5px solid var(--border); border-radius:var(--r1); background:var(--bg); min-height:48px; cursor:text; }
+    .tag { background:var(--v5); border:1px solid var(--v3); border-radius:999px; padding:0.2rem 0.6rem; font-size:0.78rem; color:var(--v1); display:flex; align-items:center; gap:0.3rem; }
+    .tag .remove-tag { cursor:pointer; opacity:0.6; }
+    .tag-input { border:none; outline:none; background:transparent; font-size:0.85rem; color:var(--txt); flex:1; min-width:120px; font-family:inherit; }
+
+    /* Step nav buttons */
+    .step-nav { display:flex; justify-content:space-between; margin-top:1.75rem; }
+    .btn-next { background:var(--grad); color:#fff; border:none; border-radius:var(--r1); padding:0.75rem 2rem; font-size:0.9rem; font-weight:700; cursor:pointer; transition:all 0.25s; font-family:inherit; }
+    .btn-next:hover { opacity:0.88; transform:scale(1.02); }
+    .btn-back { background:transparent; border:1.5px solid var(--border); border-radius:var(--r1); padding:0.75rem 2rem; font-size:0.9rem; font-weight:600; cursor:pointer; color:var(--txt3); transition:all 0.2s; font-family:inherit; }
+    .btn-back:hover { border-color:var(--v1); color:var(--v1); }
+
+    /* OTP step */
+    .otp-inputs { display:flex; gap:0.75rem; justify-content:center; margin:1.5rem 0; }
+    .otp-digit { width:52px; height:56px; border:2px solid var(--border); border-radius:var(--r1); text-align:center; font-size:1.5rem; font-weight:800; color:var(--txt); background:var(--bg); outline:none; transition:border-color 0.2s; font-family:inherit; }
+    .otp-digit:focus { border-color:var(--v1); box-shadow:0 0 0 3px var(--v5); }
+
+    /* Success */
+    .success-card { text-align:center; padding:3rem 2rem; }
+    .success-icon { font-size:4rem; margin-bottom:1rem; }
+    .success-card h2 { font-size:1.75rem; margin-bottom:0.5rem; }
+    .success-card p  { color:var(--txt3); max-width:400px; margin:0 auto 1.5rem; }
+
+    /* Terms checkbox */
+    .check-row { display:flex; align-items:flex-start; gap:0.75rem; padding:0.75rem; background:var(--bg); border:1px solid var(--border); border-radius:var(--r1); margin-bottom:1rem; }
+    .check-row input[type=checkbox] { width:18px; height:18px; flex-shrink:0; accent-color:var(--v1); margin-top:2px; }
+    .check-row label { font-size:0.83rem; color:var(--txt3); cursor:pointer; }
+    .check-row label a { color:var(--v1); }
+
+    /* Alert */
+    .alert { padding:0.75rem 1rem; border-radius:var(--r1); font-size:0.83rem; margin-bottom:1rem; display:none; }
+    .alert.error   { background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.25); color:#dc2626; }
+    .alert.success { background:rgba(34,197,94,0.1); border:1px solid rgba(34,197,94,0.25); color:#16a34a; }
+    .alert.show    { display:block; }
+
+    @media(max-width:640px) {
+      .form-row { grid-template-columns:1fr; }
+      .mentor-hero h1 { font-size:1.8rem; }
+      .step-line { width:40px; }
+    }
+  </style>
+</head>
+<body>
+<div class="mesh-bg"></div>
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+<nav></nav>
+
+<div class="page-wrap">
+  <section class="mentor-hero">
+    <h1>Become a SkillUpNow Mentor</h1>
+    <p>Share your expertise, inspire learners, and earn while doing what you love. Join 50+ approved mentors.</p>
+    <div class="mentor-hero-badges">
+      <span class="hero-badge">🎓 Teach Live Classes</span>
+      <span class="hero-badge">💰 Earn Competitive Pay</span>
+      <span class="hero-badge">📊 Full Mentor Dashboard</span>
+      <span class="hero-badge">🤝 1000+ Students</span>
+    </div>
+  </section>
+
+  <div class="form-wrap">
+    <!-- Step Indicator -->
+    <div class="step-indicator">
+      <div class="step-wrap"><div class="step-num active" id="s1">1</div><div class="step-label">Account</div></div>
+      <div class="step-line" id="line1"></div>
+      <div class="step-wrap"><div class="step-num" id="s2">2</div><div class="step-label">Profile</div></div>
+      <div class="step-line" id="line2"></div>
+      <div class="step-wrap"><div class="step-num" id="s3">3</div><div class="step-label">Documents</div></div>
+      <div class="step-line" id="line3"></div>
+      <div class="step-wrap"><div class="step-num" id="s4">4</div><div class="step-label">Verify</div></div>
+    </div>
+
+    <div class="alert error" id="err-alert"></div>
+    <div class="alert success" id="suc-alert"></div>
+
+    <!-- STEP 1: Account -->
+    <div class="form-section active" id="step1">
+      <div class="form-card">
+        <h3>Create Your Account</h3>
+        <p>Start with your basic login credentials</p>
+        <div class="form-row">
+          <div class="f-group"><label>Full Name <span>*</span></label><input type="text" id="m-fullname" placeholder="Your full legal name"></div>
+          <div class="f-group"><label>Username <span>*</span></label><input type="text" id="m-username" placeholder="e.g. john_mentor"></div>
+        </div>
+        <div class="form-row">
+          <div class="f-group"><label>Email <span>*</span></label><input type="email" id="m-email" placeholder="professional@email.com"></div>
+          <div class="f-group"><label>Phone <span>*</span></label><input type="tel" id="m-phone" placeholder="10-digit mobile number"></div>
+        </div>
+        <div class="form-row">
+          <div class="f-group"><label>Password <span>*</span></label><input type="password" id="m-pass" placeholder="Min. 8 characters"></div>
+          <div class="f-group"><label>Confirm Password <span>*</span></label><input type="password" id="m-pass2" placeholder="Repeat password"></div>
+        </div>
+        <div class="step-nav">
+          <div></div>
+          <button class="btn-next" onclick="goStep1()">Continue →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 2: Professional Profile -->
+    <div class="form-section" id="step2">
+      <div class="form-card">
+        <h3>Professional Profile</h3>
+        <p>Tell us about your expertise and experience</p>
+        <div class="form-row">
+          <div class="f-group"><label>Designation <span>*</span></label><input type="text" id="m-designation" placeholder="e.g. Senior Cloud Architect"></div>
+          <div class="f-group"><label>Years of Experience <span>*</span></label><input type="number" id="m-exp" min="1" max="50" placeholder="e.g. 8"></div>
+        </div>
+        <div class="f-group"><label>Qualifications <span>*</span></label><input type="text" id="m-qualifications" placeholder="e.g. B.Tech CSE, AWS Certified, Google Cloud Professional"></div>
+        <div class="f-group">
+          <label>Areas of Expertise <span>*</span></label>
+          <div class="tag-input-wrap" id="expertise-wrap" onclick="document.getElementById('expertise-input').focus()">
+            <input class="tag-input" id="expertise-input" placeholder="Type a skill and press Enter…" onkeydown="addExpertiseTag(event)">
+          </div>
+          <div class="hint">e.g. AWS, Kubernetes, Python, DevOps, Machine Learning</div>
+        </div>
+        <div class="f-group"><label>LinkedIn URL</label><input type="url" id="m-linkedin" placeholder="https://linkedin.com/in/yourname"></div>
+        <div class="f-group"><label>Professional Bio <span>*</span></label><textarea id="m-bio" placeholder="Write a brief bio about your background, teaching style, and what students can expect from your classes…" rows="4"></textarea></div>
+        <div class="f-group"><label>Salary Expectation</label>
+          <select id="m-salary-type">
+            <option value="per_session">Per Session</option>
+            <option value="fixed_monthly">Fixed Monthly</option>
+            <option value="revenue_share">Revenue Share</option>
+          </select>
+        </div>
+        <div class="step-nav">
+          <button class="btn-back" onclick="setStep(1)">← Back</button>
+          <button class="btn-next" onclick="goStep2()">Continue →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 3: Documents -->
+    <div class="form-section" id="step3">
+      <div class="form-card">
+        <h3>Upload Documents</h3>
+        <p>All documents must be clear and under 1 MB each. Accepted formats: JPG, PNG, PDF</p>
+
+        <!-- Profile Photo — centred, circular -->
+        <div class="photo-center">
+          <div class="photo-upload-box" id="photo-zone" title="Click to upload your photo">
+            <input type="file" id="m-photo" accept="image/jpeg,image/png" onchange="previewPhoto('m-photo','photo-zone')">
+            <div class="upload-icon" id="photo-icon">📷</div>
+            <div class="upload-label" id="photo-lbl">Professional Photo</div>
+          </div>
+          <div style="text-align:center">
+            <div style="font-size:0.82rem;font-weight:700;color:var(--txt2)">Profile Photo <span style="color:#ef4444">*</span></div>
+            <div style="font-size:0.72rem;color:var(--txt4);margin-top:2px">JPG or PNG · Max 1 MB · Clear face photo</div>
+          </div>
+        </div>
+
+        <!-- ID Documents grid -->
+        <div class="doc-grid">
+          <!-- PAN Card -->
+          <div class="doc-card">
+            <div class="doc-card-label">🪪 PAN Card <span class="req">*</span></div>
+            <input type="text" class="doc-num-input" id="m-pan" placeholder="ABCDE1234F" maxlength="10" style="text-transform:uppercase" title="Enter your PAN number">
+            <div class="upload-zone" id="pan-zone">
+              <input type="file" id="m-pan-doc" accept="image/*,.pdf" onchange="previewFile('pan-zone','m-pan-doc','pan-preview')">
+              <div class="upload-icon">⬆️</div>
+              <div class="upload-label">Upload PAN Document</div>
+              <div class="upload-hint">JPG, PNG or PDF · Max 1 MB</div>
+              <div class="upload-preview" id="pan-preview"></div>
+            </div>
+          </div>
+
+          <!-- Aadhaar Card -->
+          <div class="doc-card">
+            <div class="doc-card-label">🪪 Aadhaar Card <span class="req">*</span></div>
+            <input type="text" class="doc-num-input" id="m-aadhaar" placeholder="1234 5678 9012" maxlength="14" title="Enter your Aadhaar number">
+            <div class="upload-zone" id="aadhaar-zone">
+              <input type="file" id="m-aadhaar-doc" accept="image/*,.pdf" onchange="previewFile('aadhaar-zone','m-aadhaar-doc','aadhaar-preview')">
+              <div class="upload-icon">⬆️</div>
+              <div class="upload-label">Upload Aadhaar Document</div>
+              <div class="upload-hint">JPG, PNG or PDF · Max 1 MB</div>
+              <div class="upload-preview" id="aadhaar-preview"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Address Proof — full width -->
+        <div class="doc-card" style="margin-bottom:1.25rem">
+          <div class="doc-card-label">🏠 Address Proof <span style="font-size:0.7rem;color:var(--txt4);font-weight:500">(optional)</span></div>
+          <div class="upload-zone" id="addr-zone">
+            <input type="file" id="m-addr-doc" accept="image/*,.pdf" onchange="previewFile('addr-zone','m-addr-doc','addr-preview')">
+            <div class="upload-icon">⬆️</div>
+            <div class="upload-label">Upload Address Proof</div>
+            <div class="upload-hint">Utility bill, bank statement or rent agreement · Max 1 MB</div>
+            <div class="upload-preview" id="addr-preview"></div>
+          </div>
+        </div>
+
+        <!-- Certificates — full width -->
+        <div class="doc-card" style="margin-bottom:1.25rem">
+          <div class="doc-card-label">📜 Certificates &amp; Credentials <span class="req">*</span></div>
+          <div class="cert-zone-full" id="cert-zone">
+            <input type="file" id="m-certs" accept="image/*,.pdf" multiple onchange="previewMultiFiles('cert-zone','m-certs','cert-preview')">
+            <div class="upload-icon">⬆️</div>
+            <div class="upload-label">Upload Certificates (select multiple)</div>
+            <div class="upload-hint">AWS, Google Cloud, Microsoft, PMP, CISSP, etc. · Each max 1 MB</div>
+            <div class="upload-preview" id="cert-preview" style="justify-content:center;gap:0.5rem;margin-top:0.5rem"></div>
+          </div>
+        </div>
+
+        <!-- Consent -->
+        <div class="check-row">
+          <input type="checkbox" id="agree-kyc">
+          <label for="agree-kyc">I confirm all uploaded documents are genuine and belong to me. Providing false documents will result in permanent suspension.</label>
+        </div>
+
+        <div class="step-nav">
+          <button class="btn-back" onclick="setStep(2)">← Back</button>
+          <button class="btn-next" onclick="goStep3()">Continue →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 4: SMS Verification -->
+    <div class="form-section" id="step4">
+      <div class="form-card" style="text-align:center">
+        <h3>Verify Your Phone Number</h3>
+        <p>We've sent a 6-digit OTP to <strong id="phone-display"></strong></p>
+        <div class="otp-inputs">
+          <input class="otp-digit" maxlength="1" id="otp1" oninput="otpNav(this,'','otp2')">
+          <input class="otp-digit" maxlength="1" id="otp2" oninput="otpNav(this,'otp1','otp3')">
+          <input class="otp-digit" maxlength="1" id="otp3" oninput="otpNav(this,'otp2','otp4')">
+          <input class="otp-digit" maxlength="1" id="otp4" oninput="otpNav(this,'otp3','otp5')">
+          <input class="otp-digit" maxlength="1" id="otp5" oninput="otpNav(this,'otp4','otp6')">
+          <input class="otp-digit" maxlength="1" id="otp6" oninput="otpNav(this,'otp5','')">
+        </div>
+        <p style="font-size:0.82rem;color:var(--txt3)">Didn't receive? <button onclick="resendOtp()" style="background:none;border:none;color:var(--v1);cursor:pointer;font-weight:700;font-family:inherit">Resend OTP</button></p>
+        <div class="step-nav" style="justify-content:center;margin-top:1.5rem">
+          <button class="btn-next" onclick="submitApplication()">Submit Application</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Success -->
+    <div class="form-section" id="step-success">
+      <div class="form-card success-card">
+        <div class="success-icon">🎉</div>
+        <h2>Application Submitted!</h2>
+        <p>Your mentor application is under review. Our team will verify your documents and contact you within 2–3 business days.</p>
+        <div style="background:var(--bg);border:1.5px solid var(--border);border-radius:var(--r2);padding:1.25rem;text-align:left;margin:1.5rem 0">
+          <div style="font-size:0.85rem;color:var(--txt3);line-height:2">
+            ✅ Application submitted<br>
+            ⏳ Document verification (2–3 days)<br>
+            📧 Approval email sent to your registered email<br>
+            🎓 Access to mentor dashboard granted
+          </div>
+        </div>
+        <a href="../index.html"><button class="btn-next">← Back to Home</button></a>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../config/supabase-config.js"></script>
+<script src="../js/theme.js"></script>
+<script src="../js/profile-nav.js"></script>
+<script>
+const db = new SupabaseConfig();
+let currentStep = 1;
+const expertiseTags = [];
+let createdUserId = null;
+
+function setStep(n) {
+  document.querySelectorAll('.form-section').forEach(s => s.classList.remove('active'));
+  document.getElementById('step' + n)?.classList.add('active');
+  for (let i = 1; i <= 4; i++) {
+    const el = document.getElementById('s' + i);
+    if (!el) continue;
+    el.classList.toggle('active', i === n);
+    el.classList.toggle('done', i < n);
+  }
+  for (let i = 1; i <= 3; i++) {
+    const line = document.getElementById('line' + i);
+    if (line) line.classList.toggle('done', i < n);
+  }
+  currentStep = n;
+}
+
+function showErr(msg) {
+  const el = document.getElementById('err-alert');
+  el.textContent = msg; el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 4000);
+}
+
+function goStep1() {
+  const name = document.getElementById('m-fullname').value.trim();
+  const email = document.getElementById('m-email').value.trim();
+  const phone = document.getElementById('m-phone').value.trim();
+  const pass  = document.getElementById('m-pass').value;
+  const pass2 = document.getElementById('m-pass2').value;
+  if (!name || !email || !phone || !pass) return showErr('Please fill all required fields.');
+  if (pass !== pass2) return showErr('Passwords do not match.');
+  if (pass.length < 8) return showErr('Password must be at least 8 characters.');
+  if (!/^\d{10}$/.test(phone)) return showErr('Enter a valid 10-digit phone number.');
+  setStep(2);
+}
+
+function goStep2() {
+  const desig = document.getElementById('m-designation').value.trim();
+  const qual  = document.getElementById('m-qualifications').value.trim();
+  const bio   = document.getElementById('m-bio').value.trim();
+  const exp   = document.getElementById('m-exp').value;
+  if (!desig || !qual || !bio || !exp) return showErr('Please fill all required fields.');
+  if (expertiseTags.length < 2) return showErr('Add at least 2 areas of expertise.');
+  setStep(3);
+}
+
+function goStep3() {
+  if (!document.getElementById('m-photo').files[0]) return showErr('Please upload your profile photo.');
+  if (!document.getElementById('m-pan').value.trim()) return showErr('Please enter your PAN number.');
+  if (!document.getElementById('m-pan-doc').files[0]) return showErr('Please upload your PAN card.');
+  if (!document.getElementById('m-aadhaar').value.trim()) return showErr('Please enter your Aadhaar number.');
+  if (!document.getElementById('m-aadhaar-doc').files[0]) return showErr('Please upload your Aadhaar card.');
+  if (!document.getElementById('m-certs').files[0]) return showErr('Please upload at least one certificate.');
+  if (!document.getElementById('agree-kyc').checked) return showErr('Please agree to the document authenticity declaration.');
+  document.getElementById('phone-display').textContent = document.getElementById('m-phone').value;
+  // In production: send OTP via SMS gateway
+  setStep(4);
+}
+
+function otpNav(el, prevId, nextId) {
+  if (el.value && nextId) document.getElementById(nextId)?.focus();
+  if (!el.value && prevId) document.getElementById(prevId)?.focus();
+}
+
+function resendOtp() { alert('OTP resent to ' + document.getElementById('m-phone').value); }
+
+async function submitApplication() {
+  const otp = ['otp1','otp2','otp3','otp4','otp5','otp6'].map(id => document.getElementById(id).value).join('');
+  if (otp.length < 6) return showErr('Please enter the 6-digit OTP.');
+  // In production: verify OTP via backend
+
+  try {
+    // Create auth account
+    const email    = document.getElementById('m-email').value.trim();
+    const password = document.getElementById('m-pass').value;
+    const { data: authData, error: authErr } = await db.client.auth.signUp({ email, password, options: { data: { full_name: document.getElementById('m-fullname').value.trim(), role: 'mentor' } } });
+    if (authErr) throw authErr;
+    createdUserId = authData.user.id;
+
+    // Update user profile
+    await db.client.from('user_profiles').upsert({
+      id: createdUserId,
+      full_name: document.getElementById('m-fullname').value.trim(),
+      username: document.getElementById('m-username').value.trim(),
+      email, phone: document.getElementById('m-phone').value.trim(), role: 'user',
+    }, { onConflict: 'id' });
+
+    // Upload photo to Supabase storage (simplified - production would handle actual upload)
+    const photoFile = document.getElementById('m-photo').files[0];
+    let photoUrl = null;
+    if (photoFile) {
+      const { data: uploadData } = await db.client.storage.from('mentor-docs').upload(`${createdUserId}/photo.${photoFile.name.split('.').pop()}`, photoFile, { upsert: true });
+      if (uploadData) photoUrl = db.client.storage.from('mentor-docs').getPublicUrl(uploadData.path).data.publicUrl;
+    }
+
+    // Create mentor record
+    await db.client.from('mentors').insert({
+      user_id: createdUserId,
+      designation: document.getElementById('m-designation').value.trim(),
+      qualifications: document.getElementById('m-qualifications').value.trim(),
+      expertise_areas: expertiseTags,
+      years_experience: parseInt(document.getElementById('m-exp').value),
+      bio: document.getElementById('m-bio').value.trim(),
+      linkedin_url: document.getElementById('m-linkedin').value.trim() || null,
+      pan_number: document.getElementById('m-pan').value.trim().toUpperCase(),
+      aadhaar_number: document.getElementById('m-aadhaar').value.trim(),
+      salary_type: document.getElementById('m-salary-type').value,
+      photo_url: photoUrl,
+      approval_status: 'pending',
+    });
+
+    // Log form submission
+    await db.client.from('form_submissions').insert({
+      user_id: createdUserId,
+      form_type: 'mentor_signup',
+      form_data: { name: document.getElementById('m-fullname').value, email, phone: document.getElementById('m-phone').value },
+      status: 'submitted',
+    });
+
+    document.querySelectorAll('.form-section').forEach(s => s.classList.remove('active'));
+    document.getElementById('step-success').classList.add('active');
+  } catch (err) {
+    showErr(err.message || 'Signup failed. Please try again.');
+  }
+}
+
+// File preview helpers
+function previewFile(zoneId, inputId, previewId) {
+  const file = document.getElementById(inputId).files[0];
+  if (!file) return;
+  if (file.size > 1024 * 1024) { showErr(file.name + ' exceeds 1 MB limit'); document.getElementById(inputId).value = ''; return; }
+  const prev = document.getElementById(previewId);
+  prev.style.display = 'flex';
+  prev.innerHTML = `✅ ${file.name} (${(file.size/1024).toFixed(0)} KB)`;
+}
+
+function previewMultiFiles(zoneId, inputId, previewId) {
+  const files = document.getElementById(inputId).files;
+  const prev = document.getElementById(previewId);
+  prev.style.display = 'flex';
+  prev.innerHTML = Array.from(files).map(f => `<span style="background:var(--v5);border:1px solid var(--v3);border-radius:999px;padding:0.2rem 0.6rem;font-size:0.75rem;color:var(--v1)">✅ ${f.name}</span>`).join('');
+}
+
+function previewPhoto(inputId, zoneId) {
+  const file = document.getElementById(inputId).files[0];
+  if (!file) return;
+  if (file.size > 1024 * 1024) { showErr('Photo exceeds 1 MB limit'); document.getElementById(inputId).value = ''; return; }
+  const reader = new FileReader();
+  reader.onload = e => {
+    const box = document.getElementById(zoneId);
+    box.innerHTML = `<input type="file" id="${inputId}" accept="image/jpeg,image/png" onchange="previewPhoto('${inputId}','${zoneId}')"><img src="${e.target.result}" alt="Profile photo">`;
+  };
+  reader.readAsDataURL(file);
+}
+
+function addExpertiseTag(e) {
+  if (e.key !== 'Enter' && e.key !== ',') return;
+  e.preventDefault();
+  const val = e.target.value.trim();
+  if (!val || expertiseTags.includes(val)) { e.target.value = ''; return; }
+  expertiseTags.push(val);
+  const tag = document.createElement('span');
+  tag.className = 'tag';
+  tag.innerHTML = `${val} <span class="remove-tag" data-val="${val}">×</span>`;
+  tag.querySelector('.remove-tag').onclick = function() {
+    const idx = expertiseTags.indexOf(this.dataset.val);
+    if (idx > -1) expertiseTags.splice(idx, 1);
+    tag.remove();
+  };
+  document.getElementById('expertise-wrap').insertBefore(tag, e.target);
+  e.target.value = '';
+}
+</script>
+<footer></footer>
+</body>
+</html>

@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cat e:/SKILLUPNOW_website/config/*.js)"
+    ]
+  }
+}

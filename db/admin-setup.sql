@@ -1,156 +1,114 @@
 -- ============================================================
--- SKILLUPNOW — ADMIN USER SETUP
--- Run this in Supabase SQL Editor AFTER schema.sql
+--  SkillUpNow — Super Admin Setup
+--  Run this ONCE in Supabase → SQL Editor after creating the
+--  admin auth user via Authentication → Add User in Supabase.
+-- ============================================================
+
+-- ── STEP 1 ──────────────────────────────────────────────────
+--  Go to: Supabase Dashboard → Authentication → Users → Add User
+--  Email   : skillupnow@gmail.com
+--  Password: Skillupnow@0904   (matches .env → ADMIN_PASSWORD)
+--  ✓ Auto-confirm email
 --
--- Admin credentials:
---   Username : skillupnowadmin
---   Email    : skillupnowadmin@skillupnowadmin.org 
---   Password : Skillupnow@0904
--- ============================================================
+--  Copy the UUID shown after creating the user.
+--  Paste it below in place of '<PASTE_USER_UUID_HERE>'.
+-- ────────────────────────────────────────────────────────────
 
-
--- ============================================================
--- STEP 1 — Create the admin auth user
--- This inserts directly into Supabase's managed auth.users table.
--- The password is bcrypt-hashed automatically via pgcrypto.
--- ============================================================
 DO $$
 DECLARE
-  v_admin_id UUID := gen_random_uuid();
+  v_user_id   UUID := '4574921a-1718-447c-92a3-a291a27cddf5';   -- ← Replace with real UUID
+  v_name      TEXT := 'SkillUpNow Admin';
+  v_email     TEXT := 'skillupnow@gmail.com';
 BEGIN
 
-  INSERT INTO auth.users (
-    instance_id,
-    id,
-    aud,
-    role,
-    email,
-    encrypted_password,
-    email_confirmed_at,
-    raw_app_meta_data,
-    raw_user_meta_data,
-    is_super_admin,
-    created_at,
-    updated_at,
-    confirmation_token,
-    recovery_token,
-    email_change_token_new,
-    email_change
-  )
-  VALUES (
-    '00000000-0000-0000-0000-000000000000',  -- instance_id (default for single-tenant)
-    v_admin_id,
-    'authenticated',
-    'authenticated',
-    'skillupnowadmin@skillupnowadmin.org ',
-    crypt('Skillupnow@0904', gen_salt('bf')),  -- bcrypt-hashed password
-    NOW(),                                      -- email pre-confirmed
-    '{"provider":"email","providers":["email"]}',
-    '{"full_name":"SkillUpNow Admin","username":"skillupnowadmin"}',
-    FALSE,
-    NOW(),
-    NOW(),
-    '', '', '', ''
-  );
-
-  -- ============================================================
-  -- STEP 2 — Create the user profile row
-  -- ============================================================
+  -- 1. Upsert user_profiles row
   INSERT INTO public.user_profiles (
-    id,
-    full_name,
-    email,
-    is_email_verified,
-    is_active,
-    registration_date
+    id, full_name, email, role,
+    is_email_verified, created_at, updated_at
   )
   VALUES (
-    v_admin_id,
-    'SkillUpNow Admin',
-    'skillupnowadmin@skillupnowadmin.org ',
-    TRUE,
-    TRUE,
-    NOW()
+    v_user_id, v_name, v_email, 'super_admin',
+    true, NOW(), NOW()
   )
-  ON CONFLICT (id) DO NOTHING;
+  ON CONFLICT (id) DO UPDATE
+    SET full_name = EXCLUDED.full_name,
+        email     = EXCLUDED.email,
+        role      = 'super_admin',
+        updated_at = NOW();
 
-  -- ============================================================
-  -- STEP 3 — Grant super_admin role
-  -- ============================================================
+  -- 2. Upsert admin_users row (grants access to admin-dashboard.html)
   INSERT INTO public.admin_users (
-    user_id,
-    role,
-    permissions,
-    is_active
+    user_id, role,
+    is_active, permissions, created_at, updated_at
   )
   VALUES (
-    v_admin_id,
+    v_user_id,
     'super_admin',
+    true,
     '{
       "users":    {"view":true,"edit":true,"delete":true},
       "courses":  {"view":true,"edit":true,"delete":true},
       "payments": {"view":true,"edit":true,"delete":true},
       "reports":  {"view":true,"export":true},
+      "mentors":  {"view":true,"edit":true,"approve":true},
       "settings": {"view":true,"edit":true},
+      "enrollments": {"view":true,"edit":true,"delete":true},
+      "emi":      {"view":true,"edit":true},
+      "notifications": {"view":true,"edit":true},
+      "reviews":  {"view":true,"edit":true,"delete":true},
+      "inquiries":{"view":true,"edit":true,"delete":true},
+      "schedules":{"view":true,"edit":true,"delete":true},
       "admins":   {"view":true,"edit":true,"delete":true}
-    }',
-    TRUE
+    }'::jsonb,
+    NOW(), NOW()
   )
   ON CONFLICT (user_id) DO UPDATE
     SET role        = 'super_admin',
-        is_active   = TRUE,
+        is_active   = true,
+        permissions = EXCLUDED.permissions,
         updated_at  = NOW();
 
-  RAISE NOTICE '✅ Admin user created: skillupnowadmin@skillupnowadmin.org  (id: %)', v_admin_id;
+  RAISE NOTICE 'Super admin created/updated successfully for user: %', v_user_id;
 
-END;
-$$;
+END $$;
 
 
--- ============================================================
--- VERIFY — Run this to confirm the admin was created
--- ============================================================
+-- ── STEP 1b — Fix RLS (CRITICAL — run this if admin login fails) ──
+-- admin_users has RLS enabled but no SELECT policy, which blocks
+-- the login page from reading the admin row via the client.
+DO $fix$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE tablename = 'admin_users' AND policyname = 'admin_self_select'
+  ) THEN
+    EXECUTE 'CREATE POLICY admin_self_select ON public.admin_users FOR SELECT TO authenticated USING (user_id = auth.uid())';
+  END IF;
+END $fix$;
+
+-- ── STEP 2 — Verify ─────────────────────────────────────────
 SELECT
-  u.email,
+  up.id,
   up.full_name,
-  au.role          AS admin_role,
-  au.is_active     AS admin_active,
-  u.email_confirmed_at IS NOT NULL AS email_confirmed
-FROM auth.users          u
-JOIN public.user_profiles up ON up.id     = u.id
-JOIN public.admin_users   au ON au.user_id = u.id
-WHERE u.email = 'skillupnowadmin@skillupnowadmin.org ';
+  up.email,
+  up.role,
+  au.role  AS admin_role,
+  au.is_active
+FROM public.user_profiles up
+JOIN public.admin_users    au ON au.user_id = up.id
+WHERE up.email = 'skillupnow@gmail.com';
 
 
--- ============================================================
--- TROUBLESHOOTING
+-- ── STEP 3 — Admin Login URL ─────────────────────────────────
+--  The admin login page is intentionally NOT linked in the public nav.
+--  To log in as admin, navigate directly to:
 --
--- If you get "duplicate key" on auth.users:
---   The email already exists. To reset the password instead:
+--    http://localhost:5500/pages/admin-login.html
+--    or
+--    https://your-domain.com/pages/admin-login.html
 --
---   UPDATE auth.users
---   SET encrypted_password = crypt('Skillupnow@0904', gen_salt('bf')),
---       email_confirmed_at = NOW(),
---       updated_at         = NOW()
---   WHERE email = 'skillupnowadmin@skillupnowadmin.org ';
+--  Use the credentials stored in .env:
+--    Email   : skillupnow@gmail.com
+--    Password: ADMIN_PASSWORD value from .env
 --
--- Then re-run STEP 3 to ensure admin_users row exists.
---
--- ============================================================
--- HOW ADMIN LOGIN WORKS ON THE WEBSITE
---
--- 1. User goes to the Sign In modal on any page (index.html)
---    OR directly visits pages/admin-login.html
---
--- 2. Enters:
---      Email    : skillupnowadmin@skillupnowadmin.org 
---      Password : Skillupnow@0904
---
--- 3. On successful login, the code calls checkAdminAccess(userId).
---    This queries admin_users WHERE user_id = <id> AND is_active = true.
---
--- 4. If the row exists → user is automatically redirected to
---    pages/admin-dashboard.html
---
--- 5. Regular users (not in admin_users) stay on the homepage.
--- ============================================================
+-- ────────────────────────────────────────────────────────────

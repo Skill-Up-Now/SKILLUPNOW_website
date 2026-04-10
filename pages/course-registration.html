@@ -1,285 +1,350 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Course Registration - SkillUpNow">
-  <title>Course Registration - SkillUpNow</title>
-  
+  <title>Course Registration — SkillUpNow</title>
   <link rel="stylesheet" href="../css/variables.css">
-  <link rel="stylesheet" href="../css/animations.css">
   <link rel="stylesheet" href="../css/main.css">
-  <link rel="stylesheet" href="../css/forms.css">
   <link rel="stylesheet" href="../css/responsive.css">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  <script>
-    if (window.location.protocol !== 'file:') {
-      var p = window.location.pathname;
-      if (p.endsWith('.html')) history.replaceState(null, '', p.replace(/\.html$/, ''));
+  <style>
+    .page-wrap { position:relative; z-index:1; padding-top:80px; min-height:100vh; }
+    .reg-hero { background:var(--grad); padding:2.5rem 2rem; text-align:center; position:relative; overflow:hidden; }
+    .reg-hero::before { content:''; position:absolute; inset:0; background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='rgba(255,255,255,0.06)' stroke-width='1'%3E%3Ccircle cx='30' cy='30' r='25'/%3E%3C/g%3E%3C/svg%3E") repeat; }
+    .reg-hero h1 { color:#fff; font-size:2rem; font-weight:800; position:relative; }
+    .reg-hero p  { color:rgba(255,255,255,0.82); position:relative; margin-top:0.35rem; }
+    .wrap { max-width:820px; margin:2rem auto; padding:0 1.5rem 3rem; }
+    .card { background:var(--panel); border:1.5px solid var(--border); border-radius:var(--r3); padding:1.75rem; margin-bottom:1.25rem; }
+    .card h3 { font-size:1rem; font-weight:800; margin-bottom:1.25rem; display:flex; align-items:center; gap:0.5rem; }
+    .f-group { margin-bottom:1rem; }
+    .f-group label { display:block; font-size:0.8rem; font-weight:700; color:var(--txt2); margin-bottom:0.4rem; }
+    .f-group label span { color:#ef4444; }
+    .f-group input, .f-group select, .f-group textarea {
+      width:100%; background:var(--bg); border:1.5px solid var(--border); border-radius:var(--r1);
+      padding:0.65rem 0.9rem; color:var(--txt); font-size:0.88rem; outline:none; font-family:inherit; transition:border-color 0.2s;
     }
-  </script>
+    .f-group input:focus, .f-group select:focus, .f-group textarea:focus { border-color:var(--v1); box-shadow:0 0 0 3px var(--v5); }
+    .f-group textarea { resize:vertical; min-height:80px; }
+    .f-group .hint { font-size:0.75rem; color:var(--txt4); margin-top:0.3rem; }
+    .form-row { display:grid; grid-template-columns:1fr 1fr; gap:0.85rem; }
+
+    /* Course preview */
+    .course-preview { background:var(--bg); border:1.5px solid var(--border); border-radius:var(--r2); padding:1.25rem; display:none; margin-bottom:1rem; }
+    .course-preview.show { display:block; }
+    .cp-name { font-size:1rem; font-weight:800; margin-bottom:0.25rem; }
+    .cp-meta { font-size:0.8rem; color:var(--txt3); display:flex; gap:1rem; flex-wrap:wrap; margin-bottom:0.75rem; }
+    .cp-fees { display:flex; gap:1.5rem; }
+    .cp-fee-item .lbl { font-size:0.72rem; color:var(--txt4); }
+    .cp-fee-item .val { font-size:1.1rem; font-weight:800; color:var(--v1); }
+
+    /* Pay type */
+    .pay-opts { display:flex; gap:0.75rem; flex-wrap:wrap; margin-bottom:1rem; }
+    .pay-opt { flex:1; min-width:120px; border:2px solid var(--border); border-radius:var(--r1); padding:0.85rem; text-align:center; cursor:pointer; transition:all 0.2s; background:var(--bg); }
+    .pay-opt:hover  { border-color:var(--v2); }
+    .pay-opt.active { border-color:var(--v1); background:var(--v5); }
+    .pay-opt .po-icon  { font-size:1.5rem; margin-bottom:0.25rem; }
+    .pay-opt .po-label { font-size:0.83rem; font-weight:700; }
+    .pay-opt .po-desc  { font-size:0.72rem; color:var(--txt3); }
+
+    /* Summary */
+    .sum-row { display:flex; justify-content:space-between; font-size:0.87rem; padding:0.5rem 0; border-bottom:1px solid var(--border); }
+    .sum-row:last-child { border:none; }
+    .sum-row .sl { color:var(--txt3); }
+    .sum-row .sv { font-weight:700; }
+    .sum-row.total .sv { color:var(--v1); font-size:1.1rem; }
+
+    .btn-submit { width:100%; background:var(--grad); color:#fff; border:none; border-radius:var(--r1); padding:0.85rem; font-size:0.95rem; font-weight:800; cursor:pointer; transition:all 0.25s; font-family:inherit; box-shadow:var(--shadow-btn); }
+    .btn-submit:hover:not(:disabled) { opacity:0.88; transform:scale(1.01); }
+    .btn-submit:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
+
+    .alert { padding:0.75rem 1rem; border-radius:var(--r1); font-size:0.83rem; margin-bottom:1rem; display:none; }
+    .alert.success { background:rgba(34,197,94,0.1); border:1px solid rgba(34,197,94,0.25); color:#16a34a; }
+    .alert.error   { background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.25); color:#dc2626; }
+    .alert.show { display:block; }
+
+    @media(max-width:640px) { .form-row { grid-template-columns:1fr; } .pay-opts { flex-direction:column; } }
+  </style>
 </head>
 <body>
-  <div class="mesh-bg"></div>
-  <div class="orb orb1"></div>
-  <div class="orb orb2"></div>
-  <div class="orb orb3"></div>
+<div class="mesh-bg"></div>
+<div class="orb orb1"></div>
+<nav></nav>
 
-  <!-- Navigation — rebuilt by profile-nav.js -->
-  <nav></nav>
+<div class="page-wrap">
+  <section class="reg-hero">
+    <h1>Course Registration</h1>
+    <p>Complete your enrollment with all required details</p>
+  </section>
 
-  <nav class="page-breadcrumb"><a href="../index.html">Home</a><span class="separator">›</span><span class="current">Registration</span></nav>
+  <div class="wrap">
+    <div class="alert error"   id="err-alert"></div>
+    <div class="alert success" id="suc-alert"></div>
 
-  <section style="padding: 3rem 5vw; min-height: calc(100vh - 200px);">
-    <div style="max-width: 900px; margin: 0 auto;">
-      <h1 style="font-family: 'Cormorant Garamond', serif; font-size: 2.5rem; text-align: center; margin-bottom: 1rem;">Course Registration</h1>
-      <p style="text-align: center; color: var(--txt3); margin-bottom: 3rem; font-size: 1.05rem;">Start your learning journey today. Register for our premium courses.</p>
-
-      <form class="form-container" id="courseRegForm" onsubmit="submitCourseRegistration(event)">
-        <!-- Student Information -->
-        <h2 style="margin-bottom: 2rem; border-bottom: 2px solid var(--border); padding-bottom: 1rem;">Student Information</h2>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label>First Name *</label>
-            <input type="text" name="firstName" required data-validate="required"/>
-          </div>
-          <div class="form-group">
-            <label>Last Name *</label>
-            <input type="text" name="lastName" required data-validate="required"/>
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label>Email Address *</label>
-            <input type="email" name="email" required data-validate="required|email"/>
-          </div>
-          <div class="form-group">
-            <label>Phone Number *</label>
-            <input type="tel" name="phone" required data-validate="required|phone"/>
-          </div>
-        </div>
-
-        <!-- Course Selection -->
-        <h2 style="margin-top: 3rem; margin-bottom: 2rem; border-bottom: 2px solid var(--border); padding-bottom: 1rem;">Select Course</h2>
-
-        <div class="form-group">
-          <label>Choose Course *</label>
-          <select name="course" required onchange="updateCourseDetails()" style="background: var(--panel); border: 1.5px solid var(--border); color: var(--txt); padding: 0.9rem 1.1rem; border-radius: var(--r2);">
-            <option value="">Select a course</option>
-            <option value="aws">AWS Solutions Architect Pro - ₹14,999</option>
-            <option value="k8s">Kubernetes & Docker Mastery - ₹12,999</option>
-            <option value="ai">Generative AI with Python - ₹16,999</option>
-            <option value="cyber">Cybersecurity Fundamentals - ₹11,999</option>
-            <option value="terraform">Terraform & IaC Engineering - ₹13,999</option>
-            <option value="spark">Data Engineering with Spark - ₹15,999</option>
+    <!-- Personal Info -->
+    <div class="card">
+      <h3>👤 Personal Information</h3>
+      <div class="form-row">
+        <div class="f-group"><label>Full Name <span>*</span></label><input type="text" id="r-name" placeholder="As per ID proof"></div>
+        <div class="f-group"><label>Email <span>*</span></label><input type="email" id="r-email" placeholder="Active email address"></div>
+      </div>
+      <div class="form-row">
+        <div class="f-group"><label>Phone <span>*</span></label><input type="tel" id="r-phone" placeholder="10-digit mobile number" maxlength="10"></div>
+        <div class="f-group"><label>Alternate Phone</label><input type="tel" id="r-alt-phone" placeholder="Optional"></div>
+      </div>
+      <div class="form-row">
+        <div class="f-group"><label>Date of Birth</label><input type="date" id="r-dob"></div>
+        <div class="f-group"><label>Gender</label>
+          <select id="r-gender">
+            <option value="">Select…</option>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+            <option value="other">Other</option>
+            <option value="prefer_not_to_say">Prefer not to say</option>
           </select>
         </div>
+      </div>
+      <div class="f-group"><label>Full Address <span>*</span></label><textarea id="r-address" placeholder="House/Flat No., Street, City, State, Pincode"></textarea></div>
+    </div>
 
-        <div style="background: var(--panel2); padding: 1.5rem; border-radius: var(--r2); margin-bottom: 2rem;">
-          <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-            <span style="color: var(--txt3);">Course Price:</span>
-            <span id="coursePrice" style="font-weight: 700; color: var(--v1);">-</span>
-          </div>
-          <div style="display: flex; justify-content: space-between;">
-            <span style="color: var(--txt3);">Duration:</span>
-            <span id="courseDuration" style="font-weight: 600; color: var(--txt2);">-</span>
-          </div>
+    <!-- Education & Background -->
+    <div class="card">
+      <h3>🎓 Educational Background</h3>
+      <div class="form-row">
+        <div class="f-group"><label>Highest Qualification</label>
+          <select id="r-qualification">
+            <option value="">Select…</option>
+            <option value="10th">10th (SSLC)</option>
+            <option value="12th">12th (PUC/HSC)</option>
+            <option value="diploma">Diploma</option>
+            <option value="ug">Under Graduate (UG)</option>
+            <option value="pg">Post Graduate (PG)</option>
+            <option value="phd">PhD</option>
+            <option value="other">Other</option>
+          </select>
         </div>
-
-        <!-- Learning Background -->
-        <h2 style="margin-top: 3rem; margin-bottom: 2rem; border-bottom: 2px solid var(--border); padding-bottom: 1rem;">Learning Background</h2>
-
-        <div class="form-group">
-          <label>Experience Level *</label>
-          <div style="display: flex; gap: 1rem; margin-top: 0.5rem;">
-            <label style="display: flex; gap: 0.5rem; align-items: center; margin: 0; font-weight: 400;">
-              <input type="radio" name="experience" value="beginner" required/>
-              Beginner
-            </label>
-            <label style="display: flex; gap: 0.5rem; align-items: center; margin: 0; font-weight: 400;">
-              <input type="radio" name="experience" value="intermediate" required/>
-              Intermediate
-            </label>
-            <label style="display: flex; gap: 0.5rem; align-items: center; margin: 0; font-weight: 400;">
-              <input type="radio" name="experience" value="advanced" required/>
-              Advanced
-            </label>
-          </div>
+        <div class="f-group"><label>Current Occupation</label>
+          <select id="r-occupation">
+            <option value="">Select…</option>
+            <option value="student">Student</option>
+            <option value="fresher">Fresher</option>
+            <option value="working">Working Professional</option>
+            <option value="self_employed">Self-Employed</option>
+            <option value="freelancer">Freelancer</option>
+            <option value="other">Other</option>
+          </select>
         </div>
+      </div>
+      <div class="f-group"><label>Current Company / Institution</label><input type="text" id="r-company" placeholder="Optional"></div>
+      <div class="f-group"><label>Why do you want to take this course?</label><textarea id="r-motivation" placeholder="Briefly describe your goal and how this course will help…"></textarea></div>
+    </div>
 
-        <div class="form-group">
-          <label>What are your learning goals? *</label>
-          <textarea name="goals" placeholder="Tell us about your learning goals..." required data-validate="required|min:10" style="background: var(--panel); border: 1.5px solid var(--border); color: var(--txt); padding: 0.9rem 1.1rem; border-radius: var(--r2);"></textarea>
+    <!-- Course Selection -->
+    <div class="card">
+      <h3>📚 Course Selection</h3>
+      <div class="f-group"><label>Select Course <span>*</span></label><select id="r-course" onchange="onCourseChange()"><option value="">Choose a course…</option></select></div>
+      <div class="f-group"><label>Preferred Batch Timing</label>
+        <select id="r-timing">
+          <option value="">Select preferred timing</option>
+          <option value="morning">Morning (6 AM – 10 AM)</option>
+          <option value="afternoon">Afternoon (11 AM – 2 PM)</option>
+          <option value="evening">Evening (5 PM – 8 PM)</option>
+          <option value="night">Night (8 PM – 10 PM)</option>
+          <option value="weekend">Weekend</option>
+          <option value="flexible">Flexible</option>
+        </select>
+      </div>
+      <div class="course-preview" id="course-preview">
+        <div class="cp-name" id="prev-name">—</div>
+        <div class="cp-meta">
+          <span id="prev-cat">—</span>
+          <span id="prev-dur">—</span>
+          <span id="prev-level">—</span>
         </div>
-
-        <div class="form-group">
-          <label>Current Role</label>
-          <input type="text" name="currentRole" placeholder="e.g., Systems Administrator, Developer, etc."/>
-        </div>
-
-        <!-- Schedule Preference -->
-        <h2 style="margin-top: 3rem; margin-bottom: 2rem; border-bottom: 2px solid var(--border); padding-bottom: 1rem;">Schedule Preference</h2>
-
-        <div class="form-group">
-          <label>Preferred Learning Schedule *</label>
-          <div style="display: flex; flex-direction: column; gap: 0.8rem;">
-            <label style="display: flex; gap: 0.7rem; align-items: center; margin: 0; font-weight: 400;">
-              <input type="radio" name="schedule" value="weekday-evening" required/>
-              <span>Weekday Evening (6 PM - 9 PM)</span>
-            </label>
-            <label style="display: flex; gap: 0.7rem; align-items: center; margin: 0; font-weight: 400;">
-              <input type="radio" name="schedule" value="weekend" required/>
-              <span>Weekend (10 AM - 6 PM)</span>
-            </label>
-            <label style="display: flex; gap: 0.7rem; align-items: center; margin: 0; font-weight: 400;">
-              <input type="radio" name="schedule" value="flexible" required/>
-              <span>Flexible (On-demand)</span>
-            </label>
-          </div>
-        </div>
-
-        <!-- Additional Info -->
-        <h2 style="margin-top: 3rem; margin-bottom: 2rem; border-bottom: 2px solid var(--border); padding-bottom: 1rem;">Additional Information</h2>
-
-        <div style="background: rgba(124,92,252,0.1); border-left: 4px solid var(--v1); padding: 1rem; border-radius: 0 var(--r2) var(--r2) 0; margin-bottom: 2rem;">
-          <p style="margin: 0; font-size: 0.95rem; color: var(--txt);">✓ Lifetime access to course materials<br/>✓ Live mentorship sessions<br/>✓ Project-based learning<br/>✓ Job placement support</p>
-        </div>
-
-        <!-- Terms & Conditions -->
-        <div style="background: var(--panel2); padding: 1.5rem; border-radius: var(--r2); margin-bottom: 2rem;">
-          <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
-            <input type="checkbox" name="agreeTerms" required/>
-            <label style="margin: 0; font-size: 0.95rem;">I agree to the terms and conditions</label>
-          </div>
-          <div style="display: flex; gap: 1rem;">
-            <input type="checkbox" name="newsletter" />
-            <label style="margin: 0; font-size: 0.95rem;">Send me course updates and special offers</label>
-          </div>
-        </div>
-
-        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-          <button type="submit" class="btn-grad" style="flex: 1;">Complete Registration</button>
-          <button type="reset" class="btn-outline" style="flex: 1; border: 1.5px solid var(--border2);">Clear Form</button>
-        </div>
-      </form>
-
-      <!-- Success Message -->
-      <div id="successMessage" style="display: none; margin-top: 2rem;">
-        <div style="background: rgba(16,185,129,0.1); border-left: 4px solid #10b981; padding: 2rem; border-radius: 0 var(--r2) var(--r2) 0; text-align: center;">
-          <h3 style="color: #10b981; font-size: 1.5rem; margin-bottom: 1rem;">✓ Registration Successful!</h3>
-          <p style="color: var(--txt3); margin-bottom: 1rem;">You have been enrolled in the course. Check your email for login credentials.</p>
-          <p style="color: var(--txt4); margin-bottom: 1.5rem; font-size: 0.95rem;">You will receive an invitation link shortly. Your learning journey starts now!</p>
-          <a href="../index.html" class="btn-grad">Back to Home</a>
+        <div class="cp-fees">
+          <div class="cp-fee-item"><div class="lbl">Course Fee</div><div class="val" id="prev-fee">—</div></div>
+          <div class="cp-fee-item" id="prev-disc-wrap" style="display:none"><div class="lbl">Discounted</div><div class="val" id="prev-disc">—</div></div>
         </div>
       </div>
     </div>
-  </section>
 
-  <footer style="background: rgba(8,6,18,0.95); border-top: 1px solid var(--border); padding: 3rem 5vw; text-align: center; margin-top: 4rem;">
-    <p style="color: var(--txt4); font-size: 0.9rem;">© <span class="site-year"></span> SkillUpNow. Start learning today!</p>
-  </footer>
+    <!-- Payment Preference -->
+    <div class="card">
+      <h3>💳 Payment Preference</h3>
+      <div class="pay-opts">
+        <div class="pay-opt active" onclick="selectPay('full',this)"><div class="po-icon">💳</div><div class="po-label">Full Payment</div><div class="po-desc">Pay once, instant access</div></div>
+        <div class="pay-opt" id="emi-opt" onclick="selectPay('emi',this)"><div class="po-icon">📅</div><div class="po-label">Easy EMI</div><div class="po-desc">0% interest installments</div></div>
+        <div class="pay-opt" onclick="selectPay('bank',this)"><div class="po-icon">🏦</div><div class="po-label">Bank Transfer</div><div class="po-desc">Direct bank payment</div></div>
+        <div class="pay-opt" onclick="selectPay('cash',this)"><div class="po-icon">💵</div><div class="po-label">Cash</div><div class="po-desc">Pay at office</div></div>
+      </div>
+      <div id="emi-info" style="display:none">
+        <div class="f-group"><label>Preferred EMI Duration</label>
+          <select id="r-emi-months">
+            <option value="">Select EMI months…</option>
+          </select>
+        </div>
+      </div>
+      <div class="f-group"><label>Referral Code (optional)</label><input type="text" id="r-referral" placeholder="Friend's referral code"></div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="../config/supabase-config.js"></script>
-  <script src="../js/validations.js"></script>
-  <script src="../js/theme.js"></script>
-  <script src="../js/profile-nav.js"></script>
-  <script src="../js/emi-calculator.js"></script>
-  <script src="../js/payment.js"></script>
-  <script src="../js/main.js"></script>
+      <!-- Summary -->
+      <div style="background:var(--bg);border:1.5px solid var(--border);border-radius:var(--r1);padding:1rem;margin-top:0.75rem" id="reg-summary" style="display:none">
+        <div style="font-size:0.85rem;font-weight:700;margin-bottom:0.75rem">Registration Summary</div>
+        <div class="sum-row"><span class="sl">Course</span><span class="sv" id="sum-course">—</span></div>
+        <div class="sum-row"><span class="sl">Payment Type</span><span class="sv" id="sum-type">Full Payment</span></div>
+        <div class="sum-row total"><span class="sl">Amount Due</span><span class="sv" id="sum-amount">—</span></div>
+      </div>
+    </div>
 
-  <script>
-    const courseData = {
-      aws: { price: '₹14,999', duration: '48 hours', name: 'AWS Solutions Architect', category: 'Cloud', level: 'Professional', id: 'aws' },
-      k8s: { price: '₹12,999', duration: '36 hours', name: 'Kubernetes & Docker', category: 'DevOps', level: 'Intermediate', id: 'k8s' },
-      ai: { price: '₹16,999', duration: '60 hours', name: 'Generative AI with Python', category: 'AI', level: 'Advanced', id: 'ai' },
-      cyber: { price: '₹11,999', duration: '40 hours', name: 'Cybersecurity Fundamentals', category: 'Security', level: 'Beginner', id: 'cyber' },
-      terraform: { price: '₹13,999', duration: '32 hours', name: 'Terraform & IaC Engineering', category: 'DevOps', level: 'Intermediate', id: 'terraform' },
-      spark: { price: '₹15,999', duration: '52 hours', name: 'Data Engineering with Spark', category: 'Data', level: 'Advanced', id: 'spark' }
-    };
+    <!-- Declaration -->
+    <div style="display:flex;align-items:flex-start;gap:0.65rem;margin-bottom:1.25rem;font-size:0.82rem;color:var(--txt3)">
+      <input type="checkbox" id="r-agree" style="flex-shrink:0;margin-top:2px;accent-color:var(--v1)">
+      <label for="r-agree">I confirm that all information provided is accurate and I agree to the <a href="#" style="color:var(--v1)">Terms & Conditions</a>, <a href="#" style="color:var(--v1)">Refund Policy</a>, and <a href="#" style="color:var(--v1)">Privacy Policy</a> of SkillUpNow.</label>
+    </div>
 
-    function updateCourseDetails() {
-      const course = document.querySelector('select[name="course"]').value;
-      if (course && courseData[course]) {
-        document.getElementById('coursePrice').textContent = courseData[course].price;
-        document.getElementById('courseDuration').textContent = courseData[course].duration;
-      }
+    <button class="btn-submit" onclick="submitRegistration()">Submit Registration & Proceed to Payment</button>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../config/supabase-config.js"></script>
+<script src="../js/theme.js"></script>
+<script src="../js/profile-nav.js"></script>
+<script>
+const db = new SupabaseConfig();
+let coursesData = [], selectedPayType = 'full', selectedCourseObj = null;
+const fmtCurr = v => '₹' + Number(v||0).toLocaleString('en-IN');
+
+async function init() {
+  const { data: { session } } = await db.client.auth.getSession();
+  if (!session) { window.location.href = '../index.html?login=1'; return; }
+  const { data: p } = await db.client.from('user_profiles').select('full_name,email,phone,address,date_of_birth,gender').eq('id', session.user.id).single();
+  if (p) {
+    document.getElementById('r-name').value    = p.full_name||'';
+    document.getElementById('r-email').value   = p.email||'';
+    document.getElementById('r-phone').value   = p.phone||'';
+    document.getElementById('r-address').value = p.address||'';
+    document.getElementById('r-dob').value     = p.date_of_birth||'';
+    document.getElementById('r-gender').value  = p.gender||'';
+  }
+  const { data } = await db.client.from('courses').select('*').eq('is_active',true).eq('is_published',true).order('name');
+  coursesData = data || [];
+  const sel = document.getElementById('r-course');
+  coursesData.forEach(c => { const o = document.createElement('option'); o.value = c.id; o.textContent = c.name + ' — ' + c.category; sel.appendChild(o); });
+  const preselect = new URLSearchParams(window.location.search).get('course');
+  if (preselect) { sel.value = preselect; onCourseChange(); }
+}
+
+function onCourseChange() {
+  const id = document.getElementById('r-course').value;
+  selectedCourseObj = coursesData.find(c => c.id === id);
+  if (!selectedCourseObj) { document.getElementById('course-preview').classList.remove('show'); return; }
+  const c = selectedCourseObj;
+  const price = c.discounted_price || c.price;
+  document.getElementById('course-preview').classList.add('show');
+  document.getElementById('prev-name').textContent  = c.name;
+  document.getElementById('prev-cat').textContent   = c.category;
+  document.getElementById('prev-dur').textContent   = (c.duration_months||'?') + ' months';
+  document.getElementById('prev-level').textContent = c.level;
+  document.getElementById('prev-fee').textContent   = fmtCurr(c.price);
+  if (c.discounted_price) { document.getElementById('prev-disc-wrap').style.display='block'; document.getElementById('prev-disc').textContent = fmtCurr(c.discounted_price); }
+  else { document.getElementById('prev-disc-wrap').style.display='none'; }
+
+  // EMI option
+  document.getElementById('emi-opt').style.display = c.is_emi_available ? 'block' : 'none';
+  // EMI months
+  const emiSel = document.getElementById('r-emi-months');
+  emiSel.innerHTML = '<option value="">Select…</option>';
+  if (c.is_emi_available) {
+    for (let m = (c.min_emi_months||2); m <= (c.max_emi_months||12); m += 2) {
+      const monthly = Math.ceil(price / m);
+      const o = document.createElement('option'); o.value = m; o.textContent = `${m} months — ${fmtCurr(monthly)}/month`; emiSel.appendChild(o);
     }
+  }
 
-    const form = document.getElementById('courseRegForm');
-    const validator = new FormValidator(form);
+  updateSummary();
+}
 
-    async function submitCourseRegistration(e) {
-      e.preventDefault();
+function selectPay(type, el) {
+  selectedPayType = type;
+  document.querySelectorAll('.pay-opt').forEach(o => o.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('emi-info').style.display = type === 'emi' ? 'block' : 'none';
+  document.getElementById('sum-type').textContent = { full:'Full Payment', emi:'EMI', bank:'Bank Transfer', cash:'Cash at Office' }[type];
+  updateSummary();
+}
 
-      if (!validator.validateAll()) {
-        if (window.app) window.app.showNotification('Please correct the errors', 'error');
-        return;
-      }
+function updateSummary() {
+  if (!selectedCourseObj) return;
+  document.getElementById('sum-course').textContent = selectedCourseObj.name;
+  const price = selectedCourseObj.discounted_price || selectedCourseObj.price;
+  let amtText = fmtCurr(price);
+  if (selectedPayType === 'emi') {
+    const months = parseInt(document.getElementById('r-emi-months').value);
+    if (months) amtText = fmtCurr(Math.ceil(price/months)) + '/month × ' + months;
+  }
+  document.getElementById('sum-amount').textContent = amtText;
+}
+document.getElementById('r-emi-months').addEventListener('change', updateSummary);
 
-      if (!window.supabaseConfig) {
-        if (window.app) window.app.showNotification('Supabase is not initialized. Refresh and try again.', 'error');
-        return;
-      }
+async function submitRegistration() {
+  const name   = document.getElementById('r-name').value.trim();
+  const email  = document.getElementById('r-email').value.trim();
+  const phone  = document.getElementById('r-phone').value.trim();
+  const course = document.getElementById('r-course').value;
+  if (!name || !email || !phone || !course) { showAlert('err', 'Please fill all required fields.'); return; }
+  if (!document.getElementById('r-agree').checked) { showAlert('err', 'Please agree to the Terms & Conditions.'); return; }
+  if (selectedPayType === 'emi' && !document.getElementById('r-emi-months').value) { showAlert('err', 'Please select an EMI duration.'); return; }
 
-      const formData = new FormData(form);
-      const firstName = formData.get('firstName').trim();
-      const lastName = formData.get('lastName').trim();
-      const email = formData.get('email').trim();
-      const phone = formData.get('phone').trim();
-      const password = formData.get('password').trim();
-      const courseKey = formData.get('course');
-      const experience = formData.get('experience');
-      const goals = formData.get('goals').trim();
-      const currentRole = formData.get('currentRole').trim();
-      const schedule = formData.get('schedule');
+  const btn = document.querySelector('.btn-submit');
+  btn.disabled = true; btn.textContent = 'Submitting…';
 
-      if (!courseKey || !courseData[courseKey]) {
-        if (window.app) window.app.showNotification('Please select a course to continue.', 'error');
-        return;
-      }
+  try {
+    const { data: { session } } = await db.client.auth.getSession();
+    const price = selectedCourseObj ? (selectedCourseObj.discounted_price || selectedCourseObj.price) : 0;
+    const emiMonths = selectedPayType === 'emi' ? parseInt(document.getElementById('r-emi-months').value) : null;
 
-      const courseInfo = courseData[courseKey];
+    // Create enrollment
+    const { data: enroll, error: enrollErr } = await db.client.from('enrollments').upsert({
+      user_id: session.user.id, course_id: course,
+      payment_type: selectedPayType, payment_status: 'pending',
+      enrollment_status: 'pending', total_amount: price,
+      emi_months: emiMonths,
+    }, { onConflict:'user_id,course_id' }).select().single();
 
-      try {
-        const result = await window.supabaseConfig.signUp(email, password, {
-          full_name: `${firstName} ${lastName}`,
-          email,
-          phone_number: phone,
-          learning_interest: courseInfo.name,
-          experience_level: experience,
-          current_role: currentRole,
-          schedule_preference: schedule,
-          learning_goals: goals
-        });
+    if (enrollErr) throw enrollErr;
 
-        if (!result.success) {
-          if (window.app) window.app.showNotification(result.error || 'Registration failed. Please try again.', 'error');
-          return;
-        }
+    // Save form submission
+    await db.client.from('form_submissions').insert({
+      user_id: session.user.id, course_id: course, form_type: 'course_registration',
+      form_data: {
+        name, email, phone,
+        qualification: document.getElementById('r-qualification').value,
+        occupation:    document.getElementById('r-occupation').value,
+        company:       document.getElementById('r-company').value,
+        motivation:    document.getElementById('r-motivation').value,
+        timing:        document.getElementById('r-timing').value,
+        pay_type:      selectedPayType,
+        emi_months:    emiMonths,
+        referral:      document.getElementById('r-referral').value.trim(),
+      },
+    });
 
-        // Save to user_enrollments (new relational enrollment table)
-        await window.supabaseConfig.createEnrollment(result.data.user.id, courseInfo);
+    showAlert('suc', '✅ Registration successful! Redirecting to payment…');
+    setTimeout(() => { window.location.href = `payment.html?enrollment=${enroll.id}`; }, 1500);
+  } catch (err) {
+    showAlert('err', err.message || 'Registration failed.');
+  }
+  btn.disabled = false; btn.textContent = 'Submit Registration & Proceed to Payment';
+}
 
-        // Also save to legacy course_registrations table for backward compat
-        await window.supabaseConfig.enrollCourse(result.data.user.id, courseInfo);
+function showAlert(type, msg) {
+  document.querySelectorAll('.alert').forEach(a => a.classList.remove('show'));
+  const el = document.getElementById(type === 'err' ? 'err-alert' : 'suc-alert');
+  el.textContent = msg; el.classList.add('show');
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
 
-        setTimeout(() => {
-          form.style.display = 'none';
-          document.getElementById('successMessage').style.display = 'block';
-          if (window.app) {
-            window.app.showNotification('Course registration successful!', 'success');
-          }
-        }, 500);
-      } catch (error) {
-        if (window.app) {
-          window.app.showNotification(error.message || 'Registration failed. Please try again.', 'error');
-        }
-      }
-    }
-  </script>
+init();
+</script>
+<footer></footer>
 </body>
 </html>
