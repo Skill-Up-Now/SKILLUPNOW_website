@@ -346,6 +346,12 @@
       <div class="nav-item" data-section="emi">
         <span class="nav-icon">📅</span> EMI Schedules
       </div>
+      <div class="nav-item" data-section="pricing">
+        <span class="nav-icon">💰</span> Fee & Pricing
+      </div>
+      <div class="nav-item" data-section="discounts">
+        <span class="nav-icon">🏷</span> Discounts
+      </div>
       <div class="nav-item" data-section="reports">
         <span class="nav-icon">📈</span> Reports
       </div>
@@ -443,7 +449,7 @@
           <h3>Course Management</h3>
           <div class="table-actions">
             <input class="tbl-search" placeholder="Search courses…" oninput="filterTable('course-tbody', this.value, [0,1])">
-            <button class="btn-primary" onclick="openModal('course-modal')">+ Add Course</button>
+            <button class="btn-primary" onclick="document.getElementById('course-id').value='';document.getElementById('course-modal-title').textContent='Add New Course';openModal('course-modal')">+ Add Course</button>
           </div>
         </div>
         <table class="data-table">
@@ -459,7 +465,7 @@
         <div class="table-header">
           <h3>Course Categories</h3>
           <div class="table-actions">
-            <button class="btn-primary" onclick="openModal('category-modal')">+ Add Category</button>
+            <button class="btn-primary" onclick="document.getElementById('cat-id').value='';document.getElementById('category-modal').querySelector('.modal-title').textContent='Add Category';openModal('category-modal')">+ Add Category</button>
           </div>
         </div>
         <table class="data-table">
@@ -537,7 +543,7 @@
         <div class="table-header">
           <h3>Batch Management</h3>
           <div class="table-actions">
-            <button class="btn-primary" onclick="openModal('batch-modal')">+ New Batch</button>
+            <button class="btn-primary" onclick="document.getElementById('batch-id').value='';document.getElementById('batch-modal').querySelector('.modal-title').textContent='Create Batch';document.querySelector('#batch-modal .btn-primary').textContent='Create Batch';openModal('batch-modal')">+ New Batch</button>
           </div>
         </div>
         <table class="data-table">
@@ -587,6 +593,39 @@
         <table class="data-table">
           <thead><tr><th>User</th><th>Course</th><th>Installment #</th><th>Due Date</th><th>Amount</th><th>Late Fee</th><th>Status</th><th>Actions</th></tr></thead>
           <tbody id="emi-tbody"><tr><td colspan="8" class="table-empty">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ===== FEE & PRICING ===== -->
+    <div class="section" id="section-pricing">
+      <div class="table-card">
+        <div class="table-header">
+          <h3>Course Fee & Pricing</h3>
+          <div class="table-actions">
+            <input class="tbl-search" placeholder="Search…" oninput="filterTable('pricing-tbody', this.value, [0,1])">
+            <button class="btn-primary" onclick="openPricingModal()">+ Set Pricing</button>
+          </div>
+        </div>
+        <table class="data-table">
+          <thead><tr><th>Course</th><th>Pricing Type</th><th>List Price</th><th>Sale Price</th><th>Discount %</th><th>EMI Months</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="pricing-tbody"><tr><td colspan="8" class="table-empty">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ===== DISCOUNTS ===== -->
+    <div class="section" id="section-discounts">
+      <div class="table-card">
+        <div class="table-header">
+          <h3>Discount Campaigns</h3>
+          <div class="table-actions">
+            <button class="btn-primary" onclick="openModal('discount-modal');document.getElementById('disc-id').value=''">+ New Discount</button>
+          </div>
+        </div>
+        <table class="data-table">
+          <thead><tr><th>Campaign Name</th><th>Code</th><th>Type</th><th>Value</th><th>Course</th><th>Valid Until</th><th>Uses</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="discount-tbody"><tr><td colspan="9" class="table-empty">Loading…</td></tr></tbody>
         </table>
       </div>
     </div>
@@ -878,6 +917,93 @@
   </div>
 </div>
 
+<!-- Pricing Modal -->
+<div class="modal-overlay" id="pricing-modal">
+  <div class="modal-box">
+    <div class="modal-close" onclick="closeModal('pricing-modal')">✕</div>
+    <div class="modal-title" id="pricing-modal-title">Set Course Pricing</div>
+    <input type="hidden" id="pricing-id">
+    <div class="f-group"><label>Course *</label><select id="pr-course"><option value="">Select course…</option></select></div>
+    <div class="form-row">
+      <div class="f-group"><label>Pricing Type *</label>
+        <select id="pr-type" onchange="toggleEmiField()">
+          <option value="full_payment">Full Payment</option>
+          <option value="emi">EMI</option>
+          <option value="subscription">Subscription</option>
+          <option value="scholarship">Scholarship</option>
+        </select>
+      </div>
+      <div class="f-group"><label>Status</label>
+        <select id="pr-active"><option value="true">Active</option><option value="false">Inactive</option></select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="f-group"><label>List Price (₹) *</label><input type="number" id="pr-list" placeholder="e.g. 25000" min="0" step="100"></div>
+      <div class="f-group"><label>Sale Price (₹) <span style="font-size:.7rem;color:rgba(200,191,255,.4)">(optional)</span></label><input type="number" id="pr-sale" placeholder="e.g. 19999" min="0" step="100"></div>
+    </div>
+    <div class="f-group" id="pr-emi-wrap" style="display:none">
+      <label>EMI Installments</label>
+      <input type="number" id="pr-emi" placeholder="e.g. 6" min="2" max="36">
+    </div>
+    <div class="f-group"><label>Pricing Plan Name</label><input type="text" id="pr-name" placeholder="e.g. Standard, Premium…"></div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal('pricing-modal')">Cancel</button>
+      <button class="btn-primary" onclick="savePricing()">Save Pricing</button>
+    </div>
+  </div>
+</div>
+
+<!-- Discount Modal -->
+<div class="modal-overlay" id="discount-modal">
+  <div class="modal-box">
+    <div class="modal-close" onclick="closeModal('discount-modal')">✕</div>
+    <div class="modal-title">Discount Campaign</div>
+    <input type="hidden" id="disc-id">
+    <div class="form-row">
+      <div class="f-group"><label>Campaign Name *</label><input type="text" id="disc-name" placeholder="Summer Sale 2025…"></div>
+      <div class="f-group"><label>Coupon Code *</label><input type="text" id="disc-code" placeholder="SUMMER25" style="text-transform:uppercase" oninput="this.value=this.value.toUpperCase()"></div>
+    </div>
+    <div class="form-row">
+      <div class="f-group"><label>Discount Type *</label>
+        <select id="disc-type">
+          <option value="percentage">Percentage (%)</option>
+          <option value="flat">Flat Amount (₹)</option>
+        </select>
+      </div>
+      <div class="f-group"><label>Discount Value *</label><input type="number" id="disc-value" placeholder="e.g. 20 or 2000" min="0"></div>
+    </div>
+    <div class="form-row">
+      <div class="f-group"><label>Min Purchase (₹)</label><input type="number" id="disc-min" placeholder="0 = no minimum" min="0"></div>
+      <div class="f-group"><label>Max Discount (₹) <span style="font-size:.7rem;color:rgba(200,191,255,.4)">(for % type)</span></label><input type="number" id="disc-max" placeholder="Optional cap" min="0"></div>
+    </div>
+    <div class="form-row">
+      <div class="f-group"><label>Max Uses</label><input type="number" id="disc-maxuse" placeholder="0 = unlimited" min="0"></div>
+      <div class="f-group"><label>Per User Limit</label><input type="number" id="disc-peruser" value="1" min="1"></div>
+    </div>
+    <div class="form-row">
+      <div class="f-group"><label>Valid From</label><input type="datetime-local" id="disc-from"></div>
+      <div class="f-group"><label>Expires At</label><input type="datetime-local" id="disc-until"></div>
+    </div>
+    <div class="f-group"><label>Applicable Course <span style="font-size:.7rem;color:rgba(200,191,255,.4)">(leave blank = all courses)</span></label>
+      <select id="disc-course"><option value="">All Courses</option></select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal('discount-modal')">Cancel</button>
+      <button class="btn-primary" onclick="saveDiscount()">Save Campaign</button>
+    </div>
+  </div>
+</div>
+
+<!-- User Detail Modal -->
+<div class="modal-overlay" id="user-modal">
+  <div class="modal-box" style="max-width:520px">
+    <div class="modal-close" onclick="closeModal('user-modal')">✕</div>
+    <div class="modal-title">User Details</div>
+    <div id="user-detail-content" style="font-size:.85rem;line-height:1.8;color:#c8bfff;"></div>
+    <div class="modal-actions"><button class="btn-secondary" onclick="closeModal('user-modal')">Close</button></div>
+  </div>
+</div>
+
 <!-- Recording Modal -->
 <div class="modal-overlay" id="recording-modal">
   <div class="modal-box">
@@ -899,6 +1025,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../config/supabase-config.js"></script>
+<script src="../js/profile-nav.js"></script>
 <script>
 const db = new SupabaseConfig();
 let adminUser = null;
@@ -949,6 +1076,7 @@ function loadSection(sec) {
     dashboard: loadDashboard, courses: loadCourses, categories: loadCategories,
     users: loadUsers, mentors: loadMentors, enrollments: loadEnrollments,
     batches: loadBatches, payments: loadPayments, emi: loadEmi,
+    pricing: loadPricing, discounts: loadDiscounts,
     reports: loadReports, recordings: loadRecordings, schedules: loadSchedules,
     reviews: loadReviews, forms: loadForms, inquiries: loadInquiries,
   };
@@ -1125,8 +1253,9 @@ async function loadCategories() {
         <button class="action-btn danger" onclick="deleteCategory('${c.id}')">Delete</button>
       </div></td>
     </tr>`).join('') || '<tr><td colspan="5" class="table-empty">No categories</td></tr>';
-  const opts = (data||[]).map(c => `<option value="${c.slug}">${c.name}</option>`).join('');
-  const el = document.getElementById('c-category'); if (el) el.innerHTML = '<option value="">Select…</option>' + opts;
+  // Use UUID as value (not slug) to match category_id FK on courses table
+  const opts = (data||[]).map(c => `<option value="${c.id}">${c.icon||''} ${c.name}</option>`).join('');
+  const el = document.getElementById('c-category'); if (el) el.innerHTML = '<option value="">None</option>' + opts;
 }
 
 async function loadUsers() {
@@ -1363,26 +1492,6 @@ async function loadReviews() {
     </tr>`).join('') || '<tr><td colspan="6" class="table-empty">No reviews</td></tr>';
 }
 
-async function loadForms() {
-  const typeFilter = document.getElementById('form-type-filter').value;
-  let q = db.client.from('form_submissions').select('*, courses(title)');
-  if (typeFilter) q = q.eq('form_type', typeFilter);
-  const { data } = await q.order('created_at', { ascending: false }).limit(100);
-  document.getElementById('form-tbody').innerHTML = (data||[]).map(f => `
-    <tr>
-      <td><span class="badge badge-blue">${(f.form_type||'').replace(/_/g,' ')}</span></td>
-      <td>${f.form_data?.name || f.form_data?.full_name || '—'}</td>
-      <td>${f.form_data?.email || '—'}</td>
-      <td>${f.courses?.title || '—'}</td>
-      <td>${fmtDate(f.created_at)}</td>
-      <td>${statusBadge(f.status)}</td>
-      <td><div class="action-btns">
-        <button class="action-btn" onclick="viewFormData('${f.id}')">View</button>
-        <button class="action-btn" onclick="updateFormStatus('${f.id}','reviewed')">Mark Reviewed</button>
-      </div></td>
-    </tr>`).join('') || '<tr><td colspan="7" class="table-empty">No form submissions</td></tr>';
-}
-
 async function loadInquiries() {
   const statusFilter = document.getElementById('inq-status-filter').value;
   let q = db.client.from('inquiries').select('*');
@@ -1529,21 +1638,6 @@ async function saveEnrollment() {
   loadEnrollments();
 }
 
-async function saveBatch() {
-  const batchName = document.getElementById('b-name').value.trim();
-  await db.client.from('course_batches').insert({
-    course_id: document.getElementById('b-course').value,
-    primary_mentor_user_id: document.getElementById('b-mentor').value || null,
-    batch_name: batchName,
-    batch_code: 'B' + Date.now(),
-    max_students: parseInt(document.getElementById('b-max').value) || 30,
-    starts_on: document.getElementById('b-start').value || null,
-    ends_on: document.getElementById('b-end').value || null,
-    is_active: true,
-  });
-  closeModal('batch-modal');
-  loadBatches();
-}
 
 async function saveSchedule() {
   const startVal = document.getElementById('sch-time').value;
@@ -1647,6 +1741,376 @@ async function loadForms() {
       </div></td>
     </tr>`).join('') || '<tr><td colspan="7" class="table-empty">No form submissions</td></tr>';
 }
+
+// ===== EDIT COURSE =====
+async function editCourse(id) {
+  const { data: c, error } = await db.client.from('courses').select('*').eq('id', id).single();
+  if (error) { alert('Failed to load course: ' + error.message); return; }
+  const { data: pricing } = await db.client.from('course_pricing').select('*').eq('course_id', id).eq('is_active', true).maybeSingle();
+  document.getElementById('course-id').value = c.id;
+  document.getElementById('c-name').value = c.title || '';
+  document.getElementById('c-short-desc').value = c.short_description || '';
+  document.getElementById('c-desc').value = c.description || '';
+  document.getElementById('c-level').value = c.level || 'beginner';
+  document.getElementById('c-months').value = c.duration_days ? Math.round(c.duration_days / 30) : '';
+  document.getElementById('c-sessions').value = c.total_live_classes || '';
+  document.getElementById('c-published').value = c.course_status === 'published' ? 'true' : 'false';
+  document.getElementById('c-featured').value = c.is_featured ? 'true' : 'false';
+  // Set category (the modal uses UUID)
+  document.getElementById('c-category').value = c.category_id || '';
+  if (pricing) {
+    document.getElementById('c-price').value = pricing.list_price || '';
+    document.getElementById('c-disc-price').value = pricing.sale_price || '';
+    document.getElementById('c-emi').value = pricing.pricing_type === 'emi' ? 'true' : 'false';
+    document.getElementById('c-emi-months').value = pricing.emi_installments || '';
+  }
+  document.getElementById('course-modal').querySelector('.modal-title').textContent = 'Edit Course';
+  openModal('course-modal');
+}
+
+// ===== EDIT CATEGORY =====
+async function editCategory(id) {
+  const { data: c } = await db.client.from('course_categories').select('*').eq('id', id).single();
+  if (!c) return;
+  document.getElementById('cat-id').value = c.id;
+  document.getElementById('cat-name').value = c.name || '';
+  document.getElementById('cat-slug').value = c.slug || '';
+  document.getElementById('cat-desc').value = c.description || '';
+  document.getElementById('cat-icon').value = c.icon || '';
+  document.getElementById('cat-active').value = c.is_active ? 'true' : 'false';
+  document.getElementById('category-modal').querySelector('.modal-title').textContent = 'Edit Category';
+  openModal('category-modal');
+}
+
+async function deleteCategory(id) {
+  if (!confirm('Delete this category? Courses in this category will have no category.')) return;
+  const { error } = await db.client.from('course_categories').delete().eq('id', id);
+  if (error) { alert('Error: ' + error.message); return; }
+  loadCategories();
+}
+
+// ===== EDIT BATCH =====
+async function editBatch(id) {
+  const { data: b } = await db.client.from('course_batches').select('*').eq('id', id).single();
+  if (!b) return;
+  // Make sure dropdowns are populated
+  await Promise.all([loadCourses(), loadMentors()]);
+  document.getElementById('batch-id').value = b.id;
+  document.getElementById('b-course').value = b.course_id || '';
+  document.getElementById('b-mentor').value = b.primary_mentor_user_id || '';
+  document.getElementById('b-name').value = b.batch_name || b.batch_code || '';
+  document.getElementById('b-max').value = b.max_students || 30;
+  document.getElementById('b-start').value = b.starts_on || '';
+  document.getElementById('b-end').value = b.ends_on || '';
+  document.getElementById('batch-modal').querySelector('.modal-title').textContent = 'Edit Batch';
+  const saveBtn = document.querySelector('#batch-modal .btn-primary');
+  if (saveBtn) saveBtn.textContent = 'Update Batch';
+  openModal('batch-modal');
+}
+
+// ===== VIEW USER =====
+async function viewUser(id) {
+  const [{ data: profile }, { data: enrollments }] = await Promise.all([
+    db.client.from('user_profiles').select('*').eq('user_id', id).single(),
+    db.client.from('enrollments').select('enrollment_status, net_amount, paid_amount, courses(title)').eq('student_user_id', id)
+  ]);
+  if (!profile) return;
+  document.getElementById('user-detail-content').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:1rem;">
+      <div><strong style="color:rgba(200,191,255,.45);font-size:.7rem;text-transform:uppercase;">Name</strong><br>${profile.full_name}</div>
+      <div><strong style="color:rgba(200,191,255,.45);font-size:.7rem;text-transform:uppercase;">Email</strong><br>${profile.email}</div>
+      <div><strong style="color:rgba(200,191,255,.45);font-size:.7rem;text-transform:uppercase;">Phone</strong><br>${profile.phone||'—'}</div>
+      <div><strong style="color:rgba(200,191,255,.45);font-size:.7rem;text-transform:uppercase;">Role</strong><br>${profile.role}</div>
+      <div><strong style="color:rgba(200,191,255,.45);font-size:.7rem;text-transform:uppercase;">Joined</strong><br>${fmtDate(profile.account_created_at||profile.created_at)}</div>
+      <div><strong style="color:rgba(200,191,255,.45);font-size:.7rem;text-transform:uppercase;">Status</strong><br>${profile.is_active!==false?'<span class="badge badge-green">Active</span>':'<span class="badge badge-red">Inactive</span>'}</div>
+    </div>
+    <div><strong style="color:rgba(200,191,255,.45);font-size:.7rem;text-transform:uppercase;">Enrollments (${(enrollments||[]).length})</strong></div>
+    ${(enrollments||[]).map(e=>`<div style="margin-top:.5rem;padding:.5rem .75rem;background:rgba(124,92,252,.07);border-radius:8px;font-size:.8rem;">
+      <strong>${e.courses?.title||'Unknown course'}</strong> — ${statusBadge(e.enrollment_status)} — Paid: ${fmtCurr(e.paid_amount)} / ${fmtCurr(e.net_amount)}
+    </div>`).join('')||'<div style="font-size:.8rem;color:rgba(200,191,255,.4);margin-top:.5rem;">No enrollments</div>'}`;
+  openModal('user-modal');
+}
+
+// ===== VIEW MENTOR =====
+async function viewMentor(id) {
+  const [{ data: m }, { data: profile }] = await Promise.all([
+    db.client.from('mentor_profiles').select('*').eq('user_id', id).single(),
+    db.client.from('user_profiles').select('*').eq('user_id', id).single()
+  ]);
+  if (!m || !profile) return;
+  document.getElementById('user-detail-content').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:1rem;">
+      <div><strong style="color:rgba(200,191,255,.45);font-size:.7rem;text-transform:uppercase;">Name</strong><br>${profile.full_name}</div>
+      <div><strong style="color:rgba(200,191,255,.45);font-size:.7rem;text-transform:uppercase;">Email</strong><br>${profile.email}</div>
+      <div><strong style="color:rgba(200,191,255,.45);font-size:.7rem;text-transform:uppercase;">Phone</strong><br>${profile.phone||'—'}</div>
+      <div><strong style="color:rgba(200,191,255,.45);font-size:.7rem;text-transform:uppercase;">Status</strong><br>${statusBadge(m.status)}</div>
+      <div><strong style="color:rgba(200,191,255,.45);font-size:.7rem;text-transform:uppercase;">Experience</strong><br>${m.years_of_experience} yrs</div>
+      <div><strong style="color:rgba(200,191,255,.45);font-size:.7rem;text-transform:uppercase;">Rating</strong><br>⭐ ${(m.average_rating||0).toFixed(1)}</div>
+    </div>
+    <div><strong style="color:rgba(200,191,255,.45);font-size:.7rem;text-transform:uppercase;">Qualifications</strong><br>${m.qualifications}</div>
+    <div style="margin-top:.5rem"><strong style="color:rgba(200,191,255,.45);font-size:.7rem;text-transform:uppercase;">Expertise</strong><br>${(m.expertise_areas||[]).join(', ')||'—'}</div>
+    ${m.bio?`<div style="margin-top:.5rem"><strong style="color:rgba(200,191,255,.45);font-size:.7rem;text-transform:uppercase;">Bio</strong><br>${m.bio}</div>`:''}
+    ${m.linkedin_url?`<div style="margin-top:.5rem"><a href="${m.linkedin_url}" target="_blank" style="color:#9b8fff;">LinkedIn Profile →</a></div>`:''}`;
+  document.querySelector('#user-modal .modal-title').textContent = 'Mentor Details';
+  openModal('user-modal');
+}
+
+// ===== VIEW FORM DATA =====
+async function viewFormData(id) {
+  const { data: f } = await db.client.from('form_submissions').select('*').eq('id', id).single();
+  if (!f) return;
+  const fdata = f.form_data || f.submission_data || {};
+  document.getElementById('user-detail-content').innerHTML = `
+    <div style="margin-bottom:.75rem"><span class="badge badge-blue">${f.form_type?.replace(/_/g,' ')||'Form'}</span> &nbsp; <span style="font-size:.78rem;color:rgba(200,191,255,.4);">${fmtDate(f.created_at)}</span></div>
+    ${Object.entries(fdata).map(([k,v])=>`<div style="display:flex;gap:.75rem;padding:.3rem 0;border-bottom:1px solid rgba(124,92,252,.08);">
+      <div style="min-width:120px;font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;color:rgba(200,191,255,.4);">${k.replace(/_/g,' ')}</div>
+      <div style="font-size:.85rem;">${v||'—'}</div>
+    </div>`).join('')}`;
+  document.querySelector('#user-modal .modal-title').textContent = 'Form Submission';
+  openModal('user-modal');
+}
+
+// ===== ADD LATE FEE =====
+async function addLateFee(id) {
+  const feeAmt = parseFloat(prompt('Enter late fee amount (₹):') || '0');
+  if (!feeAmt || isNaN(feeAmt)) return;
+  await db.client.from('payment_schedules').update({ late_fee_amount: feeAmt }).eq('id', id);
+  loadEmi();
+}
+
+// ===== REFUND PAYMENT =====
+async function refundPayment(id) {
+  if (!confirm('Mark this payment as refunded? This cannot be undone.')) return;
+  await db.client.from('payments').update({ payment_status: 'refunded' }).eq('id', id);
+  loadPayments();
+}
+
+// ===== DELETE RECORDING =====
+async function deleteRecording(id) {
+  if (!confirm('Delete this recording?')) return;
+  await db.client.from('live_recordings').delete().eq('id', id);
+  loadRecordings();
+}
+
+// ===== EXPORT CSV =====
+function exportTable(type) {
+  const tbodiesMap = { users:'user-tbody', payments:'payment-tbody', enrollments:'enrollment-tbody' };
+  const tbody = document.getElementById(tbodiesMap[type]);
+  if (!tbody) return;
+  const rows = [...tbody.querySelectorAll('tr')];
+  const csv = rows.map(r=>[...r.querySelectorAll('td')].map(td=>'"'+td.textContent.replace(/"/g,'""').trim()+'"').join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,\uFEFF' + encodeURIComponent(csv);
+  a.download = type + '-export-' + new Date().toISOString().slice(0,10) + '.csv';
+  a.click();
+}
+
+// ===== PRICING =====
+function toggleEmiField() {
+  const type = document.getElementById('pr-type').value;
+  document.getElementById('pr-emi-wrap').style.display = type === 'emi' ? '' : 'none';
+}
+
+function openPricingModal(existingId) {
+  document.getElementById('pricing-id').value = existingId || '';
+  document.getElementById('pricing-modal-title').textContent = existingId ? 'Edit Pricing' : 'Set Course Pricing';
+  // Populate course dropdown
+  db.client.from('courses').select('id, title').order('title').then(({ data }) => {
+    const el = document.getElementById('pr-course');
+    el.innerHTML = '<option value="">Select course…</option>' + (data||[]).map(c=>`<option value="${c.id}">${c.title}</option>`).join('');
+  });
+  if (!existingId) {
+    ['pr-course','pr-type','pr-active','pr-list','pr-sale','pr-emi','pr-name'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = el.tagName === 'SELECT' ? el.options[0]?.value : '';
+    });
+    document.getElementById('pr-active').value = 'true';
+  }
+  openModal('pricing-modal');
+}
+
+async function loadPricing() {
+  const { data, error } = await db.client
+    .from('course_pricing')
+    .select('*, courses(title)')
+    .order('created_at', { ascending: false });
+  if (error) throw error;
+  document.getElementById('pricing-tbody').innerHTML = (data||[]).map(p => {
+    const disc = p.list_price && p.sale_price && p.list_price > p.sale_price
+      ? Math.round((1 - p.sale_price / p.list_price) * 100) + '%'
+      : '—';
+    return `<tr>
+      <td>${p.courses?.title||'—'}</td>
+      <td><span class="badge badge-blue">${p.pricing_type?.replace(/_/g,' ')||'—'}</span></td>
+      <td>${fmtCurr(p.list_price)}</td>
+      <td>${p.sale_price ? fmtCurr(p.sale_price) : '—'}</td>
+      <td>${disc}</td>
+      <td>${p.emi_installments ? p.emi_installments + ' months' : '—'}</td>
+      <td>${statusBadge(p.is_active ? 'active' : 'paused')}</td>
+      <td><div class="action-btns">
+        <button class="action-btn" onclick="editPricing('${p.id}')">Edit</button>
+        <button class="action-btn danger" onclick="deletePricing('${p.id}')">Delete</button>
+      </div></td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="8" class="table-empty">No pricing plans set</td></tr>';
+}
+
+async function editPricing(id) {
+  const { data: p } = await db.client.from('course_pricing').select('*').eq('id', id).single();
+  if (!p) return;
+  await openPricingModal(id);
+  // Wait for modal to open then fill fields
+  setTimeout(() => {
+    document.getElementById('pr-course').value = p.course_id || '';
+    document.getElementById('pr-type').value = p.pricing_type || 'full_payment';
+    document.getElementById('pr-active').value = p.is_active ? 'true' : 'false';
+    document.getElementById('pr-list').value = p.list_price || '';
+    document.getElementById('pr-sale').value = p.sale_price || '';
+    document.getElementById('pr-emi').value = p.emi_installments || '';
+    document.getElementById('pr-name').value = p.pricing_name || '';
+    toggleEmiField();
+  }, 50);
+}
+
+async function savePricing() {
+  const id = document.getElementById('pricing-id').value;
+  const courseId = document.getElementById('pr-course').value;
+  if (!courseId) { alert('Please select a course.'); return; }
+  const listPrice = parseFloat(document.getElementById('pr-list').value);
+  if (!listPrice || isNaN(listPrice)) { alert('List price is required.'); return; }
+  const saleVal = document.getElementById('pr-sale').value;
+  const payload = {
+    course_id: courseId,
+    pricing_type: document.getElementById('pr-type').value,
+    is_active: document.getElementById('pr-active').value === 'true',
+    list_price: listPrice,
+    sale_price: saleVal ? parseFloat(saleVal) : null,
+    emi_installments: document.getElementById('pr-emi').value ? parseInt(document.getElementById('pr-emi').value) : null,
+    pricing_name: document.getElementById('pr-name').value || 'Standard',
+  };
+  const { error } = id
+    ? await db.client.from('course_pricing').update(payload).eq('id', id)
+    : await db.client.from('course_pricing').insert(payload);
+  if (error) { alert('Error: ' + error.message); return; }
+  closeModal('pricing-modal');
+  loadPricing();
+}
+
+async function deletePricing(id) {
+  if (!confirm('Remove this pricing plan?')) return;
+  await db.client.from('course_pricing').delete().eq('id', id);
+  loadPricing();
+}
+
+// ===== DISCOUNTS =====
+async function loadDiscounts() {
+  const { data, error } = await db.client
+    .from('discount_campaigns')
+    .select('*, courses(title)')
+    .order('created_at', { ascending: false });
+  if (error) {
+    document.getElementById('discount-tbody').innerHTML = '<tr><td colspan="9" class="table-empty">Table not found — run schema.sql to create discount_campaigns</td></tr>';
+    return;
+  }
+  // Populate course dropdown in modal
+  db.client.from('courses').select('id, title').order('title').then(({ data: cs }) => {
+    const el = document.getElementById('disc-course');
+    if (el) el.innerHTML = '<option value="">All Courses</option>' + (cs||[]).map(c=>`<option value="${c.id}">${c.title}</option>`).join('');
+  });
+  document.getElementById('discount-tbody').innerHTML = (data||[]).map(d => `
+    <tr>
+      <td>${d.campaign_name||'—'}</td>
+      <td><code>${d.coupon_code||'—'}</code></td>
+      <td>${d.discount_type||'—'}</td>
+      <td>${d.discount_type==='percentage' ? d.discount_value+'%' : fmtCurr(d.discount_value)}</td>
+      <td>${d.courses?.title||'All'}</td>
+      <td>${d.expires_at ? fmtDate(d.expires_at) : '—'}</td>
+      <td>${d.current_uses||0} / ${d.max_uses||'∞'}</td>
+      <td>${statusBadge(d.is_active ? 'active' : 'paused')}</td>
+      <td><div class="action-btns">
+        <button class="action-btn" onclick="editDiscount('${d.id}')">Edit</button>
+        <button class="action-btn danger" onclick="deleteDiscount('${d.id}')">Delete</button>
+      </div></td>
+    </tr>`).join('') || '<tr><td colspan="9" class="table-empty">No discount campaigns</td></tr>';
+}
+
+async function editDiscount(id) {
+  const { data: d } = await db.client.from('discount_campaigns').select('*').eq('id', id).single();
+  if (!d) return;
+  document.getElementById('disc-id').value = d.id;
+  document.getElementById('disc-name').value = d.campaign_name || '';
+  document.getElementById('disc-code').value = d.coupon_code || '';
+  document.getElementById('disc-type').value = d.discount_type || 'percentage';
+  document.getElementById('disc-value').value = d.discount_value || '';
+  document.getElementById('disc-min').value = d.min_purchase_amount || '';
+  document.getElementById('disc-max').value = d.max_discount_amount || '';
+  document.getElementById('disc-maxuse').value = d.max_uses || '';
+  document.getElementById('disc-peruser').value = d.per_user_limit || 1;
+  document.getElementById('disc-from').value = d.valid_from ? d.valid_from.slice(0,16) : '';
+  document.getElementById('disc-until').value = d.expires_at ? d.expires_at.slice(0,16) : '';
+  document.getElementById('disc-course').value = d.course_id || '';
+  openModal('discount-modal');
+}
+
+async function saveDiscount() {
+  const id = document.getElementById('disc-id').value;
+  const code = document.getElementById('disc-code').value.trim().toUpperCase();
+  const name = document.getElementById('disc-name').value.trim();
+  if (!name || !code) { alert('Campaign name and coupon code are required.'); return; }
+  const discVal = parseFloat(document.getElementById('disc-value').value);
+  if (!discVal || isNaN(discVal)) { alert('Discount value is required.'); return; }
+  const payload = {
+    campaign_name: name,
+    coupon_code: code,
+    discount_type: document.getElementById('disc-type').value,
+    discount_value: discVal,
+    min_purchase_amount: parseFloat(document.getElementById('disc-min').value) || 0,
+    max_discount_amount: parseFloat(document.getElementById('disc-max').value) || null,
+    max_uses: parseInt(document.getElementById('disc-maxuse').value) || null,
+    per_user_limit: parseInt(document.getElementById('disc-peruser').value) || 1,
+    valid_from: document.getElementById('disc-from').value || null,
+    expires_at: document.getElementById('disc-until').value || null,
+    course_id: document.getElementById('disc-course').value || null,
+    is_active: true,
+  };
+  const { error } = id
+    ? await db.client.from('discount_campaigns').update(payload).eq('id', id)
+    : await db.client.from('discount_campaigns').insert(payload);
+  if (error) { alert('Error: ' + error.message); return; }
+  closeModal('discount-modal');
+  loadDiscounts();
+}
+
+async function deleteDiscount(id) {
+  if (!confirm('Delete this discount campaign?')) return;
+  await db.client.from('discount_campaigns').delete().eq('id', id);
+  loadDiscounts();
+}
+
+async function saveBatch() {
+  const id = document.getElementById('batch-id').value;
+  const courseId = document.getElementById('b-course').value;
+  if (!courseId) { alert('Please select a course.'); return; }
+  const batchName = document.getElementById('b-name').value.trim();
+  if (!batchName) { alert('Batch name is required.'); return; }
+  const payload = {
+    course_id: courseId,
+    primary_mentor_user_id: document.getElementById('b-mentor').value || null,
+    batch_name: batchName,
+    batch_code: batchName.toUpperCase().replace(/[^A-Z0-9]/g,'-').slice(0,20) + '-' + Date.now().toString().slice(-4),
+    max_students: parseInt(document.getElementById('b-max').value) || 30,
+    starts_on: document.getElementById('b-start').value || null,
+    ends_on: document.getElementById('b-end').value || null,
+    is_active: true,
+  };
+  const { error } = id
+    ? await db.client.from('course_batches').update(payload).eq('id', id)
+    : await db.client.from('course_batches').insert(payload);
+  if (error) { alert('Error saving batch: ' + error.message); return; }
+  closeModal('batch-modal');
+  loadBatches();
+}
+
 
 // ===== INIT =====
 (async () => {

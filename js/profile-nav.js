@@ -9,7 +9,7 @@ class ProfileNavigationManager {
     this.inPages     = path.includes('/pages/');
     this.rootPfx     = this.inPages ? '../' : '';
     this.pagesPfx    = this.inPages ? ''    : 'pages/';
-    this.isAdminPage = path.includes('admin-dashboard');
+    this.isAdminPage = path.includes('admin-dashboard') || path.includes('admin-login') || path.includes('admin-signup');
     this.isMentorPage = path.includes('mentor-dashboard');
     this._pendingOtpEmail = null;
     this._pendingOtpRole  = null;
@@ -18,8 +18,8 @@ class ProfileNavigationManager {
   }
 
   async init() {
+    this.injectNeuralCursor(); // Always inject cursor — including admin and mentor pages
     if (this.isAdminPage || this.isMentorPage) return;
-    this.injectNeuralCursor();
     this.injectThemeSwitcher();
     this.rebuildNav();
     this.replaceFooter();
@@ -64,121 +64,143 @@ class ProfileNavigationManager {
     tick();
   }
 
-  /* ── Theme Switcher (liquid glass, small floating widget) ── */
+  /* ── Theme Switcher — inline nav toggle near profile icon ── */
   injectThemeSwitcher() {
-    if (document.getElementById('pn-theme-switcher')) return;
-    const themes = [
-      { id: 'dark',    icon: '🌙', label: 'Dark',    variant: 'purple'  },
-      { id: 'light',   icon: '☀️',  label: 'Light',   variant: 'purple'  },
-      { id: 'dark',    icon: '🌊', label: 'Ocean',   variant: 'ocean'   },
-      { id: 'dark',    icon: '🌅', label: 'Sunset',  variant: 'sunset'  },
-      { id: 'dark',    icon: '🌿', label: 'Emerald', variant: 'emerald' },
-    ];
-    const THEMES = JSON.stringify(themes);
-    const sw = document.createElement('div');
-    sw.id = 'pn-theme-switcher';
-    sw.innerHTML = `
-      <style>
-        #pn-theme-switcher {
-          position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 99990;
-          display: flex; flex-direction: column; align-items: flex-end; gap: .5rem;
-        }
-        #pn-ts-toggle {
-          width: 46px; height: 46px; border-radius: 50%;
-          background: rgba(124,92,252,0.85);
-          backdrop-filter: blur(18px) saturate(2);
-          -webkit-backdrop-filter: blur(18px) saturate(2);
-          border: 1.5px solid rgba(255,255,255,0.25);
-          box-shadow: 0 6px 24px rgba(124,92,252,0.5), inset 0 1px 0 rgba(255,255,255,0.25);
-          cursor: pointer; font-size: 1.15rem;
-          display: flex; align-items: center; justify-content: center;
-          transition: transform .3s cubic-bezier(.34,1.56,.64,1), box-shadow .3s;
-          color: #fff;
-        }
-        #pn-ts-toggle:hover { transform: scale(1.12) rotate(20deg); box-shadow: 0 10px 32px rgba(124,92,252,0.7); }
-        #pn-ts-panel {
-          background: rgba(18,14,42,0.94);
-          backdrop-filter: blur(20px) saturate(2);
-          -webkit-backdrop-filter: blur(20px) saturate(2);
-          border: 1px solid rgba(124,92,252,0.3);
-          border-radius: 18px;
-          padding: .65rem .75rem;
-          display: flex; flex-direction: column; gap: .38rem;
-          box-shadow: 0 16px 48px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.07);
-          transform-origin: bottom right;
-          transform: scale(0); opacity: 0;
-          transition: transform .28s cubic-bezier(.34,1.56,.64,1), opacity .25s ease;
-          pointer-events: none;
-        }
-        #pn-ts-panel.open { transform: scale(1); opacity: 1; pointer-events: all; }
-        :root[data-theme="light"] #pn-ts-panel {
-          background: rgba(255,255,255,0.96);
-          border-color: rgba(124,92,252,0.18);
-          box-shadow: 0 8px 32px rgba(124,92,252,0.18), inset 0 1px 0 rgba(255,255,255,1);
-        }
-        .pn-ts-option {
-          display: flex; align-items: center; gap: .6rem;
-          padding: .55rem .85rem; border-radius: 12px;
-          cursor: pointer; font-size: .8rem; font-weight: 600; color: var(--txt2);
-          border: 1px solid transparent; transition: all .18s;
-          white-space: nowrap;
-          background: none;
-          font-family: inherit;
-        }
-        .pn-ts-option:hover { background: rgba(124,92,252,0.12); border-color: rgba(124,92,252,0.3); }
-        .pn-ts-option.active { background: rgba(124,92,252,0.18); border-color: rgba(124,92,252,0.5); color: var(--v1); }
-        .pn-ts-option .pn-ts-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; border: 1.5px solid rgba(255,255,255,.3); }
-        #pn-ts-label { font-size: .6rem; font-weight: 700; color: rgba(200,191,255,.5); text-transform: uppercase; letter-spacing: .08em; padding: .2rem .85rem .1rem; }
-        :root[data-theme="light"] #pn-ts-label { color: var(--txt4); }
-        :root[data-theme="light"] .pn-ts-option { color: var(--txt2); }
-      </style>
-      <div id="pn-ts-panel">
-        <div id="pn-ts-label">Theme</div>
-      </div>
-      <button id="pn-ts-toggle" aria-label="Switch theme" title="Switch theme">🎨</button>
-    `;
-    document.body.appendChild(sw);
-
-    // Build options
-    const THEME_LIST = ${THEMES};
-    const panel = sw.querySelector('#pn-ts-panel');
-    const toggle = sw.querySelector('#pn-ts-toggle');
-    const dotColors = { purple:'#7c5cfc', ocean:'#0ea5e9', sunset:'#f59e0b', emerald:'#10b981' };
-    const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
-    const currentVariant = document.documentElement.getAttribute('data-theme-variant') || 'purple';
-
-    THEME_LIST.forEach(t => {
-      const btn = document.createElement('button');
-      btn.className = 'pn-ts-option' + (t.id === currentTheme && t.variant === currentVariant ? ' active' : '');
-      btn.innerHTML = \`<span class="pn-ts-dot" style="background:\${dotColors[t.variant]||'#7c5cfc'};"></span><span>\${t.icon}</span>\${t.label}\`;
-      btn.addEventListener('click', () => {
-        document.documentElement.setAttribute('data-theme', t.id);
-        if (t.variant !== 'purple') {
-          document.documentElement.setAttribute('data-theme-variant', t.variant);
-        } else {
-          document.documentElement.removeAttribute('data-theme-variant');
-        }
-        localStorage.setItem('pn-theme', t.id);
-        localStorage.setItem('pn-theme-variant', t.variant);
-        panel.querySelectorAll('.pn-ts-option').forEach(o => o.classList.remove('active'));
-        btn.classList.add('active');
-        panel.classList.remove('open');
-      });
-      panel.appendChild(btn);
-    });
-
-    toggle.addEventListener('click', e => {
-      e.stopPropagation();
-      panel.classList.toggle('open');
-    });
-    document.addEventListener('click', () => panel.classList.remove('open'));
-
-    // Restore saved theme on page load
+    // Restore saved theme first (runs on every page load)
     const saved = localStorage.getItem('pn-theme');
     const savedVariant = localStorage.getItem('pn-theme-variant');
     if (saved) document.documentElement.setAttribute('data-theme', saved);
     if (savedVariant && savedVariant !== 'purple') document.documentElement.setAttribute('data-theme-variant', savedVariant);
     else if (savedVariant === 'purple') document.documentElement.removeAttribute('data-theme-variant');
+
+    // Inject nav button styles once
+    if (!document.getElementById('pn-theme-nav-style')) {
+      const s = document.createElement('style');
+      s.id = 'pn-theme-nav-style';
+      s.textContent = `
+        .nav-theme-btn {
+          width: 34px; height: 34px; border-radius: 50%;
+          background: rgba(124,92,252,0.12);
+          border: 1.5px solid rgba(124,92,252,0.25);
+          display: flex; align-items: center; justify-content: center;
+          cursor: pointer; font-size: .95rem;
+          transition: background .2s, transform .25s cubic-bezier(.34,1.56,.64,1), box-shadow .2s;
+          box-shadow: 0 2px 8px rgba(124,92,252,0.12);
+          flex-shrink: 0;
+        }
+        .nav-theme-btn:hover {
+          background: rgba(124,92,252,0.22);
+          transform: scale(1.12) rotate(18deg);
+          box-shadow: 0 4px 16px rgba(124,92,252,0.35);
+        }
+        :root[data-theme="light"] .nav-theme-btn {
+          background: rgba(124,92,252,0.08);
+          border-color: rgba(124,92,252,0.18);
+        }
+        /* Theme picker dropdown panel */
+        #pn-theme-nav-panel {
+          position: absolute; top: calc(100% + 10px); right: 0;
+          background: rgba(14,10,34,0.96);
+          backdrop-filter: blur(20px) saturate(2);
+          -webkit-backdrop-filter: blur(20px) saturate(2);
+          border: 1px solid rgba(124,92,252,0.3);
+          border-radius: 16px; padding: .5rem;
+          display: flex; flex-direction: column; gap: .25rem;
+          box-shadow: 0 16px 48px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.06);
+          min-width: 150px; z-index: 9999;
+          transform-origin: top right;
+          transform: scale(0); opacity: 0;
+          transition: transform .25s cubic-bezier(.34,1.56,.64,1), opacity .22s ease;
+          pointer-events: none;
+        }
+        #pn-theme-nav-panel.open { transform: scale(1); opacity: 1; pointer-events: all; }
+        :root[data-theme="light"] #pn-theme-nav-panel {
+          background: rgba(255,255,255,0.97);
+          border-color: rgba(124,92,252,0.15);
+          box-shadow: 0 8px 32px rgba(124,92,252,0.18);
+        }
+        .pn-tn-option {
+          display: flex; align-items: center; gap: .55rem;
+          padding: .48rem .75rem; border-radius: 10px;
+          cursor: pointer; font-size: .78rem; font-weight: 600;
+          color: rgba(200,191,255,0.7);
+          border: 1px solid transparent; transition: all .16s;
+          background: none; font-family: inherit; white-space: nowrap;
+        }
+        .pn-tn-option:hover { background: rgba(124,92,252,0.12); border-color: rgba(124,92,252,0.28); }
+        .pn-tn-option.active { background: rgba(124,92,252,0.18); border-color: rgba(124,92,252,0.5); color: #b5adff; }
+        :root[data-theme="light"] .pn-tn-option { color: #374151; }
+        :root[data-theme="light"] .pn-tn-option.active { color: #7c5cfc; }
+        .pn-tn-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+      `;
+      document.head.appendChild(s);
+    }
+
+    // Wire up the nav button once it exists
+    const setupBtn = () => {
+      const btn = document.getElementById('pn-theme-nav-btn');
+      if (!btn || btn._tsWired) return;
+      btn._tsWired = true;
+
+      // Update icon to reflect current theme
+      const updateIcon = () => {
+        const th = document.documentElement.getAttribute('data-theme') || 'dark';
+        const vr = document.documentElement.getAttribute('data-theme-variant') || 'purple';
+        const icons = { light: '☀️', ocean: '🌊', sunset: '🌅', emerald: '🌿', dark: '🌙' };
+        btn.textContent = th === 'light' ? icons.light : (icons[vr] || icons.dark);
+      };
+      updateIcon();
+
+      // Build dropdown panel
+      const themes = [
+        { id: 'dark',  icon: '🌙', label: 'Dark',    variant: 'purple'  },
+        { id: 'light', icon: '☀️',  label: 'Light',   variant: 'purple'  },
+        { id: 'dark',  icon: '🌊', label: 'Ocean',   variant: 'ocean'   },
+        { id: 'dark',  icon: '🌅', label: 'Sunset',  variant: 'sunset'  },
+        { id: 'dark',  icon: '🌿', label: 'Emerald', variant: 'emerald' },
+      ];
+      const dotColors = { purple: '#7c5cfc', ocean: '#0ea5e9', sunset: '#f59e0b', emerald: '#10b981' };
+      const currentTh = document.documentElement.getAttribute('data-theme') || 'dark';
+      const currentVr = document.documentElement.getAttribute('data-theme-variant') || 'purple';
+
+      // Wrap the button in a relative container for the panel
+      const wrap = document.createElement('div');
+      wrap.style.cssText = 'position:relative;display:flex;align-items:center;';
+      btn.parentNode.insertBefore(wrap, btn);
+      wrap.appendChild(btn);
+
+      const panel = document.createElement('div');
+      panel.id = 'pn-theme-nav-panel';
+
+      themes.forEach(t => {
+        const opt = document.createElement('button');
+        opt.className = 'pn-tn-option' + (t.id === currentTh && t.variant === currentVr ? ' active' : '');
+        opt.innerHTML = \`<span class="pn-tn-dot" style="background:\${dotColors[t.variant]||'#7c5cfc'};border:1.5px solid rgba(255,255,255,.2);"></span><span>\${t.icon}</span> \${t.label}\`;
+        opt.addEventListener('click', e => {
+          e.stopPropagation();
+          document.documentElement.setAttribute('data-theme', t.id);
+          if (t.variant !== 'purple') document.documentElement.setAttribute('data-theme-variant', t.variant);
+          else document.documentElement.removeAttribute('data-theme-variant');
+          localStorage.setItem('pn-theme', t.id);
+          localStorage.setItem('pn-theme-variant', t.variant);
+          panel.querySelectorAll('.pn-tn-option').forEach(o => o.classList.remove('active'));
+          opt.classList.add('active');
+          panel.classList.remove('open');
+          updateIcon();
+        });
+        panel.appendChild(opt);
+      });
+      wrap.appendChild(panel);
+
+      btn.addEventListener('click', e => {
+        e.stopPropagation();
+        panel.classList.toggle('open');
+      });
+      document.addEventListener('click', () => panel.classList.remove('open'));
+    };
+
+    // The nav is built synchronously in rebuildNav() before injectThemeSwitcher() runs
+    setupBtn();
   }
 
   /* ── Login Streak tracking ── */
@@ -243,6 +265,9 @@ class ProfileNavigationManager {
       </ul>
 
       <div class="nav-actions" id="nav-actions">
+
+        <!-- Theme toggle (near profile) -->
+        <button id="pn-theme-nav-btn" class="nav-theme-btn" aria-label="Toggle theme" title="Switch theme">🌙</button>
 
         <!-- Profile: shown after login -->
         <div id="profile-section" style="display:none;align-items:center;position:relative;">
@@ -552,41 +577,155 @@ class ProfileNavigationManager {
     const style = document.createElement('style');
     style.id = 'pn-auth-modal-style';
     style.textContent = `
-      /* ── Overlay ── */
+      /* ── Overlay — deep blurred glass backdrop ── */
       #pn-auth-modal {
         position: fixed; inset: 0; z-index: 99999;
-        background: rgba(30, 20, 80, 0.55);
-        backdrop-filter: blur(14px) saturate(1.6);
-        -webkit-backdrop-filter: blur(14px) saturate(1.6);
+        background: rgba(8, 4, 28, 0.62);
+        backdrop-filter: blur(22px) saturate(1.8);
+        -webkit-backdrop-filter: blur(22px) saturate(1.8);
         display: flex; align-items: center; justify-content: center;
         padding: 1rem;
         opacity: 0; visibility: hidden; pointer-events: none;
-        transition: opacity .3s ease, visibility .3s ease;
+        transition: opacity .28s ease, visibility .28s ease;
       }
       #pn-auth-modal.pn-open {
         opacity: 1; visibility: visible; pointer-events: all;
       }
 
-      /* ── Box (LIGHT THEME) ── */
+      /* ── Box — liquid glossy card ── */
       .pn-box {
-        width: 100%; max-width: 460px;
+        width: 100%; max-width: 464px;
         max-height: 94vh; overflow-y: auto; overflow-x: hidden;
-        background: #ffffff;
-        border: 1.5px solid rgba(124,92,252,.15);
-        border-radius: 24px;
+        background: rgba(255,255,255,0.92);
+        backdrop-filter: blur(28px) saturate(2);
+        -webkit-backdrop-filter: blur(28px) saturate(2);
+        border: 1.5px solid rgba(255,255,255,0.65);
+        border-radius: 28px;
         padding: 2.5rem 2.2rem 2rem;
         position: relative;
-        box-shadow: 0 24px 64px rgba(80,40,180,.14), 0 2px 16px rgba(124,92,252,.08);
-        transform: scale(.94) translateY(20px);
-        transition: transform .32s cubic-bezier(.22,1,.36,1);
+        box-shadow:
+          0 32px 80px rgba(60,20,160,.18),
+          0 8px 32px rgba(124,92,252,.12),
+          inset 0 1px 0 rgba(255,255,255,0.95),
+          inset 0 -1px 0 rgba(124,92,252,0.06);
+        transform: scale(.93) translateY(24px);
+        transition: transform .34s cubic-bezier(.22,1,.36,1);
       }
+      /* Liquid shimmer top line */
       .pn-box::before {
         content: '';
         position: absolute; top: 0; left: 0; right: 0; height: 3px;
-        background: linear-gradient(90deg, #7c5cfc, #3d6bff, #a78bfa);
-        border-radius: 24px 24px 0 0;
+        background: linear-gradient(90deg, #7c5cfc, #3d6bff, #a78bfa, #7c5cfc);
+        background-size: 200% 100%;
+        border-radius: 28px 28px 0 0;
+        animation: pn-shimmer 3s linear infinite;
+      }
+      @keyframes pn-shimmer { 0% { background-position: 0% 0; } 100% { background-position: 200% 0; } }
+      /* Glossy glare highlight */
+      .pn-box::after {
+        content: '';
+        position: absolute; top: 3px; left: 10%; right: 10%; height: 50%;
+        background: linear-gradient(180deg, rgba(255,255,255,0.28) 0%, rgba(255,255,255,0) 100%);
+        border-radius: 28px 28px 60% 60%;
+        pointer-events: none;
       }
       #pn-auth-modal.pn-open .pn-box { transform: scale(1) translateY(0); }
+
+      /* Dark theme glass box */
+      :root[data-theme="dark"] .pn-box,
+      html[data-theme="dark"] .pn-box {
+        background: rgba(16, 10, 42, 0.88);
+        border-color: rgba(124,92,252,0.28);
+        box-shadow:
+          0 32px 80px rgba(0,0,0,0.6),
+          0 8px 32px rgba(124,92,252,0.22),
+          inset 0 1px 0 rgba(255,255,255,0.08),
+          inset 0 -1px 0 rgba(124,92,252,0.06);
+      }
+      :root[data-theme="dark"] .pn-title,
+      html[data-theme="dark"] .pn-title { color: #f0eeff; }
+      :root[data-theme="dark"] .pn-sub,
+      html[data-theme="dark"] .pn-sub { color: rgba(200,191,255,0.5); }
+      :root[data-theme="dark"] .pn-field label,
+      html[data-theme="dark"] .pn-field label { color: rgba(200,191,255,0.5); }
+      :root[data-theme="dark"] .pn-field input,
+      :root[data-theme="dark"] .pn-field select,
+      html[data-theme="dark"] .pn-field input,
+      html[data-theme="dark"] .pn-field select {
+        background: rgba(255,255,255,0.06);
+        border-color: rgba(124,92,252,0.22);
+        color: #f0eeff;
+      }
+      :root[data-theme="dark"] .pn-field input::placeholder,
+      html[data-theme="dark"] .pn-field input::placeholder { color: rgba(200,191,255,0.28); }
+      :root[data-theme="dark"] .pn-field input:focus,
+      :root[data-theme="dark"] .pn-field select:focus,
+      html[data-theme="dark"] .pn-field input:focus,
+      html[data-theme="dark"] .pn-field select:focus {
+        border-color: rgba(155,143,255,0.7);
+        background: rgba(124,92,252,0.1);
+        box-shadow: 0 0 0 3px rgba(124,92,252,0.18);
+      }
+      :root[data-theme="dark"] .pn-role-card,
+      html[data-theme="dark"] .pn-role-card {
+        background: rgba(255,255,255,0.04);
+        border-color: rgba(124,92,252,0.2);
+      }
+      :root[data-theme="dark"] .pn-role-name,
+      html[data-theme="dark"] .pn-role-name { color: #f0eeff; }
+      :root[data-theme="dark"] .pn-role-desc,
+      html[data-theme="dark"] .pn-role-desc { color: rgba(200,191,255,0.45); }
+      :root[data-theme="dark"] .pn-close,
+      html[data-theme="dark"] .pn-close {
+        background: rgba(124,92,252,0.15);
+        border-color: rgba(124,92,252,0.3);
+        color: #b5adff;
+      }
+      :root[data-theme="dark"] .pn-google-btn,
+      html[data-theme="dark"] .pn-google-btn {
+        background: rgba(255,255,255,0.07);
+        border-color: rgba(124,92,252,0.2);
+        color: #f0eeff;
+      }
+      :root[data-theme="dark"] .pn-brand-name,
+      html[data-theme="dark"] .pn-brand-name {
+        background: linear-gradient(135deg,#c4b5fd 0%,#93c5fd 100%);
+        -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      }
+      :root[data-theme="dark"] .pn-switch,
+      html[data-theme="dark"] .pn-switch { color: rgba(200,191,255,0.5); }
+      :root[data-theme="dark"] .pn-otp-input,
+      html[data-theme="dark"] .pn-otp-input {
+        background: rgba(255,255,255,0.05);
+        border-color: rgba(124,92,252,0.25);
+        color: #f0eeff;
+      }
+      :root[data-theme="dark"] .pn-terms,
+      html[data-theme="dark"] .pn-terms { color: rgba(200,191,255,0.5); }
+      :root[data-theme="dark"] .pn-info-note,
+      html[data-theme="dark"] .pn-info-note {
+        background: rgba(255,255,255,0.04);
+        border-color: rgba(124,92,252,0.2);
+        color: rgba(200,191,255,0.6);
+      }
+      :root[data-theme="dark"] .pn-err,
+      html[data-theme="dark"] .pn-err {
+        background: rgba(239,68,68,0.12); border-color: rgba(239,68,68,0.3); color: #fca5a5;
+      }
+      :root[data-theme="dark"] .pn-ok,
+      html[data-theme="dark"] .pn-ok {
+        background: rgba(34,197,94,0.1); border-color: rgba(34,197,94,0.3); color: #86efac;
+      }
+      :root[data-theme="dark"] .pn-forgot a,
+      :root[data-theme="dark"] .pn-switch a,
+      html[data-theme="dark"] .pn-forgot a,
+      html[data-theme="dark"] .pn-switch a { color: #a78bfa; }
+      :root[data-theme="dark"] .pn-back,
+      html[data-theme="dark"] .pn-back { color: rgba(200,191,255,0.45); }
+      :root[data-theme="dark"] .pn-success h3,
+      html[data-theme="dark"] .pn-success h3 { color: #f0eeff; }
+      :root[data-theme="dark"] .pn-success p,
+      html[data-theme="dark"] .pn-success p { color: rgba(200,191,255,0.55); }
 
       /* ── Scrollbar ── */
       .pn-box::-webkit-scrollbar { width: 3px; }
@@ -1402,15 +1541,16 @@ class ProfileNavigationManager {
       const fullName = fname + ' ' + lname;
 
       try {
-        if (!window.supabaseConfig) throw new Error('Auth service not ready. Refresh and try again.');
-        const otpReq = await window.supabaseConfig.requestSignupOtp(email);
-        if (!otpReq.success || !otpReq.data?.otp) throw new Error(otpReq.error || 'Unable to send verification code right now. Please try again.');
+        if (!window.emailjs && !window._emailjsLoaded) throw new Error('Email service not ready. Please refresh and try again.');
+        // Generate OTP client-side — no server RPC needed
+        const otp = window._pnOtpGenerate();
+        window._pnOtpStore(email, otp);
         self._pendingOtpEmail = email;
         self._pendingOtpRole  = 'user';
         self._pendingOtpData  = { full_name: fullName, email, phone, pw, role: 'user' };
         document.getElementById('pn-otp-back').onclick = () => window._pnView('signup-student');
         document.getElementById('pn-otp-btn').textContent = 'Verify & Create Account';
-        await window._pnOtpSend(email, fullName, otpReq.data.otp);
+        await window._pnOtpSend(email, fullName, otp);
         document.getElementById('pn-otp-sub').textContent = 'We sent a 6-digit code to ' + email + '. Check your inbox (and spam folder).';
         window._pnView('otp');
       } catch(e) {
@@ -1438,13 +1578,13 @@ class ProfileNavigationManager {
       if (!pnPasswordRe.test(pw || '')) return _pnErr(err, 'Password must be at least 8 characters and include uppercase, lowercase, and a number.');
       if (!terms)            return _pnErr(err, 'Please agree to the Mentor Terms to continue.');
 
-      btn.disabled = true; btn.textContent = 'Creating account…';
+      btn.disabled = true; btn.textContent = 'Sending code…';
       err.style.display = 'none';
       try {
-        if (!window.supabaseConfig) throw new Error('Auth service not ready. Refresh and try again.');
         const fullName = fname + ' ' + lname;
-        const otpReq = await window.supabaseConfig.requestSignupOtp(email);
-        if (!otpReq.success || !otpReq.data?.otp) throw new Error(otpReq.error || 'Unable to send verification code right now.');
+        // Generate OTP client-side — no server RPC needed
+        const otp = window._pnOtpGenerate();
+        window._pnOtpStore(email, otp);
         self._pendingOtpEmail = email;
         self._pendingOtpRole  = 'mentor';
         self._pendingOtpData  = {
@@ -1458,59 +1598,73 @@ class ProfileNavigationManager {
         };
         document.getElementById('pn-otp-back').onclick = () => window._pnView('signup-mentor');
         document.getElementById('pn-otp-btn').textContent = 'Verify & Continue to Mentor Form';
-        await window._pnOtpSend(email, fullName, otpReq.data.otp);
+        await window._pnOtpSend(email, fullName, otp);
         document.getElementById('pn-otp-sub').textContent = 'Verify your email to continue to the mentor application.';
         window._pnView('otp');
       } catch(e) { _pnErr(err, e.message); btn.disabled = false; btn.textContent = 'Create & Continue to Application →'; }
     };
 
-    /* ── OTP Verify (EmailJS custom OTP) ── */
+    /* ── OTP Verify — client-side check, then direct Supabase signUp ── */
     window._pnVerifyOtp = async () => {
       const entered = [0,1,2,3,4,5].map(i => document.getElementById('pn-otp-'+i)?.value || '').join('');
       const err     = document.getElementById('pn-otp-err');
       const btn     = document.getElementById('pn-otp-btn');
       if (entered.length < 6) return _pnErr(err, 'Please enter the complete 6-digit code.');
       if (!self._pendingOtpEmail) return _pnErr(err, 'Session expired. Please start again.');
-      btn.disabled = true; btn.textContent = 'Verifying…';
+
+      // Client-side OTP verification — no server round-trip needed
+      const isValid = window._pnOtpVerify(self._pendingOtpEmail, entered);
+      if (!isValid) return _pnErr(err, 'Incorrect or expired code. Please check and try again, or resend.');
+
+      btn.disabled = true; btn.textContent = 'Creating account…';
       err.style.display = 'none';
       try {
         if (!window.supabaseConfig) throw new Error('Auth service not ready.');
         const pendingData = self._pendingOtpData || {};
-        const verifyRes = await window.supabaseConfig.verifySignupOtp(self._pendingOtpEmail, entered);
-        if (!verifyRes.success) throw new Error(verifyRes.error || 'Invalid or expired code. Please try again or resend.');
-        const r2 = await window.supabaseConfig.registerVerifiedUser({
+
+        // Create account directly via Supabase — email already verified via OTP
+        const { data: signUpData, error: signUpErr } = await window.supabaseConfig.client.auth.signUp({
           email: pendingData.email,
           password: pendingData.pw,
-          full_name: pendingData.full_name,
-          phone: pendingData.phone,
-          role: pendingData.role || 'user',
-          metadata: {
-            requested_role: pendingData.requested_role || null,
-            expertise_area: pendingData.expertise_area || null
+          options: {
+            data: {
+              full_name: pendingData.full_name,
+              phone: pendingData.phone,
+              role: pendingData.role || 'user',
+              requested_role: pendingData.requested_role || null,
+              expertise_area: pendingData.expertise_area || null
+            },
+            emailRedirectTo: null
           }
         });
-        if (!r2.success) throw new Error(r2.error || 'Account creation failed.');
-        const lr2 = await window.supabaseConfig.signIn(pendingData.email, pendingData.pw);
-        if (lr2.success) {
-          const user = lr2.data?.user || lr2.user;
-          // Non-fatal: sync profile but don't block on failure
-          window.supabaseConfig.syncUserProfile(user.id, {
-            full_name: pendingData.full_name,
-            email: pendingData.email,
-            phone: pendingData.phone,
-            role: pendingData.role || 'user',
-            is_email_verified: true
-          }).catch(e => console.warn('Profile sync warning:', e));
-          self.currentUser = user;
-          self.showLoggedInUI();
+        if (signUpErr) throw new Error(signUpErr.message || 'Account creation failed.');
+
+        // Auto sign-in (works when email confirmation is disabled, or if user is created)
+        const lr = await window.supabaseConfig.signIn(pendingData.email, pendingData.pw);
+        if (lr.success) {
+          const user = lr.data?.user || lr.user;
+          if (user) {
+            // Sync extended profile — non-fatal
+            window.supabaseConfig.syncUserProfile?.(user.id, {
+              full_name: pendingData.full_name,
+              email: pendingData.email,
+              phone: pendingData.phone,
+              role: pendingData.role || 'user',
+              is_email_verified: true
+            }).catch(e => console.warn('Profile sync:', e));
+            self.currentUser = user;
+            self.showLoggedInUI();
+          }
         }
+
+        sessionStorage.removeItem('pn_otp'); // Clean up OTP
         if (self._pendingOtpRole === 'mentor') {
-          _pnShowSuccess('🎓', 'Email Verified!', 'Your account is ready. Taking you to the mentor application form.', () => {
+          _pnShowSuccess('🎓', 'Email Verified!', 'Account ready. Taking you to the mentor application.', () => {
             window._pnClose();
             window.location.href = self.pagesPfx + 'mentor-signup.html';
           });
         } else {
-          _pnShowSuccess('🎉', "You're Verified!", 'Account confirmed! Taking you to your dashboard.', () => {
+          _pnShowSuccess('🎉', "You're In!", 'Account created! Redirecting to your dashboard.', () => {
             window._pnClose();
             window.location.href = self.pagesPfx + 'profile.html';
           });
@@ -1518,14 +1672,14 @@ class ProfileNavigationManager {
       } catch(e) { _pnErr(err, e.message); btn.disabled = false; btn.textContent = 'Verify & Create Account'; }
     };
 
-    /* ── OTP Resend (regenerate + re-send via EmailJS) ── */
+    /* ── OTP Resend — generate fresh OTP client-side ── */
     window._pnResendOtp = async () => {
       if (!self._pendingOtpEmail) return;
       try {
         const pendingData = self._pendingOtpData || {};
-        const otpReq = await window.supabaseConfig.requestSignupOtp(self._pendingOtpEmail);
-        if (!otpReq.success || !otpReq.data?.otp) throw new Error(otpReq.error || 'Unable to resend the code.');
-        await window._pnOtpSend(self._pendingOtpEmail, pendingData.full_name || 'User', otpReq.data.otp);
+        const otp = window._pnOtpGenerate();
+        window._pnOtpStore(self._pendingOtpEmail, otp);
+        await window._pnOtpSend(self._pendingOtpEmail, pendingData.full_name || 'User', otp);
         alert('✅ A new code has been sent to ' + self._pendingOtpEmail);
       } catch(e) { alert('Failed to resend: ' + e.message); }
     };

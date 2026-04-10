@@ -145,11 +145,8 @@
         if (this.state === ST.TEXT) this._setState(ST.IDLE);
       });
 
-      document.addEventListener('mousedown', () => {
-        this.clicking = true;
-        this._spawnClick();
-      });
-      document.addEventListener('mouseup', () => { this.clicking = false; });
+      document.addEventListener('mousedown', () => { this.clicking = true; });
+      document.addEventListener('mouseup',   () => { this.clicking = false; });
 
       document.addEventListener('mouseleave', () => { this.visible = false; });
       document.addEventListener('mouseenter', () => { this.visible = true; });
@@ -276,9 +273,6 @@
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         if (this.visible) {
-          this._spawnAmbient();
-          this._drawParticles(ctx);
-          this._drawRipples(ctx);
           this._drawCursor(ctx);
         }
 
