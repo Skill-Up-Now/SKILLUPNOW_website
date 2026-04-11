@@ -1081,9 +1081,35 @@ a[href*="pages/"]:hover {
   color: #1a1630;
 }
 
+/* ── Liquid back button — apply anywhere with class="back-btn" ── */
 .back-btn {
-  display: none;
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .5rem 1.2rem .5rem .9rem;
+  border-radius: 999px;
+  background: rgba(124,92,252,0.08);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  border: 1.5px solid rgba(124,92,252,0.22);
+  color: var(--v1);
+  font-size: .84rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  text-decoration: none;
+  transition: background .22s, border-color .22s, transform .22s cubic-bezier(.34,1.56,.64,1), box-shadow .22s;
+  position: relative;
+  overflow: hidden;
+  letter-spacing: .01em;
 }
+.back-btn:hover {
+  background: rgba(124,92,252,0.15);
+  border-color: rgba(124,92,252,0.5);
+  transform: translateY(-2px) scale(1.04);
+  box-shadow: 0 6px 20px rgba(124,92,252,0.2);
+}
+.back-btn:active { transform: scale(1) translateY(0); }
 
 /* ── Breadcrumb Right Section ────────────────── */
 .bc-right {

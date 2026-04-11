@@ -31,7 +31,7 @@
     .f-group input:focus, .f-group select:focus, .f-group textarea:focus { border-color:var(--v1); box-shadow:0 0 0 3px var(--v5); }
     .f-group textarea { resize:vertical; min-height:120px; }
     .f-group.full { grid-column:1/-1; }
-    .btn-submit { background:var(--grad); color:#fff; border:none; border-radius:var(--r1); padding:0.8rem 2rem; font-size:0.93rem; font-weight:700; cursor:pointer; transition:all 0.25s; font-family:inherit; display:flex; align-items:center; gap:0.5rem; }
+    .btn-submit { background:linear-gradient(135deg,#16a34a,#22c55e); color:#fff; border:none; border-radius:var(--r1); padding:0.8rem 2rem; font-size:0.93rem; font-weight:700; cursor:pointer; transition:all 0.25s; font-family:inherit; display:flex; align-items:center; gap:0.5rem; }
     .btn-submit:hover:not(:disabled) { opacity:0.88; transform:scale(1.01); }
     .btn-submit:disabled { opacity:0.5; cursor:not-allowed; }
 
@@ -130,23 +130,22 @@
           <div class="ci-icon">📧</div>
           <div class="ci-info">
             <div class="label">Email</div>
-            <div class="value">skillupnowoff@gmail.com</div>
-            <div class="sub">admin@skillupnowadmin.org</div>
+            <div class="value"><a href="mailto:skillupnowoff@gmail.com" style="color:var(--txt2);text-decoration:none;">skillupnowoff@gmail.com</a></div>
+            <div class="sub"><a href="mailto:admin@skillupnowadmin.org" style="color:var(--txt4);text-decoration:none;">admin@skillupnowadmin.org</a></div>
           </div>
         </div>
         <div class="contact-item">
-          <div class="ci-icon">📞</div>
+          <div class="ci-icon" style="background:rgba(34,197,94,0.12);border-color:rgba(34,197,94,0.3);">📞</div>
           <div class="ci-info">
             <div class="label">Phone</div>
-            <div class="value">+91 63836 33054</div>
+            <div class="value"><a href="tel:+916383633054" style="color:var(--txt2);text-decoration:none;">+91 6383 633 054</a></div>
           </div>
         </div>
         <div class="contact-item">
-          <div class="ci-icon">💬</div>
+          <div class="ci-icon" style="background:rgba(34,197,94,0.12);border-color:rgba(34,197,94,0.3);">📞</div>
           <div class="ci-info">
-            <div class="label">WhatsApp</div>
-            <div class="value">+91 63817 21061</div>
-            <div class="sub">Quick support available</div>
+            <div class="label">Phone</div>
+            <div class="value"><a href="tel:+916381721061" style="color:var(--txt2);text-decoration:none;">+91 6381 721 061</a></div>
           </div>
         </div>
         <div class="contact-item">
@@ -191,20 +190,26 @@
 <script src="../js/theme.js"></script>
 <script src="../js/profile-nav.js"></script>
 <script>
-const db = new SupabaseConfig();
+function _db() { return window.supabaseConfig?.client || null; }
 
 // Load courses for dropdown
 async function loadCourses() {
-  const { data } = await db.client.from('courses').select('id,name').eq('is_active',true).order('name');
+  let tries = 0;
+  while (!_db() && tries++ < 20) await new Promise(r => setTimeout(r, 150));
+  if (!_db()) return;
+  const { data } = await _db().from('courses').select('id,title').eq('course_status','published').order('title');
   const sel = document.getElementById('c-course');
-  (data||[]).forEach(c => { const o = document.createElement('option'); o.value = c.id; o.textContent = c.name; sel.appendChild(o); });
+  (data||[]).forEach(c => { const o = document.createElement('option'); o.value = c.id; o.textContent = c.title; sel.appendChild(o); });
 }
 
 // Pre-fill if logged in
 (async () => {
-  const { data: { session } } = await db.client.auth.getSession();
-  if (session) {
-    const { data: p } = await db.client.from('user_profiles').select('full_name,email,phone').eq('id', session.user.id).single();
+  let tries = 0;
+  while (!_db() && tries++ < 20) await new Promise(r => setTimeout(r, 150));
+  if (!_db()) return;
+  const { data: { session } } = await _db().auth.getSession();
+  if (session?.user) {
+    const { data: p } = await _db().from('user_profiles').select('full_name,email,phone').eq('user_id', session.user.id).single();
     if (p) {
       document.getElementById('c-name').value  = p.full_name || '';
       document.getElementById('c-email').value = p.email || '';
@@ -218,14 +223,18 @@ document.getElementById('contact-form').addEventListener('submit', async (e) => 
   e.preventDefault();
   const btn = document.getElementById('submit-btn');
   const label = document.getElementById('submit-label');
+  const sucEl = document.getElementById('suc-alert');
+  const errEl = document.getElementById('err-alert');
+  sucEl.classList.remove('show');
+  errEl.classList.remove('show');
   btn.disabled = true;
-  label.innerHTML = '<span style="display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.7s linear infinite"></span> Sending…';
+  label.innerHTML = '<span style="display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.7s linear infinite;vertical-align:middle"></span> Sending…';
 
   try {
-    const { data: { session } } = await db.client.auth.getSession();
+    const { data: { session } } = await _db().auth.getSession();
     const courseId = document.getElementById('c-course').value || null;
-    await db.client.from('inquiries').insert({
-      user_id: session?.user?.id || null,
+    const payload = {
+      user_id:         session?.user?.id || null,
       name:            document.getElementById('c-name').value.trim(),
       email:           document.getElementById('c-email').value.trim(),
       phone:           document.getElementById('c-phone').value.trim() || null,
@@ -236,29 +245,17 @@ document.getElementById('contact-form').addEventListener('submit', async (e) => 
       source:          'website',
       status:          'open',
       priority:        'normal',
-    });
-    // Also save as form_submission
-    await db.client.from('form_submissions').insert({
-      user_id: session?.user?.id || null,
-      form_type: 'contact',
-      course_id: courseId,
-      form_data: {
-        name: document.getElementById('c-name').value.trim(),
-        email: document.getElementById('c-email').value.trim(),
-        phone: document.getElementById('c-phone').value.trim(),
-        type: document.getElementById('c-type').value,
-        subject: document.getElementById('c-subject').value.trim(),
-        message: document.getElementById('c-message').value.trim(),
-      },
-    });
-    const el = document.getElementById('suc-alert');
-    el.textContent = '✅ Your message has been received! We\'ll respond within 24 hours.';
-    el.classList.add('show');
+    };
+    const { error } = await _db().from('inquiries').insert(payload);
+    if (error) throw error;
+    sucEl.textContent = '✅ Your enquiry has been received! We\'ll respond within 24 hours.';
+    sucEl.classList.add('show');
     document.getElementById('contact-form').reset();
+    // Scroll to success message
+    sucEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   } catch (err) {
-    const el = document.getElementById('err-alert');
-    el.textContent = 'Error: ' + err.message;
-    el.classList.add('show');
+    errEl.textContent = '❌ ' + (err.message || 'Something went wrong. Please try again.');
+    errEl.classList.add('show');
   }
   btn.disabled = false;
   label.textContent = 'Send Message';
@@ -273,6 +270,85 @@ function toggleFaq(el) {
   if (!isOpen) { answer.classList.add('open'); icon.textContent = '−'; }
 }
 </script>
+<!-- ── WHAT OUR STUDENTS SAY ── -->
+<section id="testimonials" style="padding:4rem 5vw 5rem;background:linear-gradient(135deg,rgba(124,92,252,0.04),rgba(0,207,238,0.02));border-top:1px solid var(--border);">
+  <style>
+    .test-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:1.5rem; margin-top:2.5rem; }
+    .test-card { background:var(--panel); border:1.5px solid var(--border); border-radius:var(--r2); padding:1.6rem; display:flex; flex-direction:column; gap:1rem; transition:border-color .25s,transform .25s; }
+    .test-card:hover { border-color:var(--v3); transform:translateY(-3px); }
+    .test-stars { color:#fbbf24; font-size:1rem; letter-spacing:.05em; }
+    .test-body { font-size:.9rem; color:var(--txt3); line-height:1.7; flex:1; }
+    .test-author { display:flex; align-items:center; gap:.75rem; }
+    .test-avatar { width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1rem; font-weight:700; color:#fff; flex-shrink:0; }
+    .test-name { font-size:.88rem; font-weight:700; color:var(--txt2); }
+    .test-meta { font-size:.75rem; color:var(--txt4); }
+  </style>
+  <div style="max-width:1300px;margin:0 auto;">
+    <div style="text-align:center;">
+      <span style="display:inline-block;padding:.25rem .9rem;background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.25);border-radius:50px;font-size:.72rem;font-weight:700;color:#fbbf24;letter-spacing:.07em;text-transform:uppercase;margin-bottom:.8rem;">⭐ Student Reviews</span>
+      <h2 style="font-family:'Cormorant Garamond',serif;font-size:clamp(1.8rem,4vw,2.8rem);font-weight:700;color:var(--txt);margin:0 0 .5rem;line-height:1.15;">What Our <span style="background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Students Say</span></h2>
+      <p style="font-size:.95rem;color:var(--txt3);max-width:500px;margin:0 auto;">Real feedback from real learners who transformed their careers with SkillUpNow.</p>
+    </div>
+    <div class="test-grid" id="enq-reviews-grid">
+      <div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--txt4);">
+        <div style="font-size:2rem;margin-bottom:.75rem;opacity:.4;">⭐</div>
+        <p>Loading reviews…</p>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:2rem;">
+      <a href="../pages/feedback.html" style="display:inline-flex;align-items:center;gap:.5rem;padding:.75rem 1.8rem;background:var(--panel);border:1.5px solid var(--border);border-radius:999px;font-size:.88rem;font-weight:700;color:var(--txt2);text-decoration:none;transition:border-color .2s,color .2s;" onmouseover="this.style.borderColor='var(--v1)';this.style.color='var(--v1)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--txt2)'">
+        Share Your Review
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+    </div>
+  </div>
+</section>
+<script>
+(async function loadEnqReviews() {
+  let tries = 0;
+  while (!_db() && tries++ < 20) await new Promise(r => setTimeout(r, 150));
+  if (!_db()) return;
+  const grid = document.getElementById('enq-reviews-grid');
+  try {
+    const { data } = await _db().from('reviews')
+      .select('id,rating,comment,created_at,user_id,courses(title)')
+      .eq('is_approved', true)
+      .order('created_at', { ascending: false })
+      .limit(6);
+    if (!data?.length) {
+      grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:2.5rem;color:var(--txt4)"><div style="font-size:2rem;opacity:.4;margin-bottom:.75rem">⭐</div><p style="font-size:.9rem;">Be the first to share your experience!</p></div>`;
+      return;
+    }
+    // Load names
+    const uids = [...new Set(data.map(r => r.user_id).filter(Boolean))];
+    let nameMap = {};
+    if (uids.length) {
+      const { data: profiles } = await _db().from('user_profiles').select('user_id,full_name').in('user_id', uids);
+      nameMap = Object.fromEntries((profiles||[]).map(p => [p.user_id, p.full_name]));
+    }
+    const gradients = ['linear-gradient(135deg,#7c5cfc,#3d6bff)','linear-gradient(135deg,#00cfee,#0090b8)','linear-gradient(135deg,#a855f7,#7c3aed)','linear-gradient(135deg,#10b981,#059669)','linear-gradient(135deg,#f59e0b,#d97706)','linear-gradient(135deg,#ef4444,#dc2626)'];
+    grid.innerHTML = data.map((r, i) => {
+      const name = nameMap[r.user_id] || 'Student';
+      const initials = name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+      const stars = '★'.repeat(r.rating||5) + '☆'.repeat(5-(r.rating||5));
+      return `<div class="test-card">
+        <div class="test-stars">${stars}</div>
+        <div class="test-body">"${r.comment?.substring(0,200)}${r.comment?.length>200?'…':''}"</div>
+        <div class="test-author">
+          <div class="test-avatar" style="background:${gradients[i%gradients.length]}">${initials}</div>
+          <div>
+            <div class="test-name">${name}</div>
+            <div class="test-meta">${r.courses?.title||'SkillUpNow Student'}</div>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  } catch(e) {
+    grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--txt4)">Unable to load reviews</div>`;
+  }
+})();
+</script>
+
 <footer></footer>
 </body>
 </html>

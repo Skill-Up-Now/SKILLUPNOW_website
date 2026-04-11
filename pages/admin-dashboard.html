@@ -302,7 +302,7 @@
 <!-- SIDEBAR -->
 <aside class="sidebar" id="sidebar">
   <div class="sidebar-brand">
-    <div class="brand-icon">⚡</div>
+    <img src="../icon/Main logo.png" alt="SkillUpNow" style="height:36px;width:auto;object-fit:contain;flex-shrink:0;" onerror="this.style.display='none';">
     <div class="brand-text">
       <div class="name">SkillUpNow</div>
       <div class="sub">Admin Panel</div>
@@ -675,12 +675,12 @@
         <div class="table-header">
           <h3>Class Recordings</h3>
           <div class="table-actions">
-            <button class="btn-primary" onclick="initDropdowns();openModal('recording-modal')">+ Add Recording</button>
+            <button class="btn-primary" onclick="openRecordingModal()">+ Add Recording</button>
           </div>
         </div>
         <table class="data-table">
-          <thead><tr><th>Title</th><th>Course</th><th>Batch</th><th>Session Date</th><th>Drive URL</th><th>YouTube</th><th>Actions</th></tr></thead>
-          <tbody id="recording-tbody"><tr><td colspan="7" class="table-empty">Loading…</td></tr></tbody>
+          <thead><tr><th>Title</th><th>Course</th><th>Provider</th><th>Date Added</th><th>Recording URL</th><th>Actions</th></tr></thead>
+          <tbody id="recording-tbody"><tr><td colspan="6" class="table-empty">Loading…</td></tr></tbody>
         </table>
       </div>
     </div>
@@ -723,47 +723,381 @@
 
     <!-- ===== FORMS ===== -->
     <div class="section" id="section-forms">
-      <div class="table-card">
-        <div class="table-header">
-          <h3>Form Submissions</h3>
-          <div class="table-actions">
-            <select id="form-type-filter" onchange="loadForms()">
-              <option value="">All Types</option>
-              <option value="registration">Registration</option>
-              <option value="contact">Contact</option>
-              <option value="mentor_signup">Mentor Signup</option>
-              <option value="feedback">Feedback</option>
-              <option value="emi">EMI</option>
-              <option value="complaint">Complaint</option>
-              <option value="custom">Custom</option>
+      <style>
+        /* ── Forms Section Styles ── */
+        .forms-tabs { display:flex; gap:.5rem; margin-bottom:1.5rem; flex-wrap:wrap; }
+        .forms-tab {
+          padding:.5rem 1.1rem; border-radius:999px; font-size:.82rem; font-weight:700;
+          border:1.5px solid var(--border); background:var(--panel); color:var(--txt3);
+          cursor:pointer; transition:all .2s;
+        }
+        .forms-tab.active, .forms-tab:hover { background:var(--v1); border-color:var(--v1); color:#fff; }
+
+        .form-types-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:1rem; margin-bottom:2rem; }
+        .form-type-card {
+          background:var(--panel); border:1.5px solid var(--border); border-radius:16px;
+          padding:1.4rem 1.2rem; display:flex; flex-direction:column; gap:.75rem;
+          transition:all .22s; position:relative; overflow:hidden;
+        }
+        .form-type-card:hover { border-color:var(--v1); transform:translateY(-2px); box-shadow:0 8px 28px rgba(124,92,252,.12); }
+        .form-type-card::before { content:''; position:absolute; inset:0; background:linear-gradient(135deg,rgba(124,92,252,.04),transparent); pointer-events:none; }
+        .ftc-icon { font-size:2rem; }
+        .ftc-title { font-size:.95rem; font-weight:800; color:var(--txt); }
+        .ftc-count { font-size:.78rem; color:var(--txt3); }
+        .ftc-actions { display:flex; gap:.5rem; flex-wrap:wrap; margin-top:.25rem; }
+        .ftc-btn {
+          padding:.38rem .85rem; border-radius:999px; font-size:.75rem; font-weight:700;
+          border:1.5px solid var(--border); background:var(--bg); color:var(--txt3);
+          cursor:pointer; transition:all .18s; display:flex; align-items:center; gap:.3rem;
+        }
+        .ftc-btn:hover { background:var(--v1); border-color:var(--v1); color:#fff; }
+        .ftc-btn.qr { background:linear-gradient(135deg,rgba(124,92,252,.15),rgba(61,107,255,.1)); border-color:rgba(124,92,252,.3); color:var(--v1); }
+        .ftc-btn.qr:hover { background:var(--grad); border-color:transparent; color:#fff; }
+
+        /* QR Popup */
+        #qr-popup-overlay {
+          position:fixed; inset:0; z-index:99999;
+          background:rgba(8,4,28,.7); backdrop-filter:blur(24px) saturate(1.8);
+          display:flex; align-items:center; justify-content:center; padding:1rem;
+          opacity:0; visibility:hidden; transition:all .28s;
+        }
+        #qr-popup-overlay.open { opacity:1; visibility:visible; }
+        #qr-popup-box {
+          background:rgba(255,255,255,.92); backdrop-filter:blur(20px);
+          border:1.5px solid rgba(255,255,255,.7); border-radius:24px;
+          padding:2.2rem 2rem 1.8rem; max-width:440px; width:94vw;
+          text-align:center; position:relative;
+          box-shadow:0 32px 80px rgba(60,20,160,.2), 0 8px 32px rgba(124,92,252,.15);
+          transform:scale(.93) translateY(20px); transition:transform .3s cubic-bezier(.22,1,.36,1);
+        }
+        #qr-popup-overlay.open #qr-popup-box { transform:scale(1) translateY(0); }
+        :root[data-theme="dark"] #qr-popup-box {
+          background:rgba(16,10,42,.92); border-color:rgba(124,92,252,.3);
+        }
+        .qr-close-btn {
+          position:absolute; top:.9rem; right:.9rem; width:32px; height:32px; border-radius:50%;
+          border:1.5px solid rgba(124,92,252,.3); background:rgba(124,92,252,.1);
+          color:#9b7dff; font-size:.8rem; font-weight:700;
+          display:flex; align-items:center; justify-content:center; cursor:pointer;
+          transition:all .2s;
+        }
+        .qr-close-btn:hover { background:var(--v1); border-color:var(--v1); color:#fff; transform:rotate(90deg); }
+        .qr-title { font-size:1.1rem; font-weight:800; color:var(--txt); margin-bottom:.3rem; }
+        .qr-subtitle { font-size:.8rem; color:var(--txt3); margin-bottom:1.5rem; }
+        #qr-canvas-wrap {
+          display:inline-block; padding:16px; background:#fff;
+          border-radius:16px; border:3px solid #1a1a2e;
+          box-shadow:0 8px 32px rgba(124,92,252,.18), inset 0 1px 0 rgba(255,255,255,.9);
+        }
+        #qr-canvas-wrap canvas { display:block; border-radius:8px; }
+        .qr-url-display {
+          background:rgba(124,92,252,.07); border:1px solid rgba(124,92,252,.15);
+          border-radius:10px; padding:.55rem .85rem; font-size:.72rem; color:var(--txt3);
+          word-break:break-all; margin:1rem 0 .75rem; text-align:left;
+        }
+        .qr-actions { display:flex; gap:.6rem; justify-content:center; flex-wrap:wrap; }
+        .qr-action-btn {
+          padding:.55rem 1.2rem; border-radius:999px; font-size:.82rem; font-weight:700;
+          border:1.5px solid var(--border); background:var(--panel); color:var(--txt3);
+          cursor:pointer; transition:all .2s;
+        }
+        .qr-action-btn:hover { background:var(--v1); border-color:var(--v1); color:#fff; }
+        .qr-action-btn.primary { background:var(--grad); border-color:transparent; color:#fff; }
+        .qr-fullscreen-btn {
+          margin-top:.75rem; font-size:.75rem; color:var(--txt4); cursor:pointer;
+          text-decoration:underline; background:none; border:none; font-family:inherit;
+        }
+        .qr-fullscreen-btn:hover { color:var(--v1); }
+      </style>
+
+      <!-- Sub-tabs -->
+      <div class="forms-tabs">
+        <button class="forms-tab active" onclick="switchFormsTab('links', this)">📎 Manage Form Links</button>
+        <button class="forms-tab" onclick="switchFormsTab('types', this)">Form Types & QR</button>
+        <button class="forms-tab" onclick="switchFormsTab('submissions', this)">Submissions</button>
+        <button class="forms-tab" onclick="switchFormsTab('reports', this)">Reports</button>
+      </div>
+
+      <!-- Tab: Manage Form Links (site_forms table) -->
+      <div id="forms-tab-links">
+        <style>
+          .sf-toolbar { display:flex; align-items:center; justify-content:space-between; margin-bottom:1.2rem; flex-wrap:wrap; gap:.75rem; }
+          .sf-add-btn { padding:.55rem 1.2rem; border-radius:50px; font-size:.83rem; font-weight:700; background:var(--grad); border:none; color:#fff; cursor:pointer; display:flex; align-items:center; gap:.4rem; font-family:inherit; transition:opacity .2s; }
+          .sf-add-btn:hover { opacity:.88; }
+          .sf-table { width:100%; border-collapse:collapse; }
+          .sf-table th { font-size:.75rem; font-weight:700; color:var(--txt3); text-transform:uppercase; letter-spacing:.06em; padding:.65rem .9rem; border-bottom:1.5px solid var(--border); text-align:left; }
+          .sf-table td { padding:.7rem .9rem; border-bottom:1px solid var(--border); font-size:.85rem; color:var(--txt); vertical-align:middle; }
+          .sf-table tr:last-child td { border-bottom:none; }
+          .sf-table tr:hover td { background:rgba(124,92,252,.04); }
+          .sf-icon-cell { font-size:1.4rem; width:46px; text-align:center; }
+          .sf-url-cell { font-size:.78rem; color:var(--txt3); max-width:220px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+          .sf-status-badge { display:inline-flex; align-items:center; gap:.3rem; padding:.2rem .65rem; border-radius:50px; font-size:.72rem; font-weight:700; }
+          .sf-status-badge.active { background:rgba(74,222,128,.12); color:#4ade80; }
+          .sf-status-badge.inactive { background:rgba(239,68,68,.1); color:#f87171; }
+          .sf-action-btn { padding:.3rem .7rem; border-radius:8px; font-size:.75rem; font-weight:700; border:1px solid var(--border); background:var(--bg); color:var(--txt3); cursor:pointer; transition:all .15s; font-family:inherit; }
+          .sf-action-btn:hover { background:var(--v1); border-color:var(--v1); color:#fff; }
+          .sf-action-btn.del:hover { background:#ef4444; border-color:#ef4444; color:#fff; }
+          /* Add/Edit modal */
+          #sf-modal-overlay { position:fixed; inset:0; z-index:9999; background:rgba(6,3,18,.65); backdrop-filter:blur(16px); display:flex; align-items:center; justify-content:center; padding:1rem; opacity:0; visibility:hidden; transition:all .25s; }
+          #sf-modal-overlay.open { opacity:1; visibility:visible; }
+          #sf-modal-box { background:var(--panel); border:1.5px solid rgba(124,92,252,.25); border-radius:24px; padding:2rem 2rem 1.6rem; max-width:480px; width:100%; position:relative; transform:scale(.94) translateY(16px); transition:transform .28s cubic-bezier(.22,1,.36,1); }
+          #sf-modal-overlay.open #sf-modal-box { transform:scale(1) translateY(0); }
+          .sf-modal-title { font-size:1.1rem; font-weight:800; margin-bottom:1.5rem; color:var(--txt); }
+          .sf-field { margin-bottom:1rem; }
+          .sf-field label { display:block; font-size:.78rem; font-weight:700; color:var(--txt3); margin-bottom:.35rem; }
+          .sf-field input, .sf-field textarea, .sf-field select { width:100%; padding:.65rem .9rem; border-radius:12px; border:1.5px solid var(--border); background:var(--bg); color:var(--txt); font-size:.875rem; font-family:inherit; outline:none; box-sizing:border-box; transition:border-color .2s; }
+          .sf-field input:focus, .sf-field textarea:focus, .sf-field select:focus { border-color:var(--v1); }
+          .sf-field textarea { resize:vertical; min-height:72px; }
+          .sf-modal-actions { display:flex; gap:.75rem; justify-content:flex-end; margin-top:1.5rem; }
+          .sf-modal-cancel { padding:.6rem 1.3rem; border-radius:50px; border:1.5px solid var(--border); background:var(--bg); color:var(--txt3); font-size:.83rem; font-weight:700; cursor:pointer; font-family:inherit; }
+          .sf-modal-save { padding:.6rem 1.6rem; border-radius:50px; border:none; background:var(--grad); color:#fff; font-size:.83rem; font-weight:700; cursor:pointer; font-family:inherit; }
+        </style>
+
+        <div class="sf-toolbar">
+          <div>
+            <div style="font-size:1rem;font-weight:800;color:var(--txt);margin-bottom:.2rem;">Public Form Links</div>
+            <div style="font-size:.8rem;color:var(--txt3);">These appear as cards on the public <strong>Forms</strong> page ·
+              <a href="forms.html" target="_blank" style="color:var(--v1);font-weight:600;text-decoration:none;">Preview →</a>
+            </div>
+          </div>
+          <button class="sf-add-btn" onclick="openSFModal()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add Form Link
+          </button>
+        </div>
+
+        <div class="table-card" style="padding:0;overflow:hidden;">
+          <table class="sf-table">
+            <thead>
+              <tr>
+                <th style="width:46px;text-align:center;">Icon</th>
+                <th>Title</th>
+                <th>Form URL</th>
+                <th>Status</th>
+                <th>Order</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="sf-tbody"><tr><td colspan="6" class="table-empty" style="padding:2rem;text-align:center;color:var(--txt4);">Loading…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Add/Edit Form Link Modal -->
+      <div id="sf-modal-overlay" onclick="handleSFOverlayClick(event)">
+        <div id="sf-modal-box">
+          <div class="sf-modal-title" id="sf-modal-title">Add Form Link</div>
+          <input type="hidden" id="sf-edit-id">
+          <div class="sf-field">
+            <label>Form Title *</label>
+            <input type="text" id="sf-title" placeholder="e.g. Course Registration Form">
+          </div>
+          <div class="sf-field">
+            <label>Form URL (Google Form link) *</label>
+            <input type="url" id="sf-url" placeholder="https://forms.google.com/...">
+          </div>
+          <div class="sf-field">
+            <label>Description</label>
+            <textarea id="sf-desc" placeholder="Brief description of what this form is for…"></textarea>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;">
+            <div class="sf-field">
+              <label>Icon (emoji)</label>
+              <input type="text" id="sf-icon" placeholder="📝" maxlength="4">
+            </div>
+            <div class="sf-field">
+              <label>Sort Order</label>
+              <input type="number" id="sf-order" placeholder="1" min="0" value="0">
+            </div>
+          </div>
+          <div class="sf-field">
+            <label>Status</label>
+            <select id="sf-status">
+              <option value="true">Active (visible on public page)</option>
+              <option value="false">Inactive (hidden)</option>
             </select>
           </div>
+          <div class="sf-modal-actions">
+            <button class="sf-modal-cancel" onclick="closeSFModal()">Cancel</button>
+            <button class="sf-modal-save" onclick="saveSiteForm()">Save Form Link</button>
+          </div>
         </div>
-        <table class="data-table">
-          <thead><tr><th>Type</th><th>Name</th><th>Email</th><th>Course</th><th>Submitted</th><th>Status</th><th>Actions</th></tr></thead>
-          <tbody id="form-tbody"><tr><td colspan="7" class="table-empty">Loading…</td></tr></tbody>
-        </table>
+      </div>
+
+      <!-- Tab: Form Types & QR -->
+      <div id="forms-tab-types" style="display:none;">
+        <div class="form-types-grid" id="form-types-grid">
+          <!-- populated by JS -->
+        </div>
+      </div>
+
+      <!-- Tab: Submissions -->
+      <div id="forms-tab-submissions" style="display:none;">
+        <div class="table-card">
+          <div class="table-header">
+            <h3>All Submissions</h3>
+            <div class="table-actions" style="gap:.5rem;display:flex;flex-wrap:wrap;align-items:center;">
+              <select id="form-type-filter" onchange="loadForms()" style="min-width:140px;">
+                <option value="">All Types</option>
+                <option value="registration">Registration</option>
+                <option value="contact">Contact</option>
+                <option value="mentor_signup">Mentor Signup</option>
+                <option value="feedback">Feedback</option>
+                <option value="emi">EMI</option>
+                <option value="complaint">Complaint</option>
+                <option value="custom">Custom</option>
+              </select>
+              <button class="table-btn" onclick="exportFormsCsv()" style="background:var(--v1);color:#fff;border:none;padding:.4rem .9rem;border-radius:8px;font-size:.8rem;font-weight:700;cursor:pointer;">⬇ Export CSV</button>
+            </div>
+          </div>
+          <table class="data-table">
+            <thead><tr><th>Type</th><th>Name</th><th>Email</th><th>Course</th><th>Submitted</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="form-tbody"><tr><td colspan="7" class="table-empty">Loading…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Tab: Reports -->
+      <div id="forms-tab-reports" style="display:none;">
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem;margin-bottom:1.5rem;" id="form-stats-grid">
+          <div class="stat-card"><div class="stat-icon">📝</div><div class="stat-value" id="fstat-total">—</div><div class="stat-label">Total Submissions</div></div>
+          <div class="stat-card"><div class="stat-icon">✅</div><div class="stat-value" id="fstat-completed">—</div><div class="stat-label">Completed</div></div>
+          <div class="stat-card"><div class="stat-icon">⏳</div><div class="stat-value" id="fstat-pending">—</div><div class="stat-label">Pending Review</div></div>
+          <div class="stat-card"><div class="stat-icon">📅</div><div class="stat-value" id="fstat-today">—</div><div class="stat-label">Today's Submissions</div></div>
+        </div>
+        <div class="table-card">
+          <div class="table-header"><h3>Submissions by Form Type</h3><button class="table-btn" onclick="exportFormsCsv()" style="background:var(--v1);color:#fff;border:none;padding:.4rem .9rem;border-radius:8px;font-size:.8rem;font-weight:700;cursor:pointer;">⬇ Export Report</button></div>
+          <table class="data-table">
+            <thead><tr><th>Form Type</th><th>Total</th><th>Pending</th><th>Completed</th><th>Last Submission</th></tr></thead>
+            <tbody id="form-report-tbody"><tr><td colspan="5" class="table-empty">Loading…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- QR Code Popup -->
+    <div id="qr-popup-overlay">
+      <div id="qr-popup-box">
+        <button class="qr-close-btn" onclick="closeQrPopup()">✕</button>
+        <div class="qr-title" id="qr-popup-title">QR Code</div>
+        <div class="qr-subtitle" id="qr-popup-subtitle">Scan to open the form</div>
+        <div id="qr-canvas-wrap"><canvas id="qr-canvas"></canvas></div>
+        <div class="qr-url-display" id="qr-url-display"></div>
+        <div class="qr-actions">
+          <button class="qr-action-btn" onclick="copyQrUrl()">📋 Copy Link</button>
+          <button class="qr-action-btn primary" onclick="downloadQr()">⬇ Download QR</button>
+        </div>
+        <button class="qr-fullscreen-btn" onclick="fullscreenQr()">🔍 View Full Screen</button>
       </div>
     </div>
 
     <!-- ===== INQUIRIES ===== -->
     <div class="section" id="section-inquiries">
+      <style>
+        .inq-stats { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:1rem; margin-bottom:1.5rem; }
+        .inq-stat { background:var(--panel); border:1.5px solid var(--border); border-radius:14px; padding:1rem 1.2rem; text-align:center; }
+        .inq-stat .val { font-size:1.6rem; font-weight:800; color:var(--txt); line-height:1; }
+        .inq-stat .lbl { font-size:.72rem; color:var(--txt4); margin-top:.3rem; font-weight:600; text-transform:uppercase; letter-spacing:.06em; }
+        .inq-stat.open-stat .val  { color:#fbbf24; }
+        .inq-stat.prog-stat .val  { color:#60a5fa; }
+        .inq-stat.done-stat .val  { color:#4ade80; }
+        .inq-stat.urg-stat  .val  { color:#f87171; }
+        /* Detail modal */
+        #inq-modal-overlay { position:fixed; inset:0; z-index:9999; background:rgba(6,3,18,.7); backdrop-filter:blur(18px); display:flex; align-items:center; justify-content:center; padding:1rem; opacity:0; visibility:hidden; transition:all .25s; }
+        #inq-modal-overlay.open { opacity:1; visibility:visible; }
+        #inq-modal-box { background:var(--panel); border:1.5px solid rgba(124,92,252,.25); border-radius:24px; padding:2rem; max-width:580px; width:100%; max-height:85vh; overflow-y:auto; position:relative; transform:scale(.94) translateY(16px); transition:transform .28s cubic-bezier(.22,1,.36,1); }
+        #inq-modal-overlay.open #inq-modal-box { transform:scale(1) translateY(0); }
+        .inq-detail-row { display:grid; grid-template-columns:1fr 1fr; gap:.75rem; margin-bottom:.75rem; }
+        .inq-detail-field { background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:.65rem .9rem; }
+        .inq-detail-field .lbl { font-size:.7rem; font-weight:700; color:var(--txt4); text-transform:uppercase; letter-spacing:.06em; margin-bottom:.2rem; }
+        .inq-detail-field .val { font-size:.87rem; color:var(--txt2); font-weight:500; word-break:break-word; }
+        .inq-msg-box { background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:.85rem 1rem; font-size:.88rem; color:var(--txt2); line-height:1.7; margin-bottom:1rem; white-space:pre-wrap; }
+        .inq-modal-actions { display:flex; gap:.6rem; flex-wrap:wrap; margin-top:1.25rem; justify-content:flex-end; }
+        .inq-action-btn { padding:.55rem 1.2rem; border-radius:50px; font-size:.82rem; font-weight:700; border:1.5px solid var(--border); background:var(--bg); color:var(--txt3); cursor:pointer; transition:all .2s; font-family:inherit; }
+        .inq-action-btn:hover { background:var(--v1); border-color:var(--v1); color:#fff; }
+        .inq-action-btn.green:hover { background:#16a34a; border-color:#16a34a; }
+        .inq-action-btn.red:hover { background:#ef4444; border-color:#ef4444; }
+        .inq-notes-area { width:100%; padding:.65rem .9rem; border-radius:10px; border:1.5px solid var(--border); background:var(--bg); color:var(--txt); font-family:inherit; font-size:.88rem; resize:vertical; min-height:80px; outline:none; box-sizing:border-box; transition:border-color .2s; }
+        .inq-notes-area:focus { border-color:var(--v1); }
+      </style>
+
+      <!-- Stats row -->
+      <div class="inq-stats">
+        <div class="inq-stat"><div class="val" id="inqs-total">—</div><div class="lbl">Total</div></div>
+        <div class="inq-stat open-stat"><div class="val" id="inqs-open">—</div><div class="lbl">Open</div></div>
+        <div class="inq-stat prog-stat"><div class="val" id="inqs-prog">—</div><div class="lbl">In Progress</div></div>
+        <div class="inq-stat done-stat"><div class="val" id="inqs-resolved">—</div><div class="lbl">Resolved</div></div>
+        <div class="inq-stat urg-stat"><div class="val" id="inqs-urgent">—</div><div class="lbl">Urgent</div></div>
+      </div>
+
       <div class="table-card">
         <div class="table-header">
-          <h3>Inquiries & Support</h3>
-          <div class="table-actions">
+          <h3>Enquiries & Support</h3>
+          <div class="table-actions" style="gap:.5rem;display:flex;flex-wrap:wrap;align-items:center;">
             <select id="inq-status-filter" onchange="loadInquiries()">
               <option value="open">Open</option>
               <option value="in_progress">In Progress</option>
               <option value="resolved">Resolved</option>
               <option value="">All</option>
             </select>
+            <select id="inq-type-filter" onchange="loadInquiries()">
+              <option value="">All Types</option>
+              <option value="course">Course</option>
+              <option value="payment">Payment</option>
+              <option value="admission">Admission</option>
+              <option value="technical">Technical</option>
+              <option value="complaint">Complaint</option>
+              <option value="general">General</option>
+            </select>
+            <select id="inq-priority-filter" onchange="loadInquiries()">
+              <option value="">All Priorities</option>
+              <option value="urgent">Urgent</option>
+              <option value="high">High</option>
+              <option value="normal">Normal</option>
+              <option value="low">Low</option>
+            </select>
           </div>
         </div>
         <table class="data-table">
-          <thead><tr><th>Name</th><th>Email</th><th>Type</th><th>Subject</th><th>Priority</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead>
+          <thead><tr><th>Name</th><th>Contact</th><th>Type</th><th>Subject</th><th>Priority</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead>
           <tbody id="inquiry-tbody"><tr><td colspan="8" class="table-empty">Loading…</td></tr></tbody>
         </table>
+      </div>
+    </div>
+
+    <!-- Inquiry Detail Modal -->
+    <div id="inq-modal-overlay" onclick="if(event.target===this)closeInqModal()">
+      <div id="inq-modal-box">
+        <button onclick="closeInqModal()" style="position:absolute;top:1rem;right:1rem;width:30px;height:30px;border-radius:50%;border:1px solid var(--border);background:var(--bg);color:var(--txt3);font-size:.85rem;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;" onmouseover="this.style.background='var(--border)'" onmouseout="this.style.background='var(--bg)'">✕</button>
+        <div style="font-size:1.1rem;font-weight:800;color:var(--txt);margin-bottom:1.25rem;" id="inq-modal-subject">Inquiry Details</div>
+        <div class="inq-detail-row">
+          <div class="inq-detail-field"><div class="lbl">From</div><div class="val" id="inq-d-name">—</div></div>
+          <div class="inq-detail-field"><div class="lbl">Email</div><div class="val" id="inq-d-email">—</div></div>
+        </div>
+        <div class="inq-detail-row">
+          <div class="inq-detail-field"><div class="lbl">Phone</div><div class="val" id="inq-d-phone">—</div></div>
+          <div class="inq-detail-field"><div class="lbl">Type</div><div class="val" id="inq-d-type">—</div></div>
+        </div>
+        <div class="inq-detail-row">
+          <div class="inq-detail-field"><div class="lbl">Status</div><div class="val" id="inq-d-status">—</div></div>
+          <div class="inq-detail-field"><div class="lbl">Priority</div><div class="val" id="inq-d-priority">—</div></div>
+        </div>
+        <div class="inq-detail-field" style="margin-bottom:.75rem;"><div class="lbl">Received</div><div class="val" id="inq-d-date">—</div></div>
+        <div style="font-size:.75rem;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.4rem;">Message</div>
+        <div class="inq-msg-box" id="inq-d-message">—</div>
+        <div style="font-size:.75rem;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.4rem;">Resolution Notes</div>
+        <textarea class="inq-notes-area" id="inq-d-notes" placeholder="Add resolution notes or reply details…"></textarea>
+        <div class="inq-modal-actions">
+          <select id="inq-d-priority-sel" style="padding:.5rem .75rem;border-radius:10px;border:1.5px solid var(--border);background:var(--bg);color:var(--txt);font-size:.82rem;font-family:inherit;">
+            <option value="urgent">🔴 Urgent</option>
+            <option value="high">🟡 High</option>
+            <option value="normal">⚪ Normal</option>
+            <option value="low">🔵 Low</option>
+          </select>
+          <button class="inq-action-btn" onclick="updateInquiry('in_progress')">Mark In Progress</button>
+          <button class="inq-action-btn green" onclick="updateInquiry('resolved')">✓ Resolve</button>
+          <button class="inq-action-btn red" onclick="deleteInquiry()">Delete</button>
+        </div>
       </div>
     </div>
 
@@ -802,7 +1136,7 @@
     </div>
     <div class="form-row">
       <div class="f-group"><label>Is Featured</label><select id="c-featured"><option value="false">No</option><option value="true">Yes</option></select></div>
-      <div class="f-group"><label>Published</label><select id="c-published"><option value="false">Draft</option><option value="true">Published</option></select></div>
+      <div class="f-group"><label>Published</label><select id="c-published"><option value="true">Published</option><option value="false">Draft</option></select></div>
     </div>
     <div class="modal-actions">
       <button class="btn-secondary" onclick="closeModal('course-modal')">Cancel</button>
@@ -1014,8 +1348,15 @@
       <div class="f-group"><label>Course *</label><select id="rec-course"><option value="">Select course…</option></select></div>
       <div class="f-group"><label>Session Date</label><input type="date" id="rec-date"></div>
     </div>
-    <div class="f-group"><label>Google Drive URL</label><input type="url" id="rec-drive" placeholder="https://drive.google.com/…"></div>
-    <div class="f-group"><label>YouTube URL</label><input type="url" id="rec-yt" placeholder="https://youtube.com/…"></div>
+    <div class="form-row">
+      <div class="f-group"><label>Provider *</label>
+        <select id="rec-provider">
+          <option value="google_drive">Google Drive</option>
+          <option value="youtube">YouTube</option>
+        </select>
+      </div>
+      <div class="f-group"><label>Recording URL *</label><input type="url" id="rec-url" placeholder="Paste the recording link here…"></div>
+    </div>
     <div class="modal-actions">
       <button class="btn-secondary" onclick="closeModal('recording-modal')">Cancel</button>
       <button class="btn-primary" onclick="saveRecording()">Save Recording</button>
@@ -1071,7 +1412,7 @@ function loadSection(sec) {
     batches: loadBatches, payments: loadPayments, emi: loadEmi,
     pricing: loadPricing, discounts: loadDiscounts,
     reports: loadReports, recordings: loadRecordings, schedules: loadSchedules,
-    reviews: loadReviews, forms: loadForms, inquiries: loadInquiries,
+    reviews: loadReviews, forms: loadFormsSection, inquiries: loadInquiries,
   };
   loaders[sec]?.();
 }
@@ -1317,24 +1658,88 @@ async function loadMentors() {
 }
 
 async function loadEnrollments() {
+  const tbody = document.getElementById('enrollment-tbody');
+  tbody.innerHTML = '<tr><td colspan="9" class="table-empty">Loading…</td></tr>';
+
   const statusFilter = document.getElementById('enroll-status-filter').value;
-  let q = db.client.from('enrollments').select('*, student_profiles(user_profiles(full_name, email)), courses(title)');
+  let q = db.client.from('enrollments').select('*, courses(title), course_pricing(pricing_type)');
   if (statusFilter) q = q.eq('enrollment_status', statusFilter);
-  const { data } = await q.order('created_at', { ascending: false }).limit(100);
-  document.getElementById('enrollment-tbody').innerHTML = (data||[]).map(e => `
-    <tr>
-      <td>${e.student_profiles?.user_profiles?.full_name||'—'}</td>
+  const { data, error } = await q.order('created_at', { ascending: false }).limit(200);
+
+  if (error) {
+    tbody.innerHTML = `<tr><td colspan="9" class="table-empty" style="color:#f87171;">Query error: ${error.message}</td></tr>`;
+    return;
+  }
+  if (!data?.length) {
+    tbody.innerHTML = '<tr><td colspan="9" class="table-empty">No enrollments found</td></tr>';
+    return;
+  }
+
+  // Step 2 — fetch user profiles for all enrolled students
+  const userIds = [...new Set(data.map(e => e.student_user_id).filter(Boolean))];
+  const { data: profiles } = await db.client.from('user_profiles')
+    .select('user_id, full_name, email').in('user_id', userIds);
+  const profileMap = Object.fromEntries((profiles||[]).map(p => [p.user_id, p]));
+
+  const hasAccess = s => s === 'active';
+
+  tbody.innerHTML = data.map(e => {
+    const p = profileMap[e.student_user_id] || {};
+    const name  = p.full_name || p.email || (e.student_user_id||'').slice(0,8)+'…';
+    const email = p.email || '';
+    const payType = e.paid_amount >= e.net_amount ? 'Full'
+                  : e.paid_amount > 0             ? 'Partial' : 'Pending';
+    const accessHtml = hasAccess(e.access_status)
+      ? '<span class="badge badge-green">Active</span>'
+      : `<span class="badge badge-yellow">${e.access_status||'Pending'}</span>`;
+    const safe = encodeURIComponent(JSON.stringify({
+      id: e.id, enrollment_status: e.enrollment_status,
+      access_status: e.access_status, net_amount: e.net_amount,
+      paid_amount: e.paid_amount, due_amount: e.due_amount,
+      progress_percentage: e.progress_percentage, notes: e.notes,
+    }));
+    return `<tr>
+      <td>
+        <div style="font-weight:600;font-size:.85rem;">${name}</div>
+        <div style="font-size:.74rem;color:var(--txt4);">${email}</div>
+      </td>
       <td>${e.courses?.title||'—'}</td>
-      <td>${e.paid_amount >= e.net_amount ? 'Full' : e.paid_amount > 0 ? 'Partial' : 'Pending'}</td>
+      <td>${payType}</td>
       <td>${fmtCurr(e.net_amount)}</td>
       <td>${fmtCurr(e.paid_amount)}</td>
       <td>${fmtCurr(e.due_amount)}</td>
-      <td>${e.access_status === 'active' ? '<span class="badge badge-green">Active</span>' : `<span class="badge badge-red">${e.access_status||'Pending'}</span>`}</td>
+      <td>${accessHtml}</td>
       <td>${statusBadge(e.enrollment_status)}</td>
       <td><div class="action-btns">
-        <button class="action-btn" onclick="editEnrollment('${JSON.stringify(e).replace(/'/g,'&apos;').replace(/"/g,'&quot;')}')">Edit</button>
+        <button class="action-btn" onclick="editEnrollmentById('${safe}')">Edit</button>
+        ${!hasAccess(e.access_status) ? `<button class="action-btn" style="background:rgba(74,222,128,.15);color:#4ade80;border-color:rgba(74,222,128,.3);" onclick="grantAccess('${e.id}')">Grant</button>` : ''}
       </div></td>
-    </tr>`).join('') || '<tr><td colspan="9" class="table-empty">No enrollments</td></tr>';
+    </tr>`;
+  }).join('');
+}
+
+async function grantAccess(enrollId) {
+  if (!confirm('Grant course access to this student?')) return;
+  const { error } = await db.client.from('enrollments').update({
+    enrollment_status: 'active', access_status: 'active',
+    activated_at: new Date().toISOString(),
+  }).eq('id', enrollId);
+  if (error) { _showAdminToast('Grant failed: ' + error.message, 'error'); return; }
+  _showAdminToast('✓ Access granted', 'success');
+  loadEnrollments();
+}
+
+function editEnrollmentById(safeEncoded) {
+  const e = JSON.parse(decodeURIComponent(safeEncoded));
+  document.getElementById('enroll-id').value = e.id;
+  document.getElementById('enroll-status-edit').value = e.enrollment_status || 'pending';
+  document.getElementById('enroll-pay-status').value = e.access_status || 'pending';
+  document.getElementById('enroll-access').value = e.access_status === 'active' ? 'true' : 'false';
+  document.getElementById('enroll-total').value = e.net_amount || 0;
+  document.getElementById('enroll-paid').value = e.paid_amount || 0;
+  document.getElementById('enroll-progress').value = e.progress_percentage || 0;
+  document.getElementById('enroll-notes').value = e.notes || '';
+  openModal('enroll-modal');
 }
 
 async function loadBatches() {
@@ -1447,12 +1852,11 @@ async function loadRecordings() {
     <tr>
       <td>${r.title}</td>
       <td>${r.courses?.title||'—'}</td>
-      <td>${r.provider_name||'—'}</td>
+      <td>${r.provider_name === 'youtube' ? '▶ YouTube' : r.provider_name === 'google_drive' ? '📁 Google Drive' : r.provider_name||'—'}</td>
       <td>${fmtDate(r.published_at || r.created_at)}</td>
-      <td>—</td>
-      <td>${r.external_url ? `<a href="${r.external_url}" target="_blank" style="color:#f87171">View</a>` : '—'}</td>
+      <td>${r.external_url ? `<a href="${r.external_url}" target="_blank" style="color:#7c5cfc;word-break:break-all;font-size:.78rem;">View Recording</a>` : '—'}</td>
       <td><div class="action-btns"><button class="action-btn danger" onclick="deleteRecording('${r.id}')">Delete</button></div></td>
-    </tr>`).join('') || '<tr><td colspan="7" class="table-empty">No recordings</td></tr>';
+    </tr>`).join('') || '<tr><td colspan="6" class="table-empty">No recordings found</td></tr>';
 }
 
 async function loadSchedules() {
@@ -1497,24 +1901,121 @@ async function loadReviews() {
     </tr>`).join('') || '<tr><td colspan="6" class="table-empty">No reviews</td></tr>';
 }
 
+let _inqAll = [];
+let _currentInqId = null;
+
 async function loadInquiries() {
-  const statusFilter = document.getElementById('inq-status-filter').value;
+  const statusFilter   = document.getElementById('inq-status-filter')?.value || '';
+  const typeFilter     = document.getElementById('inq-type-filter')?.value || '';
+  const priorityFilter = document.getElementById('inq-priority-filter')?.value || '';
+
   let q = db.client.from('inquiries').select('*');
-  if (statusFilter) q = q.eq('status', statusFilter);
-  const { data } = await q.order('created_at', { ascending: false }).limit(100);
-  document.getElementById('inquiry-tbody').innerHTML = (data||[]).map(i => `
+  if (statusFilter)   q = q.eq('status', statusFilter);
+  if (typeFilter)     q = q.eq('inquiry_type', typeFilter);
+  if (priorityFilter) q = q.eq('priority', priorityFilter);
+  const { data, error } = await q.order('created_at', { ascending: false }).limit(200);
+  if (error) { console.error('loadInquiries error:', error); return; }
+  _inqAll = data || [];
+
+  // Update stats
+  const all = _inqAll;
+  const statsQ = await db.client.from('inquiries').select('status,priority');
+  const statsData = statsQ.data || [];
+  document.getElementById('inqs-total').textContent    = statsData.length;
+  document.getElementById('inqs-open').textContent     = statsData.filter(r => r.status === 'open').length;
+  document.getElementById('inqs-prog').textContent     = statsData.filter(r => r.status === 'in_progress').length;
+  document.getElementById('inqs-resolved').textContent = statsData.filter(r => r.status === 'resolved').length;
+  document.getElementById('inqs-urgent').textContent   = statsData.filter(r => r.priority === 'urgent').length;
+
+  // Update sidebar badge
+  const openCount = statsData.filter(r => r.status === 'open').length;
+  const badge = document.getElementById('inquiry-badge');
+  if (badge) { badge.textContent = openCount; badge.style.display = openCount ? '' : 'none'; }
+  const dashBadge = document.getElementById('s-inquiries');
+  if (dashBadge) dashBadge.textContent = openCount;
+
+  const prioColor = { urgent:'#f87171', high:'#fbbf24', normal:'rgba(200,191,255,.6)', low:'#60a5fa' };
+  document.getElementById('inquiry-tbody').innerHTML = all.length ? all.map(i => `
     <tr>
-      <td>${i.name}</td>
-      <td>${i.email}</td>
-      <td>${i.inquiry_type}</td>
-      <td>${i.subject?.substring(0,40)}</td>
-      <td><span class="badge badge-${i.priority==='urgent'?'red':i.priority==='high'?'yellow':'gray'}">${i.priority}</span></td>
-      <td>${fmtDate(i.created_at)}</td>
-      <td>${statusBadge(i.status)}</td>
-      <td><div class="action-btns">
-        <button class="action-btn" onclick="resolveInquiry('${i.id}')">Resolve</button>
-      </div></td>
-    </tr>`).join('') || '<tr><td colspan="8" class="table-empty">No inquiries</td></tr>';
+      <td>
+        <div style="font-weight:700;color:var(--txt);font-size:.87rem;">${escHtml(i.name||'—')}</div>
+        ${i.phone ? `<div style="font-size:.72rem;color:var(--txt4);">${escHtml(i.phone)}</div>` : ''}
+      </td>
+      <td style="font-size:.8rem;color:var(--txt3);">${escHtml(i.email||'—')}</td>
+      <td><span class="badge badge-blue">${(i.inquiry_type||'general').replace(/_/g,' ')}</span></td>
+      <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.85rem;">${escHtml(i.subject||'—')}</td>
+      <td>
+        <span style="display:inline-flex;align-items:center;gap:.3rem;padding:.2rem .65rem;border-radius:50px;font-size:.72rem;font-weight:700;background:rgba(255,255,255,.06);color:${prioColor[i.priority]||'var(--txt3)'};">
+          ● ${i.priority||'normal'}
+        </span>
+      </td>
+      <td style="font-size:.8rem;color:var(--txt4);">${fmtDate(i.created_at)}</td>
+      <td>${statusBadge(i.status||'open')}</td>
+      <td>
+        <div class="action-btns">
+          <button class="action-btn" onclick="openInqModal('${i.id}')">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            View
+          </button>
+          ${i.status !== 'resolved'
+            ? `<button class="action-btn" onclick="quickResolve('${i.id}')">✓ Resolve</button>`
+            : ''}
+        </div>
+      </td>
+    </tr>`).join('') : '<tr><td colspan="8" class="table-empty">No enquiries found</td></tr>';
+}
+
+function openInqModal(id) {
+  const i = _inqAll.find(x => x.id === id);
+  if (!i) return;
+  _currentInqId = id;
+  document.getElementById('inq-modal-subject').textContent = i.subject || 'Enquiry Details';
+  document.getElementById('inq-d-name').textContent     = i.name || '—';
+  document.getElementById('inq-d-email').innerHTML      = `<a href="mailto:${escHtml(i.email)}" style="color:var(--v1);">${escHtml(i.email||'—')}</a>`;
+  document.getElementById('inq-d-phone').innerHTML      = i.phone ? `<a href="tel:${escHtml(i.phone)}" style="color:var(--v1);">${escHtml(i.phone)}</a>` : '—';
+  document.getElementById('inq-d-type').textContent     = (i.inquiry_type||'general').replace(/_/g,' ');
+  document.getElementById('inq-d-status').textContent   = i.status || 'open';
+  document.getElementById('inq-d-priority').textContent = i.priority || 'normal';
+  document.getElementById('inq-d-date').textContent     = new Date(i.created_at).toLocaleString('en-IN', { dateStyle:'medium', timeStyle:'short' });
+  document.getElementById('inq-d-message').textContent  = i.inquiry_details || '(no message)';
+  document.getElementById('inq-d-notes').value          = i.resolution_notes || '';
+  document.getElementById('inq-d-priority-sel').value   = i.priority || 'normal';
+  document.getElementById('inq-modal-overlay').classList.add('open');
+}
+
+function closeInqModal() {
+  document.getElementById('inq-modal-overlay').classList.remove('open');
+  _currentInqId = null;
+}
+
+async function updateInquiry(newStatus) {
+  if (!_currentInqId) return;
+  const notes    = document.getElementById('inq-d-notes').value.trim();
+  const priority = document.getElementById('inq-d-priority-sel').value;
+  const payload  = { status: newStatus, priority, updated_at: new Date().toISOString() };
+  if (notes) payload.resolution_notes = notes;
+  const { error } = await db.client.from('inquiries').update(payload).eq('id', _currentInqId);
+  if (error) { alert('Update failed: ' + error.message); return; }
+  closeInqModal();
+  loadInquiries();
+}
+
+async function quickResolve(id) {
+  await db.client.from('inquiries').update({ status: 'resolved', updated_at: new Date().toISOString() }).eq('id', id);
+  loadInquiries();
+}
+
+async function deleteInquiry() {
+  if (!_currentInqId) return;
+  if (!confirm('Delete this enquiry permanently?')) return;
+  await db.client.from('inquiries').delete().eq('id', _currentInqId);
+  closeInqModal();
+  loadInquiries();
+}
+
+async function resolveInquiry(id) {
+  await db.client.from('inquiries').update({ status: 'resolved', updated_at: new Date().toISOString() }).eq('id', id);
+  loadInquiries();
 }
 
 // ===== ACTIONS =====
@@ -1577,6 +2078,7 @@ async function saveCourse() {
     total_live_classes: parseInt(document.getElementById('c-sessions').value) || 0,
     slug: titleVal.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''),
   };
+  if (isPublished) payload.published_at = new Date().toISOString();
   if (!id) payload.owner_admin_id = adminUser.id;
   const { data: saved, error } = id
     ? await db.client.from('courses').update(payload).eq('id', id).select('id').single()
@@ -1650,23 +2152,28 @@ function editEnrollment(eData) {
   document.getElementById('enroll-paid').value = e.paid_amount;
   document.getElementById('enroll-emi-months').value = '';
   document.getElementById('enroll-progress').value = e.progress_percentage;
-  document.getElementById('enroll-notes').value = e.admin_notes || '';
+  document.getElementById('enroll-notes').value = e.notes || '';
   openModal('enroll-modal');
 }
 
 async function saveEnrollment() {
-  const id = document.getElementById('enroll-id').value;
-  const accessGranted = document.getElementById('enroll-access').value === 'true';
+  const id          = document.getElementById('enroll-id').value;
+  const accessVal   = document.getElementById('enroll-access').value === 'true';
+  const netAmount   = parseFloat(document.getElementById('enroll-total').value) || 0;
+  const paidAmount  = parseFloat(document.getElementById('enroll-paid').value) || 0;
   const { error } = await db.client.from('enrollments').update({
     enrollment_status: document.getElementById('enroll-status-edit').value,
-    access_status: accessGranted ? 'active' : 'pending',
-    net_amount: parseFloat(document.getElementById('enroll-total').value) || 0,
-    paid_amount: parseFloat(document.getElementById('enroll-paid').value) || 0,
+    access_status: accessVal ? 'active' : 'pending',
+    net_amount:   netAmount,
+    paid_amount:  paidAmount,
+    due_amount:   Math.max(0, netAmount - paidAmount),
     progress_percentage: parseInt(document.getElementById('enroll-progress').value) || 0,
-    admin_notes: document.getElementById('enroll-notes').value,
+    notes:        document.getElementById('enroll-notes').value,
+    ...(accessVal ? { activated_at: new Date().toISOString() } : {}),
   }).eq('id', id);
-  if (error) { alert('Error updating enrollment: ' + error.message); return; }
+  if (error) { _showAdminToast('Update failed: ' + error.message, 'error'); return; }
   closeModal('enroll-modal');
+  _showAdminToast('✓ Enrollment updated', 'success');
   loadEnrollments();
 }
 
@@ -1698,9 +2205,9 @@ async function saveSchedule() {
 async function saveRecording() {
   const title = document.getElementById('rec-title').value.trim();
   if (!title) { alert('Recording title is required.'); return; }
-  const providerUrl = document.getElementById('rec-yt').value || document.getElementById('rec-drive').value || '';
-  if (!providerUrl) { alert('Please enter a YouTube or Google Drive URL.'); return; }
-  const provider = document.getElementById('rec-yt').value ? 'youtube' : 'google_drive';
+  const providerUrl = document.getElementById('rec-url').value.trim();
+  if (!providerUrl) { alert('Please enter the recording URL.'); return; }
+  const provider = document.getElementById('rec-provider').value;
   const { error } = await db.client.from('live_recordings').insert({
     course_id: document.getElementById('rec-course').value || null,
     title,
@@ -1748,36 +2255,419 @@ async function logout() {
   window.location.href = 'admin-login.html';
 }
 
+/* ===== FORMS SECTION ENTRY ===== */
+function loadFormsSection() {
+  // Default to the Manage Form Links tab
+  const firstTab = document.querySelector('#section-forms .forms-tab');
+  switchFormsTab('links', firstTab || document.querySelector('.forms-tab'));
+}
+
+/* ===== FORMS MANAGEMENT ===== */
+
+const FORM_TYPES = [
+  { key: 'registration', label: 'Course Registration', icon: '📝', path: 'course-registration.html', desc: 'New course registrations' },
+  { key: 'emi',          label: 'EMI Application',     icon: '📅', path: 'emi-application.html',     desc: 'EMI payment requests' },
+  { key: 'contact',      label: 'Fee Enquiry',          icon: '💬', path: 'contact-enquiry.html',     desc: 'Fee and course queries' },
+  { key: 'mentor_signup',label: 'Mentor Application',  icon: '🎓', path: 'mentor-signup.html',       desc: 'Mentor onboarding forms' },
+  { key: 'feedback',     label: 'Feedback',             icon: '⭐', path: 'feedback.html',            desc: 'Student feedback' },
+  { key: 'quick',        label: 'Quick Register',       icon: '⚡', path: 'quick-registration.html',  desc: 'Fast enrollment form' },
+];
+
+let _formCounts = {};
+
+function switchFormsTab(tab, btn) {
+  ['links','types','submissions','reports'].forEach(t => {
+    const el = document.getElementById('forms-tab-' + t);
+    if (el) el.style.display = t === tab ? '' : 'none';
+  });
+  document.querySelectorAll('.forms-tab').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  if (tab === 'links')       loadSiteFormLinks();
+  if (tab === 'submissions') loadForms();
+  if (tab === 'reports')     loadFormReports();
+  if (tab === 'types')       renderFormTypes();
+}
+
+/* ══════════════════════════════════════════
+   SITE_FORMS — Public form link management
+══════════════════════════════════════════ */
+let _sfEditId = null;
+
+async function loadSiteFormLinks() {
+  const tbody = document.getElementById('sf-tbody');
+  if (!tbody) return;
+  tbody.innerHTML = '<tr><td colspan="6" style="padding:1.5rem;text-align:center;color:var(--txt4);">Loading…</td></tr>';
+  try {
+    const { data, error } = await db.client.from('site_forms')
+      .select('*').order('sort_order').order('created_at');
+    if (error) throw error;
+    if (!data || !data.length) {
+      tbody.innerHTML = `<tr><td colspan="6" style="padding:2.5rem 1rem;text-align:center;">
+        <div style="font-size:2rem;margin-bottom:.5rem;">📋</div>
+        <div style="font-weight:700;color:var(--txt);margin-bottom:.3rem;">No form links yet</div>
+        <div style="font-size:.82rem;color:var(--txt4);margin-bottom:1rem;">Add Google Form links that students can access from the public Forms page</div>
+        <button onclick="openSFModal()" style="padding:.55rem 1.4rem;border-radius:50px;background:var(--grad);border:none;color:#fff;font-size:.82rem;font-weight:700;cursor:pointer;font-family:inherit;">
+          + Add Your First Form Link
+        </button>
+      </td></tr>`;
+      return;
+    }
+    tbody.innerHTML = data.map(f => `
+      <tr>
+        <td class="sf-icon-cell">${f.icon || '📝'}</td>
+        <td>
+          <div style="font-weight:700;color:var(--txt);font-size:.875rem;">${escHtml(f.title)}</div>
+          <div style="font-size:.75rem;color:var(--txt4);margin-top:.15rem;">${escHtml(f.description || '')}</div>
+        </td>
+        <td class="sf-url-cell">
+          <a href="${escHtml(f.form_url)}" target="_blank" rel="noopener"
+             style="color:var(--v1);text-decoration:none;font-size:.78rem;"
+             title="${escHtml(f.form_url)}">${escHtml(f.form_url)}</a>
+        </td>
+        <td>
+          <span class="sf-status-badge ${f.is_active ? 'active' : 'inactive'}">
+            ${f.is_active ? '● Active' : '○ Inactive'}
+          </span>
+        </td>
+        <td style="text-align:center;color:var(--txt3);">${f.sort_order ?? 0}</td>
+        <td>
+          <div style="display:flex;gap:.4rem;flex-wrap:wrap;">
+            <button class="sf-action-btn" onclick="openSFModal('${f.id}')">✏ Edit</button>
+            <button class="sf-action-btn del" onclick="deleteSiteForm('${f.id}', '${escAttr(f.title)}')">🗑 Delete</button>
+          </div>
+        </td>
+      </tr>`).join('');
+  } catch(e) {
+    tbody.innerHTML = `<tr><td colspan="6" style="padding:1.5rem;text-align:center;color:#f87171;">Error: ${e.message}</td></tr>`;
+  }
+}
+
+function openSFModal(editId) {
+  _sfEditId = editId || null;
+  document.getElementById('sf-modal-title').textContent = editId ? 'Edit Form Link' : 'Add Form Link';
+  document.getElementById('sf-edit-id').value = editId || '';
+  if (editId) {
+    // Populate form with existing data
+    db.client.from('site_forms').select('*').eq('id', editId).single().then(({ data }) => {
+      if (!data) return;
+      document.getElementById('sf-title').value  = data.title || '';
+      document.getElementById('sf-url').value    = data.form_url || '';
+      document.getElementById('sf-desc').value   = data.description || '';
+      document.getElementById('sf-icon').value   = data.icon || '';
+      document.getElementById('sf-order').value  = data.sort_order ?? 0;
+      document.getElementById('sf-status').value = String(data.is_active !== false);
+    });
+  } else {
+    document.getElementById('sf-title').value  = '';
+    document.getElementById('sf-url').value    = '';
+    document.getElementById('sf-desc').value   = '';
+    document.getElementById('sf-icon').value   = '📝';
+    document.getElementById('sf-order').value  = '0';
+    document.getElementById('sf-status').value = 'true';
+  }
+  document.getElementById('sf-modal-overlay').classList.add('open');
+}
+
+function closeSFModal() {
+  document.getElementById('sf-modal-overlay').classList.remove('open');
+  _sfEditId = null;
+}
+
+function handleSFOverlayClick(e) {
+  if (e.target === document.getElementById('sf-modal-overlay')) closeSFModal();
+}
+
+async function saveSiteForm() {
+  const title    = document.getElementById('sf-title').value.trim();
+  const form_url = document.getElementById('sf-url').value.trim();
+  const desc     = document.getElementById('sf-desc').value.trim();
+  const icon     = document.getElementById('sf-icon').value.trim() || '📝';
+  const order    = parseInt(document.getElementById('sf-order').value) || 0;
+  const active   = document.getElementById('sf-status').value === 'true';
+
+  if (!title) { alert('Form title is required.'); return; }
+  if (!form_url) { alert('Form URL is required.'); return; }
+
+  const btn = document.querySelector('.sf-modal-save');
+  btn.disabled = true; btn.textContent = 'Saving…';
+
+  try {
+    const payload = {
+      title, form_url, description: desc || null,
+      icon, sort_order: order, is_active: active,
+      updated_at: new Date().toISOString()
+    };
+    let err;
+    if (_sfEditId) {
+      ({ error: err } = await db.client.from('site_forms').update(payload).eq('id', _sfEditId));
+    } else {
+      payload.created_by = (await db.client.auth.getUser()).data?.user?.id || null;
+      ({ error: err } = await db.client.from('site_forms').insert(payload));
+    }
+    if (err) throw err;
+    const wasNew = !_sfEditId;
+    closeSFModal();
+    loadSiteFormLinks();
+    _showAdminToast(
+      wasNew ? '✓ Form link added! It\'s now live on the public Forms page.' : '✓ Form link updated.',
+      'success'
+    );
+  } catch(e) {
+    alert('Save failed: ' + e.message);
+  } finally {
+    btn.disabled = false; btn.textContent = 'Save Form Link';
+  }
+}
+
+async function deleteSiteForm(id, title) {
+  if (!confirm(`Delete "${title}"?\nThis will remove it from the public forms page.`)) return;
+  const { error } = await db.client.from('site_forms').delete().eq('id', id);
+  if (error) { alert('Delete failed: ' + error.message); return; }
+  loadSiteFormLinks();
+  _showAdminToast('Form link deleted.', 'error');
+}
+
+function escHtml(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function escAttr(s) { return String(s||'').replace(/'/g,'&#39;').replace(/"/g,'&quot;'); }
+
+function _showAdminToast(msg, type = 'success', duration = 3500) {
+  const existing = document.getElementById('_admin-toast');
+  if (existing) existing.remove();
+  const t = document.createElement('div');
+  t.id = '_admin-toast';
+  const bg = type === 'success' ? 'linear-gradient(135deg,#4ade80,#22d3ee)' : 'linear-gradient(135deg,#f87171,#fb923c)';
+  t.style.cssText = `position:fixed;top:80px;left:50%;transform:translateX(-50%) translateY(-8px);background:${bg};color:#0a2a1a;padding:.7rem 1.6rem;border-radius:50px;font-size:.85rem;font-weight:700;z-index:99999;box-shadow:0 8px 24px rgba(0,0,0,.18);opacity:0;transition:all .3s;pointer-events:none;max-width:90vw;text-align:center;`;
+  t.textContent = msg;
+  document.body.appendChild(t);
+  requestAnimationFrame(() => { t.style.opacity = '1'; t.style.transform = 'translateX(-50%) translateY(0)'; });
+  setTimeout(() => { t.style.opacity = '0'; t.style.transform = 'translateX(-50%) translateY(-8px)'; setTimeout(() => t.remove(), 350); }, duration);
+}
+
+async function renderFormTypes() {
+  const grid = document.getElementById('form-types-grid');
+  if (!grid) return;
+
+  // Fetch counts per type
+  try {
+    const { data } = await db.client.from('form_submissions').select('form_type');
+    _formCounts = {};
+    (data || []).forEach(r => { _formCounts[r.form_type] = (_formCounts[r.form_type] || 0) + 1; });
+  } catch(_) {}
+
+  const baseUrl = window.location.origin + window.location.pathname.replace('admin-dashboard.html', '');
+
+  grid.innerHTML = FORM_TYPES.map(f => `
+    <div class="form-type-card">
+      <div class="ftc-icon">${f.icon}</div>
+      <div>
+        <div class="ftc-title">${f.label}</div>
+        <div class="ftc-count">${_formCounts[f.key] || 0} submission${(_formCounts[f.key] || 0) !== 1 ? 's' : ''}</div>
+      </div>
+      <div class="ftc-actions">
+        <button class="ftc-btn qr" onclick="showQrCode('${f.key}','${f.label}','${baseUrl}${f.path}')">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h.01M14 18h.01M18 14h.01M18 18h.01M22 14h.01M22 18h.01"/></svg>
+          Generate QR
+        </button>
+        <button class="ftc-btn" onclick="window.open('${f.path}','_blank')">🔗 Open Form</button>
+        <button class="ftc-btn" onclick="filterFormsByType('${f.key}')">📋 Submissions</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function filterFormsByType(type) {
+  const filter = document.getElementById('form-type-filter');
+  if (filter) filter.value = type;
+  switchFormsTab('submissions', document.querySelector('.forms-tab:nth-child(2)'));
+}
+
+/* ── QR Code Generation ── */
+let _qrCurrentUrl = '';
+
+function showQrCode(formKey, formLabel, url) {
+  _qrCurrentUrl = url;
+  document.getElementById('qr-popup-title').textContent = formLabel + ' — QR Code';
+  document.getElementById('qr-popup-subtitle').textContent = 'Share or display this QR. Scanning opens the form directly.';
+  document.getElementById('qr-url-display').textContent = url;
+
+  const canvas = document.getElementById('qr-canvas');
+  generateQr(canvas, url, 240);
+
+  document.getElementById('qr-popup-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeQrPopup() {
+  document.getElementById('qr-popup-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function generateQr(canvas, url, size) {
+  // Pure JS QR code generator (no external lib needed for basic use)
+  // Uses qrcode-generator compatible approach via inline library
+  if (typeof QRCode !== 'undefined') {
+    QRCode.toCanvas(canvas, url, {
+      width: size, margin: 2,
+      color: { dark: '#1a1a2e', light: '#ffffff' },
+      errorCorrectionLevel: 'H'
+    }, err => { if (err) console.warn('QR error:', err); });
+    return;
+  }
+  // Fallback: draw placeholder with URL text
+  const ctx = canvas.getContext('2d');
+  canvas.width = size; canvas.height = size;
+  ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, size, size);
+  ctx.fillStyle = '#1a1a2e'; ctx.font = '11px monospace'; ctx.textAlign = 'center';
+  // Draw simple QR-like placeholder
+  const msg = 'QR: ' + url.split('/').pop();
+  ctx.fillText('QR Code', size/2, size/2 - 10);
+  ctx.font = '9px monospace'; ctx.fillStyle = '#7c5cfc';
+  ctx.fillText('(install qrcode.js)', size/2, size/2 + 10);
+  ctx.fillStyle = '#1a1a2e';
+  const lines = (url.match(/.{1,28}/g) || []).slice(0,3);
+  lines.forEach((l, i) => ctx.fillText(l, size/2, size/2 + 28 + i*13));
+}
+
+function copyQrUrl() {
+  if (!_qrCurrentUrl) return;
+  navigator.clipboard.writeText(_qrCurrentUrl).then(() => {
+    const btn = event.target; const orig = btn.textContent;
+    btn.textContent = '✅ Copied!';
+    setTimeout(() => { btn.textContent = orig; }, 2000);
+  }).catch(() => { prompt('Copy this link:', _qrCurrentUrl); });
+}
+
+function downloadQr() {
+  const canvas = document.getElementById('qr-canvas');
+  if (!canvas) return;
+  const link = document.createElement('a');
+  link.download = 'skillupnow-qr-' + (_qrCurrentUrl.split('/').pop() || 'form') + '.png';
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+}
+
+function fullscreenQr() {
+  const canvas = document.getElementById('qr-canvas');
+  if (!canvas) return;
+  const win = window.open('', '_blank');
+  win.document.write(`<html><head><title>QR Code - SkillUpNow</title><style>
+    body{margin:0;background:#0d0920;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif;}
+    img{border-radius:16px;border:4px solid #1a1a2e;box-shadow:0 16px 60px rgba(124,92,252,.35);max-width:90vw;}
+    p{color:#b5adff;margin-top:1.5rem;font-size:.9rem;word-break:break-all;max-width:90vw;text-align:center;}
+    h2{color:#fff;margin-bottom:1.5rem;font-size:1.3rem;}
+  </style></head><body>
+    <h2>Scan to open form</h2>
+    <img src="${canvas.toDataURL()}" alt="QR Code">
+    <p>${_qrCurrentUrl}</p>
+  </body></html>`);
+  win.document.close();
+}
+
+// Close QR popup on overlay click
+document.addEventListener('DOMContentLoaded', () => {
+  const overlay = document.getElementById('qr-popup-overlay');
+  if (overlay) overlay.addEventListener('click', e => { if (e.target === overlay) closeQrPopup(); });
+  // Load qrcode.js
+  if (!window.QRCode) {
+    const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js';
+    document.head.appendChild(s);
+  }
+});
+
 async function loadForms() {
-  const typeFilter = document.getElementById('form-type-filter').value;
+  const typeFilter = document.getElementById('form-type-filter')?.value || '';
   let q = db.client.from('form_submissions').select('*');
   if (typeFilter) q = q.eq('form_type', typeFilter);
-  const { data, error } = await q.order('created_at', { ascending: false }).limit(100);
-  if (error) throw error;
+  const { data, error } = await q.order('created_at', { ascending: false }).limit(200);
+  if (error) { console.error('loadForms error:', error); return; }
 
   const forms = data || [];
   const profileMap = await fetchProfileMap(forms.map(f => f.user_id || f.submitted_by_user_id));
   const courseIds = [...new Set(forms.map(f => f.course_id).filter(Boolean))];
   let courseMap = {};
   if (courseIds.length) {
-    const { data: courses, error: courseError } = await db.client.from('courses').select('id, title').in('id', courseIds);
-    if (courseError) throw courseError;
-    courseMap = Object.fromEntries((courses || []).map(course => [course.id, course]));
+    const { data: courses } = await db.client.from('courses').select('id, title').in('id', courseIds);
+    courseMap = Object.fromEntries((courses || []).map(c => [c.id, c]));
   }
 
-  document.getElementById('form-tbody').innerHTML = forms.map(f => `
-    <tr>
-      <td><span class="badge badge-blue">${f.form_type.replace(/_/g,' ')}</span></td>
-      <td>${f.form_data?.name || f.submission_data?.name || profileMap[f.user_id || f.submitted_by_user_id]?.full_name || '—'}</td>
-      <td>${f.form_data?.email || f.submission_data?.email || '—'}</td>
+  document.getElementById('form-tbody').innerHTML = forms.length ? forms.map(f => {
+    const name = f.form_data?.name || f.form_data?.full_name || f.submission_data?.name ||
+                 profileMap[f.user_id || f.submitted_by_user_id]?.full_name || '—';
+    const email = f.form_data?.email || f.submission_data?.email ||
+                  profileMap[f.user_id || f.submitted_by_user_id]?.email || '—';
+    return `<tr>
+      <td><span class="badge badge-blue">${(f.form_type||'').replace(/_/g,' ')}</span></td>
+      <td>${name}</td>
+      <td style="font-size:.8rem;">${email}</td>
       <td>${courseMap[f.course_id]?.title || '—'}</td>
       <td>${fmtDate(f.created_at)}</td>
-      <td>${statusBadge(f.status)}</td>
+      <td>${statusBadge(f.status || 'pending')}</td>
       <td><div class="action-btns">
         <button class="action-btn" onclick="viewFormData('${f.id}')">View</button>
-        <button class="action-btn" onclick="updateFormStatus('${f.id}','reviewed')">Mark Reviewed</button>
+        <button class="action-btn" onclick="updateFormStatus('${f.id}','reviewed')">Reviewed</button>
       </div></td>
-    </tr>`).join('') || '<tr><td colspan="7" class="table-empty">No form submissions</td></tr>';
+    </tr>`;
+  }).join('') : '<tr><td colspan="7" class="table-empty">No submissions found</td></tr>';
+}
+
+async function loadFormReports() {
+  const { data } = await db.client.from('form_submissions').select('form_type, status, created_at');
+  const rows = data || [];
+  const today = new Date().toDateString();
+
+  document.getElementById('fstat-total').textContent = rows.length;
+  document.getElementById('fstat-completed').textContent = rows.filter(r => r.status === 'reviewed' || r.status === 'completed').length;
+  document.getElementById('fstat-pending').textContent = rows.filter(r => !r.status || r.status === 'pending').length;
+  document.getElementById('fstat-today').textContent = rows.filter(r => new Date(r.created_at).toDateString() === today).length;
+
+  // Group by type
+  const byType = {};
+  rows.forEach(r => {
+    if (!byType[r.form_type]) byType[r.form_type] = { total:0, pending:0, completed:0, last:null };
+    byType[r.form_type].total++;
+    if (!r.status || r.status === 'pending') byType[r.form_type].pending++;
+    if (r.status === 'reviewed' || r.status === 'completed') byType[r.form_type].completed++;
+    if (!byType[r.form_type].last || r.created_at > byType[r.form_type].last) byType[r.form_type].last = r.created_at;
+  });
+
+  document.getElementById('form-report-tbody').innerHTML = Object.entries(byType).length ?
+    Object.entries(byType).map(([type, s]) => `<tr>
+      <td><span class="badge badge-blue">${type.replace(/_/g,' ')}</span></td>
+      <td><strong>${s.total}</strong></td>
+      <td>${s.pending}</td>
+      <td>${s.completed}</td>
+      <td>${fmtDate(s.last)}</td>
+    </tr>`).join('') : '<tr><td colspan="5" class="table-empty">No data</td></tr>';
+}
+
+function exportFormsCsv() {
+  const rows = [];
+  document.querySelectorAll('#form-tbody tr').forEach(tr => {
+    const cells = [...tr.querySelectorAll('td')].map(td => '"' + td.textContent.replace(/"/g,'""') + '"');
+    if (cells.length > 1) rows.push(cells.join(','));
+  });
+  if (!rows.length) { alert('No data to export.'); return; }
+  const csv = 'Type,Name,Email,Course,Submitted,Status,Actions\n' + rows.join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = 'form-submissions-' + new Date().toISOString().slice(0,10) + '.csv';
+  link.click();
+}
+
+function viewFormData(id) {
+  db.client.from('form_submissions').select('*').eq('id', id).single().then(({ data }) => {
+    if (!data) { alert('Record not found.'); return; }
+    const d = data.form_data || data.submission_data || {};
+    let txt = 'Form Submission Details\n' + '─'.repeat(40) + '\n';
+    txt += 'Type: ' + data.form_type + '\n';
+    txt += 'Status: ' + (data.status || 'pending') + '\n';
+    txt += 'Submitted: ' + new Date(data.created_at).toLocaleString('en-IN') + '\n\n';
+    txt += 'Form Data:\n';
+    Object.entries(d).forEach(([k, v]) => { txt += '  ' + k + ': ' + v + '\n'; });
+    alert(txt);
+  });
 }
 
 // ===== EDIT COURSE =====
@@ -2188,11 +3078,110 @@ async function initDropdowns() {
   }
 }
 
+// ===== RECORDING FORM RESET =====
+function openRecordingModal() {
+  document.getElementById('rec-title').value = '';
+  document.getElementById('rec-url').value = '';
+  document.getElementById('rec-provider').value = 'google_drive';
+  document.getElementById('rec-date').value = '';
+  initDropdowns();
+  openModal('recording-modal');
+}
+
+// ===== REALTIME SUBSCRIPTIONS =====
+function initRealtime() {
+  const sectionRefresh = {
+    courses: loadCourses,
+    payments: loadPayments,
+    enrollments: loadEnrollments,
+    live_recordings: loadRecordings,
+    user_profiles: loadUsers,
+    course_batches: loadBatches,
+    discounts: loadDiscounts,
+  };
+
+  const tables = ['courses', 'payments', 'enrollments', 'live_recordings', 'user_profiles', 'course_batches', 'discounts'];
+  const tableToSection = {
+    courses: 'courses', payments: 'payments', enrollments: 'enrollments',
+    live_recordings: 'recordings', user_profiles: 'users',
+    course_batches: 'batches', discounts: 'discounts',
+  };
+
+  tables.forEach(table => {
+    db.client.channel(`admin-rt-${table}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table }, () => {
+        const fn = sectionRefresh[table];
+        if (!fn) return;
+        const activeSection = document.querySelector('.section.active');
+        if (!activeSection) return;
+        const secId = activeSection.id.replace('section-', '');
+        if (secId === tableToSection[table]) fn();
+        if (secId === 'dashboard') loadDashboard();
+      })
+      .subscribe();
+  });
+}
+
+// ===== ADMIN KEYBOARD SHORTCUTS =====
+(function setupAdminKeys() {
+  const SECTIONS = [
+    'dashboard','courses','categories','users','mentors',
+    'enrollments','batches','payments','emi','pricing',
+    'discounts','reports','recordings','schedules',
+    'reviews','forms','inquiries',
+  ];
+  // Map single letter shortcuts → section keys (used with Alt)
+  const ALT_MAP = {
+    d: 'dashboard', c: 'courses', u: 'users', m: 'mentors',
+    e: 'enrollments', b: 'batches', p: 'payments', r: 'reports',
+    f: 'forms', i: 'inquiries', s: 'schedules',
+  };
+
+  function goToSection(sec) {
+    const item = document.querySelector(`.nav-item[data-section="${sec}"]`);
+    if (item) item.click();
+  }
+
+  document.addEventListener('keydown', ev => {
+    const tag = document.activeElement?.tagName?.toLowerCase();
+    const inInput = tag === 'input' || tag === 'textarea' || tag === 'select' || document.activeElement?.isContentEditable;
+
+    // Escape — close topmost open modal
+    if (ev.key === 'Escape') {
+      const modal = document.querySelector('.modal-overlay.open');
+      if (modal) { modal.classList.remove('open'); ev.preventDefault(); return; }
+    }
+
+    if (inInput) return;
+
+    // Ctrl+F — focus quick search
+    if ((ev.ctrlKey || ev.metaKey) && ev.key === 'f') {
+      const qs = document.getElementById('quick-search');
+      if (qs) { qs.focus(); ev.preventDefault(); return; }
+    }
+
+    // Alt + letter — jump to section
+    if (ev.altKey && !ev.ctrlKey && !ev.metaKey) {
+      const sec = ALT_MAP[ev.key?.toLowerCase()];
+      if (sec) { ev.preventDefault(); goToSection(sec); return; }
+    }
+
+    // ? — show shortcut help toast
+    if (ev.key === '?') {
+      _showAdminToast(
+        'Shortcuts: Alt+D Dashboard · Alt+C Courses · Alt+U Users · Alt+M Mentors · Alt+E Enrollments · Alt+P Payments · Alt+F Forms · Ctrl+F Search · Esc Close modal',
+        'success', 6000
+      );
+    }
+  });
+})();
+
 // ===== INIT =====
 (async () => {
   await checkAdminAuth();
   loadDashboard();
   initDropdowns();
+  initRealtime();
 })();
 </script>
 </body>

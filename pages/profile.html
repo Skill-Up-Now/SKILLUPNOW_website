@@ -36,7 +36,31 @@
       background:#fff; border:2px solid rgba(255,255,255,0.5);
       display:flex; align-items:center; justify-content:center;
       font-size:0.75rem; cursor:pointer; color:var(--v1);
+      transition:transform .2s;
     }
+    /* Avatar click menu (works on desktop, tablet, mobile) */
+    .avatar-wrap { cursor:pointer; }
+    .avatar-hover-menu {
+      position:absolute; top:calc(100% + 10px); left:50%; transform:translateX(-50%) scale(.95) translateY(-6px);
+      background:rgba(18,12,42,.96); border:1.5px solid rgba(124,92,252,.3);
+      border-radius:16px; padding:.5rem; min-width:170px;
+      box-shadow:0 16px 48px rgba(0,0,0,.45), 0 4px 16px rgba(124,92,252,.2);
+      opacity:0; visibility:hidden; pointer-events:none;
+      transition:all .2s cubic-bezier(.23,1,.32,1);
+      z-index:999; backdrop-filter:blur(16px);
+    }
+    .avatar-hover-menu.open { opacity:1; visibility:visible; pointer-events:all; transform:translateX(-50%) scale(1) translateY(0); }
+    .ahm-item {
+      display:flex; align-items:center; gap:.65rem;
+      padding:.6rem .85rem; border-radius:10px; cursor:pointer;
+      font-size:.82rem; font-weight:600; color:rgba(200,191,255,.85);
+      transition:all .15s; white-space:nowrap; text-decoration:none;
+    }
+    .ahm-item:hover { background:rgba(124,92,252,.18); color:#fff; }
+    .ahm-item.danger:hover { background:rgba(239,68,68,.15); color:#ff6b6b; }
+    .ahm-icon { font-size:.95rem; width:18px; text-align:center; flex-shrink:0; }
+    .ahm-divider { height:1px; background:rgba(124,92,252,.15); margin:.35rem .5rem; }
+    .ahm-item-hidden { display:none; }
     .profile-info h2 { color:#fff; font-size:1.5rem; font-weight:800; }
     .profile-info p  { color:rgba(255,255,255,0.75); font-size:0.85rem; }
     .profile-badges { display:flex; gap:0.5rem; margin-top:0.5rem; flex-wrap:wrap; }
@@ -210,13 +234,32 @@
   <!-- Profile Hero -->
   <div class="profile-hero">
     <div class="profile-hero-inner">
-      <div class="avatar-wrap">
+      <div class="avatar-wrap" id="avatar-wrap" onclick="toggleAvatarMenu(event)">
         <div class="avatar" id="profile-avatar">
           <img id="avatar-img" src="" alt="" style="display:none">
           <span id="avatar-initial">U</span>
         </div>
-        <div class="avatar-edit" onclick="document.getElementById('avatar-upload').click()" title="Change photo">✏</div>
+        <div class="avatar-edit" title="Options">✏</div>
         <input type="file" id="avatar-upload" accept="image/*" style="display:none" onchange="uploadAvatar(this)">
+        <!-- Click-toggle menu (works on all devices) -->
+        <div class="avatar-hover-menu" id="avatar-menu">
+          <div class="ahm-item" onclick="document.getElementById('avatar-upload').click()">
+            <span class="ahm-icon">📷</span> Change Photo
+          </div>
+          <div class="ahm-item ahm-item-hidden" id="ahm-remove-photo" onclick="removeAvatar()">
+            <span class="ahm-icon">🗑️</span> Remove Photo
+          </div>
+          <div class="ahm-item" onclick="switchTab('account')">
+            <span class="ahm-icon">✏️</span> Edit Profile
+          </div>
+          <div class="ahm-item" onclick="switchTab('emi')">
+            <span class="ahm-icon">📅</span> My EMI
+          </div>
+          <div class="ahm-divider"></div>
+          <div class="ahm-item danger" onclick="window.profileNav?.logout()">
+            <span class="ahm-icon">🚪</span> Sign Out
+          </div>
+        </div>
       </div>
       <div class="profile-info">
         <h2 id="hero-name">Loading…</h2>
@@ -413,26 +456,53 @@
 <script src="../js/theme.js"></script>
 <script src="../js/profile-nav.js"></script>
 <script>
-const db = new SupabaseConfig();
+// Use global supabase client — consistent across all pages
+function _db() { return window.supabaseConfig?.client || null; }
 let currentUser = null, userProfile = null;
 const fmtCurr = v => '₹' + Number(v||0).toLocaleString('en-IN');
 const fmtDate = d => d ? new Date(d).toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' }) : '—';
 
+// Avatar menu toggle — click/tap works on all devices
+function toggleAvatarMenu(e) {
+  e.stopPropagation();
+  const menu = document.getElementById('avatar-menu');
+  menu.classList.toggle('open');
+}
+document.addEventListener('click', () => {
+  document.getElementById('avatar-menu')?.classList.remove('open');
+});
+
 async function init() {
-  const { data: { session } } = await db.client.auth.getSession();
+  let tries = 0;
+  while (!_db() && tries++ < 20) await new Promise(r => setTimeout(r, 150));
+  if (!_db()) { window.location.href = '../index.html?login=1'; return; }
+  const { data: { session } } = await _db().auth.getSession();
   if (!session) { window.location.href = '../index.html?login=1'; return; }
   currentUser = session.user;
 
   // Check URL tab param
-  const urlTab = new URLSearchParams(window.location.search).get('tab');
+  const urlParams = new URLSearchParams(window.location.search);
+  const urlTab = urlParams.get('tab');
   if (urlTab) switchTab(urlTab);
+
+  // Show enrollment success toast
+  const enrolledCourse = urlParams.get('enrolled');
+  if (enrolledCourse) {
+    const toast = document.createElement('div');
+    toast.style.cssText = 'position:fixed;top:90px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#4ade80,#22d3ee);color:#0a2a1a;padding:0.75rem 1.5rem;border-radius:999px;font-weight:700;font-size:0.9rem;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,0.2);animation:fadeIn 0.3s ease';
+    toast.textContent = `✓ Enrolled in ${decodeURIComponent(enrolledCourse)}!`;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 4000);
+    // Clean URL
+    history.replaceState({}, '', window.location.pathname + (urlTab ? '?tab=' + urlTab : ''));
+  }
 
   await loadProfile();
   loadLearningPath();
 }
 
 async function loadProfile() {
-  const { data } = await db.client.from('user_profiles').select('*').eq('id', currentUser.id).single();
+  const { data } = await _db().from('user_profiles').select('*').eq('user_id', currentUser.id).single();
   userProfile = data;
   if (!data) return;
 
@@ -446,9 +516,8 @@ async function loadProfile() {
   document.getElementById('reward-points').textContent = data.reward_points || 0;
 
   if (data.profile_picture_url) {
-    document.getElementById('avatar-img').src = data.profile_picture_url;
-    document.getElementById('avatar-img').style.display = 'block';
-    document.getElementById('avatar-initial').style.display = 'none';
+    _setAvatarImage(data.profile_picture_url);
+    document.getElementById('ahm-remove-photo').classList.remove('ahm-item-hidden');
   }
 
   // Edit form
@@ -465,7 +534,7 @@ async function loadProfile() {
 }
 
 async function loadLearningPath() {
-  const { data: enrollments } = await db.client.from('enrollments')
+  const { data: enrollments } = await _db().from('enrollments')
     .select('*, courses(title, thumbnail_url, duration_days, duration_hours, course_categories(name))')
     .eq('student_user_id', currentUser.id).order('created_at', { ascending: false });
 
@@ -523,7 +592,7 @@ async function loadLearningPath() {
 }
 
 async function loadPayments(enrollments) {
-  const { data: payments } = await db.client.from('payments').select('*, enrollments(courses(title))').eq('student_user_id', currentUser.id).order('paid_at', { ascending: false });
+  const { data: payments } = await _db().from('payments').select('*, enrollments(courses(title))').eq('student_user_id', currentUser.id).order('paid_at', { ascending: false });
 
   let totalFee = 0, totalPaid = 0, totalBal = 0;
   (enrollments||[]).forEach(e => { totalFee += e.net_amount||0; totalPaid += e.paid_amount||0; totalBal += e.due_amount||0; });
@@ -550,10 +619,10 @@ async function loadPayments(enrollments) {
 
 async function loadEmi() {
   // payment_schedules links via enrollment_id, need user's enrollment IDs first
-  const { data: myEnrollIds } = await db.client.from('enrollments').select('id').eq('student_user_id', currentUser.id);
+  const { data: myEnrollIds } = await _db().from('enrollments').select('id').eq('student_user_id', currentUser.id);
   const ids = (myEnrollIds||[]).map(e => e.id);
   if (!ids.length) return;
-  const { data } = await db.client.from('payment_schedules')
+  const { data } = await _db().from('payment_schedules')
     .select('*, enrollments(courses(title))').in('enrollment_id', ids).order('due_at');
   if (!data?.length) return;
   const statusIcon = { paid:'✅', pending:'🕐', overdue:'⚠️', waived:'🚫' };
@@ -573,14 +642,14 @@ async function loadEmi() {
 }
 
 async function loadSchedule() {
-  const { data: enrollments } = await db.client.from('enrollments').select('batch_id').eq('student_user_id', currentUser.id).eq('enrollment_status', 'active');
+  const { data: enrollments } = await _db().from('enrollments').select('batch_id').eq('student_user_id', currentUser.id).eq('enrollment_status', 'active');
   const batchIds = (enrollments||[]).map(e => e.batch_id).filter(Boolean);
   if (!batchIds.length) return;
 
   const now = new Date().toISOString();
   // class_sessions table: scheduled_start_at, session_status, session_title, meeting_url
-  const { data: upcoming } = await db.client.from('class_sessions').select('*').in('batch_id', batchIds).eq('session_status','scheduled').gte('scheduled_start_at', now).order('scheduled_start_at').limit(5);
-  const { data: past } = await db.client.from('class_sessions').select('*, live_recordings(external_url)').in('batch_id', batchIds).eq('session_status','completed').lt('scheduled_start_at', now).order('scheduled_start_at', { ascending: false }).limit(5);
+  const { data: upcoming } = await _db().from('class_sessions').select('*').in('batch_id', batchIds).eq('session_status','scheduled').gte('scheduled_start_at', now).order('scheduled_start_at').limit(5);
+  const { data: past } = await _db().from('class_sessions').select('*, live_recordings(external_url)').in('batch_id', batchIds).eq('session_status','completed').lt('scheduled_start_at', now).order('scheduled_start_at', { ascending: false }).limit(5);
 
   if (upcoming?.length) {
     document.getElementById('schedule-list').innerHTML = upcoming.map(s => {
@@ -641,7 +710,7 @@ async function saveProfile() {
     postal_code: document.getElementById('edit-pincode').value.trim(),
     address:   document.getElementById('edit-address').value.trim(),
   };
-  const { error } = await db.client.from('user_profiles').update(payload).eq('id', currentUser.id);
+  const { error } = await _db().from('user_profiles').update(payload).eq('user_id', currentUser.id);
   if (error) { showMsg('err', error.message); return; }
   showMsg('suc', 'Profile updated successfully!');
   document.getElementById('hero-name').textContent = payload.full_name;
@@ -653,7 +722,7 @@ async function changePassword() {
   const conf = document.getElementById('conf-pass').value;
   if (!newP || newP !== conf) { showMsg('err', 'New passwords do not match.'); return; }
   if (newP.length < 8) { showMsg('err', 'Password must be at least 8 characters.'); return; }
-  const { error } = await db.client.auth.updateUser({ password: newP });
+  const { error } = await _db().auth.updateUser({ password: newP });
   if (error) { showMsg('err', error.message); return; }
   showMsg('suc', 'Password updated successfully!');
   document.getElementById('curr-pass').value = '';
@@ -664,16 +733,81 @@ async function changePassword() {
 async function uploadAvatar(input) {
   const file = input.files[0];
   if (!file) return;
+  if (!currentUser?.id) { showMsg('err', 'Not logged in. Please refresh and try again.'); return; }
   if (file.size > 2 * 1024 * 1024) { showMsg('err', 'Image must be under 2 MB.'); return; }
-  const ext = file.name.split('.').pop();
-  const { data, error } = await db.client.storage.from('avatars').upload(`${currentUser.id}/avatar.${ext}`, file, { upsert: true });
-  if (error) { showMsg('err', error.message); return; }
-  const url = db.client.storage.from('avatars').getPublicUrl(data.path).data.publicUrl;
-  await db.client.from('user_profiles').update({ profile_picture_url: url }).eq('id', currentUser.id);
-  document.getElementById('avatar-img').src = url + '?t=' + Date.now();
+  const allowed = ['jpg','jpeg','png','webp','gif'];
+  const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
+  if (!allowed.includes(ext)) { showMsg('err', 'Only JPG, PNG, WEBP, or GIF images are allowed.'); return; }
+
+  showMsg('suc', 'Uploading photo…');
+  try {
+    const path = `${currentUser.id}/avatar.${ext}`;
+    const { data: uploadData, error: uploadErr } = await _db().storage
+      .from('avatars').upload(path, file, { upsert: true, contentType: file.type });
+    if (uploadErr) throw new Error('Upload failed: ' + uploadErr.message);
+
+    const filePath = uploadData?.path || path;
+    const { data: urlData } = _db().storage.from('avatars').getPublicUrl(filePath);
+    const url = urlData?.publicUrl;
+    if (!url) throw new Error('Could not retrieve image URL after upload.');
+
+    const { error: updateErr } = await _db()
+      .from('user_profiles')
+      .update({ profile_picture_url: url })
+      .eq('user_id', currentUser.id);
+    if (updateErr) throw new Error('Profile update failed: ' + updateErr.message);
+
+    const bust = url + '?t=' + Date.now();
+    _setAvatarImage(bust);
+    _syncNavAvatar(bust);
+    document.getElementById('ahm-remove-photo').classList.remove('ahm-item-hidden');
+    showMsg('suc', 'Profile photo updated!');
+  } catch(e) {
+    console.error('Avatar upload error:', e);
+    showMsg('err', e.message || 'Upload failed. Please try again.');
+  }
+  input.value = '';
+}
+
+async function removeAvatar() {
+  if (!confirm('Remove your profile photo?')) return;
+  try {
+    const { error } = await _db().from('user_profiles')
+      .update({ profile_picture_url: null })
+      .eq('user_id', currentUser.id);
+    if (error) throw error;
+    document.getElementById('avatar-img').style.display = 'none';
+    document.getElementById('avatar-initial').style.display = '';
+    document.getElementById('ahm-remove-photo').classList.add('ahm-item-hidden');
+    document.getElementById('avatar-menu').classList.remove('open');
+    const navBtn = document.getElementById('profile-btn');
+    if (navBtn) {
+      navBtn.innerHTML = '';
+      navBtn.textContent = (currentUser.email||'U')[0].toUpperCase();
+      navBtn.style.padding = ''; navBtn.style.overflow = '';
+    }
+    showMsg('suc', 'Profile photo removed.');
+  } catch(e) {
+    showMsg('err', e.message || 'Could not remove photo. Please try again.');
+  }
+}
+
+function _setAvatarImage(url) {
+  document.getElementById('avatar-img').src = url;
   document.getElementById('avatar-img').style.display = 'block';
   document.getElementById('avatar-initial').style.display = 'none';
-  showMsg('suc', 'Profile photo updated!');
+}
+
+function _syncNavAvatar(url) {
+  const navBtn = document.getElementById('profile-btn');
+  if (!navBtn) return;
+  navBtn.textContent = '';
+  navBtn.style.padding = '0'; navBtn.style.overflow = 'hidden';
+  const img = document.createElement('img');
+  img.src = url;
+  img.style.cssText = 'width:100%;height:100%;border-radius:50%;object-fit:cover;display:block;';
+  img.onerror = () => { navBtn.textContent = (currentUser.email||'U')[0].toUpperCase(); navBtn.style.padding=''; navBtn.style.overflow=''; };
+  navBtn.appendChild(img);
 }
 
 function downloadInvoice(paymentId, invoiceNo) {
@@ -706,47 +840,54 @@ function showMsg(type, msg) {
 }
 
 // ==================== LOGIN STREAK ====================
+function _getStreakDates() {
+  if (!currentUser?.id) return [];
+  const key = 'pn_streak_v2_' + currentUser.id;
+  try { const d = JSON.parse(localStorage.getItem(key) || '[]'); return Array.isArray(d) ? d : []; }
+  catch(_) { return []; }
+}
+
 function loadStreakData() {
   try {
-    const today = new Date().toISOString().slice(0, 10);
-    // Uses same key as profile-nav.js: pn_streak = { date, count, last }
-    const stored = JSON.parse(localStorage.getItem('pn_streak') || '{"date":"","count":0,"last":""}');
-    const current = stored.date === today ? stored.count : stored.count || 0;
+    const today   = new Date().toISOString().slice(0, 10);
+    const dates   = _getStreakDates();
+    const dateSet = new Set(dates);
 
-    if (current < 1) return; // No streak yet
+    // Calculate streaks using the same static helpers from ProfileNavigationManager
+    const current = ProfileNavigationManager.calcCurrentStreak(dates);
+    const longest = ProfileNavigationManager.calcLongestStreak(dates);
+    const total   = dates.length;
 
-    // For longest/total we can only show current streak (no full history stored)
-    document.getElementById('ls-streak').textContent = current + (current === 1 ? ' day' : ' days');
+    if (current < 1) return; // Nothing to show
+
+    document.getElementById('ls-streak').textContent     = current + (current === 1 ? ' day' : ' days');
     document.getElementById('streak-current').textContent = current;
-    document.getElementById('streak-longest').textContent = current; // best we can show without full history
-    document.getElementById('streak-total').textContent = current;
+    document.getElementById('streak-longest').textContent = longest;
+    document.getElementById('streak-total').textContent   = total;
 
     // Hero badge
     const heroBadge = document.getElementById('hero-streak');
     const heroCount = document.getElementById('hero-streak-count');
-    if (heroBadge && heroCount) {
-      heroCount.textContent = current;
-      heroBadge.style.display = '';
-    }
+    if (heroBadge && heroCount) { heroCount.textContent = current; heroBadge.style.display = ''; }
 
     // Show streak card
     const card = document.getElementById('streak-card');
     if (card) card.style.display = '';
 
-    // Render 30-day calendar — shade backwards from today based on streak count
+    // Render accurate 60-day calendar using actual login dates
     const cal = document.getElementById('streak-calendar');
     if (cal) {
       let html = '';
-      for (let i = 29; i >= 0; i--) {
-        const d = new Date();
+      for (let i = 59; i >= 0; i--) {
+        const d  = new Date();
         d.setDate(d.getDate() - i);
-        const ds = d.toISOString().slice(0, 10);
+        const ds      = d.toISOString().slice(0, 10);
         const isToday = ds === today;
-        // A day is "logged" if it falls within the current streak window
-        const logged = i < current;
-        const color = logged ? (isToday ? '#f59e0b' : '#7c5cfc') : 'var(--bg2)';
-        const border = isToday ? '2px solid #f59e0b' : '1px solid var(--border)';
-        html += `<div title="${ds}${isToday ? ' (today)' : ''}" style="width:20px;height:20px;border-radius:4px;background:${color};border:${border};opacity:${logged ? 1 : 0.35};transition:transform .15s;" onmouseover="this.style.transform='scale(1.3)'" onmouseout="this.style.transform=''"></div>`;
+        const logged  = dateSet.has(ds);
+        const color   = logged ? (isToday ? '#f59e0b' : '#7c5cfc') : 'var(--bg2)';
+        const border  = isToday ? '2px solid #f59e0b' : '1px solid var(--border)';
+        const opacity = logged ? '1' : '0.35';
+        html += `<div title="${ds}${isToday ? ' (today)' : ''}" style="width:18px;height:18px;border-radius:4px;background:${color};border:${border};opacity:${opacity};transition:transform .15s;cursor:default;" onmouseover="this.style.transform='scale(1.35)'" onmouseout="this.style.transform=''"></div>`;
       }
       cal.innerHTML = html;
     }

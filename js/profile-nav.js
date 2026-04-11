@@ -18,6 +18,7 @@ class ProfileNavigationManager {
   }
 
   async init() {
+    this.injectFavicon();
     this.injectNeuralCursor(); // Always inject cursor — including admin and mentor pages
     if (this.isAdminPage || this.isMentorPage) return;
     this.injectThemeSwitcher(); // restores saved theme + injects CSS; setupBtn() is no-op (nav not built yet)
@@ -31,6 +32,52 @@ class ProfileNavigationManager {
     this.injectAuthModal();
     await this.checkUserSession();
     this.handleUrlAuth();
+    this.setupKeyboardShortcuts();
+  }
+
+  /* ── Global keyboard shortcuts ── */
+  setupKeyboardShortcuts() {
+    const r = this.rootPfx, p = this.pagesPfx;
+    document.addEventListener('keydown', (e) => {
+      const tag = document.activeElement?.tagName?.toLowerCase();
+      const inInput = tag === 'input' || tag === 'textarea' || tag === 'select' || document.activeElement?.isContentEditable;
+
+      // Escape — close any open modal / overlay
+      if (e.key === 'Escape') {
+        const overlay = document.querySelector('.pn-overlay.open, .enroll-overlay.open, .ec-overlay.open, #enroll-overlay.open');
+        if (overlay) { overlay.classList.remove('open'); document.body.style.overflow = ''; e.preventDefault(); return; }
+        window._pnClose?.();
+        return;
+      }
+
+      if (inInput) return; // don't fire nav shortcuts while typing
+
+      // / — focus search bar (courses page)
+      if (e.key === '/' && !e.altKey && !e.ctrlKey && !e.metaKey) {
+        const search = document.getElementById('search-input') || document.querySelector('input[type="search"]');
+        if (search) { search.focus(); e.preventDefault(); return; }
+      }
+
+      // Alt + key — page navigation
+      if (e.altKey && !e.ctrlKey && !e.metaKey) {
+        const nav = {
+          h: r + 'index.html',
+          c: p + 'courses.html',
+          f: p + 'forms.html',
+          e: p + 'contact-enquiry.html',
+          p: p + 'profile.html',
+        };
+        const dest = nav[e.key?.toLowerCase()];
+        if (dest) { e.preventDefault(); window.location.href = dest; return; }
+
+        // Alt+L — login/logout toggle
+        if (e.key?.toLowerCase() === 'l') {
+          e.preventDefault();
+          if (this.currentUser) { this.logout?.(); } else { this.openLoginModal?.(); }
+          return;
+        }
+      }
+    });
   }
 
   /* ── Handle ?login=1 / ?signup=1 URL params ── */
@@ -46,13 +93,20 @@ class ProfileNavigationManager {
     document.querySelectorAll('.site-year').forEach(el => { el.textContent = year; });
   }
 
-  /* ── Neural cursor: inject neural-cursor.js dynamically ── */
+  /* ── Favicon ── */
+  injectFavicon() {
+    if (document.querySelector('link[rel~="icon"]')) return;
+    const link = document.createElement('link');
+    link.rel = 'icon';
+    link.type = 'image/png';
+    link.href = this.rootPfx + 'icon/Favicon.png';
+    document.head.appendChild(link);
+  }
+
+  /* ── Neural cursor: disabled — hand cursor handled by CSS only ── */
   injectNeuralCursor() {
-    if (document.getElementById('nc-canvas')) return;  // already loaded
-    const s = document.createElement('script');
-    s.src = this.rootPfx + 'js/neural-cursor.js';
-    s.defer = true;
-    document.head.appendChild(s);
+    // Cursor animations removed per design requirements.
+    // Interactive elements get cursor:pointer via CSS.
   }
 
   /* ── Scroll: add .scrolled class to nav for effects ── */
@@ -213,21 +267,76 @@ class ProfileNavigationManager {
     setupBtn();
   }
 
-  /* ── Login Streak tracking ── */
+  /* ── Login Streak tracking (per-user, full date history) ── */
+  _streakKey() {
+    const uid = this.currentUser?.id;
+    return uid ? 'pn_streak_v2_' + uid : null;
+  }
+
+  /* Returns sorted unique array of YYYY-MM-DD login dates (max 365) */
+  _getLoginDates() {
+    const key = this._streakKey();
+    if (!key) return [];
+    try {
+      const stored = JSON.parse(localStorage.getItem(key) || '[]');
+      return Array.isArray(stored) ? stored : [];
+    } catch(_) { return []; }
+  }
+
+  /* Records today's login and returns current streak count */
   updateLoginStreak() {
-    const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
-    const stored = JSON.parse(localStorage.getItem('pn_streak') || '{"date":"","count":0,"last":""}');
-    if (stored.date === today) return stored.count; // Already logged today
-    const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
-    const newCount = (stored.last === yesterday) ? stored.count + 1 : 1;
-    localStorage.setItem('pn_streak', JSON.stringify({ date: today, count: newCount, last: today }));
-    return newCount;
+    const key = this._streakKey();
+    if (!key) return 0;
+    const today = new Date().toISOString().slice(0, 10);
+    let dates = this._getLoginDates();
+    if (!dates.includes(today)) {
+      dates.push(today);
+      dates.sort();
+      if (dates.length > 365) dates = dates.slice(-365); // keep last 365 days
+      localStorage.setItem(key, JSON.stringify(dates));
+    }
+    return ProfileNavigationManager.calcCurrentStreak(dates);
   }
 
   getLoginStreak() {
-    const stored = JSON.parse(localStorage.getItem('pn_streak') || '{"date":"","count":0}');
+    return ProfileNavigationManager.calcCurrentStreak(this._getLoginDates());
+  }
+
+  /* Static helpers used by both profile-nav.js and profile.html */
+  static calcCurrentStreak(dates) {
+    if (!dates.length) return 0;
     const today = new Date().toISOString().slice(0, 10);
-    return stored.date === today ? stored.count : stored.count || 0;
+    const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+    // Streak is alive if logged in today or yesterday (so closing browser overnight doesn't break it)
+    const sorted = [...new Set(dates)].sort().reverse();
+    if (sorted[0] !== today && sorted[0] !== yesterday) return 0;
+    let streak = 0;
+    let expected = sorted[0];
+    for (const d of sorted) {
+      if (d === expected) {
+        streak++;
+        const dt = new Date(expected);
+        dt.setDate(dt.getDate() - 1);
+        expected = dt.toISOString().slice(0, 10);
+      } else {
+        break;
+      }
+    }
+    return streak;
+  }
+
+  static calcLongestStreak(dates) {
+    if (!dates.length) return 0;
+    const sorted = [...new Set(dates)].sort();
+    let longest = 1, current = 1;
+    for (let i = 1; i < sorted.length; i++) {
+      const prev = new Date(sorted[i - 1]);
+      const curr = new Date(sorted[i]);
+      const diff = (curr - prev) / 86400000;
+      if (diff === 1) { current++; longest = Math.max(longest, current); }
+      else { current = 1; }
+    }
+    return longest;
   }
 
   showStreakBadge() {
@@ -255,15 +364,12 @@ class ProfileNavigationManager {
     const isCourses = path.includes('courses');
     const isEnquiry = path.includes('contact-enquiry');
     const isVideos  = path.includes('recording-videos');
+    const isForms   = path.includes('forms');
 
     return `
-      <a href="${r}index.html" class="nav-logo" aria-label="SkillUpNow Home">
-        <div class="logo-icon">
-          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-        <span class="nav-logo-text">SkillUpNow</span>
+      <a href="${r}index.html" class="nav-logo" aria-label="SkillUpNow Home" style="padding:0;background:none;gap:0;">
+        <img src="${r}icon/Main logo.png" alt="SkillUpNow" style="height:44px;width:auto;object-fit:contain;display:block;" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+        <span style="display:none;align-items:center;gap:.5rem;font-size:1.1rem;font-weight:800;">SkillUpNow</span>
       </a>
 
       <ul class="nav-links" id="nav-links-list" role="navigation" aria-label="Main navigation">
@@ -271,6 +377,7 @@ class ProfileNavigationManager {
         <li><a href="${p}courses.html"                   class="nav-link-item ${isCourses ? 'active' : ''}">Courses</a></li>
         <li><a href="${p}recording-videos.html"          class="nav-link-item ${isVideos  ? 'active' : ''}">
           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="margin-right:.25rem;vertical-align:-1px"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>Videos</a></li>
+        <li><a href="${p}forms.html" class="nav-link-item ${isForms ? 'active' : ''}">Forms</a></li>
         <li><a href="${p}contact-enquiry.html"           class="nav-link-item ${isEnquiry ? 'active' : ''}">Enquiry</a></li>
       </ul>
 
@@ -340,80 +447,92 @@ class ProfileNavigationManager {
     const r = this.rootPfx;
     const p = this.pagesPfx;
     return `
+      <style>
+        /* ── Single-line footer ── */
+        .footer-inner {
+          display: flex; align-items: flex-start; flex-wrap: nowrap;
+          gap: 0 2rem;
+          max-width: 1400px; margin: 0 auto;
+          padding: 2rem 5vw 1.5rem;
+        }
+        .pn-f-logo  { flex: 0 0 auto; display:flex; align-items:flex-start; padding-top:.1rem; margin-right:.25rem; }
+        .pn-f-contact { flex: 1.4; min-width: 0; display:flex; flex-direction:column; gap:.3rem; }
+        .pn-f-contact-row { display:flex; flex-wrap:wrap; gap:.25rem .9rem; align-items:center; margin-top:.15rem; }
+        .pn-f-platform { flex: 1; min-width: 0; }
+        .pn-f-company  { flex: 1; min-width: 0; }
+        .pn-footer-phone { color:#4ade80; }
+        @media(max-width:900px){
+          .footer-inner { flex-wrap:wrap; gap:1.5rem 2rem; }
+          .pn-f-logo { flex: 0 0 auto; }
+          .pn-f-contact { flex: 1 1 200px; }
+          .pn-f-platform { flex: 1 1 130px; }
+          .pn-f-company  { flex: 1 1 130px; }
+        }
+        @media(max-width:480px){
+          .footer-inner { flex-direction:column; gap:1.25rem; }
+        }
+      </style>
+
       <div class="footer-inner">
-        <div class="footer-brand-col">
-          <a href="${r}index.html" class="nav-logo" style="margin-bottom:1.2rem;display:inline-flex;">
-            <div class="logo-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-            <span class="nav-logo-text">SkillUpNow</span>
+        <!-- Logo -->
+        <div class="pn-f-logo">
+          <a href="${r}index.html" aria-label="SkillUpNow Home" style="display:block;">
+            <img src="${r}icon/Main logo.png" alt="SkillUpNow" style="height:48px;width:auto;object-fit:contain;" onerror="this.alt='SkillUpNow';this.style.display='none';">
           </a>
-          <p class="footer-tagline">Premium IT &amp; professional skills training. Mentor-led, live + recorded, with EMI options.</p>
-          <div class="footer-contacts">
-            <a href="mailto:skillupnow.off@gmail.com" class="footer-contact-link">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
-              skillupnow.off@gmail.com
-            </a>
-            <a href="tel:+916381721061" class="footer-contact-link">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.17 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.08 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.09 8.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21 16z"/></svg>
-              +91 6381 721 061
+        </div>
+
+        <!-- Contact -->
+        <div class="pn-f-contact">
+          <h5 class="footer-col-title" style="margin-bottom:.2rem;">Contact</h5>
+          <div class="pn-f-contact-row">
+            <a href="mailto:skillupnowoff@gmail.com" class="footer-contact-link" style="font-size:.79rem;white-space:nowrap;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#7c5cfc" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+              skillupnowoff@gmail.com
             </a>
           </div>
-          <div class="footer-ssl-badge">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
-            SSL Secured
+          <div class="pn-f-contact-row">
+            <a href="tel:+916383633054" class="footer-contact-link pn-footer-phone" style="font-size:.79rem;white-space:nowrap;">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.17 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.08 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.09 8.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21 16z"/></svg>
+              +91 63836 33054
+            </a>
+            <a href="tel:+916381721061" class="footer-contact-link pn-footer-phone" style="font-size:.79rem;white-space:nowrap;">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.17 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.08 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.09 8.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21 16z"/></svg>
+              +91 63817 21061
+            </a>
           </div>
         </div>
 
-        <div class="footer-links-col">
-          <h5 class="footer-col-title">Platform</h5>
+        <!-- Platform links -->
+        <div class="pn-f-platform">
+          <h5 class="footer-col-title" style="margin-bottom:.3rem;">Platform</h5>
           <ul class="footer-col-links">
             <li><a href="${p}courses.html"         class="footer-link">All Courses</a></li>
-            <li><a href="${p}pamphlet.html"         class="footer-link">Course Brochure</a></li>
+            <li><a href="${p}recording-videos.html" class="footer-link">Recorded Sessions</a></li>
             <li><a href="${p}emi-application.html"  class="footer-link">EMI Options</a></li>
-            <li><a href="${p}feedback.html"         class="footer-link">Student Reviews</a></li>
+            <li><a href="${p}pamphlet.html"          class="footer-link">Brochure</a></li>
           </ul>
         </div>
 
-        <div class="footer-links-col">
-          <h5 class="footer-col-title">For Mentors</h5>
+        <!-- Company links -->
+        <div class="pn-f-company">
+          <h5 class="footer-col-title" style="margin-bottom:.3rem;">Company</h5>
           <ul class="footer-col-links">
-            <li><a href="${p}mentor-signup.html"    class="footer-link">Become a Mentor</a></li>
-            <li><a href="${p}mentor-dashboard.html" class="footer-link">Mentor Dashboard</a></li>
-          </ul>
-          <h5 class="footer-col-title" style="margin-top:1.5rem;">Company</h5>
-          <ul class="footer-col-links">
-            <li><a href="${r}index.html#about-us"   class="footer-link">About Us</a></li>
+            <li><a href="${r}index.html#about-us"  class="footer-link">About Us</a></li>
+            <li><a href="${p}contact-enquiry.html"  class="footer-link">Contact</a></li>
             <li><a href="#"                         class="footer-link">Privacy Policy</a></li>
             <li><a href="#"                         class="footer-link">Terms of Service</a></li>
           </ul>
         </div>
-
-        <!-- Reviews column -->
-        <div class="footer-links-col" id="footer-reviews-col">
-          <h5 class="footer-col-title">What Students Say</h5>
-          <div id="footer-review-list" style="display:flex;flex-direction:column;gap:.75rem;">
-            <div style="font-size:.8rem;color:var(--txt4);">Loading reviews…</div>
-          </div>
-          <a href="${p}feedback.html" class="footer-link" style="display:inline-flex;align-items:center;gap:.3rem;margin-top:.9rem;font-size:.78rem;font-weight:600;color:var(--v1);">
-            See all reviews
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-          </a>
-        </div>
       </div>
 
       <div class="footer-bottom">
-        <p class="footer-copy">© <span class="site-year">${new Date().getFullYear()}</span> SkillUpNow. All rights reserved. Chennai, Tamil Nadu.</p>
+        <p class="footer-copy">© 2026, SkillUpNow, Chennai. All rights reserved.</p>
         <div class="footer-socials">
-          <a href="#" class="footer-social-icon" aria-label="Facebook" title="Facebook">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
-          </a>
-          <a href="#" class="footer-social-icon" aria-label="Twitter / X" title="X">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-          </a>
-          <a href="#" class="footer-social-icon" aria-label="YouTube" title="YouTube">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46a2.78 2.78 0 0 0-1.95 1.96A29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58A2.78 2.78 0 0 0 3.41 19.6C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-1.95A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z"/><polygon fill="white" points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02"/></svg>
-          </a>
-          <a href="#" class="footer-social-icon" aria-label="Instagram" title="Instagram">
+          <a href="https://www.instagram.com/skillupnow" class="footer-social-icon" aria-label="Instagram" title="Instagram" target="_blank" rel="noopener">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+          </a>
+          <a href="https://www.linkedin.com/company/skillupnow" class="footer-social-icon" aria-label="LinkedIn" title="LinkedIn" target="_blank" rel="noopener">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
           </a>
         </div>
       </div>
@@ -454,7 +573,7 @@ class ProfileNavigationManager {
         .order('created_at', { ascending: false })
         .limit(3);
       if (!reviews || !reviews.length) {
-        container.innerHTML = '<div style="font-size:.78rem;color:var(--txt4);">Be the first to leave a review!</div>';
+        container.innerHTML = '<div style="font-size:.78rem;color:var(--txt4);">No reviews yet.</div>';
         return;
       }
       container.innerHTML = reviews.map(r => `
@@ -530,37 +649,8 @@ class ProfileNavigationManager {
   injectAuthModal() {
     if (document.getElementById('pn-auth-modal')) return;
 
-    /* ── EmailJS config ─────────────────────────────────────────
-       Fill these from your EmailJS dashboard (emailjs.com):
-         Service ID  → Email Services → copy the Service ID
-         Public Key  → Account → API Keys → Public Key
-       Template ID is already set: template_bjqerns
-    ── */
-    const EMAILJS_SERVICE_ID  = 'service_skillupnow'; // ← replace with your Service ID
-    const EMAILJS_TEMPLATE_ID = 'template_bjqerns';
-    const EMAILJS_PUBLIC_KEY  = '6chiuXaZ_OqXbYyG1';     // ← replace with your Public Key
-
-    // Load EmailJS SDK once
-    if (!window._emailjsLoaded) {
-      window._emailjsLoaded = true;
-      const ejs = document.createElement('script');
-      ejs.src = 'https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js';
-      ejs.onload = () => {
-        if (window.emailjs) window.emailjs.init(EMAILJS_PUBLIC_KEY);
-      };
-      document.head.appendChild(ejs);
-    }
-
-    window._pnOtpSend = async (email, name, otp) => {
-      if (!window.emailjs) throw new Error('Email service not ready. Please refresh and try again.');
-      await window.emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
-        email,
-        name,
-        to_name: name,
-        otp,
-        otp_code: otp
-      }, EMAILJS_PUBLIC_KEY);
-    };
+    // Email verification is handled by Supabase's built-in email system.
+    // No EmailJS or custom OTP needed.
 
     /* ── CSS ── */
     const pnEmailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -588,7 +678,7 @@ class ProfileNavigationManager {
 
       /* ── Box — liquid glossy card ── */
       .pn-box {
-        width: 100%; max-width: 464px;
+        width: 100%; max-width: 680px;
         max-height: 94vh; overflow-y: auto; overflow-x: hidden;
         background: rgba(255,255,255,0.92);
         backdrop-filter: blur(28px) saturate(2);
@@ -675,12 +765,6 @@ class ProfileNavigationManager {
         border-color: rgba(124,92,252,0.3);
         color: #b5adff;
       }
-      :root[data-theme="dark"] .pn-google-btn,
-      html[data-theme="dark"] .pn-google-btn {
-        background: rgba(255,255,255,0.07);
-        border-color: rgba(124,92,252,0.2);
-        color: #f0eeff;
-      }
       :root[data-theme="dark"] .pn-brand-name,
       html[data-theme="dark"] .pn-brand-name {
         background: linear-gradient(135deg,#c4b5fd 0%,#93c5fd 100%);
@@ -714,8 +798,6 @@ class ProfileNavigationManager {
       :root[data-theme="dark"] .pn-switch a,
       html[data-theme="dark"] .pn-forgot a,
       html[data-theme="dark"] .pn-switch a { color: #a78bfa; }
-      :root[data-theme="dark"] .pn-back,
-      html[data-theme="dark"] .pn-back { color: rgba(200,191,255,0.45); }
       :root[data-theme="dark"] .pn-success h3,
       html[data-theme="dark"] .pn-success h3 { color: #f0eeff; }
       :root[data-theme="dark"] .pn-success p,
@@ -794,25 +876,6 @@ class ProfileNavigationManager {
       .pn-role-name { font-size: .88rem; font-weight: 800; color: #12103a; margin-bottom: .2rem; }
       .pn-role-desc { font-size: .7rem; color: #9ca3af; line-height: 1.4; }
 
-      /* ── Google btn ── */
-      .pn-google-btn {
-        width: 100%; padding: .78rem;
-        background: #ffffff;
-        border: 1.5px solid #e5e7eb;
-        border-radius: 50px; color: #374151;
-        font-size: .88rem; font-weight: 600;
-        cursor: pointer; display: flex; align-items: center; justify-content: center; gap: .55rem;
-        transition: all .22s; font-family: inherit; margin-bottom: .9rem;
-        box-shadow: 0 1px 4px rgba(0,0,0,.06);
-      }
-      .pn-google-btn:hover {
-        background: #f9fafb;
-        border-color: #d1d5db;
-        box-shadow: 0 4px 12px rgba(0,0,0,.1);
-        transform: translateY(-1px);
-      }
-      .pn-google-btn svg { flex-shrink: 0; }
-
       /* ── Divider ── */
       .pn-divider-text {
         display: flex; align-items: center; gap: .7rem;
@@ -823,13 +886,26 @@ class ProfileNavigationManager {
         content: ''; flex: 1; height: 1px; background: #f0f0f8;
       }
 
-      /* ── Back btn ── */
+      /* ── Back btn — liquid glass style ── */
       .pn-back {
-        background: none; border: none; color: #9ca3af;
-        font-size: .8rem; cursor: pointer; display: flex; align-items: center; gap: .35rem;
-        padding: 0; margin-bottom: 1.4rem; transition: color .2s; font-family: inherit;
+        display: inline-flex; align-items: center; gap: .45rem;
+        padding: .42rem 1rem .42rem .7rem;
+        background: rgba(124,92,252,0.08);
+        -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+        border: 1.5px solid rgba(124,92,252,0.2);
+        border-radius: 999px;
+        color: #9b8fff; font-size: .8rem; font-weight: 700;
+        cursor: pointer; font-family: inherit;
+        margin-bottom: 1.4rem;
+        transition: background .2s, border-color .2s, transform .22s cubic-bezier(.34,1.56,.64,1), color .2s;
+        letter-spacing: .01em;
       }
-      .pn-back:hover { color: #7c5cfc; }
+      .pn-back:hover {
+        background: rgba(124,92,252,0.18); border-color: rgba(124,92,252,.5);
+        color: #c4b5fd; transform: translateX(-3px) scale(1.04);
+      }
+      :root[data-theme="dark"] .pn-back,
+      html[data-theme="dark"] .pn-back { color: rgba(200,191,255,0.6); border-color: rgba(124,92,252,.25); }
 
       /* ── Field ── */
       .pn-field { margin-bottom: .85rem; }
@@ -870,11 +946,13 @@ class ProfileNavigationManager {
       .pn-field .pn-pw-wrap { position: relative; }
       .pn-field .pn-pw-wrap input { padding-right: 2.8rem; }
       .pn-pw-toggle {
-        position: absolute; right: .85rem; top: 50%; transform: translateY(-50%);
+        position: absolute; right: .75rem; top: 50%; transform: translateY(-50%);
         background: none; border: none; color: #c4b5fd;
-        cursor: pointer; font-size: .75rem; padding: 0; transition: color .2s; font-family: inherit;
+        cursor: pointer; padding: .25rem; line-height: 0; transition: color .2s, background .2s;
+        display: flex; align-items: center; justify-content: center;
+        border-radius: 6px; width: 28px; height: 28px;
       }
-      .pn-pw-toggle:hover { color: #7c5cfc; }
+      .pn-pw-toggle:hover { color: #7c5cfc; background: rgba(124,92,252,.1); }
 
       /* ── Strength bar ── */
       .pn-strength { height: 3px; border-radius: 3px; margin-top: .4rem; transition: all .3s; background: #f0eeff; }
@@ -889,12 +967,23 @@ class ProfileNavigationManager {
       }
       .pn-pw-hint.ok { background: rgba(74,222,128,.1); border-color: rgba(34,197,94,.3); color: #16a34a; }
 
-      /* ── Terms ── */
+      /* ── Terms — green rounded button style ── */
       .pn-terms {
-        display: flex; align-items: flex-start; gap: .6rem; margin-bottom: .9rem;
+        display: flex; align-items: center; gap: .75rem; margin-bottom: .9rem;
         font-size: .75rem; color: #6b7280; line-height: 1.5; cursor: pointer;
       }
-      .pn-terms input[type=checkbox] { margin-top: .15rem; accent-color: #7c5cfc; flex-shrink: 0; }
+      .pn-terms input[type=checkbox] { display:none; }
+      .pn-terms-check {
+        flex-shrink: 0; width: 28px; height: 28px;
+        border-radius: 999px; border: 2px solid #d1d5db;
+        background: #fff; display: flex; align-items: center; justify-content: center;
+        transition: all .22s cubic-bezier(.34,1.56,.64,1); font-size: 1rem; color: transparent;
+        box-shadow: 0 1px 4px rgba(0,0,0,.06);
+      }
+      .pn-terms input[type=checkbox]:checked + .pn-terms-check {
+        background: #22c55e; border-color: #16a34a; color: #fff;
+        box-shadow: 0 4px 12px rgba(34,197,94,.35);
+      }
       .pn-terms a { color: #7c5cfc; text-decoration: none; }
       .pn-terms a:hover { color: #5b3fd4; text-decoration: underline; }
 
@@ -1004,11 +1093,6 @@ class ProfileNavigationManager {
       .pd-divider { height: 1px; background: var(--border); margin: .3rem 0; }
 
       /* ── Footer extra styles ── */
-      .footer-inner {
-        max-width: 1100px; margin: 0 auto;
-        display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 2.5rem;
-        padding: 3.5rem 1.5rem 3rem; align-items: start;
-      }
       .footer-tagline { font-size: .84rem; color: var(--txt4); line-height: 1.75; max-width: 280px; margin-top: .75rem; }
       .footer-contacts { display: flex; flex-direction: column; gap: .45rem; margin-top: 1rem; }
       .footer-ssl-badge {
@@ -1016,9 +1100,6 @@ class ProfileNavigationManager {
         font-size: .72rem; color: var(--txt4); font-weight: 500; margin-top: .75rem;
         background: rgba(74,222,128,.06); border: 1px solid rgba(74,222,128,.15);
         border-radius: 999px; padding: .25rem .65rem;
-      }
-      @media (max-width: 768px) {
-        .footer-inner { grid-template-columns: 1fr; gap: 2rem; }
       }
 
       /* ── Nav scrolled state ── */
@@ -1030,6 +1111,8 @@ class ProfileNavigationManager {
       :root[data-theme="light"] nav.scrolled {
         background: rgba(255,255,255,0.96) !important;
       }
+
+
 
       /* ── Active nav link indicator ── */
       .nav-link-item.active {
@@ -1064,12 +1147,7 @@ class ProfileNavigationManager {
           <div class="pn-title">Welcome <span>Back</span></div>
           <div class="pn-sub">Sign in to continue your learning journey</div>
 
-          <button class="pn-google-btn" onclick="window._pnGoogleAuth()">
-            <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-            Continue with Google
-          </button>
-
-          <div class="pn-divider-text">OR SIGN IN AS</div>
+          <div class="pn-divider-text">SIGN IN AS</div>
 
           <div class="pn-role-cards">
             <div class="pn-role-card" onclick="window._pnView('student-login')" role="button" tabindex="0">
@@ -1089,15 +1167,9 @@ class ProfileNavigationManager {
 
         <!-- ═══════════ STUDENT LOGIN ═══════════ -->
         <div id="pn-v-student-login" style="display:none">
-          <button class="pn-back" onclick="window._pnView('welcome')">← Back</button>
+          <button class="pn-back" onclick="window._pnView('welcome')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg> Back</button>
           <div class="pn-title">Student <span>Login</span></div>
           <div class="pn-sub">Access your courses and learning dashboard</div>
-
-          <button class="pn-google-btn" onclick="window._pnGoogleAuth()">
-            <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-            Sign in with Google
-          </button>
-          <div class="pn-divider-text">OR</div>
 
           <div class="pn-err" id="pn-sl-err"></div>
           <div class="pn-field"><label>Email Address</label><input type="email" id="pn-sl-email" placeholder="you@example.com" autocomplete="email"></div>
@@ -1105,7 +1177,7 @@ class ProfileNavigationManager {
             <label>Password</label>
             <div class="pn-pw-wrap">
               <input type="password" id="pn-sl-pw" placeholder="Your password" autocomplete="current-password">
-              <button class="pn-pw-toggle" type="button" onclick="window._pnTogglePw('pn-sl-pw',this)">Show</button>
+              <button class="pn-pw-toggle" type="button" onclick="window._pnTogglePw('pn-sl-pw',this)" title="Show/hide password" aria-label="Toggle password visibility"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
             </div>
           </div>
           <div class="pn-forgot"><a onclick="window._pnForgotPw()">Forgot password?</a></div>
@@ -1115,15 +1187,9 @@ class ProfileNavigationManager {
 
         <!-- ═══════════ MENTOR LOGIN ═══════════ -->
         <div id="pn-v-mentor-login" style="display:none">
-          <button class="pn-back" onclick="window._pnView('welcome')">← Back</button>
+          <button class="pn-back" onclick="window._pnView('welcome')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg> Back</button>
           <div class="pn-title">Mentor <span>Login</span></div>
           <div class="pn-sub">Access your teaching portal and batch management</div>
-
-          <button class="pn-google-btn" onclick="window._pnGoogleAuth()">
-            <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-            Sign in with Google
-          </button>
-          <div class="pn-divider-text">OR</div>
 
           <div class="pn-err" id="pn-ml-err"></div>
           <div class="pn-field"><label>Email Address</label><input type="email" id="pn-ml-email" placeholder="you@example.com" autocomplete="email"></div>
@@ -1131,7 +1197,7 @@ class ProfileNavigationManager {
             <label>Password</label>
             <div class="pn-pw-wrap">
               <input type="password" id="pn-ml-pw" placeholder="Your password" autocomplete="current-password">
-              <button class="pn-pw-toggle" type="button" onclick="window._pnTogglePw('pn-ml-pw',this)">Show</button>
+              <button class="pn-pw-toggle" type="button" onclick="window._pnTogglePw('pn-ml-pw',this)" title="Show/hide password" aria-label="Toggle password visibility"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
             </div>
           </div>
           <div class="pn-forgot"><a onclick="window._pnForgotPw()">Forgot password?</a></div>
@@ -1141,15 +1207,11 @@ class ProfileNavigationManager {
 
         <!-- ═══════════ SIGNUP ROLE SELECT ═══════════ -->
         <div id="pn-v-signup-role" style="display:none">
-          <button class="pn-back" onclick="window._pnView('welcome')">← Back</button>
+          <button class="pn-back" onclick="window._pnView('welcome')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg> Back</button>
           <div class="pn-title">Join <span>SkillUpNow</span></div>
           <div class="pn-sub">Create your free account — choose your role to get started</div>
 
-          <button class="pn-google-btn" onclick="window._pnGoogleAuth()">
-            <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-            Sign up with Google
-          </button>
-          <div class="pn-divider-text">OR CREATE AS</div>
+          <div class="pn-divider-text">CREATE ACCOUNT AS</div>
 
           <div class="pn-role-cards">
             <div class="pn-role-card" onclick="window._pnView('signup-student')" role="button" tabindex="0">
@@ -1168,43 +1230,69 @@ class ProfileNavigationManager {
 
         <!-- ═══════════ STUDENT SIGNUP ═══════════ -->
         <div id="pn-v-signup-student" style="display:none">
-          <button class="pn-back" onclick="window._pnView('signup-role')">← Back</button>
+          <button class="pn-back" onclick="window._pnView('signup-role')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg> Back</button>
           <div class="pn-title">Student <span>Sign Up</span></div>
           <div class="pn-sub">Start your learning journey — it's free</div>
 
           <div class="pn-err" id="pn-ss-err"></div>
           <div class="pn-ok"  id="pn-ss-ok"></div>
 
+          <!-- Row 1: First & Last Name side by side -->
           <div class="pn-field-row">
-            <div class="pn-field"><label>First Name <span class="pn-req">*</span></label><input type="text" id="pn-ss-fname" placeholder="First name" autocomplete="given-name" oninput="window._pnValidateField(this,'text')"><div class="pn-field-hint" id="pn-ss-fname-h"></div></div>
-            <div class="pn-field"><label>Last Name <span class="pn-req">*</span></label><input type="text" id="pn-ss-lname" placeholder="Last name" autocomplete="family-name" oninput="window._pnValidateField(this,'text')"><div class="pn-field-hint" id="pn-ss-lname-h"></div></div>
+            <div class="pn-field">
+              <label>First Name <span class="pn-req">*</span></label>
+              <input type="text" id="pn-ss-fname" placeholder="First name" autocomplete="given-name" oninput="window._pnValidateField(this,'text')">
+              <div class="pn-field-hint" id="pn-ss-fname-h"></div>
+            </div>
+            <div class="pn-field">
+              <label>Last Name <span class="pn-req">*</span></label>
+              <input type="text" id="pn-ss-lname" placeholder="Last name" autocomplete="family-name" oninput="window._pnValidateField(this,'text')">
+              <div class="pn-field-hint" id="pn-ss-lname-h"></div>
+            </div>
           </div>
-          <div class="pn-field"><label>Email Address <span class="pn-req">*</span></label><input type="email" id="pn-ss-email" placeholder="you@example.com" autocomplete="email" oninput="window._pnValidateField(this,'email')"><div class="pn-field-hint" id="pn-ss-email-h"></div></div>
-          <div class="pn-field"><label>Phone Number <span class="pn-req">*</span> <span style="font-size:.62rem;color:#9ca3af;text-transform:none;letter-spacing:0;">(10-digit Indian mobile)</span></label><input type="tel" id="pn-ss-phone" placeholder="9876543210" autocomplete="tel" maxlength="10" oninput="window._pnValidateField(this,'phone')"><div class="pn-field-hint" id="pn-ss-phone-h"></div></div>
+
+          <!-- Row 2: Email -->
           <div class="pn-field">
-            <label>Password <span class="pn-req">*</span> <span style="font-size:.62rem;color:#9ca3af;text-transform:none;letter-spacing:0;">(min. 8 chars, A-Z, a-z, 0-9)</span></label>
-            <div class="pn-pw-wrap">
-              <input type="password" id="pn-ss-pw" placeholder="Create a strong password" autocomplete="new-password" oninput="window._pnStrength('pn-ss-pw','pn-ss-strength','pn-ss-strength-lbl','pn-ss-hints')">
-              <button class="pn-pw-toggle" type="button" onclick="window._pnTogglePw('pn-ss-pw',this)">Show</button>
-            </div>
-            <div class="pn-strength" id="pn-ss-strength"></div>
-            <div class="pn-strength-label" id="pn-ss-strength-lbl"></div>
-            <div class="pn-pw-hints" id="pn-ss-hints">
-              <span class="pn-pw-hint" data-rule="len">8+ chars</span>
-              <span class="pn-pw-hint" data-rule="upper">Uppercase</span>
-              <span class="pn-pw-hint" data-rule="num">Number</span>
-              <span class="pn-pw-hint" data-rule="special">Special char</span>
-            </div>
+            <label>Email Address <span class="pn-req">*</span></label>
+            <input type="email" id="pn-ss-email" placeholder="you@example.com" autocomplete="email" oninput="window._pnValidateField(this,'email')">
+            <div class="pn-field-hint" id="pn-ss-email-h"></div>
           </div>
+
+          <!-- Row 3: Phone -->
           <div class="pn-field">
-            <label>Confirm Password *</label>
-            <div class="pn-pw-wrap">
-              <input type="password" id="pn-ss-cpw" placeholder="Re-enter your password" autocomplete="new-password">
-              <button class="pn-pw-toggle" type="button" onclick="window._pnTogglePw('pn-ss-cpw',this)">Show</button>
+            <label>Phone Number <span class="pn-req">*</span> <span style="font-size:.62rem;color:#9ca3af;text-transform:none;letter-spacing:0;">(10-digit Indian mobile)</span></label>
+            <input type="tel" id="pn-ss-phone" placeholder="9876543210" autocomplete="tel" maxlength="10" oninput="window._pnValidateField(this,'phone')">
+            <div class="pn-field-hint" id="pn-ss-phone-h"></div>
+          </div>
+
+          <!-- Row 4: Password + Confirm Password side by side -->
+          <div class="pn-field-row">
+            <div class="pn-field">
+              <label>Password <span class="pn-req">*</span></label>
+              <div class="pn-pw-wrap">
+                <input type="password" id="pn-ss-pw" placeholder="Min. 8 chars, A-Z, 0-9" autocomplete="new-password" oninput="window._pnStrength('pn-ss-pw','pn-ss-strength','pn-ss-strength-lbl','pn-ss-hints')">
+                <button class="pn-pw-toggle" type="button" onclick="window._pnTogglePw('pn-ss-pw',this)" title="Show/hide password" aria-label="Toggle password visibility"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+              </div>
+              <div class="pn-strength" id="pn-ss-strength"></div>
+              <div class="pn-strength-label" id="pn-ss-strength-lbl"></div>
+              <div class="pn-pw-hints" id="pn-ss-hints" style="margin-top:.3rem;">
+                <span class="pn-pw-hint" data-rule="len">8+ chars</span>
+                <span class="pn-pw-hint" data-rule="upper">A-Z</span>
+                <span class="pn-pw-hint" data-rule="num">0-9</span>
+              </div>
+            </div>
+            <div class="pn-field">
+              <label>Confirm Password <span class="pn-req">*</span></label>
+              <div class="pn-pw-wrap">
+                <input type="password" id="pn-ss-cpw" placeholder="Re-enter password" autocomplete="new-password">
+                <button class="pn-pw-toggle" type="button" onclick="window._pnTogglePw('pn-ss-cpw',this)" title="Show/hide password" aria-label="Toggle password visibility"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+              </div>
             </div>
           </div>
+
           <label class="pn-terms">
             <input type="checkbox" id="pn-ss-terms">
+            <span class="pn-terms-check">✓</span>
             I agree to the <a href="#" onclick="return false">Terms of Service</a> and <a href="#" onclick="return false">Privacy Policy</a>
           </label>
           <button class="pn-btn" id="pn-ss-btn" onclick="window._pnStudentRegister()">Create Student Account</button>
@@ -1213,7 +1301,7 @@ class ProfileNavigationManager {
 
         <!-- ═══════════ MENTOR SIGNUP (basic) ═══════════ -->
         <div id="pn-v-signup-mentor" style="display:none">
-          <button class="pn-back" onclick="window._pnView('signup-role')">← Back</button>
+          <button class="pn-back" onclick="window._pnView('signup-role')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg> Back</button>
           <div class="pn-title">Mentor <span>Sign Up</span></div>
           <div class="pn-sub">Create your account, then complete your mentor profile</div>
 
@@ -1241,38 +1329,45 @@ class ProfileNavigationManager {
             </select>
           </div>
           <div class="pn-field">
-            <label>Password * (min. 8 chars)</label>
+            <label>Password <span class="pn-req">*</span> <span style="font-size:.62rem;color:#9ca3af;text-transform:none;letter-spacing:0;">(min. 8 chars, A-Z, a-z, 0-9)</span></label>
             <div class="pn-pw-wrap">
               <input type="password" id="pn-sm-pw" placeholder="Create a strong password" autocomplete="new-password" oninput="window._pnStrength('pn-sm-pw','pn-sm-strength','pn-sm-strength-lbl',null)">
-              <button class="pn-pw-toggle" type="button" onclick="window._pnTogglePw('pn-sm-pw',this)">Show</button>
+              <button class="pn-pw-toggle" type="button" onclick="window._pnTogglePw('pn-sm-pw',this)" title="Show/hide password" aria-label="Toggle password visibility"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
             </div>
             <div class="pn-strength" id="pn-sm-strength"></div>
             <div class="pn-strength-label" id="pn-sm-strength-lbl"></div>
           </div>
+          <div class="pn-field">
+            <label>Confirm Password <span class="pn-req">*</span></label>
+            <div class="pn-pw-wrap">
+              <input type="password" id="pn-sm-cpw" placeholder="Re-enter your password" autocomplete="new-password">
+              <button class="pn-pw-toggle" type="button" onclick="window._pnTogglePw('pn-sm-cpw',this)" title="Show/hide password" aria-label="Toggle password visibility"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+            </div>
+          </div>
           <label class="pn-terms">
             <input type="checkbox" id="pn-sm-terms">
+            <span class="pn-terms-check">✓</span>
             I agree to the <a href="#" onclick="return false">Mentor Terms</a> and understand the approval process
           </label>
           <button class="pn-btn" id="pn-sm-btn" onclick="window._pnMentorRegister()">Create & Continue to Application →</button>
           <div class="pn-switch">Already a mentor? <a onclick="window._pnView('mentor-login')">Sign in →</a></div>
         </div>
 
-        <!-- ═══════════ OTP VERIFICATION ═══════════ -->
-        <div id="pn-v-otp" style="display:none">
-          <button class="pn-back" id="pn-otp-back" onclick="window._pnView('signup-student')">← Back</button>
-          <div class="pn-title">Verify <span>Email</span></div>
-          <div class="pn-sub" id="pn-otp-sub">Enter the 6-digit code sent to your email</div>
-          <div class="pn-err" id="pn-otp-err"></div>
-          <div class="pn-otp-wrap">
-            <input class="pn-otp-input" id="pn-otp-0" maxlength="1" inputmode="numeric" pattern="[0-9]">
-            <input class="pn-otp-input" id="pn-otp-1" maxlength="1" inputmode="numeric" pattern="[0-9]">
-            <input class="pn-otp-input" id="pn-otp-2" maxlength="1" inputmode="numeric" pattern="[0-9]">
-            <input class="pn-otp-input" id="pn-otp-3" maxlength="1" inputmode="numeric" pattern="[0-9]">
-            <input class="pn-otp-input" id="pn-otp-4" maxlength="1" inputmode="numeric" pattern="[0-9]">
-            <input class="pn-otp-input" id="pn-otp-5" maxlength="1" inputmode="numeric" pattern="[0-9]">
+        <!-- ═══════════ EMAIL VERIFICATION SENT ═══════════ -->
+        <div id="pn-v-email-sent" style="display:none">
+          <div class="pn-success">
+            <div class="pn-success-icon">📧</div>
+            <h3>Check Your Inbox</h3>
+            <p id="pn-email-sent-msg">A verification link has been sent to your email address. Click the link to activate your account and then sign in.</p>
+            <div style="background:rgba(124,92,252,.06);border:1px solid rgba(124,92,252,.15);border-radius:12px;padding:.85rem 1rem;font-size:.78rem;color:inherit;margin-bottom:1.2rem;text-align:left;line-height:1.7;">
+              <strong>Steps to complete sign-up:</strong><br>
+              1. Open the verification email from SkillUpNow<br>
+              2. Click the confirmation link<br>
+              3. Return here and sign in
+            </div>
+            <button class="pn-btn" onclick="window._pnView('student-login')">Go to Sign In →</button>
+            <div class="pn-switch" style="margin-top:.75rem;font-size:.75rem;">Didn't receive the email? Check your spam folder or <a onclick="window._pnView('signup-student')">try again</a></div>
           </div>
-          <button class="pn-btn" id="pn-otp-btn" onclick="window._pnVerifyOtp()">Verify & Create Account</button>
-          <div class="pn-otp-resend">Didn't receive it? <a onclick="window._pnResendOtp()">Resend code</a></div>
         </div>
 
         <!-- ═══════════ SUCCESS SCREEN ═══════════ -->
@@ -1301,25 +1396,11 @@ class ProfileNavigationManager {
       if (e.key === 'Enter' && e.target.classList.contains('pn-role-card')) e.target.click();
     });
 
-    /* ── OTP auto-advance ── */
-    for (let i = 0; i < 6; i++) {
-      const inp = document.getElementById('pn-otp-' + i);
-      if (!inp) continue;
-      inp.addEventListener('input', () => {
-        const v = inp.value.replace(/\D/g, '');
-        inp.value = v.slice(-1);
-        if (v && i < 5) document.getElementById('pn-otp-' + (i+1))?.focus();
-      });
-      inp.addEventListener('keydown', e => {
-        if (e.key === 'Backspace' && !inp.value && i > 0) document.getElementById('pn-otp-' + (i-1))?.focus();
-      });
-    }
-
     /* ── Enter key submit in forms ── */
     wrap.addEventListener('keydown', e => {
       if (e.key !== 'Enter' || e.target.tagName === 'BUTTON') return;
       const active = ['pn-v-student-login','pn-v-mentor-login','pn-v-signup-student','pn-v-signup-mentor']
-        .find(id => document.getElementById(id)?.style.display !== 'none');
+        .find(id => { const el = document.getElementById(id); return el && el.style.display !== 'none'; });
       if (!active) return;
       const map = {
         'pn-v-student-login': () => window._pnStudentLogin(),
@@ -1337,7 +1418,7 @@ class ProfileNavigationManager {
 
     const ALL_VIEWS = ['pn-v-welcome','pn-v-student-login','pn-v-mentor-login',
                        'pn-v-signup-role','pn-v-signup-student','pn-v-signup-mentor',
-                       'pn-v-otp','pn-v-success'];
+                       'pn-v-email-sent','pn-v-success'];
 
     window._pnView = (view) => {
       ALL_VIEWS.forEach(id => {
@@ -1360,12 +1441,16 @@ class ProfileNavigationManager {
       document.getElementById('pn-auth-modal')?.classList.add('pn-open');
     };
 
+    const _eyeOpen  = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
+    const _eyeClosed = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`;
+
     window._pnTogglePw = (inputId, btn) => {
       const inp = document.getElementById(inputId);
       if (!inp) return;
       const isText = inp.type === 'text';
       inp.type = isText ? 'password' : 'text';
-      btn.textContent = isText ? 'Show' : 'Hide';
+      btn.innerHTML = isText ? _eyeOpen : _eyeClosed;
+      btn.style.color = isText ? '' : 'var(--v1, #7c5cfc)';
     };
 
     window._pnForgotPw = async () => {
@@ -1438,21 +1523,6 @@ class ProfileNavigationManager {
       }
     };
 
-    /* ── Google OAuth ── */
-    window._pnGoogleAuth = async () => {
-      if (!window.supabaseConfig) return;
-      try {
-        const redirectTo = window.location.origin + (window.location.pathname.endsWith('index.html') ? window.location.pathname : '/index.html');
-        const { error } = await window.supabaseConfig.client.auth.signInWithOAuth({
-          provider: 'google',
-          options: { redirectTo }
-        });
-        if (error) throw error;
-      } catch (e) {
-        alert('Google sign-in failed: ' + e.message);
-      }
-    };
-
     /* ── Student Login ── */
     window._pnStudentLogin = async () => {
       const email = document.getElementById('pn-sl-email')?.value?.trim();
@@ -1510,7 +1580,7 @@ class ProfileNavigationManager {
       } catch(e) { _pnErr(err, e.message); btn.disabled = false; btn.textContent = 'Sign In to Portal'; }
     };
 
-    /* ── Student Register (EmailJS OTP flow) ── */
+    /* ── Student Register (Supabase email verification) ── */
     window._pnStudentRegister = async () => {
       const fname  = document.getElementById('pn-ss-fname')?.value?.trim();
       const lname  = document.getElementById('pn-ss-lname')?.value?.trim();
@@ -1522,37 +1592,71 @@ class ProfileNavigationManager {
       const err    = document.getElementById('pn-ss-err');
       const btn    = document.getElementById('pn-ss-btn');
 
-      if (!fname || !lname) return _pnErr(err, 'Please enter your full name.');
-      if (!pnEmailRe.test(email || '')) return _pnErr(err, 'Please enter a valid email address.');
-      if (!pnPhoneRe.test(phone || '')) return _pnErr(err, 'Please enter a valid 10-digit phone number.');
-      if (!pnPasswordRe.test(pw || '')) return _pnErr(err, 'Password must be at least 8 characters and include uppercase, lowercase, and a number.');
-      if (pw !== cpw)       return _pnErr(err, 'Passwords do not match.');
-      if (!terms)           return _pnErr(err, 'Please agree to the Terms of Service to continue.');
+      // Validate all required fields and highlight in red
+      let hasErr = false;
+      const setInvalid = (id, msg) => {
+        const el = document.getElementById(id);
+        if (el) { el.classList.add('invalid'); el.classList.remove('valid'); }
+        if (!hasErr) _pnErr(err, msg);
+        hasErr = true;
+      };
+      if (!fname || fname.length < 1) setInvalid('pn-ss-fname', 'First name is required.');
+      if (!lname || lname.length < 1) setInvalid('pn-ss-lname', 'Last name is required (min 1 character).');
+      if (!pnEmailRe.test(email || '')) setInvalid('pn-ss-email', 'Please enter a valid email address.');
+      if (!pnPhoneRe.test(phone || '')) setInvalid('pn-ss-phone', 'Please enter a valid 10-digit Indian phone number.');
+      if (!pnPasswordRe.test(pw || '')) setInvalid('pn-ss-pw', 'Password must be at least 8 characters with uppercase, lowercase, and a number.');
+      if (pw !== cpw) { setInvalid('pn-ss-cpw', 'Passwords do not match.'); hasErr = true; }
+      if (!terms) { _pnErr(err, 'Please agree to the Terms of Service to continue.'); hasErr = true; }
+      if (hasErr) return;
 
-      btn.disabled = true; btn.textContent = 'Sending OTP…';
+      btn.disabled = true; btn.textContent = 'Creating account…';
       err.style.display = 'none';
 
       const fullName = fname + ' ' + lname;
+      const redirectTo = window.location.origin + (window.location.pathname.includes('/pages/') ? window.location.pathname.replace(/\/[^/]+$/, '/') : '/') + 'index.html';
 
       try {
         if (!window.supabaseConfig) throw new Error('Auth service not ready. Please refresh and try again.');
-        const otpReq = await window.supabaseConfig.requestSignupOtp(email);
-        if (!otpReq.success || !otpReq.data?.otp) throw new Error(otpReq.error || 'Failed to send verification code.');
-        self._pendingOtpEmail = email;
-        self._pendingOtpRole  = 'user';
-        self._pendingOtpData  = { full_name: fullName, email, phone, pw, role: 'user' };
-        document.getElementById('pn-otp-back').onclick = () => window._pnView('signup-student');
-        document.getElementById('pn-otp-btn').textContent = 'Verify & Create Account';
-        await window._pnOtpSend(email, fullName, otpReq.data.otp);
-        document.getElementById('pn-otp-sub').textContent = 'We sent a 6-digit code to ' + email + '. Check your inbox (and spam folder).';
-        window._pnView('otp');
+
+        const { data, error: signUpErr } = await window.supabaseConfig.client.auth.signUp({
+          email,
+          password: pw,
+          options: {
+            data: { full_name: fullName, phone, role: 'user' },
+            emailRedirectTo: redirectTo
+          }
+        });
+
+        if (signUpErr) {
+          const msg = signUpErr.message?.toLowerCase() || '';
+          if (msg.includes('already registered') || msg.includes('already exists') || msg.includes('user already')) {
+            throw new Error('An account with this email already exists. Please sign in instead.');
+          }
+          throw signUpErr;
+        }
+
+        // Sync profile first while session still exists (best-effort)
+        if (data?.user?.id) {
+          await window.supabaseConfig.upsertUserProfile?.(data.user.id, {
+            full_name: fullName, email, phone, role: 'user', is_email_verified: false
+          }).catch(() => {});
+        }
+
+        // Sign out — prevent auto-login until email is verified
+        await window.supabaseConfig.client.auth.signOut();
+
+        // Show email verification sent screen
+        document.getElementById('pn-email-sent-msg').textContent =
+          'A verification link has been sent to ' + email + '. Click the link in your email to activate your account, then come back and sign in.';
+        window._pnView('email-sent');
+
       } catch(e) {
         _pnErr(err, e.message);
         btn.disabled = false; btn.textContent = 'Create Student Account';
       }
     };
 
-    /* ── Mentor Register (basic — then redirect to full signup) ── */
+    /* ── Mentor Register (Supabase email verification → mentor signup) ── */
     window._pnMentorRegister = async () => {
       const fname     = document.getElementById('pn-sm-fname')?.value?.trim();
       const lname     = document.getElementById('pn-sm-lname')?.value?.trim();
@@ -1560,114 +1664,75 @@ class ProfileNavigationManager {
       const phone     = pnNormalizePhone(document.getElementById('pn-sm-phone')?.value?.trim());
       const expertise = document.getElementById('pn-sm-expertise')?.value;
       const pw        = document.getElementById('pn-sm-pw')?.value;
+      const cpw       = document.getElementById('pn-sm-cpw')?.value;
       const terms     = document.getElementById('pn-sm-terms')?.checked;
       const err       = document.getElementById('pn-sm-err');
       const btn       = document.getElementById('pn-sm-btn');
 
-      if (!fname || !lname)  return _pnErr(err, 'Please enter your full name.');
-      if (!pnEmailRe.test(email || '')) return _pnErr(err, 'Please enter a valid email address.');
-      if (!pnPhoneRe.test(phone || '')) return _pnErr(err, 'Please enter a valid 10-digit phone number.');
-      if (!expertise)        return _pnErr(err, 'Please select your primary expertise area.');
-      if (!pnPasswordRe.test(pw || '')) return _pnErr(err, 'Password must be at least 8 characters and include uppercase, lowercase, and a number.');
-      if (!terms)            return _pnErr(err, 'Please agree to the Mentor Terms to continue.');
-
-      btn.disabled = true; btn.textContent = 'Sending code…';
-      err.style.display = 'none';
-      try {
-        if (!window.supabaseConfig) throw new Error('Auth service not ready. Please refresh and try again.');
-        const fullName = fname + ' ' + lname;
-        const otpReq = await window.supabaseConfig.requestSignupOtp(email);
-        if (!otpReq.success || !otpReq.data?.otp) throw new Error(otpReq.error || 'Failed to send verification code.');
-        self._pendingOtpEmail = email;
-        self._pendingOtpRole  = 'mentor';
-        self._pendingOtpData  = {
-          full_name: fullName,
-          email,
-          phone,
-          pw,
-          role: 'user',
-          requested_role: 'mentor',
-          expertise_area: expertise
-        };
-        document.getElementById('pn-otp-back').onclick = () => window._pnView('signup-mentor');
-        document.getElementById('pn-otp-btn').textContent = 'Verify & Continue to Mentor Form';
-        await window._pnOtpSend(email, fullName, otpReq.data.otp);
-        document.getElementById('pn-otp-sub').textContent = 'Verify your email to continue to the mentor application.';
-        window._pnView('otp');
-      } catch(e) { _pnErr(err, e.message); btn.disabled = false; btn.textContent = 'Create & Continue to Application →'; }
-    };
-
-    /* ── OTP Verify — server check, then create verified account ── */
-    window._pnVerifyOtp = async () => {
-      const entered = [0,1,2,3,4,5].map(i => document.getElementById('pn-otp-'+i)?.value || '').join('');
-      const err     = document.getElementById('pn-otp-err');
-      const btn     = document.getElementById('pn-otp-btn');
-      if (entered.length < 6) return _pnErr(err, 'Please enter the complete 6-digit code.');
-      if (!self._pendingOtpEmail) return _pnErr(err, 'Session expired. Please start again.');
+      let hasErr = false;
+      const setInvalid = (id, msg) => {
+        const el = document.getElementById(id);
+        if (el) { el.classList.add('invalid'); el.classList.remove('valid'); }
+        if (!hasErr) _pnErr(err, msg);
+        hasErr = true;
+      };
+      if (!fname || fname.length < 1) setInvalid('pn-sm-fname', 'First name is required.');
+      if (!lname || lname.length < 1) setInvalid('pn-sm-lname', 'Last name is required (min 1 character).');
+      if (!pnEmailRe.test(email || '')) setInvalid('pn-sm-email', 'Please enter a valid email address.');
+      if (!pnPhoneRe.test(phone || '')) setInvalid('pn-sm-phone', 'Please enter a valid 10-digit Indian phone number.');
+      if (!expertise) { _pnErr(err, 'Please select your primary expertise area.'); hasErr = true; }
+      if (!pnPasswordRe.test(pw || '')) setInvalid('pn-sm-pw', 'Password must be at least 8 characters with uppercase, lowercase, and a number.');
+      if (pw !== cpw) { setInvalid('pn-sm-cpw', 'Passwords do not match.'); hasErr = true; }
+      if (!terms) { _pnErr(err, 'Please agree to the Mentor Terms to continue.'); hasErr = true; }
+      if (hasErr) return;
 
       btn.disabled = true; btn.textContent = 'Creating account…';
       err.style.display = 'none';
-      try {
-        if (!window.supabaseConfig) throw new Error('Auth service not ready.');
-        const pendingData = self._pendingOtpData || {};
-        const verifyRes = await window.supabaseConfig.verifySignupOtp(self._pendingOtpEmail, entered);
-        if (!verifyRes.success) throw new Error(verifyRes.error || 'Incorrect or expired code. Please check and try again.');
 
-        const registerRes = await window.supabaseConfig.registerVerifiedUser({
-          email: pendingData.email,
-          password: pendingData.pw,
-          full_name: pendingData.full_name,
-          phone: pendingData.phone,
-          role: pendingData.role || 'user',
-          metadata: {
-            requested_role: pendingData.requested_role || null,
-            expertise_area: pendingData.expertise_area || null
+      const fullName = fname + ' ' + lname;
+      const mentorSignupUrl = (self.pagesPfx || 'pages/') + 'mentor-signup.html';
+      const redirectTo = window.location.origin + '/' + mentorSignupUrl;
+
+      try {
+        if (!window.supabaseConfig) throw new Error('Auth service not ready. Please refresh and try again.');
+
+        const { data, error: signUpErr } = await window.supabaseConfig.client.auth.signUp({
+          email,
+          password: pw,
+          options: {
+            data: { full_name: fullName, phone, role: 'user', requested_role: 'mentor', expertise_area: expertise },
+            emailRedirectTo: redirectTo
           }
         });
-        if (!registerRes.success) throw new Error(registerRes.error || 'Account creation failed.');
 
-        const lr = await window.supabaseConfig.signIn(pendingData.email, pendingData.pw);
-        if (lr.success) {
-          const user = lr.data?.user || lr.user;
-          if (user) {
-            window.supabaseConfig.syncUserProfile?.(user.id, {
-              full_name: pendingData.full_name,
-              email: pendingData.email,
-              phone: pendingData.phone,
-              role: pendingData.role || 'user',
-              is_email_verified: true
-            }).catch(e => console.warn('Profile sync:', e));
-            self.currentUser = user;
-            self.showLoggedInUI();
+        if (signUpErr) {
+          const msg = signUpErr.message?.toLowerCase() || '';
+          if (msg.includes('already registered') || msg.includes('already exists') || msg.includes('user already')) {
+            throw new Error('An account with this email already exists. Please sign in instead.');
           }
+          throw signUpErr;
         }
 
-        if (self._pendingOtpRole === 'mentor') {
-          _pnShowSuccess('🎓', 'Email Verified!', 'Account ready. Taking you to the mentor application.', () => {
-            window._pnClose();
-            window.location.href = self.pagesPfx + 'mentor-signup.html';
-          });
-        } else {
-          _pnShowSuccess('🎉', "You're In!", 'Account created! Redirecting to your dashboard.', () => {
-            window._pnClose();
-            window.location.href = self.pagesPfx + 'profile.html';
-          });
+        // Sync profile first while session still exists (best-effort)
+        if (data?.user?.id) {
+          await window.supabaseConfig.upsertUserProfile?.(data.user.id, {
+            full_name: fullName, email, phone, role: 'user', is_email_verified: false
+          }).catch(() => {});
         }
-      } catch(e) { _pnErr(err, e.message); btn.disabled = false; btn.textContent = 'Verify & Create Account'; }
+
+        // Sign out — prevent auto-login until email is verified
+        await window.supabaseConfig.client.auth.signOut();
+
+        document.getElementById('pn-email-sent-msg').textContent =
+          'A verification link has been sent to ' + email + '. After verifying, you\'ll be taken to the mentor application form.';
+        window._pnView('email-sent');
+
+      } catch(e) { _pnErr(err, e.message); btn.disabled = false; btn.textContent = 'Create & Continue to Application →'; }
     };
 
-    /* ── OTP Resend — generate fresh OTP client-side ── */
-    window._pnResendOtp = async () => {
-      if (!self._pendingOtpEmail) return;
-      try {
-        const pendingData = self._pendingOtpData || {};
-        if (!window.supabaseConfig) throw new Error('Auth service not ready.');
-        const otpReq = await window.supabaseConfig.requestSignupOtp(self._pendingOtpEmail);
-        if (!otpReq.success || !otpReq.data?.otp) throw new Error(otpReq.error || 'Failed to resend code.');
-        await window._pnOtpSend(self._pendingOtpEmail, pendingData.full_name || 'User', otpReq.data.otp);
-        alert('✅ A new code has been sent to ' + self._pendingOtpEmail);
-      } catch(e) { alert('Failed to resend: ' + e.message); }
-    };
+    /* ── OTP functions removed — email verification handled by Supabase ── */
+    window._pnVerifyOtp = () => {}; // No-op: kept for backward compat only
+
 
     /* ── Helpers ── */
     function _pnErr(el, msg) {

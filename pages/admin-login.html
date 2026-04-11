@@ -16,9 +16,10 @@
       background: #060412; font-family: 'Plus Jakarta Sans', sans-serif;
       overflow-x: hidden; position: relative;
     }
-    nav { z-index: 30; }
+    nav { display: none !important; }
+    footer { display: none !important; }
     .page-wrap { position: relative; z-index: 1; min-height: 100vh; display: flex; flex-direction: column; }
-    .auth-shell { flex: 1; display: flex; align-items: center; justify-content: center; padding: 7.5rem 1rem 3rem; }
+    .auth-shell { flex: 1; display: flex; align-items: center; justify-content: center; padding: 2rem 1rem; }
 
     /* ── Animated background ── */
     .bg {
@@ -64,6 +65,7 @@
 
     /* ── Brand ── */
     .brand { text-align: center; margin-bottom: 2rem; }
+    .brand-logo-img { height: 60px; width: auto; object-fit: contain; margin-bottom: .75rem; }
     .brand-logo {
       width: 60px; height: 60px;
       background: linear-gradient(135deg, #9b8fff 0%, #7c6cff 50%, #5b3fd4 100%);
@@ -174,8 +176,7 @@
 <main class="auth-shell">
 <div class="card">
   <div class="brand">
-    <div class="brand-logo">⚡</div>
-    <h2>SkillUpNow</h2>
+    <img src="../icon/Main logo.png" alt="SkillUpNow" class="brand-logo-img" onerror="this.style.display='none';">
     <p>Administration Portal</p>
     <span class="badge">🔒 Restricted Access</span>
   </div>

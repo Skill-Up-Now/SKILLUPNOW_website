@@ -344,6 +344,7 @@ let currentStep = 1;
 const expertiseTags = [];
 let createdUserId = null;
 let existingUser = null;
+let _profilePhotoFile = null;
 const EMAILJS_SERVICE_ID  = 'service_skillupnow';
 const EMAILJS_TEMPLATE_ID = 'template_bjqerns';
 const EMAILJS_PUBLIC_KEY  = '6chiuXaZ_OqXbYyG1';
@@ -441,7 +442,7 @@ function goStep2() {
 async function goStep3() {
   const panNumber = document.getElementById('m-pan').value.trim().toUpperCase();
   const aadhaarNumber = normalizeAadhaar(document.getElementById('m-aadhaar').value);
-  if (!document.getElementById('m-photo').files[0]) return showErr('Please upload your profile photo.');
+  if (!_profilePhotoFile && !document.getElementById('m-photo').files[0]) return showErr('Please upload your profile photo.');
   if (!panNumber) return showErr('Please enter your PAN number.');
   if (!PAN_RE.test(panNumber)) return showErr('Please enter a valid PAN number.');
   if (!document.getElementById('m-pan-doc').files[0]) return showErr('Please upload your PAN card.');
@@ -543,7 +544,7 @@ async function submitApplication() {
       aadhaar_number: document.getElementById('m-aadhaar').value.trim(),
       salary_type: document.getElementById('m-salary-type').value
     }, {
-      photo: document.getElementById('m-photo').files[0],
+      photo: _profilePhotoFile || document.getElementById('m-photo').files[0],
       pan: document.getElementById('m-pan-doc').files[0],
       aadhaar: document.getElementById('m-aadhaar-doc').files[0],
       address_proof: document.getElementById('m-addr-doc').files[0] || null,
@@ -581,6 +582,7 @@ function previewPhoto(inputId, zoneId) {
   const file = document.getElementById(inputId).files[0];
   if (!file) return;
   if (file.size > 1024 * 1024) { showErr('Photo exceeds 1 MB limit'); document.getElementById(inputId).value = ''; return; }
+  _profilePhotoFile = file;
   const reader = new FileReader();
   reader.onload = e => {
     const box = document.getElementById(zoneId);

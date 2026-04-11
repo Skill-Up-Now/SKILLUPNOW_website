@@ -104,6 +104,10 @@ class SupabaseConfig {
         is_email_verified: !!options.isEmailVerified
       };
 
+      // Determine the redirect URL for email verification
+      const origin = typeof window !== 'undefined' ? window.location.origin : '';
+      const emailRedirectTo = origin ? origin + '/index.html' : undefined;
+
       const { data, error } = await this.client.auth.signUp({
         email,
         password,
@@ -112,7 +116,7 @@ class SupabaseConfig {
             ...userData,
             role: normalizedRole
           },
-          emailRedirectTo: null
+          emailRedirectTo
         }
       });
 
@@ -169,11 +173,27 @@ class SupabaseConfig {
         password
       });
 
-      if (error) throw error;
-      
+      if (error) {
+        // Provide clear, actionable error messages
+        const msg = (error.message || '').toLowerCase();
+        if (msg.includes('email not confirmed') || msg.includes('not confirmed')) {
+          throw new Error('Please verify your email first. Check your inbox for the verification link we sent when you signed up.');
+        }
+        if (msg.includes('invalid login') || msg.includes('invalid credentials') || msg.includes('wrong password')) {
+          throw new Error('Incorrect email or password. Please try again.');
+        }
+        throw error;
+      }
+
+      // Block login if email has not been verified
+      if (!data.user?.email_confirmed_at) {
+        await this.client.auth.signOut();
+        throw new Error('Your email is not verified yet. Check your inbox for the verification link and click it before signing in.');
+      }
+
       // Log the login in audit trail
       await this.logAuditEvent(data.user.id, 'login', 'user', data.user.id);
-      
+
       return { success: true, data, message: 'Signed in successfully!' };
     } catch (error) {
       console.error('Sign in error:', error);

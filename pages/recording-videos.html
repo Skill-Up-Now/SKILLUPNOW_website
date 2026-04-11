@@ -330,6 +330,17 @@
       width: 100%;
       height: 100%;
       border: none;
+      pointer-events: auto;
+    }
+    /* Disable download controls on native video */
+    .rv-modal-video video {
+      -webkit-media-controls-download-button: none;
+      controlsList: "nodownload nofullscreen noremoteplayback";
+    }
+    /* Prevent drag / selection of content */
+    .rv-grid, .rv-modal-box {
+      -webkit-user-select: none;
+      user-select: none;
     }
     .rv-modal-placeholder {
       display: flex;
@@ -415,14 +426,9 @@
       <input class="rv-search" type="text" id="rv-search-input" placeholder="Search sessions, topics, mentors…" oninput="filterVideos()">
     </div>
 
-    <!-- Filters -->
+    <!-- Filters — populated dynamically from DB -->
     <div class="rv-filters" id="rv-filters">
       <button class="rv-filter-btn active" data-filter="all" onclick="setFilter('all',this)">All Sessions</button>
-      <button class="rv-filter-btn" data-filter="communication" onclick="setFilter('communication',this)">Communication</button>
-      <button class="rv-filter-btn" data-filter="leadership" onclick="setFilter('leadership',this)">Leadership</button>
-      <button class="rv-filter-btn" data-filter="interview" onclick="setFilter('interview',this)">Interview Prep</button>
-      <button class="rv-filter-btn" data-filter="business" onclick="setFilter('business',this)">Business English</button>
-      <button class="rv-filter-btn" data-filter="speaking" onclick="setFilter('speaking',this)">Public Speaking</button>
     </div>
   </section>
 
@@ -455,33 +461,69 @@
   <footer></footer>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
   <script src="../config/supabase-config.js"></script>
   <script src="../js/theme.js"></script>
   <script src="../js/profile-nav.js"></script>
 
   <script>
-  // ── Static video data (DB recordings will be appended) ──
-  const STATIC_VIDEOS = [
-    { id: 's1', title: 'Mastering Eye Contact in Presentations', category: 'communication', mentor: 'Meena Krishnan', duration: '42 min', icon: '🎤', gradient: 'linear-gradient(135deg,#7c5cfc,#3d6bff)', isNew: true, tags: ['Communication', 'Presentations'], videoUrl: null },
-    { id: 's2', title: 'The Leadership Triangle: Vision, Voice & Values', category: 'leadership', mentor: 'Arjun Pillai', duration: '58 min', icon: '🏆', gradient: 'linear-gradient(135deg,#00cfee,#0090b8)', isNew: false, tags: ['Leadership', 'Strategy'], videoUrl: null },
-    { id: 's3', title: 'Cracking Behavioral Interview Questions (STAR Method)', category: 'interview', mentor: 'Priya Suresh', duration: '35 min', icon: '🎯', gradient: 'linear-gradient(135deg,#4ade80,#16a34a)', isNew: true, tags: ['Interview', 'HR'], videoUrl: null },
-    { id: 's4', title: 'Business Writing: Emails That Get Responses', category: 'business', mentor: 'Karthik Nair', duration: '28 min', icon: '💼', gradient: 'linear-gradient(135deg,#f59e0b,#ea580c)', isNew: false, tags: ['Business English', 'Writing'], videoUrl: null },
-    { id: 's5', title: 'Overcoming Stage Fright — Proven Techniques', category: 'speaking', mentor: 'Shalini Rao', duration: '47 min', icon: '🎭', gradient: 'linear-gradient(135deg,#a855f7,#ec4899)', isNew: false, tags: ['Public Speaking', 'Confidence'], videoUrl: null },
-    { id: 's6', title: 'Active Listening: The Skill Leaders Don\'t Talk About', category: 'communication', mentor: 'Ravi Kumar', duration: '33 min', icon: '👂', gradient: 'linear-gradient(135deg,#3b82f6,#1d4ed8)', isNew: false, tags: ['Communication', 'Leadership'], videoUrl: null },
-    { id: 's7', title: 'How to Negotiate Your Salary Confidently', category: 'interview', mentor: 'Deepa Sharma', duration: '41 min', icon: '💰', gradient: 'linear-gradient(135deg,#10b981,#059669)', isNew: true, tags: ['Interview', 'Negotiation'], videoUrl: null },
-    { id: 's8', title: 'Structuring Impactful Corporate Presentations', category: 'speaking', mentor: 'Meena Krishnan', duration: '52 min', icon: '📊', gradient: 'linear-gradient(135deg,#f43f5e,#be123c)', isNew: false, tags: ['Presentations', 'Corporate'], videoUrl: null },
-    { id: 's9', title: 'Team Communication in Remote Workplaces', category: 'communication', mentor: 'Arjun Pillai', duration: '39 min', icon: '🌐', gradient: 'linear-gradient(135deg,#8b5cf6,#6d28d9)', isNew: false, tags: ['Communication', 'Remote Work'], videoUrl: null },
-  ];
+  /* ══════════════════════════════════════════════════════════════
+     Recording Videos — public listing, per-video access control
+     • List is visible to everyone (no login needed)
+     • Clicking Watch → checks login → checks payment
+     • Paid users: play video with security restrictions
+     • Unpaid users: show Razorpay payment prompt
+     ══════════════════════════════════════════════════════════════ */
+
+  // Block screenshot shortcuts only inside the video modal (not page-level)
+  function blockScreenCapture() {
+    document.addEventListener('contextmenu', e => {
+      if (document.getElementById('rv-modal')?.classList.contains('open')) e.preventDefault();
+    });
+    document.addEventListener('keydown', e => {
+      if (!document.getElementById('rv-modal')?.classList.contains('open')) return;
+      if (e.key === 'PrintScreen') { navigator.clipboard?.writeText(''); e.preventDefault(); }
+      if (e.key === 'F12') e.preventDefault();
+      if ((e.ctrlKey || e.metaKey) && ['p','s','u'].includes(e.key.toLowerCase())) e.preventDefault();
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && ['i','c','j'].includes(e.key.toLowerCase())) e.preventDefault();
+    });
+  }
+  blockScreenCapture();
 
   let currentFilter = 'all';
-  let allVideos = [...STATIC_VIDEOS];
-  let dbVideos = [];
+  let allVideos = [];
 
+  // ── Provider → gradient + icon ──
+  function videoMeta(provider) {
+    if (provider === 'youtube')      return { icon: '▶', gradient: 'linear-gradient(135deg,#ff4e50,#f9d423)' };
+    if (provider === 'google_drive') return { icon: '📁', gradient: 'linear-gradient(135deg,#4285f4,#34a853)' };
+    if (provider === 'vimeo')        return { icon: '🎬', gradient: 'linear-gradient(135deg,#1ab7ea,#0075b2)' };
+    return { icon: '🎥', gradient: 'linear-gradient(135deg,#7c5cfc,#3d6bff)' };
+  }
+
+  // ── Skeleton placeholders while loading ──
+  function showSkeleton() {
+    const grid = document.getElementById('rv-grid');
+    if (!grid) return;
+    grid.innerHTML = Array.from({length: 6}, () => `
+      <div class="rv-card" style="pointer-events:none;">
+        <div class="rv-thumb" style="background:var(--panel2);border-radius:var(--r2) var(--r2) 0 0;">
+          <div style="position:absolute;inset:0;background:linear-gradient(90deg,var(--panel2) 25%,rgba(124,92,252,.08) 50%,var(--panel2) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:inherit;"></div>
+        </div>
+        <div class="rv-card-body" style="display:flex;flex-direction:column;gap:.65rem;">
+          <div style="height:12px;width:60%;background:var(--panel2);border-radius:6px;animation:shimmer 1.4s .1s infinite;background-size:200% 100%;background-image:linear-gradient(90deg,var(--panel2) 25%,rgba(124,92,252,.08) 50%,var(--panel2) 75%);"></div>
+          <div style="height:16px;width:90%;background:var(--panel2);border-radius:6px;animation:shimmer 1.4s .2s infinite;background-size:200% 100%;background-image:linear-gradient(90deg,var(--panel2) 25%,rgba(124,92,252,.08) 50%,var(--panel2) 75%);"></div>
+          <div style="height:12px;width:50%;background:var(--panel2);border-radius:6px;animation:shimmer 1.4s .3s infinite;background-size:200% 100%;background-image:linear-gradient(90deg,var(--panel2) 25%,rgba(124,92,252,.08) 50%,var(--panel2) 75%);"></div>
+        </div>
+      </div>`).join('');
+  }
+
+  // ── Render video grid ──
   function renderVideos() {
     const q = document.getElementById('rv-search-input')?.value?.toLowerCase() || '';
     const filtered = allVideos.filter(v => {
-      const matchCat = currentFilter === 'all' || v.category === currentFilter;
-      const matchQ = !q || v.title.toLowerCase().includes(q) || v.mentor.toLowerCase().includes(q) || (v.tags||[]).some(t => t.toLowerCase().includes(q));
+      const matchCat = currentFilter === 'all' || v.filterKey === currentFilter;
+      const matchQ = !q || v.title.toLowerCase().includes(q) || v.courseTitle.toLowerCase().includes(q) || (v.tags||[]).some(t => t.toLowerCase().includes(q));
       return matchCat && matchQ;
     });
     const grid = document.getElementById('rv-grid');
@@ -491,30 +533,48 @@
       return;
     }
     grid.innerHTML = filtered.map((v, i) => `
-      <div class="rv-card" style="animation-delay:${i*0.05}s" onclick="openModal('${v.id}')">
+      <div class="rv-card" style="animation-delay:${i*0.05}s" onclick="handleWatchClick('${v.id}')">
         <div class="rv-thumb">
-          <div class="rv-thumb-bg">${v.icon}</div>
-          <div class="rv-thumb-gradient" style="background:${v.gradient};opacity:.45;"></div>
+          ${v.thumbnail
+            ? `<img src="${v.thumbnail}" alt="${v.title}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" loading="lazy" onerror="this.style.display='none'">`
+            : `<div class="rv-thumb-bg">${v.icon}</div><div class="rv-thumb-gradient" style="background:${v.gradient};opacity:.55;"></div>`
+          }
           <div class="rv-play-btn">
             <div class="rv-play-circle">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="#fff" style="margin-left:3px"><polygon points="5 3 19 12 5 21 5 3"/></svg>
             </div>
           </div>
-          <div class="rv-duration">⏱ ${v.duration}</div>
+          ${v.duration !== '—' ? `<div class="rv-duration">⏱ ${v.duration}</div>` : ''}
           ${v.isNew ? '<div class="rv-new-badge">New</div>' : ''}
+          <div style="position:absolute;top:.55rem;right:.55rem;background:rgba(0,0,0,.65);backdrop-filter:blur(6px);border-radius:50px;padding:.25rem .6rem;display:flex;align-items:center;gap:.3rem;font-size:.72rem;font-weight:700;color:#e9d5ff;border:1px solid rgba(168,85,247,.35);">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            Members Only
+          </div>
         </div>
         <div class="rv-card-body">
           <div class="rv-card-tags">${(v.tags||[]).map(t=>`<span class="rv-tag">${t}</span>`).join('')}</div>
           <div class="rv-card-title">${v.title}</div>
           <div class="rv-card-meta">
             <div class="rv-card-mentor">
-              <div class="rv-mentor-dot">${v.mentor.charAt(0)}</div>
-              <span>${v.mentor}</span>
+              <div class="rv-mentor-dot">${(v.courseTitle||'S').charAt(0).toUpperCase()}</div>
+              <span>${v.courseTitle || 'SkillUpNow'}</span>
             </div>
-            <span style="margin-left:auto;">▶ Watch</span>
+            <span style="margin-left:auto;background:linear-gradient(135deg,#7c5cfc,#3d6bff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:700;font-size:.82rem;">▶ Watch</span>
           </div>
         </div>
       </div>`).join('');
+  }
+
+  // ── Build dynamic filter buttons from loaded courses ──
+  function buildFilterButtons() {
+    const filtersEl = document.getElementById('rv-filters');
+    if (!filtersEl) return;
+    const uniqueCourses = [...new Map(allVideos.filter(v => v.courseTitle).map(v => [v.filterKey, v.courseTitle])).entries()];
+    let html = `<button class="rv-filter-btn active" data-filter="all" onclick="setFilter('all',this)">All Sessions</button>`;
+    uniqueCourses.forEach(([key, name]) => {
+      html += `<button class="rv-filter-btn" data-filter="${key}" onclick="setFilter('${key}',this)">${name}</button>`;
+    });
+    filtersEl.innerHTML = html;
   }
 
   function setFilter(filter, btn) {
@@ -526,32 +586,325 @@
 
   function filterVideos() { renderVideos(); }
 
-  function openModal(id) {
+  // ── Access check: login → payment → play ──
+  async function handleWatchClick(id) {
     const v = allVideos.find(x => x.id === id);
     if (!v) return;
+
+    const client = window.supabaseConfig?.client;
+    if (!client) { showVideoGate(v, 'noClient'); return; }
+
+    const { data: { session } } = await client.auth.getSession();
+    if (!session?.user) {
+      // Not logged in — show login prompt
+      showVideoGate(v, 'login');
+      return;
+    }
+
+    // Logged in — check payment/enrollment
+    const userId = session.user.id;
+    let isPaid = false;
+    try {
+      const { data: enr } = await client.from('enrollments')
+        .select('id').eq('student_user_id', userId)
+        .in('enrollment_status', ['active', 'completed'])
+        .in('access_status', ['active', 'restricted'])
+        .limit(1);
+      if (enr?.length) { isPaid = true; }
+      if (!isPaid) {
+        const { data: pay } = await client.from('payments')
+          .select('id').eq('student_user_id', userId)
+          .in('payment_status', ['success', 'completed'])
+          .limit(1);
+        if (pay?.length) isPaid = true;
+      }
+    } catch(e) { isPaid = false; }
+
+    if (isPaid) {
+      playVideo(v);
+    } else {
+      showVideoGate(v, 'payment');
+    }
+  }
+
+  // ── Payment gate state ──
+  let _gateVideo = null, _gateCourse = null, _gateTotalAmount = 0;
+
+  // ── Show per-video gate modal ──
+  function showVideoGate(v, reason) {
+    const existing = document.getElementById('rv-access-gate');
+    if (existing) existing.remove();
+    _gateVideo = v;
+
+    let content = '';
+    if (reason === 'login') {
+      content = `
+        <div style="font-size:2.8rem;margin-bottom:.6rem;">🔒</div>
+        <h2 style="color:var(--txt);font-size:1.25rem;font-weight:800;margin:0 0 .4rem;">Sign In to Watch</h2>
+        <p style="color:var(--txt3);font-size:.85rem;margin:0 0 1.4rem;line-height:1.7;">
+          <strong>${v.title}</strong><br>Log in to access this recorded session.
+        </p>
+        <button id="rv-gate-login-btn"
+          style="background:linear-gradient(135deg,#7c5cfc,#3d6bff);color:#fff;border:none;border-radius:50px;padding:.75rem 2rem;font-size:.9rem;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 8px 24px rgba(124,92,252,.4);width:100%;max-width:220px;">
+          Sign In →
+        </button>`;
+    } else if (reason === 'payment') {
+      content = `
+        <div style="font-size:2.8rem;margin-bottom:.6rem;">🎬</div>
+        <h2 style="color:var(--txt);font-size:1.2rem;font-weight:800;margin:0 0 .35rem;">Unlock This Session</h2>
+        <p style="color:var(--txt3);font-size:.82rem;margin:0 0 1rem;line-height:1.65;">Purchase course access to watch all recorded sessions.</p>
+        <div id="rv-pay-loading" style="color:var(--txt4);font-size:.82rem;margin-bottom:.75rem;">Loading pricing…</div>
+        <div id="rv-pay-options" style="display:none;">
+          <div style="background:var(--panel,#f8f7ff);border:1.5px solid var(--border,#e8e0ff);border-radius:14px;padding:.9rem 1rem;margin-bottom:.85rem;text-align:left;">
+            <div style="display:flex;justify-content:space-between;padding:.22rem 0;font-size:.82rem;color:var(--txt3);">
+              <span>Base Price</span><span id="rv-base-price">—</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:.22rem 0;font-size:.82rem;color:var(--txt3);">
+              <span>SGST (18%)</span><span id="rv-sgst">—</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:.22rem 0;font-size:.82rem;color:var(--txt3);">
+              <span>CGST (18%)</span><span id="rv-cgst">—</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:.35rem 0 .1rem;font-size:1rem;font-weight:800;color:#7c5cfc;border-top:1px solid var(--border,#e8e0ff);margin-top:.3rem;">
+              <span>Total Amount</span><span id="rv-total-price">—</span>
+            </div>
+          </div>
+          <div style="font-size:.72rem;color:var(--txt4);margin-bottom:.75rem;display:flex;align-items:center;justify-content:center;gap:.3rem;">
+            🔒 Secured by Razorpay · SSL Encrypted
+          </div>
+          <button id="rv-pay-btn"
+            style="width:100%;background:linear-gradient(135deg,#7c5cfc,#3d6bff);color:#fff;border:none;border-radius:50px;padding:.8rem 1rem;font-size:.9rem;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 6px 20px rgba(124,92,252,.4);margin-bottom:.6rem;">
+            Pay Now via Razorpay
+          </button>
+          <a href="courses.html" style="display:block;text-align:center;font-size:.78rem;color:var(--txt3);text-decoration:none;">
+            Browse all courses →
+          </a>
+        </div>`;
+    } else {
+      content = `<p style="color:var(--txt3);font-size:.85rem;">Service unavailable. Please refresh.</p>`;
+    }
+
+    const gate = document.createElement('div');
+    gate.id = 'rv-access-gate';
+    gate.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(6,4,18,0.72);backdrop-filter:blur(14px);display:flex;align-items:center;justify-content:center;padding:1.5rem;';
+    gate.innerHTML = `<div style="background:var(--bg);border:1.5px solid var(--border);border-radius:22px;padding:2rem 1.75rem;max-width:400px;width:100%;text-align:center;position:relative;box-shadow:0 32px 80px rgba(0,0,0,.45);">
+      <button onclick="document.getElementById('rv-access-gate')?.remove();" style="position:absolute;top:.8rem;right:.8rem;background:none;border:none;color:var(--txt4);font-size:1.05rem;cursor:pointer;line-height:1;padding:.25rem;">✕</button>
+      ${content}
+    </div>`;
+    gate.addEventListener('click', e => { if (e.target === gate) gate.remove(); });
+    document.body.appendChild(gate);
+
+    // Wire login button
+    if (reason === 'login') {
+      document.getElementById('rv-gate-login-btn')?.addEventListener('click', () => {
+        gate.remove();
+        window._pendingVideoId = v.id;
+        window.profileNav?.openLoginModal?.();
+      });
+    }
+
+    // Load course pricing for payment gate
+    if (reason === 'payment') {
+      loadCoursePricingForGate(v);
+    }
+  }
+
+  // Re-attempt watch after login (works for OAuth redirect & modal login)
+  window.addEventListener('focus', async () => {
+    if (!window._pendingVideoId) return;
+    const vid = window._pendingVideoId;
+    try {
+      const { data: { session } } = await window.supabaseConfig?.client?.auth?.getSession() || { data: {} };
+      if (session?.user) { window._pendingVideoId = null; handleWatchClick(vid); }
+    } catch(_) {}
+  });
+
+  // ── Load course pricing for the payment gate ──
+  async function loadCoursePricingForGate(v) {
+    const loadEl = document.getElementById('rv-pay-loading');
+    const optsEl = document.getElementById('rv-pay-options');
+    const el = id => document.getElementById(id);
+    try {
+      let courseId = v.courseId || null;
+      let pricing = null;
+
+      if (courseId && window.supabaseConfig) {
+        const { data } = await window.supabaseConfig.client
+          .from('course_pricing')
+          .select('sale_price,list_price,pricing_type,is_active')
+          .eq('course_id', courseId).eq('is_active', true).limit(1);
+        pricing = data?.[0] || null;
+
+        if (!pricing) {
+          const { data: d2 } = await window.supabaseConfig.client
+            .from('course_pricing').select('sale_price,list_price,pricing_type')
+            .eq('course_id', courseId).limit(1);
+          pricing = d2?.[0] || null;
+        }
+        if (pricing) {
+          _gateCourse = { id: courseId, pricing };
+          const basePrice = pricing.sale_price ?? pricing.list_price ?? 0;
+          const sgst = Math.round(basePrice * 0.18);
+          const cgst = Math.round(basePrice * 0.18);
+          _gateTotalAmount = Math.round(basePrice * 1.36);
+          const fmt = n => n > 0 ? '₹' + Number(n).toLocaleString('en-IN') : 'Contact Us';
+          if (el('rv-base-price')) el('rv-base-price').textContent = fmt(basePrice);
+          if (el('rv-sgst')) el('rv-sgst').textContent = basePrice > 0 ? '₹' + Number(sgst).toLocaleString('en-IN') : '—';
+          if (el('rv-cgst')) el('rv-cgst').textContent = basePrice > 0 ? '₹' + Number(cgst).toLocaleString('en-IN') : '—';
+          if (el('rv-total-price')) el('rv-total-price').textContent = fmt(_gateTotalAmount);
+          const payBtn = el('rv-pay-btn');
+          if (payBtn && _gateTotalAmount > 0) {
+            payBtn.textContent = 'Pay ₹' + Number(_gateTotalAmount).toLocaleString('en-IN') + ' via Razorpay';
+          }
+        }
+      }
+
+      if (!pricing) {
+        if (el('rv-base-price')) el('rv-base-price').textContent = 'See pricing';
+        if (el('rv-total-price')) el('rv-total-price').textContent = 'See pricing';
+      }
+
+      if (loadEl) loadEl.style.display = 'none';
+      if (optsEl) optsEl.style.display = '';
+      el('rv-pay-btn')?.addEventListener('click', _gateInitiatePayment);
+    } catch(e) {
+      console.warn('Pricing load error:', e);
+      if (loadEl) loadEl.style.display = 'none';
+      if (optsEl) { optsEl.innerHTML = '<a href="courses.html" style="color:#7c5cfc;font-weight:700;">Browse courses to enroll →</a>'; optsEl.style.display = ''; }
+    }
+  }
+
+  async function _gateInitiatePayment() {
+    const btn = document.getElementById('rv-pay-btn');
+    if (!btn) return;
+
+    // Razorpay requires HTTPS — fail gracefully on file:// protocol
+    if (window.location.protocol === 'file:') {
+      _showGateError('Payment requires a hosted site (HTTPS). Please access SkillUpNow via its web URL, not a local file.');
+      return;
+    }
+
+    if (!window.supabaseConfig) return;
+    const { data: { session } } = await window.supabaseConfig.client.auth.getSession();
+    const user = session?.user;
+    if (!user) {
+      document.getElementById('rv-access-gate')?.remove();
+      if (_gateVideo) window._pendingVideoId = _gateVideo.id;
+      window.profileNav?.openLoginModal?.();
+      return;
+    }
+    if (!_gateCourse) { window.location.href = 'courses.html'; return; }
+
+    const totalAmount = _gateTotalAmount;
+    if (!totalAmount || totalAmount <= 0) {
+      _showGateError('Could not calculate payment amount. Please try again or contact support.');
+      return;
+    }
+
+    if (typeof window.Razorpay === 'undefined') {
+      _showGateError('Payment gateway failed to load. Please check your internet connection and refresh the page.');
+      return;
+    }
+
+    btn.disabled = true; btn.textContent = 'Processing…';
+    try {
+      const options = {
+        key: 'rzp_live_ILgsSZCZoFMQjO',
+        amount: totalAmount * 100,
+        currency: 'INR',
+        name: 'SkillUpNow',
+        description: _gateVideo?.title || 'Course Enrollment',
+        prefill: { name: user.user_metadata?.full_name || '', email: user.email },
+        theme: { color: '#7c5cfc' },
+        handler: async (response) => {
+          try {
+            const { data: enroll } = await window.supabaseConfig.client.from('enrollments').upsert({
+              student_user_id: user.id, course_id: _gateCourse.id,
+              pricing_id: null,
+              enrollment_status: 'active', access_status: 'active',
+              net_amount: totalAmount, paid_amount: totalAmount, due_amount: 0,
+            }, { onConflict: 'student_user_id,course_id' }).select().single();
+            await window.supabaseConfig.client.from('payments').insert({
+              student_user_id: user.id,
+              enrollment_id: enroll?.id || null,
+              course_id: _gateCourse.id,
+              amount: totalAmount,
+              payment_method: 'razorpay',
+              payment_gateway: 'razorpay',
+              gateway_order_id: response.razorpay_order_id,
+              gateway_payment_id: response.razorpay_payment_id,
+              gateway_signature: response.razorpay_signature,
+              transaction_reference: response.razorpay_payment_id,
+              payment_status: 'completed',
+              paid_at: new Date().toISOString(),
+            });
+          } catch(dbErr) { console.warn('DB record error:', dbErr); }
+          document.getElementById('rv-access-gate')?.remove();
+          if (_gateVideo) playVideo(_gateVideo);
+        },
+      };
+      const rzp = new window.Razorpay(options);
+      rzp.on('payment.failed', (resp) => {
+        btn.disabled = false;
+        btn.textContent = 'Retry Payment';
+        const msg = resp?.error?.description || resp?.error?.reason || 'Payment was declined. Please try a different payment method.';
+        _showGateError(msg);
+      });
+      rzp.open();
+    } catch(e) {
+      console.error(e);
+      btn.disabled = false;
+      btn.textContent = 'Pay Now via Razorpay';
+      _showGateError(e.message || 'An unexpected error occurred. Please try again.');
+    }
+  }
+
+  function _showGateError(msg) {
+    const gate = document.getElementById('rv-access-gate');
+    if (!gate) return;
+    let err = gate.querySelector('#rv-gate-err');
+    if (!err) {
+      err = document.createElement('div');
+      err.id = 'rv-gate-err';
+      err.style.cssText = 'background:rgba(239,68,68,.12);border:1.5px solid rgba(239,68,68,.3);border-radius:10px;padding:.55rem .75rem;font-size:.8rem;color:#f87171;margin-top:.6rem;text-align:left;line-height:1.5;';
+      const payBtn = document.getElementById('rv-pay-btn');
+      payBtn?.parentNode?.insertBefore(err, payBtn?.nextSibling);
+    }
+    err.textContent = msg;
+    setTimeout(() => err?.remove(), 8000);
+  }
+
+  // ── Play video in modal (paid users only) ──
+  function playVideo(v) {
     const modal = document.getElementById('rv-modal');
     const videoArea = document.getElementById('rv-modal-video');
     document.getElementById('rv-modal-title').textContent = v.title;
-    document.getElementById('rv-modal-mentor').textContent = '👤 ' + v.mentor;
-    document.getElementById('rv-modal-dur').textContent = '⏱ ' + v.duration;
-    document.getElementById('rv-modal-cat').textContent = '📚 ' + (v.tags?.[0] || v.category);
+    document.getElementById('rv-modal-mentor').textContent = '📚 ' + (v.courseTitle || 'SkillUpNow');
+    document.getElementById('rv-modal-dur').textContent = v.duration !== '—' ? '⏱ ' + v.duration : '';
+    document.getElementById('rv-modal-cat').textContent = v.tags?.[0] ? '🏷 ' + v.tags[0] : '';
     if (v.videoUrl && v.videoUrl.startsWith('http')) {
       const isYT = v.videoUrl.includes('youtube') || v.videoUrl.includes('youtu.be');
+      const isDrive = v.videoUrl.includes('drive.google.com');
       if (isYT) {
         const ytId = v.videoUrl.match(/(?:v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/)?.[1];
-        videoArea.innerHTML = `<iframe src="https://www.youtube.com/embed/${ytId}?autoplay=1&rel=0" allow="autoplay; fullscreen" allowfullscreen></iframe>`;
+        videoArea.innerHTML = `<iframe src="https://www.youtube.com/embed/${ytId}?autoplay=1&rel=0&modestbranding=1" allow="autoplay; fullscreen" allowfullscreen style="width:100%;height:100%;border:none;"></iframe>`;
+      } else if (isDrive) {
+        const driveId = v.videoUrl.match(/\/d\/([a-zA-Z0-9_-]+)/)?.[1];
+        if (driveId) {
+          videoArea.innerHTML = `<iframe src="https://drive.google.com/file/d/${driveId}/preview" allow="autoplay; fullscreen" allowfullscreen style="width:100%;height:100%;border:none;"></iframe>`;
+        } else {
+          videoArea.innerHTML = `<iframe src="${v.videoUrl}" allow="autoplay; fullscreen" allowfullscreen style="width:100%;height:100%;border:none;"></iframe>`;
+        }
       } else {
-        videoArea.innerHTML = `<video controls autoplay src="${v.videoUrl}" style="width:100%;height:100%;"></video>`;
+        videoArea.innerHTML = `<video controls autoplay src="${v.videoUrl}" controlslist="nodownload" style="width:100%;height:100%;" oncontextmenu="return false;"></video>`;
       }
     } else {
       videoArea.innerHTML = `
         <div class="rv-modal-placeholder">
           <div class="big-icon">${v.icon}</div>
           <div style="font-size:1rem;font-weight:700;color:rgba(255,255,255,.7);">${v.title}</div>
-          <div style="font-size:.82rem;color:rgba(255,255,255,.4);max-width:320px;text-align:center;">
-            This session recording will be available once you're enrolled in this programme.
-            <br><br>
-            <a href="contact-enquiry.html" style="color:#a78bfa;font-weight:700;text-decoration:none;">Enquire to enroll →</a>
+          <div style="font-size:.82rem;color:rgba(255,255,255,.4);max-width:300px;text-align:center;line-height:1.6;">
+            Recording not yet available for this session. Check back soon.
           </div>
         </div>`;
     }
@@ -559,49 +912,81 @@
     document.body.style.overflow = 'hidden';
   }
 
+  function openModal(id) { handleWatchClick(id); }
+
   function closeModal() {
     const modal = document.getElementById('rv-modal');
     modal.classList.remove('open');
     document.body.style.overflow = '';
-    // Stop any playing video
-    const videoArea = document.getElementById('rv-modal-video');
-    videoArea.innerHTML = '<div class="rv-modal-placeholder"><div class="big-icon">🎬</div><div>Loading…</div></div>';
+    document.getElementById('rv-modal-video').innerHTML = '<div class="rv-modal-placeholder"><div class="big-icon">🎬</div><div>Loading…</div></div>';
   }
 
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
-  // Load from DB
-  async function loadDBVideos() {
+  // ── Load recordings from live_recordings table (DB only) ──
+  async function loadVideos() {
+    showSkeleton();
     try {
-      if (!window.supabaseConfig) return;
-      const { data } = await window.supabaseConfig.client
-        .from('recorded_sessions')
-        .select('id,title,description,video_url,category,duration_minutes,created_at')
+      // Wait for supabase to init if needed
+      if (!window.supabaseConfig?.client) {
+        await new Promise(r => setTimeout(r, 800));
+      }
+      if (!window.supabaseConfig?.client) throw new Error('Database not ready');
+
+      // Select only columns that exist in live_recordings table
+      const { data, error } = await window.supabaseConfig.client
+        .from('live_recordings')
+        .select('id,title,external_url,provider_name,course_id,created_at,courses(title)')
         .eq('is_published', true)
         .order('created_at', { ascending: false });
-      if (!data?.length) return;
-      dbVideos = data.map(r => ({
-        id: 'db_' + r.id,
-        title: r.title || 'Session Recording',
-        category: (r.category || 'communication').toLowerCase(),
-        mentor: 'SkillUpNow Mentor',
-        duration: (r.duration_minutes || 0) + ' min',
-        icon: '🎬',
-        gradient: 'linear-gradient(135deg,#7c5cfc,#3d6bff)',
-        isNew: (Date.now() - new Date(r.created_at).getTime()) < 7*24*3600*1000,
-        tags: [r.category || 'Session'],
-        videoUrl: r.video_url,
-      }));
-      allVideos = [...STATIC_VIDEOS, ...dbVideos];
+
+      if (error) throw error;
+
+      if (!data || !data.length) {
+        document.getElementById('rv-grid').innerHTML = `
+          <div class="rv-empty">
+            <div class="rv-empty-icon">🎬</div>
+            <p style="font-size:1.05rem;font-weight:600;color:var(--txt3);margin-bottom:.5rem;">No recordings yet</p>
+            <p style="font-size:.88rem;">Recorded sessions will appear here after live classes.</p>
+          </div>`;
+        return;
+      }
+
+      allVideos = data.map(r => {
+        const { icon, gradient } = videoMeta(r.provider_name);
+        const courseTitle = r.courses?.title || '';
+        const filterKey = courseTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+        return {
+          id: r.id,
+          title: r.title || 'Session Recording',
+          courseTitle,
+          filterKey: filterKey || 'session',
+          duration: r.duration_minutes ? r.duration_minutes + ' min' : '—',
+          icon,
+          gradient,
+          isNew: (Date.now() - new Date(r.created_at).getTime()) < 7 * 24 * 3600 * 1000,
+          tags: courseTitle ? [courseTitle] : [],
+          videoUrl: r.external_url,
+          courseId: r.course_id || null,
+          thumbnail: r.thumbnail_url || null,
+        };
+      });
+
+      buildFilterButtons();
       renderVideos();
-    } catch(e) { /* DB videos unavailable, static data shown */ }
+    } catch(e) {
+      console.error('loadVideos error:', e);
+      document.getElementById('rv-grid').innerHTML = `
+        <div class="rv-empty">
+          <div class="rv-empty-icon">⚠️</div>
+          <p style="font-size:1.05rem;font-weight:600;color:var(--txt3);margin-bottom:.5rem;">Could not load recordings</p>
+          <p style="font-size:.88rem;">Check your connection and <a href="" style="color:var(--v1);">refresh</a>.</p>
+        </div>`;
+    }
   }
 
   // Init
-  renderVideos();
-  document.addEventListener('DOMContentLoaded', () => {
-    loadDBVideos();
-  });
+  document.addEventListener('DOMContentLoaded', loadVideos);
   </script>
 </body>
 </html>

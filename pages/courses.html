@@ -219,6 +219,48 @@
     }
     .btn-pay:hover { opacity: 0.88; transform: scale(1.01); }
     .btn-pay:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    .pay-actions { display: flex; gap: .65rem; margin-top: .25rem; }
+    .btn-pay-now  { flex: 1.6; }
+    .btn-pay-later { flex: 1; background: transparent; color: var(--v1); border: 1.5px solid var(--v1); }
+
+    /* ===== ENROLLMENT CONFIRMATION POPUP (PAY LATER) ===== */
+    .ec-overlay {
+      display: none; position: fixed; inset: 0; z-index: 9100;
+      background: rgba(6,3,18,.72); -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px);
+      align-items: center; justify-content: center; padding: 1rem;
+    }
+    .ec-overlay.open { display: flex; }
+    .ec-box {
+      background: var(--panel); border: 1.5px solid rgba(124,92,252,.3);
+      border-radius: 24px; padding: 2.4rem 2rem 2rem;
+      max-width: 420px; width: 94vw; text-align: center;
+      box-shadow: 0 40px 80px rgba(60,20,160,.25); position: relative;
+    }
+    .ec-icon   { font-size: 3.2rem; margin-bottom: .75rem; }
+    .ec-title  { font-size: 1.2rem; font-weight: 800; color: var(--txt); margin-bottom: .4rem; }
+    .ec-name   { font-size: .9rem; font-weight: 700; color: var(--v1); margin-bottom: .9rem; }
+    .ec-info   {
+      background: rgba(124,92,252,.08); border: 1px solid rgba(124,92,252,.18);
+      border-radius: 14px; padding: .9rem 1rem; margin-bottom: 1.2rem;
+      font-size: .83rem; color: var(--txt3); text-align: left; line-height: 1.65;
+    }
+    .ec-info-row { display: flex; justify-content: space-between; margin-bottom: .3rem; }
+    .ec-info-row:last-child { margin-bottom: 0; }
+    .ec-info-val { font-weight: 700; color: var(--txt); }
+    .ec-info-pending { font-weight: 700; color: #f59e0b; }
+    .ec-note   { font-size: .8rem; color: var(--txt3); margin-bottom: 1.25rem; }
+    .ec-actions { display: flex; gap: .65rem; }
+    .ec-btn-primary {
+      flex: 1; padding: .75rem; border-radius: var(--r1);
+      background: var(--grad); color: #fff; font-size: .85rem; font-weight: 700;
+      text-decoration: none; display: flex; align-items: center; justify-content: center;
+    }
+    .ec-btn-secondary {
+      flex: 1; padding: .75rem; border-radius: var(--r1);
+      background: var(--panel); border: 1.5px solid var(--border);
+      color: var(--txt3); font-size: .85rem; font-weight: 700;
+      cursor: pointer; font-family: inherit;
+    }
 
     /* ===== EMPTY STATE ===== */
     .empty-state { text-align: center; padding: 4rem 2rem; color: var(--txt3); }
@@ -318,62 +360,95 @@
   </section>
 </div>
 
-<!-- Enrollment Modal -->
+<!-- Course Detail / Enrollment Modal -->
 <div class="enroll-overlay" id="enroll-overlay">
-  <div class="enroll-modal">
-    <div class="em-close" id="em-close">✕</div>
-    <div class="em-title" id="em-title">Enroll in Course</div>
-    <div class="em-subtitle" id="em-subtitle">Choose your payment option below</div>
+  <div class="enroll-modal" id="enroll-modal">
+    <button class="em-close" id="em-close" onclick="closeEnrollModal()">✕</button>
 
-    <div class="em-price-row">
-      <div class="em-price-item">
-        <div class="label">Course Fee</div>
-        <div class="value" id="em-fee">₹0</div>
+    <!-- Panel 1: Course Details -->
+    <div id="em-panel-details">
+      <div id="em-thumb-wrap" style="height:150px;border-radius:var(--r2);overflow:hidden;margin-bottom:1rem;background:var(--grad2);display:flex;align-items:center;justify-content:center;font-size:3rem;"></div>
+      <div style="display:flex;align-items:center;gap:.4rem;margin-bottom:.4rem;flex-wrap:wrap;">
+        <span id="em-level-badge" style="background:var(--grad);color:#fff;padding:.18rem .6rem;border-radius:999px;font-size:.68rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;"></span>
+        <span id="em-cat-badge" style="border:1px solid var(--border);color:var(--v1);padding:.18rem .6rem;border-radius:999px;font-size:.68rem;font-weight:600;"></span>
       </div>
-      <div class="em-price-item">
-        <div class="label">Duration</div>
-        <div class="value" id="em-duration">—</div>
+      <div class="em-title" id="em-title">Course Title</div>
+      <div class="em-subtitle" id="em-subtitle" style="margin-bottom:.85rem;"></div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin-bottom:.85rem;">
+        <div style="background:var(--panel);border:1px solid var(--border);border-radius:var(--r1);padding:.5rem .3rem;text-align:center;">
+          <div style="font-size:.63rem;color:var(--txt4);margin-bottom:.12rem;">Duration</div>
+          <div style="font-size:.82rem;font-weight:700;color:var(--txt);" id="em-duration">—</div>
+        </div>
+        <div style="background:var(--panel);border:1px solid var(--border);border-radius:var(--r1);padding:.5rem .3rem;text-align:center;">
+          <div style="font-size:.63rem;color:var(--txt4);margin-bottom:.12rem;">Sessions</div>
+          <div style="font-size:.82rem;font-weight:700;color:var(--txt);" id="em-sessions">—</div>
+        </div>
+        <div style="background:var(--panel);border:1px solid var(--border);border-radius:var(--r1);padding:.5rem .3rem;text-align:center;">
+          <div style="font-size:.63rem;color:var(--txt4);margin-bottom:.12rem;">Level</div>
+          <div style="font-size:.82rem;font-weight:700;color:var(--txt);" id="em-level-val">—</div>
+        </div>
       </div>
-      <div class="em-price-item">
-        <div class="label">Sessions</div>
-        <div class="value" id="em-sessions">—</div>
+      <div id="em-desc" style="font-size:.83rem;color:var(--txt3);line-height:1.7;margin-bottom:.85rem;max-height:88px;overflow-y:auto;"></div>
+      <div id="em-mentor-row" style="font-size:.82rem;color:var(--txt3);margin-bottom:.9rem;display:none;align-items:center;gap:.4rem;">
+        <span>👨‍🏫</span><span id="em-mentor">—</span>
       </div>
+      <button class="btn-pay" id="btn-enroll-detail">Enroll Now</button>
     </div>
 
-    <div class="pay-options">
-      <div class="pay-option selected" data-type="full" onclick="selectPayType('full', this)">
-        <div class="opt-icon">💳</div>
-        <div class="opt-label">Full Payment</div>
-        <div class="opt-desc">Pay once, save more</div>
+    <!-- Panel 2: Payment Confirmation -->
+    <div id="em-panel-payment" style="display:none;">
+      <button onclick="showDetailPanel()" style="background:none;border:none;color:var(--v1);font-size:.82rem;font-weight:600;cursor:pointer;font-family:inherit;margin-bottom:1rem;padding:0;display:flex;align-items:center;gap:.3rem;">← Back to Details</button>
+      <div style="font-size:1.05rem;font-weight:800;color:var(--txt);margin-bottom:.15rem;">Confirm Enrollment</div>
+      <div style="font-size:.82rem;color:var(--txt3);margin-bottom:1rem;" id="em-pay-course-name"></div>
+      <div style="background:var(--panel);border:1.5px solid var(--border);border-radius:var(--r2);padding:1rem;margin-bottom:.9rem;">
+        <div style="display:flex;justify-content:space-between;padding:.2rem 0;font-size:.84rem;color:var(--txt3);">
+          <span>Course Fee</span><span id="em-base-fee">—</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:.2rem 0;font-size:.84rem;color:var(--txt3);">
+          <span>SGST (9%)</span><span id="em-sgst">—</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:.2rem 0;font-size:.84rem;color:var(--txt3);">
+          <span>CGST (9%)</span><span id="em-cgst">—</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:.3rem 0 .05rem;font-size:1rem;font-weight:800;color:var(--v1);border-top:1px solid var(--border);margin-top:.25rem;">
+          <span>Total (incl. GST)</span><span id="em-total-fee">—</span>
+        </div>
       </div>
-      <div class="pay-option" data-type="emi" id="emi-option" onclick="selectPayType('emi', this)">
-        <div class="opt-icon">📅</div>
-        <div class="opt-label">Easy EMI</div>
-        <div class="opt-desc">Monthly installments</div>
+      <div style="font-size:.78rem;color:var(--txt3);margin-bottom:.85rem;display:flex;align-items:center;gap:.35rem;">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Secured by Razorpay · SSL Encrypted · PCI DSS Compliant
       </div>
-    </div>
-
-    <div class="emi-selector" id="emi-selector">
-      <label>Select EMI Duration</label>
-      <div class="emi-months" id="emi-months"></div>
-      <div class="emi-breakdown" id="emi-breakdown">
-        <div><span>Monthly Installment</span><strong id="emi-monthly">₹0</strong></div>
-        <div><span>Total Amount</span><strong id="emi-total">₹0</strong></div>
-        <div><span>First Due</span><strong id="emi-first">Today</strong></div>
+      <div class="pay-actions">
+        <button type="button" class="btn-pay btn-pay-now" id="btn-pay" onclick="initiatePayment()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:-2px;margin-right:.3rem;"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+          Pay Now
+        </button>
+        <button type="button" class="btn-pay btn-pay-later" id="btn-pay-later" onclick="enrollPayLater()">
+          Pay Later
+        </button>
       </div>
+      <p style="text-align:center;font-size:.75rem;color:var(--txt4);margin-top:.6rem;">
+        By enrolling you agree to our <a href="#" style="color:var(--v1)">Terms</a> &amp; <a href="#" style="color:var(--v1)">Refund Policy</a>
+      </p>
     </div>
+  </div>
+</div>
 
-    <div style="font-size:0.8rem;color:var(--txt3);margin-bottom:1rem;display:flex;align-items:center;gap:0.4rem">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-      Secured by Razorpay · SSL Encrypted · PCI DSS Compliant
+<!-- Enrollment Confirmation Popup (Pay Later) -->
+<div id="enroll-confirm-overlay" class="ec-overlay">
+  <div class="ec-box">
+    <div class="ec-icon">🎉</div>
+    <div class="ec-title">Successfully Enrolled!</div>
+    <div class="ec-name" id="ec-course-name"></div>
+    <div class="ec-info">
+      <div class="ec-info-row"><span>Amount Due</span><span class="ec-info-val" id="ec-amount"></span></div>
+      <div class="ec-info-row"><span>Payment Status</span><span class="ec-info-pending">⏳ Pending</span></div>
     </div>
-
-    <button class="btn-pay" id="btn-pay" onclick="initiatePayment()">
-      Pay Now via Razorpay
-    </button>
-    <p style="text-align:center;font-size:0.78rem;color:var(--txt4);margin-top:0.75rem">
-      By enrolling you agree to our <a href="#" style="color:var(--v1)">Terms</a> & <a href="#" style="color:var(--v1)">Refund Policy</a>
-    </p>
+    <p class="ec-note">You can complete your payment anytime from your <strong>Profile → Payments</strong> tab.</p>
+    <div class="ec-actions">
+      <a href="profile.html?tab=learning" class="ec-btn-primary">View My Courses</a>
+      <button type="button" class="ec-btn-secondary" onclick="closeEnrollConfirm()">Stay Here</button>
+    </div>
   </div>
 </div>
 
@@ -384,33 +459,68 @@
 <script src="../js/theme.js"></script>
 <script src="../js/profile-nav.js"></script>
 <script>
-  const db = new SupabaseConfig();
-  let allCourses = [], filteredCourses = [], selectedCourse = null, selectedPayType = 'full', selectedEmiMonths = 0;
+  // Use global supabase config — do NOT create a second instance
+  let allCourses = [], filteredCourses = [], selectedCourse = null, selectedTotalAmount = 0;
+
+  function _db() { return window.supabaseConfig?.client || null; }
 
   // ===== LOAD COURSES =====
   async function loadCourses() {
-    const { data, error } = await db.client.from('courses')
-      .select(`*, course_categories(name, slug), course_pricing(id, sale_price, list_price, pricing_type, is_active, emi_installments)`)
-      .eq('course_status', 'published')
-      .order('created_at', { ascending: false });
-    if (error) { console.error(error); return; }
-    // Normalize: attach active pricing and category name for easy access
-    allCourses = (data || []).map(c => {
-      const activePricing = (c.course_pricing || []).find(p => p.is_active) || c.course_pricing?.[0] || {};
-      return { ...c, _price: activePricing.sale_price ?? activePricing.list_price ?? 0, _basePrice: activePricing.list_price ?? 0, _pricingType: activePricing.pricing_type || 'full_payment', _catName: c.course_categories?.name || '', _pricingId: activePricing.id };
-    });
-    loadCategories();
-    applyFilters();
+    const grid = document.getElementById('courses-grid');
+    const count = document.getElementById('courses-count');
+    count.textContent = 'Loading courses…';
+    try {
+      // Wait for supabase to be ready (up to 3s)
+      let tries = 0;
+      while (!_db() && tries++ < 20) await new Promise(r => setTimeout(r, 150));
+      if (!_db()) throw new Error('Database not ready');
+      // RLS already restricts to published + public for anonymous users — no need for status filter
+      const { data, error } = await _db().from('courses')
+        .select(`*, course_categories(name, slug), course_pricing(id, sale_price, list_price, pricing_type, is_active, emi_installments)`)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      // Normalize: attach active pricing and category name for easy access
+      allCourses = (data || []).map(c => {
+        const activePricing = (c.course_pricing || []).find(p => p.is_active) || c.course_pricing?.[0] || {};
+        return { ...c, _price: activePricing.sale_price ?? activePricing.list_price ?? 0, _basePrice: activePricing.list_price ?? 0, _pricingType: activePricing.pricing_type || 'full_payment', _catName: c.course_categories?.name || '', _pricingId: activePricing.id };
+      });
+      // Mark enrolled courses for logged-in user
+      try {
+        const { data: { session } } = await _db().auth.getSession();
+        if (session?.user) {
+          const { data: enrollments } = await _db().from('enrollments')
+            .select('course_id')
+            .eq('student_user_id', session.user.id)
+            .in('enrollment_status', ['active', 'completed']);
+          const enrolledIds = new Set((enrollments || []).map(e => e.course_id));
+          allCourses = allCourses.map(c => ({ ...c, _enrolled: enrolledIds.has(c.id) }));
+        }
+      } catch(_) {}
+      loadCategories();
+      applyFilters();
+      // Auto-open course detail if navigated from home page with ?id=
+      const _urlId = new URLSearchParams(window.location.search).get('id');
+      if (_urlId && allCourses.find(c => c.id === _urlId)) {
+        history.replaceState({}, '', window.location.pathname);
+        setTimeout(() => openCourseDetail(_urlId), 150);
+      }
+    } catch(e) {
+      console.error('loadCourses error:', e);
+      count.textContent = '0 courses';
+      grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">⚠️</div><h3>Could not load courses</h3><p>Check your connection and <a href="" style="color:var(--v1)">refresh</a>.</p></div>`;
+    }
   }
 
   async function loadCategories() {
-    const { data } = await db.client.from('course_categories').select('name,slug').eq('is_active', true).order('sort_order');
-    const sel = document.getElementById('category-filter');
-    (data || []).forEach(c => {
-      const o = document.createElement('option');
-      o.value = c.slug; o.textContent = c.name || c.slug;
-      sel.appendChild(o);
-    });
+    try {
+      const { data } = await _db().from('course_categories').select('name,slug').order('sort_order');
+      const sel = document.getElementById('category-filter');
+      (data || []).forEach(c => {
+        const o = document.createElement('option');
+        o.value = c.slug; o.textContent = c.name || c.slug;
+        sel.appendChild(o);
+      });
+    } catch(_) { /* categories failed — filter still works without them */ }
   }
 
   // ===== FILTER & SORT =====
@@ -455,11 +565,12 @@
       const icon = icons[c._catName] || '📚';
       const hasDiscount = c._price > 0 && c._basePrice > c._price;
       const durationMo = c.duration_days ? Math.round(c.duration_days / 30) : null;
-      return `<div class="course-card" onclick="openEnrollModal('${c.id}')">
+      const enrolled = !!c._enrolled;
+      return `<div class="course-card" onclick="openCourseDetail('${c.id}')">
         <div class="course-thumb" style="background:var(--grad2)">
           ${c.thumbnail_url ? `<img src="${c.thumbnail_url}" alt="${c.title}" loading="lazy">` : `<div class="thumb-icon">${icon}</div>`}
           <div class="course-badge">${c.level}</div>
-          ${hasDiscount ? `<div class="discount-badge">${Math.round((1 - c._price/c._basePrice)*100)}% OFF</div>` : ''}
+          ${enrolled ? `<div class="discount-badge" style="background:linear-gradient(135deg,#4ade80,#22d3ee);color:#0a2a1a;">✓ Enrolled</div>` : (hasDiscount ? `<div class="discount-badge">${Math.round((1 - c._price/c._basePrice)*100)}% OFF</div>` : '')}
         </div>
         <div class="course-body">
           <div class="course-category">${c._catName || 'Course'}</div>
@@ -467,143 +578,328 @@
           <div class="course-desc">${c.short_description || c.description?.substring(0, 120) || ''}</div>
           <div class="course-meta">
             <span>⏱ ${durationMo ? durationMo + ' months' : c.duration_hours ? c.duration_hours + ' hrs' : '—'}</span>
-            ${c._pricingType === 'emi' ? '<span style="color:var(--v1);font-weight:600">EMI Available</span>' : ''}
           </div>
         </div>
-        <div class="course-footer">
-          <div class="price-block">
-            <div class="price">${c._price > 0 ? '₹' + Number(c._price).toLocaleString('en-IN') : 'Contact Us'}</div>
-            ${hasDiscount ? `<div class="original">₹${Number(c._basePrice).toLocaleString('en-IN')}</div>` : ''}
-          </div>
-          <button class="btn-enroll" onclick="event.stopPropagation();openEnrollModal('${c.id}')">Enroll Now</button>
+        <div class="course-footer" style="justify-content:flex-end;">
+          ${enrolled
+            ? `<button class="btn-enroll" style="background:linear-gradient(135deg,#4ade80,#22d3ee);color:#0a2a1a;" onclick="event.stopPropagation();window.location.href='profile.html?tab=learning'">View Course</button>`
+            : `<button class="btn-enroll" onclick="event.stopPropagation();openCourseDetail('${c.id}')">View Details</button>`
+          }
         </div>
       </div>`;
     }).join('');
   }
 
-  // ===== ENROLL MODAL =====
-  function openEnrollModal(courseId) {
-    const user = db.currentUser;
-    if (!user) {
-      window.profileNav?.openLoginModal?.();
-      return;
-    }
+  // ===== COURSE DETAIL MODAL =====
+  async function openCourseDetail(courseId) {
     selectedCourse = allCourses.find(c => c.id === courseId);
     if (!selectedCourse) return;
 
-    document.getElementById('em-title').textContent = selectedCourse.title;
-    document.getElementById('em-subtitle').textContent = (selectedCourse._catName || '') + ' · ' + (selectedCourse.level || '');
-    const price = selectedCourse._price;
-    document.getElementById('em-fee').textContent = price > 0 ? '₹' + Number(price).toLocaleString('en-IN') : 'Contact Us';
-    const durationMo = selectedCourse.duration_days ? Math.round(selectedCourse.duration_days / 30) : null;
-    document.getElementById('em-duration').textContent = durationMo ? durationMo + ' mo' : '—';
-    document.getElementById('em-sessions').textContent = selectedCourse.total_live_classes || '—';
+    const c = selectedCourse;
+    const icons = { 'Communication':'💬','Leadership':'👑','Interview':'🎯','Business':'💼','Speaking':'🎤','IT':'💻','Cloud':'☁️','AI/ML':'🤖','DevOps':'⚙️' };
+    const icon = icons[c._catName] || '📚';
+    const durationMo = c.duration_days ? Math.round(c.duration_days / 30) : null;
+    const el = id => document.getElementById(id);
 
-    // EMI option visibility
-    const isEmi = selectedCourse._pricingType === 'emi';
-    const emiOpt = document.getElementById('emi-option');
-    emiOpt.style.display = isEmi ? 'block' : 'none';
-
-    // Build EMI month buttons
-    if (isEmi) {
-      const months = document.getElementById('emi-months');
-      months.innerHTML = '';
-      for (let m = 2; m <= 12; m += 2) {
-        const btn = document.createElement('button');
-        btn.className = 'emi-month-btn' + (m === 2 ? ' active' : '');
-        btn.textContent = m + ' months';
-        btn.dataset.months = m;
-        btn.onclick = () => { document.querySelectorAll('.emi-month-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); selectedEmiMonths = m; updateEmiBreakdown(); };
-        months.appendChild(btn);
-      }
-      selectedEmiMonths = 2;
-      updateEmiBreakdown();
+    // Thumbnail
+    const thumbWrap = el('em-thumb-wrap');
+    if (thumbWrap) {
+      thumbWrap.innerHTML = c.thumbnail_url
+        ? `<img src="${c.thumbnail_url}" alt="${c.title}" style="width:100%;height:100%;object-fit:cover;">`
+        : icon;
     }
 
-    selectPayType('full', document.querySelector('.pay-option[data-type="full"]'));
+    if (el('em-level-badge')) el('em-level-badge').textContent = c.level || 'Course';
+    if (el('em-cat-badge'))   el('em-cat-badge').textContent   = c._catName || '';
+    if (el('em-title'))       el('em-title').textContent       = c.title;
+    if (el('em-subtitle'))    el('em-subtitle').textContent    = c._catName ? c._catName + (c.mentor_name ? ' · ' + c.mentor_name : '') : '';
+    if (el('em-duration'))    el('em-duration').textContent    = durationMo ? durationMo + ' mo' : c.duration_hours ? c.duration_hours + ' hrs' : '—';
+    if (el('em-sessions'))    el('em-sessions').textContent    = c.total_live_classes || '—';
+    if (el('em-level-val'))   el('em-level-val').textContent   = c.level || '—';
+    if (el('em-desc'))        el('em-desc').textContent        = c.description || c.short_description || '';
+
+    const mentorRow = el('em-mentor-row');
+    if (mentorRow) {
+      if (c.mentor_name) { mentorRow.style.display = 'flex'; if (el('em-mentor')) el('em-mentor').textContent = c.mentor_name; }
+      else mentorRow.style.display = 'none';
+    }
+
+    // Auth + enrollment state
+    let isLoggedIn = !!window.profileNav?.currentUser;
+    let alreadyEnrolled = false;
+    try {
+      const { data: { session } } = await _db().auth.getSession();
+      if (session?.user) {
+        isLoggedIn = true;
+        window.profileNav && (window.profileNav.currentUser = session.user);
+        const { data: existing } = await _db().from('enrollments')
+          .select('id')
+          .eq('student_user_id', session.user.id)
+          .eq('course_id', c.id)
+          .in('enrollment_status', ['active', 'completed'])
+          .maybeSingle();
+        if (existing) alreadyEnrolled = true;
+      }
+    } catch(_) {}
+
+    const enrollBtn = el('btn-enroll-detail');
+    if (enrollBtn) {
+      enrollBtn.style.cssText = '';
+      if (alreadyEnrolled) {
+        enrollBtn.textContent = '✓ Already Enrolled — View Course';
+        enrollBtn.style.background = 'linear-gradient(135deg,#4ade80,#22d3ee)';
+        enrollBtn.style.color = '#0a2a1a';
+        enrollBtn.onclick = () => { window.location.href = 'profile.html?tab=learning'; };
+      } else {
+        enrollBtn.textContent = isLoggedIn ? 'Enroll Now →' : 'Login to Enroll';
+        enrollBtn.onclick = confirmEnrollment;
+      }
+    }
+
+    showDetailPanel();
     document.getElementById('enroll-overlay').classList.add('open');
   }
 
-  function updateEmiBreakdown() {
-    if (!selectedCourse || !selectedEmiMonths) return;
-    const total = selectedCourse._price;
-    const monthly = Math.ceil(total / selectedEmiMonths);
-    document.getElementById('emi-monthly').textContent = '₹' + Number(monthly).toLocaleString('en-IN');
-    document.getElementById('emi-total').textContent = '₹' + Number(total).toLocaleString('en-IN');
-    const d = new Date(); d.setMonth(d.getMonth() + 1);
-    document.getElementById('emi-first').textContent = d.toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' });
+  function showDetailPanel() {
+    const d = document.getElementById('em-panel-details');
+    const p = document.getElementById('em-panel-payment');
+    if (d) d.style.display = '';
+    if (p) p.style.display = 'none';
   }
 
-  function selectPayType(type, el) {
-    selectedPayType = type;
-    document.querySelectorAll('.pay-option').forEach(o => o.classList.remove('selected'));
-    el?.classList.add('selected');
-    const emiSel = document.getElementById('emi-selector');
-    if (type === 'emi') emiSel.classList.add('show'); else emiSel.classList.remove('show');
-    const btnText = type === 'emi' ? 'Apply EMI & Pay First Installment' : 'Pay Now via Razorpay';
-    document.getElementById('btn-pay').textContent = btnText;
+  async function confirmEnrollment() {
+    let user = window.profileNav?.currentUser;
+    if (!user) {
+      try {
+        const { data: { session } } = await _db().auth.getSession();
+        user = session?.user || null;
+      } catch(_) {}
+    }
+    if (!user) {
+      closeEnrollModal();
+      watchForLogin(selectedCourse?.id);
+      window.profileNav?.openLoginModal?.();
+      return;
+    }
+    if (!selectedCourse) return;
+
+    const basePrice = selectedCourse._price;
+    const sgst = Math.round(basePrice * 0.09);
+    const cgst = Math.round(basePrice * 0.09);
+    selectedTotalAmount = Math.round(basePrice * 1.18);
+
+    const fmt = n => n > 0 ? '₹' + Number(n).toLocaleString('en-IN') : 'Contact Us';
+    const el = id => document.getElementById(id);
+    if (el('em-pay-course-name')) el('em-pay-course-name').textContent = selectedCourse.title;
+    if (el('em-base-fee')) el('em-base-fee').textContent = fmt(basePrice);
+    if (el('em-sgst'))     el('em-sgst').textContent     = basePrice > 0 ? '₹' + Number(sgst).toLocaleString('en-IN') : '—';
+    if (el('em-cgst'))     el('em-cgst').textContent     = basePrice > 0 ? '₹' + Number(cgst).toLocaleString('en-IN') : '—';
+    if (el('em-total-fee')) el('em-total-fee').textContent = fmt(selectedTotalAmount);
+
+    const payBtn = el('btn-pay');
+    if (payBtn) payBtn.textContent = selectedTotalAmount > 0
+      ? 'Pay ₹' + Number(selectedTotalAmount).toLocaleString('en-IN') + ' via Razorpay'
+      : 'Contact Us to Enroll';
+
+    const d = document.getElementById('em-panel-details');
+    const p = document.getElementById('em-panel-payment');
+    if (d) d.style.display = 'none';
+    if (p) p.style.display = '';
   }
 
   function closeEnrollModal() { document.getElementById('enroll-overlay').classList.remove('open'); }
 
+  // ===== ENROLL CONFIRMATION (PAY LATER) =====
+  function showEnrollConfirm(courseTitle, amount) {
+    document.getElementById('ec-course-name').textContent = courseTitle;
+    document.getElementById('ec-amount').textContent = amount > 0 ? '₹' + Number(amount).toLocaleString('en-IN') : 'Contact Us';
+    document.getElementById('enroll-confirm-overlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeEnrollConfirm() {
+    document.getElementById('enroll-confirm-overlay').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  async function enrollPayLater() {
+    let user = window.profileNav?.currentUser;
+    if (!user) {
+      try {
+        const { data: { session } } = await _db().auth.getSession();
+        user = session?.user || null;
+      } catch(_) {}
+    }
+    if (!user) {
+      closeEnrollModal();
+      watchForLogin(selectedCourse?.id);
+      window.profileNav?.openLoginModal?.();
+      return;
+    }
+    if (!selectedCourse) return;
+
+    const btn = document.getElementById('btn-pay-later');
+    btn.disabled = true; btn.textContent = 'Processing…';
+
+    try {
+      const activePricing = (selectedCourse.course_pricing || []).find(p => p.is_active) || selectedCourse.course_pricing?.[0];
+      if (!activePricing?.id) {
+        alert('No pricing available. Please contact support.');
+        btn.disabled = false; btn.textContent = 'Pay Later';
+        return;
+      }
+
+      const totalAmount = selectedTotalAmount;
+      const { error: enrollErr } = await _db().from('enrollments').upsert({
+        student_user_id: user.id,
+        course_id: selectedCourse.id,
+        pricing_id: activePricing.id,
+        enrollment_status: 'pending',
+        access_status: 'pending',
+        net_amount: totalAmount,
+        paid_amount: 0,
+        due_amount: totalAmount,
+      }, { onConflict: 'student_user_id,course_id' });
+      if (enrollErr) throw enrollErr;
+
+      closeEnrollModal();
+      showEnrollConfirm(selectedCourse.title, totalAmount);
+    } catch(e) {
+      console.error(e);
+      btn.disabled = false; btn.textContent = 'Pay Later';
+      alert(e.message || 'Enrollment failed. Please try again.');
+    }
+  }
+
   // ===== RAZORPAY PAYMENT =====
+  // After login, re-open enrollment modal if user was mid-enrollment
+  document.addEventListener('pn-login-success', () => {
+    const pendingId = window._enrollAfterLogin;
+    if (pendingId) { window._enrollAfterLogin = null; openCourseDetail(pendingId); }
+  });
+  let _loginWatcher = null;
+  function watchForLogin(courseId) {
+    window._enrollAfterLogin = courseId;
+    clearInterval(_loginWatcher);
+    _loginWatcher = setInterval(() => {
+      if (window.profileNav?.currentUser) {
+        clearInterval(_loginWatcher);
+        const id = window._enrollAfterLogin;
+        if (id) { window._enrollAfterLogin = null; openCourseDetail(id); }
+      }
+    }, 600);
+  }
+
   async function initiatePayment() {
-    const user = db.currentUser;
-    if (!user || !selectedCourse) return;
+    let user = window.profileNav?.currentUser;
+    if (!user) {
+      try {
+        const { data: { session } } = await (window.supabaseConfig?.client || window.db?.client)?.auth?.getSession?.() || { data: {} };
+        user = session?.user || null;
+      } catch(_) {}
+    }
+    if (!user) {
+      closeEnrollModal();
+      watchForLogin(selectedCourse?.id);
+      window.profileNav?.openLoginModal?.();
+      return;
+    }
+    if (!selectedCourse) return;
+
+    if (window.location.protocol === 'file:') {
+      alert('Payment requires a hosted site (HTTPS). Please access SkillUpNow via its web URL.');
+      return;
+    }
+
     const btn = document.getElementById('btn-pay');
     btn.disabled = true; btn.textContent = 'Processing…';
 
-    const price = selectedCourse._price;
-    const payAmount = selectedPayType === 'emi' ? Math.ceil(price / selectedEmiMonths) : price;
+    const totalAmount = selectedTotalAmount;
+    if (!totalAmount || totalAmount <= 0) {
+      alert('No pricing available for this course. Please contact support.');
+      btn.disabled = false; btn.textContent = 'Pay Now via Razorpay';
+      return;
+    }
+
+    if (typeof window.Razorpay === 'undefined') {
+      alert('Payment gateway failed to load. Please check your connection and refresh.');
+      btn.disabled = false; btn.textContent = 'Pay Now via Razorpay';
+      return;
+    }
 
     try {
-      // Get or find default pricing_id for this course
       const activePricing = (selectedCourse.course_pricing || []).find(p => p.is_active) || selectedCourse.course_pricing?.[0];
-      if (!activePricing?.id) { alert('No pricing available for this course. Please contact support.'); btn.disabled = false; btn.textContent = 'Pay Now'; return; }
+      if (!activePricing?.id) { alert('No pricing available. Please contact support.'); btn.disabled = false; btn.textContent = 'Pay Now'; return; }
 
-      // Create enrollment record first (uses student_user_id for the FK)
-      const { data: enroll, error: enrollErr } = await db.client.from('enrollments').upsert({
+      const { data: enroll, error: enrollErr } = await _db().from('enrollments').upsert({
         student_user_id: user.id, course_id: selectedCourse.id,
         pricing_id: activePricing.id,
-        enrollment_status: 'pending', net_amount: price,
+        enrollment_status: 'pending', net_amount: totalAmount,
       }, { onConflict: 'student_user_id,course_id' }).select().single();
-
       if (enrollErr) throw enrollErr;
 
-      // Create Razorpay order via your backend / Supabase Edge Function
       const options = {
-        key: 'YOUR_RAZORPAY_KEY_ID',
-        amount: payAmount * 100,
+        key: 'rzp_live_ILgsSZCZoFMQjO',
+        amount: totalAmount * 100,
         currency: 'INR',
         name: 'SkillUpNow',
         description: selectedCourse.title,
         prefill: { name: user.user_metadata?.full_name || '', email: user.email },
         theme: { color: '#7c6cff' },
         handler: async (response) => {
-          await db.client.from('payments').insert({
-            student_user_id: user.id, enrollment_id: enroll.id,
+          const paymentInsert = {
+            student_user_id: user.id,
+            enrollment_id: enroll.id,
             course_id: selectedCourse.id,
-            amount: payAmount, payment_method: 'razorpay',
+            amount: totalAmount,
+            payment_method: 'razorpay',
             payment_gateway: 'razorpay',
-            gateway_order_id: response.razorpay_order_id,
             gateway_payment_id: response.razorpay_payment_id,
-            gateway_signature: response.razorpay_signature,
             transaction_reference: response.razorpay_payment_id,
             payment_status: 'completed',
-          });
+            paid_at: new Date().toISOString(),
+          };
+          if (response.razorpay_order_id)  paymentInsert.gateway_order_id  = response.razorpay_order_id;
+          if (response.razorpay_signature) paymentInsert.gateway_signature = response.razorpay_signature;
+          await _db().from('payments').insert(paymentInsert);
+          await _db().from('enrollments').update({
+            enrollment_status: 'active',
+            access_status: 'active',
+            paid_amount: totalAmount,
+            due_amount: 0,
+            activated_at: new Date().toISOString(),
+          }).eq('id', enroll.id);
           closeEnrollModal();
-          window.location.href = '/pages/profile.html?tab=learning';
+          window.location.href = 'profile.html?tab=learning&enrolled=' + encodeURIComponent(selectedCourse.title);
         },
       };
       const rzp = new window.Razorpay(options);
-      rzp.on('payment.failed', () => { btn.disabled = false; btn.textContent = 'Retry Payment'; });
+      rzp.on('payment.failed', (response) => {
+        console.error('Payment failed:', response.error);
+        _db().from('payments').insert({
+          student_user_id: user.id, enrollment_id: enroll?.id,
+          course_id: selectedCourse.id, amount: totalAmount,
+          payment_method: 'razorpay', payment_gateway: 'razorpay',
+          payment_status: 'failed',
+          notes: { error_code: response.error?.code, error_description: response.error?.description }
+        }).catch(() => {});
+        btn.disabled = false;
+        btn.textContent = 'Retry Payment';
+        const errMsg = response.error?.description || response.error?.reason || 'Payment was declined.';
+        const errEl = document.createElement('div');
+        errEl.style.cssText = 'background:rgba(239,68,68,.12);border:1.5px solid rgba(239,68,68,.3);border-radius:10px;padding:.5rem .75rem;font-size:.8rem;color:#f87171;margin-top:.5rem;';
+        errEl.textContent = errMsg;
+        btn.parentNode?.insertBefore(errEl, btn.nextSibling);
+        setTimeout(() => errEl.remove(), 7000);
+      });
       rzp.open();
     } catch (e) {
       console.error(e);
-      alert('Error: ' + e.message);
+      btn.disabled = false;
+      btn.textContent = 'Pay Now via Razorpay';
+      const errMsg = e.message?.includes('pricing') ? e.message : 'Unable to initiate payment. Please check your connection and try again.';
+      alert(errMsg);
     }
-    btn.disabled = false;
-    btn.textContent = selectedPayType === 'emi' ? 'Apply EMI & Pay' : 'Pay Now via Razorpay';
   }
 
   // ===== EVENT LISTENERS =====
@@ -611,7 +907,6 @@
   document.getElementById('category-filter').addEventListener('change', applyFilters);
   document.getElementById('level-filter').addEventListener('change', applyFilters);
   document.getElementById('sort-select').addEventListener('change', applyFilters);
-  document.getElementById('em-close').addEventListener('click', closeEnrollModal);
   document.getElementById('enroll-overlay').addEventListener('click', e => { if (e.target === document.getElementById('enroll-overlay')) closeEnrollModal(); });
 
   document.querySelectorAll('.filter-tag').forEach(t => {
@@ -620,7 +915,7 @@
 
   function debounce(fn, delay) { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), delay); }; }
 
-  loadCourses();
+  document.addEventListener('DOMContentLoaded', loadCourses);
 </script>
 <footer></footer>
 </body>

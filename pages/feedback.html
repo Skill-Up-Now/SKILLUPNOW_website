@@ -167,18 +167,34 @@
 <script src="../js/theme.js"></script>
 <script src="../js/profile-nav.js"></script>
 <script>
-const db = new SupabaseConfig();
+let _client = null;
 let currentUser = null, enrolledCourses = [];
 const ratingLabels = { 1:'Poor', 2:'Fair', 3:'Good', 4:'Very Good', 5:'Excellent' };
 const aspectRatings = {};
 
+async function _getClient() {
+  if (_client) return _client;
+  let tries = 0;
+  while (!window.supabaseConfig?.client && tries++ < 25) {
+    await new Promise(r => setTimeout(r, 150));
+  }
+  _client = window.supabaseConfig?.client || null;
+  return _client;
+}
+
 async function init() {
-  const { data: { session } } = await db.client.auth.getSession();
+  const client = await _getClient();
+  if (!client) { document.getElementById('err-alert').textContent = 'Could not connect. Please refresh.'; document.getElementById('err-alert').classList.add('show'); return; }
+
+  const { data: { session } } = await client.auth.getSession();
   if (!session) { window.location.href = '../index.html?login=1'; return; }
   currentUser = session.user;
 
-  // Load enrolled active courses
-  const { data } = await db.client.from('enrollments').select('id,course_id,courses(name)').eq('user_id', session.user.id).eq('enrollment_status','active');
+  // Load enrolled active/completed courses
+  const { data } = await client.from('enrollments')
+    .select('id,course_id,courses(id,title)')
+    .eq('student_user_id', session.user.id)
+    .in('enrollment_status', ['active', 'completed']);
   enrolledCourses = data || [];
   const sel = document.getElementById('fb-course');
   if (!enrolledCourses.length) {
@@ -189,7 +205,7 @@ async function init() {
       const o = document.createElement('option');
       o.value = e.course_id;
       o.dataset.enrollId = e.id;
-      o.textContent = e.courses?.name || e.course_id;
+      o.textContent = e.courses?.title || e.course_id;
       sel.appendChild(o);
     });
   }
@@ -239,27 +255,27 @@ async function submitFeedback() {
 
   const sel = document.getElementById('fb-course');
   const enrollId = sel.options[sel.selectedIndex]?.dataset.enrollId;
+  const client = await _getClient();
 
   try {
-    await db.client.from('reviews').upsert({
+    const { error } = await client.from('reviews').upsert({
       user_id: currentUser.id,
       course_id: courseId,
       enrollment_id: enrollId || null,
       rating: parseInt(ratingEl.value),
       title, comment,
+      recommend: document.getElementById('fb-recommend').value || null,
+      aspects: Object.keys(aspectRatings).length ? aspectRatings : null,
       is_approved: false,
     }, { onConflict: 'user_id,course_id' });
-
-    // Also log as form submission
-    await db.client.from('form_submissions').insert({
-      user_id: currentUser.id, course_id: courseId, form_type: 'feedback',
-      form_data: { rating: ratingEl.value, title, comment, aspects: aspectRatings, recommend: document.getElementById('fb-recommend').value },
-    });
+    if (error) throw error;
 
     document.getElementById('feedback-form-card').style.display = 'none';
     document.getElementById('success-screen').classList.add('show');
   } catch (err) {
-    showErr(err.message || 'Failed to submit review.');
+    showErr(err.message || 'Failed to submit review. Please try again.');
+    btn.disabled = false; btn.textContent = 'Submit Review';
+    return;
   }
   btn.disabled = false; btn.textContent = 'Submit Review';
 }

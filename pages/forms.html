@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Forms — SkillUpNow</title>
+  <meta name="description" content="Access SkillUpNow course registration, EMI, and enquiry forms.">
+  <link rel="stylesheet" href="../css/variables.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="stylesheet" href="../css/responsive.css">
+
+  <style>
+    /* ── Page ── */
+    .forms-page { min-height: 100vh; }
+
+    /* ── Hero ── */
+    .forms-hero {
+      background: var(--grad);
+      padding: 3.5rem 2rem 3rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .forms-hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='rgba(255,255,255,0.07)' stroke-width='1'%3E%3Ccircle cx='30' cy='30' r='22'/%3E%3Ccircle cx='30' cy='30' r='10'/%3E%3C/g%3E%3C/svg%3E") repeat;
+    }
+    .forms-hero h1 { color: #fff; font-size: clamp(1.8rem, 4vw, 2.5rem); font-weight: 800; margin-bottom: .5rem; position: relative; }
+    .forms-hero p  { color: rgba(255,255,255,.8); position: relative; font-size: .95rem; }
+
+    /* ── Grid ── */
+    .forms-body { max-width: 1200px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
+    .forms-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+
+    /* ── Card ── */
+    .form-card {
+      background: var(--panel);
+      border: 1.5px solid var(--border);
+      border-radius: 20px;
+      padding: 1.8rem 1.6rem 1.5rem;
+      display: flex; flex-direction: column; gap: 1rem;
+      transition: transform .25s, box-shadow .25s, border-color .25s;
+      position: relative;
+      overflow: hidden;
+    }
+    .form-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      background: var(--grad);
+      border-radius: 20px 20px 0 0;
+    }
+    .form-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 16px 48px rgba(124,92,252,.14);
+      border-color: rgba(124,92,252,.35);
+    }
+    .form-card-icon {
+      width: 52px; height: 52px; border-radius: 14px;
+      background: linear-gradient(135deg, rgba(124,92,252,.15), rgba(61,107,255,.1));
+      border: 1.5px solid rgba(124,92,252,.2);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.6rem;
+    }
+    .form-card-title {
+      font-size: 1.05rem; font-weight: 800; color: var(--txt);
+      line-height: 1.3;
+    }
+    .form-card-desc {
+      font-size: .85rem; color: var(--txt3); line-height: 1.65;
+      flex: 1;
+    }
+    .form-card-actions {
+      display: flex; gap: .75rem; flex-wrap: wrap; margin-top: .25rem;
+    }
+    .fc-btn {
+      flex: 1; min-width: 100px;
+      padding: .65rem .9rem;
+      border-radius: 50px;
+      font-size: .83rem; font-weight: 700;
+      border: 1.5px solid var(--border);
+      background: var(--bg);
+      color: var(--txt3);
+      cursor: pointer;
+      transition: all .2s;
+      text-align: center;
+      text-decoration: none;
+      display: flex; align-items: center; justify-content: center; gap: .4rem;
+    }
+    .fc-btn:hover { background: var(--v1); border-color: var(--v1); color: #fff; }
+    .fc-btn.primary {
+      background: var(--grad); border-color: transparent; color: #fff;
+    }
+    .fc-btn.primary:hover { opacity: .9; }
+    .fc-btn.qr {
+      background: linear-gradient(135deg, rgba(124,92,252,.12), rgba(61,107,255,.08));
+      border-color: rgba(124,92,252,.3);
+      color: var(--v1);
+    }
+    .fc-btn.qr:hover { background: var(--grad); border-color: transparent; color: #fff; }
+
+    /* ── Skeleton ── */
+    .form-card-skeleton {
+      background: var(--panel); border: 1.5px solid var(--border);
+      border-radius: 20px; padding: 1.8rem 1.6rem; height: 220px;
+      animation: pulse 1.4s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: .55; }
+    }
+
+    /* ── Empty / error state ── */
+    .forms-empty {
+      grid-column: 1 / -1;
+      text-align: center; padding: 4rem 2rem; color: var(--txt3);
+    }
+    .forms-empty-icon { font-size: 3rem; margin-bottom: 1rem; }
+
+    /* ═══════════════════════════════════════
+       QR POPUP OVERLAY
+    ═══════════════════════════════════════ */
+    #qr-overlay {
+      position: fixed; inset: 0; z-index: 99990;
+      background: rgba(6,3,18,.7);
+      backdrop-filter: blur(20px) saturate(1.6);
+      display: flex; align-items: center; justify-content: center;
+      padding: 1rem;
+      opacity: 0; visibility: hidden;
+      transition: opacity .28s, visibility .28s;
+    }
+    #qr-overlay.open { opacity: 1; visibility: visible; }
+
+    #qr-box {
+      background: var(--panel);
+      border: 1.5px solid rgba(124,92,252,.3);
+      border-radius: 28px;
+      padding: 2.5rem 2.2rem 2rem;
+      max-width: 420px; width: 94vw;
+      text-align: center;
+      position: relative;
+      box-shadow: 0 40px 80px rgba(60,20,160,.25), 0 8px 32px rgba(124,92,252,.15);
+      transform: scale(.93) translateY(18px);
+      transition: transform .3s cubic-bezier(.22,1,.36,1);
+    }
+    #qr-overlay.open #qr-box { transform: scale(1) translateY(0); }
+
+    .qr-close {
+      position: absolute; top: 1rem; right: 1rem;
+      width: 34px; height: 34px; border-radius: 50%;
+      border: 1.5px solid rgba(124,92,252,.3);
+      background: rgba(124,92,252,.1);
+      color: var(--v1); font-size: .9rem; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: all .2s;
+    }
+    .qr-close:hover { background: var(--v1); color: #fff; transform: rotate(90deg); }
+
+    .qr-title { font-size: 1.2rem; font-weight: 800; color: var(--txt); margin-bottom: .25rem; }
+    .qr-subtitle { font-size: .82rem; color: var(--txt3); margin-bottom: 1.5rem; }
+
+    #qr-canvas-wrap {
+      display: inline-block;
+      padding: 16px; background: #fff;
+      border-radius: 18px;
+      border: 3px solid rgba(124,92,252,.2);
+      box-shadow: 0 8px 28px rgba(124,92,252,.15);
+    }
+    #qr-canvas-wrap canvas { display: block; border-radius: 8px; }
+
+    .qr-url-box {
+      margin: 1.1rem 0 .75rem;
+      background: rgba(124,92,252,.07);
+      border: 1px solid rgba(124,92,252,.15);
+      border-radius: 12px;
+      padding: .6rem .9rem;
+      font-size: .73rem; color: var(--txt3);
+      word-break: break-all; text-align: left;
+    }
+    .qr-btn-row { display: flex; gap: .65rem; justify-content: center; flex-wrap: wrap; margin-bottom: .75rem; }
+    .qr-btn {
+      padding: .6rem 1.4rem; border-radius: 50px;
+      font-size: .83rem; font-weight: 700;
+      border: 1.5px solid var(--border); background: var(--bg); color: var(--txt3);
+      cursor: pointer; transition: all .2s; font-family: inherit;
+    }
+    .qr-btn:hover { background: var(--v1); border-color: var(--v1); color: #fff; }
+    .qr-btn.primary { background: var(--grad); border-color: transparent; color: #fff; }
+    .qr-fullscreen-btn {
+      background: none; border: none;
+      font-size: .76rem; color: var(--txt4);
+      cursor: pointer; text-decoration: underline;
+      font-family: inherit; transition: color .2s;
+    }
+    .qr-fullscreen-btn:hover { color: var(--v1); }
+
+    /* ── Fullscreen QR ── */
+    #qr-fullscreen {
+      position: fixed; inset: 0; z-index: 99999;
+      background: rgba(4,2,14,.92);
+      backdrop-filter: blur(32px);
+      display: none; align-items: center; justify-content: center;
+      flex-direction: column; gap: 1.5rem;
+    }
+    #qr-fullscreen.open { display: flex; }
+    #qr-fullscreen-canvas-wrap {
+      padding: 24px; background: #fff;
+      border-radius: 24px;
+      box-shadow: 0 20px 60px rgba(124,92,252,.3);
+    }
+    #qr-fullscreen canvas { display: block; border-radius: 10px; }
+    .qr-fs-title { color: #fff; font-size: 1.1rem; font-weight: 700; text-align: center; }
+    .qr-fs-close {
+      padding: .65rem 2rem; border-radius: 50px;
+      background: rgba(255,255,255,.12); border: 1.5px solid rgba(255,255,255,.2);
+      color: #fff; font-size: .85rem; font-weight: 700;
+      cursor: pointer; transition: all .2s; font-family: inherit;
+    }
+    .qr-fs-close:hover { background: rgba(255,255,255,.22); }
+  </style>
+</head>
+<body>
+<nav></nav>
+
+<div class="forms-page">
+  <!-- Hero -->
+  <div class="forms-hero">
+    <h1>Application Forms</h1>
+    <p>Fill out the right form to enroll, apply for EMI, or get in touch with us.</p>
+  </div>
+
+  <!-- Grid -->
+  <div class="forms-body">
+    <div class="forms-grid" id="forms-grid">
+      <!-- skeleton placeholders -->
+      <div class="form-card-skeleton"></div>
+      <div class="form-card-skeleton"></div>
+      <div class="form-card-skeleton"></div>
+    </div>
+  </div>
+</div>
+
+<!-- QR Popup -->
+<div id="qr-overlay" onclick="handleOverlayClick(event)">
+  <div id="qr-box">
+    <button class="qr-close" onclick="closeQR()">✕</button>
+    <div class="qr-title" id="qr-popup-title">QR Code</div>
+    <div class="qr-subtitle">Scan to open this form on any device</div>
+    <div id="qr-canvas-wrap"><canvas id="qr-canvas"></canvas></div>
+    <div class="qr-url-box" id="qr-url-display"></div>
+    <div class="qr-btn-row">
+      <button class="qr-btn" onclick="copyQrUrl()">📋 Copy Link</button>
+      <button class="qr-btn primary" onclick="downloadQR()">⬇ Download QR</button>
+    </div>
+    <button class="qr-fullscreen-btn" onclick="openFullscreen()">View fullscreen ↗</button>
+  </div>
+</div>
+
+<!-- Fullscreen QR -->
+<div id="qr-fullscreen" onclick="closeFullscreen()">
+  <div class="qr-fs-title" id="qr-fs-title"></div>
+  <div id="qr-fullscreen-canvas-wrap"><canvas id="qr-fs-canvas"></canvas></div>
+  <button class="qr-fs-close" onclick="closeFullscreen()">✕ Close</button>
+</div>
+
+<footer></footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../config/supabase-config.js"></script>
+<script src="../js/theme.js"></script>
+<script src="../js/profile-nav.js"></script>
+<script>
+/* ═══════════════════════════════════════
+   Forms Page — loads from site_forms table
+   No login required to view forms
+═══════════════════════════════════════ */
+
+let _activeQrUrl = '';
+let _activeQrTitle = '';
+
+async function loadForms() {
+  const grid = document.getElementById('forms-grid');
+  try {
+    let tries = 0;
+    while (!window.supabaseConfig?.client && tries++ < 20) {
+      await new Promise(r => setTimeout(r, 150));
+    }
+    if (!window.supabaseConfig?.client) throw new Error('Database not ready');
+
+    const { data, error } = await window.supabaseConfig.client
+      .from('site_forms')
+      .select('id, title, description, form_url, icon, sort_order')
+      .eq('is_active', true)
+      .order('sort_order', { ascending: true })
+      .order('created_at', { ascending: true });
+
+    if (error) throw error;
+
+    if (!data || !data.length) {
+      grid.innerHTML = `
+        <div class="forms-empty">
+          <div class="forms-empty-icon">📋</div>
+          <p style="font-size:1rem;font-weight:700;margin-bottom:.5rem;">No forms available yet</p>
+          <p style="font-size:.875rem;">Check back soon — forms will appear here once added.</p>
+        </div>`;
+      return;
+    }
+
+    grid.innerHTML = data.map(f => {
+      const icon = f.icon || '📝';
+      const desc = f.description || 'Click the link below to open the form.';
+      return `
+        <div class="form-card">
+          <div class="form-card-icon">${icon}</div>
+          <div class="form-card-title">${escHtml(f.title)}</div>
+          <div class="form-card-desc">${escHtml(desc)}</div>
+          <div class="form-card-actions">
+            <a href="${escHtml(f.form_url)}" target="_blank" rel="noopener" class="fc-btn primary">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+              Open Form
+            </a>
+            <button class="fc-btn qr" onclick="showQR('${escAttr(f.form_url)}', '${escAttr(f.title)}')">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="20" y="17" width="4" height="4"/><rect x="14" y="14" width="4" height="4"/><rect x="17" y="20" width="4" height="4"/></svg>
+              QR Code
+            </button>
+          </div>
+        </div>`;
+    }).join('');
+
+  } catch (e) {
+    console.error('loadForms error:', e);
+    grid.innerHTML = `
+      <div class="forms-empty">
+        <div class="forms-empty-icon">⚠️</div>
+        <p style="font-size:1rem;font-weight:700;margin-bottom:.5rem;">Could not load forms</p>
+        <p style="font-size:.875rem;">Check your connection and <a href="" style="color:var(--v1)">refresh</a>.</p>
+      </div>`;
+  }
+}
+
+/* ─── QR Code generation (pure canvas, no external lib needed) ─── */
+// Uses qrcodejs CDN for QR generation
+function showQR(url, title) {
+  _activeQrUrl = url;
+  _activeQrTitle = title;
+  document.getElementById('qr-popup-title').textContent = title;
+  document.getElementById('qr-url-display').textContent = url;
+  generateQR('qr-canvas', url, 200);
+  document.getElementById('qr-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeQR() {
+  document.getElementById('qr-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function handleOverlayClick(e) {
+  if (e.target === document.getElementById('qr-overlay')) closeQR();
+}
+
+function openFullscreen() {
+  document.getElementById('qr-fs-title').textContent = _activeQrTitle;
+  generateQR('qr-fs-canvas', _activeQrUrl, 280);
+  document.getElementById('qr-fullscreen').classList.add('open');
+}
+
+function closeFullscreen() {
+  document.getElementById('qr-fullscreen').classList.remove('open');
+}
+
+function copyQrUrl() {
+  navigator.clipboard?.writeText(_activeQrUrl).then(() => {
+    const btn = document.querySelector('.qr-btn-row .qr-btn');
+    const orig = btn.textContent;
+    btn.textContent = '✓ Copied!';
+    setTimeout(() => { btn.textContent = orig; }, 1800);
+  }).catch(() => {
+    prompt('Copy this link:', _activeQrUrl);
+  });
+}
+
+function downloadQR() {
+  const canvas = document.getElementById('qr-canvas');
+  const link = document.createElement('a');
+  link.download = 'qr-code.png';
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+}
+
+/* ─── QR Code renderer using qrcode-generator ─── */
+function generateQR(canvasId, url, size) {
+  if (typeof QRCode === 'undefined') { console.warn('QRCode not loaded'); return; }
+  const container = document.getElementById(canvasId).parentElement;
+  container.innerHTML = '';
+  const div = document.createElement('div');
+  container.appendChild(div);
+  const qr = new QRCode(div, {
+    text: url,
+    width: size,
+    height: size,
+    colorDark: '#1a0a3e',
+    colorLight: '#ffffff',
+    correctLevel: QRCode.CorrectLevel.H
+  });
+  // Replace our placeholder canvas id reference
+  const img = div.querySelector('img') || div.querySelector('canvas');
+  if (img) img.id = canvasId;
+}
+
+/* ─── Helpers ─── */
+function escHtml(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function escAttr(s) {
+  return String(s||'').replace(/'/g,'&#39;').replace(/"/g,'&quot;');
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeQR(); closeFullscreen(); } });
+document.addEventListener('DOMContentLoaded', loadForms);
+</script>
+<!-- QR Code library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</body>
+</html>
