@@ -18,7 +18,7 @@
     /* ===== HERO — FULLSCREEN SPLIT ===== */
     .courses-hero {
       background: linear-gradient(155deg,#06030e 0%,#0d0720 22%,#160b35 58%,#0a1230 100%);
-      min-height: calc(100vh - var(--nav-h, 72px));
+      min-height: 0;
       padding: 0 2.5rem;
       position: relative; overflow: hidden;
       display: flex; align-items: center;
@@ -47,7 +47,7 @@
       display: grid; grid-template-columns: 1.1fr 1fr;
       gap: 4rem; align-items: center;
       position: relative; z-index: 1;
-      padding: 5rem 0 4.5rem;
+      padding: 2.5rem 0 2rem;
     }
 
     /* ── LEFT COLUMN ── */
@@ -173,15 +173,15 @@
 
     /* Hero responsive */
     @media (max-width:1024px) {
-      .hero-inner-grid { grid-template-columns:1fr; gap:3rem; padding:4rem 0 3.5rem; text-align:center; }
+      .hero-inner-grid { grid-template-columns:1fr; gap:3rem; padding:2rem 0 1.75rem; text-align:center; }
       .hero-left { align-items:center; }
       .courses-hero-sub, .hero-search-bar { max-width:100%; }
       .hero-feat-grid { grid-template-columns:repeat(4,1fr); }
       .hero-feat-bottom { justify-content:center; max-width:400px; margin:0 auto; }
     }
     @media (max-width:640px) {
-      .courses-hero { min-height:auto; padding:0 1rem; }
-      .hero-inner-grid { padding:3rem 0 2.5rem; }
+      .courses-hero { min-height:0; padding:0 1rem; }
+      .hero-inner-grid { padding:1.5rem 0 1.25rem; }
       .hero-feat-grid { grid-template-columns:repeat(2,1fr); }
     }
 
