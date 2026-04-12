@@ -385,6 +385,126 @@
       .rv-hero h1 { font-size: 2rem; }
       .rv-sidebar { max-height: 55vh; }
     }
+
+    /* ── Secure Player ── */
+    .rv-secure-wrap {
+      position: relative;
+      width: 100%; height: 100%;
+      overflow: hidden;
+      background: #000;
+      isolation: isolate;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+    .rv-player-shield {
+      position: absolute;
+      inset: 0; z-index: 2;
+      pointer-events: none;
+      -webkit-user-drag: none;
+    }
+    .rv-watermark {
+      position: absolute;
+      inset: 0; z-index: 3;
+      pointer-events: none;
+      overflow: hidden;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+    .rv-watermark-text {
+      position: absolute;
+      font-size: .68rem;
+      font-weight: 600;
+      color: rgba(255,255,255,.09);
+      white-space: nowrap;
+      transform: rotate(-28deg);
+      letter-spacing: .03em;
+    }
+    :root[data-theme="light"] .rv-watermark-text { color: rgba(0,0,0,.07); }
+    .rv-dim-overlay {
+      position: absolute;
+      inset: 0; z-index: 50;
+      background: rgba(0,0,0,.97);
+      display: none;
+      align-items: center; justify-content: center;
+      flex-direction: column; gap: .6rem;
+      color: rgba(255,255,255,.3);
+      font-size: .82rem; font-weight: 600;
+      text-align: center; padding: 1rem;
+      -webkit-user-select: none; user-select: none;
+    }
+    .rv-dim-overlay.active { display: flex; }
+    .rv-ctrl-bar {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      z-index: 10;
+      background: linear-gradient(to top, rgba(0,0,0,.85) 0%, transparent 100%);
+      padding: 1.8rem .8rem .55rem;
+      display: flex; flex-direction: column; gap: .3rem;
+      opacity: 0; transition: opacity .22s ease;
+      pointer-events: none;
+    }
+    .rv-secure-wrap:hover .rv-ctrl-bar,
+    .rv-secure-wrap.rv-show-ctrl .rv-ctrl-bar {
+      opacity: 1; pointer-events: auto;
+    }
+    .rv-progress-row { display: flex; align-items: center; gap: .5rem; }
+    .rv-progress-track {
+      flex: 1; height: 4px;
+      background: rgba(255,255,255,.2);
+      border-radius: 2px; cursor: pointer;
+      position: relative; overflow: hidden;
+    }
+    .rv-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg,#7c5cfc,#3d6bff);
+      border-radius: 2px; width: 0%;
+      transition: width .08s linear;
+      pointer-events: none;
+    }
+    .rv-time-txt {
+      font-size: .67rem; color: rgba(255,255,255,.6);
+      font-weight: 500; white-space: nowrap;
+      min-width: 76px; text-align: right;
+    }
+    .rv-btn-row { display: flex; align-items: center; gap: .25rem; }
+    .rv-ctrl-btn {
+      background: none; border: none; color: #fff;
+      cursor: pointer; padding: .28rem .4rem;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 6px; transition: background .15s;
+      font-family: inherit; font-size: .78rem; font-weight: 600; line-height: 1;
+    }
+    .rv-ctrl-btn:hover { background: rgba(255,255,255,.15); }
+    .rv-ctrl-spacer { flex: 1; }
+    .rv-speed-sel {
+      background: rgba(255,255,255,.1);
+      border: 1px solid rgba(255,255,255,.18);
+      border-radius: 6px; color: #fff;
+      font-size: .7rem; font-weight: 600;
+      padding: .16rem .5rem;
+      cursor: pointer; font-family: inherit; outline: none;
+    }
+    .rv-speed-sel option { background: #1a1a2e; color: #fff; }
+    /* Fullscreen on player wrap */
+    .rv-player-wrap:fullscreen,
+    .rv-player-wrap:-webkit-full-screen,
+    .rv-player-wrap:-moz-full-screen {
+      border-radius: 0 !important;
+      border: none !important;
+      aspect-ratio: unset !important;
+      width: 100vw !important;
+      height: 100vh !important;
+    }
+    .rv-player-wrap:fullscreen #rv-player,
+    .rv-player-wrap:-webkit-full-screen #rv-player,
+    .rv-player-wrap:-moz-full-screen #rv-player {
+      height: 100% !important;
+    }
+    .rv-player-wrap:fullscreen .rv-secure-wrap,
+    .rv-player-wrap:-webkit-full-screen .rv-secure-wrap,
+    .rv-player-wrap:-moz-full-screen .rv-secure-wrap {
+      height: 100% !important;
+    }
   </style>
 </head>
 <body>
@@ -475,18 +595,76 @@
      • Unpaid users: show Razorpay payment prompt
      ══════════════════════════════════════════════════════════════ */
 
-  // Block screenshot shortcuts while a video is playing in the main panel
+  // ── Global "pause current video" hook — set by playVideo() ──
+  let _rvPauseCurrent = null;
+
+  // ── Flash the dim overlay briefly (screenshot attempt deterrent) ──
+  function _flashDimOverlay() {
+    const d = document.querySelector('.rv-dim-overlay');
+    if (!d) return;
+    d.classList.add('active');
+    setTimeout(() => d.classList.remove('active'), 2500);
+  }
+
+  // ── Enhanced screen-capture blocking ──
   function blockScreenCapture() {
     const playerActive = () => document.getElementById('rv-player')?.style.display !== 'none';
-    document.addEventListener('contextmenu', e => { if (playerActive()) e.preventDefault(); });
+
+    // Right-click prevention on the whole document when player is active
+    document.addEventListener('contextmenu', e => {
+      if (playerActive()) { e.preventDefault(); e.stopPropagation(); return false; }
+    });
+
+    // Keyboard shortcuts
     document.addEventListener('keydown', e => {
       if (!playerActive()) return;
-      if (e.key === 'PrintScreen') { navigator.clipboard?.writeText(''); e.preventDefault(); }
-      if (e.key === 'F12') e.preventDefault();
-      if ((e.ctrlKey || e.metaKey) && ['p','s','u'].includes(e.key.toLowerCase())) e.preventDefault();
-      if ((e.ctrlKey || e.metaKey) && e.shiftKey && ['i','c','j'].includes(e.key.toLowerCase())) e.preventDefault();
+      const k = e.key?.toLowerCase();
+      // Screenshot / print screen
+      if (e.key === 'PrintScreen' || e.key === 'Snapshot') {
+        e.preventDefault();
+        navigator.clipboard?.writeText?.('').catch(() => {});
+        _flashDimOverlay();
+        return;
+      }
+      if (e.key === 'F12') { e.preventDefault(); return; }
+      if ((e.ctrlKey || e.metaKey) && ['p','s','u'].includes(k)) { e.preventDefault(); return; }
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && ['i','c','j','k','m','s'].includes(k)) { e.preventDefault(); return; }
+      // Windows Snipping Tool (Win+Shift+S)
+      if (e.metaKey && e.shiftKey && ['s','4','5'].includes(k)) { e.preventDefault(); _flashDimOverlay(); }
+      // Mac screenshot (Cmd+Shift+3/4/5)
+      if (e.metaKey && e.shiftKey && ['3','4','5'].includes(e.key)) { e.preventDefault(); _flashDimOverlay(); }
     });
-    window.addEventListener('beforeprint', e => { if (playerActive()) e.preventDefault(); });
+
+    // Before print (Ctrl+P or browser print)
+    window.addEventListener('beforeprint', () => { if (playerActive()) _flashDimOverlay(); });
+
+    // Visibility API — dim + pause when tab is hidden
+    document.addEventListener('visibilitychange', () => {
+      if (!playerActive()) return;
+      const d = document.querySelector('.rv-dim-overlay');
+      if (document.hidden) {
+        document.querySelector('#rv-player video')?.pause();
+        _rvPauseCurrent?.();
+        if (d) d.classList.add('active');
+      } else {
+        if (d) d.classList.remove('active');
+      }
+    });
+
+    // Window blur — dim + pause when user switches app / screen-records
+    // Skip if focus moved INTO the player iframe (clicking inside Drive/YT iframe
+    // causes the parent window to blur — that is normal interaction, not a threat)
+    window.addEventListener('blur', () => {
+      if (!playerActive()) return;
+      if (document.querySelector('#rv-player iframe')) return;
+      document.querySelector('#rv-player video')?.pause();
+      const d = document.querySelector('.rv-dim-overlay');
+      if (d) d.classList.add('active');
+    });
+    window.addEventListener('focus', () => {
+      const d = document.querySelector('.rv-dim-overlay');
+      if (d) d.classList.remove('active');
+    });
   }
   blockScreenCapture();
 
@@ -538,11 +716,12 @@
 
     const q = (document.getElementById('rv-search-input')?.value || '').toLowerCase().trim();
 
-    // Filter by search
+    // Filter by search (title, course title, or category name)
     const filtered = q
       ? allVideos.filter(v =>
           v.title.toLowerCase().includes(q) ||
-          (v.courseTitle||'').toLowerCase().includes(q))
+          (v.groupLabel||'').toLowerCase().includes(q) ||
+          (v.categoryName||'').toLowerCase().includes(q))
       : allVideos;
 
     if (countEl) countEl.textContent = filtered.length + ' session' + (filtered.length !== 1 ? 's' : '');
@@ -552,12 +731,12 @@
       return;
     }
 
-    // Group by course, sort courses alphabetically
+    // Group by course / category, skip videos with no group label
     const groups = {};
     filtered.forEach(v => {
-      const key = v.filterKey || 'uncategorized';
-      const name = v.courseTitle || 'Uncategorized';
-      if (!groups[key]) groups[key] = { name, key, videos: [] };
+      if (!v.groupLabel) return; // skip videos with no course or category
+      const key = v.filterKey;
+      if (!groups[key]) groups[key] = { name: v.groupLabel, key, videos: [] };
       groups[key].videos.push(v);
     });
 
@@ -566,8 +745,9 @@
       g.videos.sort((a, b) => a.title.localeCompare(b.title));
     });
 
-    // Sort course groups alphabetically
-    const sortedGroups = Object.values(groups).sort((a, b) => a.name.localeCompare(b.name));
+    // Sort groups alphabetically
+    const sortedGroups = Object.values(groups)
+      .sort((a, b) => a.name.localeCompare(b.name));
 
     pl.innerHTML = sortedGroups.map((g, gi) => {
       const open = gi === 0 || sortedGroups.length === 1; // open first group by default
@@ -1108,39 +1288,318 @@
     document.getElementById('rv-player-wrap')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
-  // ── Play video in main panel (paid users only) ──
-  function playVideo(v) {
+  // ── Get current session user ──
+  async function _rvGetUser() {
+    try {
+      const { data: { session } } = await window.supabaseConfig?.client?.auth?.getSession() || { data: {} };
+      return session?.user || null;
+    } catch(_) { return null; }
+  }
+
+  // ── Build tiled watermark HTML ──
+  function _rvWatermark(label) {
+    let h = '';
+    for (let r = 0; r < 5; r++) {
+      for (let c = 0; c < 4; c++) {
+        h += `<span class="rv-watermark-text" style="top:${r*22+4}%;left:${c*28-8}%;">${label}</span>`;
+      }
+    }
+    return h;
+  }
+
+  // ── Format seconds → m:ss ──
+  function _rvFmt(s) {
+    if (!isFinite(s) || s < 0) return '0:00';
+    return Math.floor(s / 60) + ':' + String(Math.floor(s % 60)).padStart(2, '0');
+  }
+
+  // ── Wire custom controls to a native <video> element ──
+  function _rvWireVideo(video, wrapEl) {
+    const progFill  = wrapEl.querySelector('.rv-progress-fill');
+    const timeTxt   = wrapEl.querySelector('.rv-time-txt');
+    const playBtn   = wrapEl.querySelector('.rv-play-btn');
+    const progTrack = wrapEl.querySelector('.rv-progress-track');
+    const speedSel  = wrapEl.querySelector('.rv-speed-sel');
+    const fsBtn     = wrapEl.querySelector('.rv-fs-btn');
+
+    const syncPlayBtn = () => {
+      if (!playBtn) return;
+      playBtn.innerHTML = video.paused
+        ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>`
+        : `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>`;
+    };
+
+    video.addEventListener('play',  syncPlayBtn);
+    video.addEventListener('pause', syncPlayBtn);
+    video.addEventListener('loadedmetadata', () => {
+      if (timeTxt) timeTxt.textContent = '0:00 / ' + _rvFmt(video.duration);
+    });
+    video.addEventListener('timeupdate', () => {
+      if (!video.duration) return;
+      if (progFill) progFill.style.width = (video.currentTime / video.duration * 100) + '%';
+      if (timeTxt) timeTxt.textContent = _rvFmt(video.currentTime) + ' / ' + _rvFmt(video.duration);
+    });
+
+    playBtn?.addEventListener('click', e => { e.stopPropagation(); video.paused ? video.play() : video.pause(); });
+
+    progTrack?.addEventListener('click', e => {
+      const r = progTrack.getBoundingClientRect();
+      video.currentTime = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * (video.duration || 0);
+    });
+    progTrack?.addEventListener('touchstart', e => {
+      const r = progTrack.getBoundingClientRect();
+      video.currentTime = Math.max(0, Math.min(1, (e.touches[0].clientX - r.left) / r.width)) * (video.duration || 0);
+    }, { passive: true });
+
+    speedSel?.addEventListener('change', () => { video.playbackRate = parseFloat(speedSel.value); });
+
+    const doFs = e => {
+      if (e) e.stopPropagation();
+      const wrap = document.getElementById('rv-player-wrap');
+      if (!document.fullscreenElement) {
+        (wrap?.requestFullscreen || wrap?.webkitRequestFullscreen || wrap?.mozRequestFullScreen)?.call(wrap);
+      } else {
+        (document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen)?.call(document);
+      }
+    };
+    fsBtn?.addEventListener('click', doFs);
+
+    // Click on wrap area (outside controls) → toggle play/pause
+    wrapEl.addEventListener('click', e => {
+      if (e.target.closest('.rv-ctrl-bar') || e.target.closest('.rv-dim-overlay')) return;
+      video.paused ? video.play() : video.pause();
+    });
+
+    // Auto-hide controls
+    let _ht;
+    const showCtrl = () => {
+      wrapEl.classList.add('rv-show-ctrl');
+      clearTimeout(_ht);
+      _ht = setTimeout(() => wrapEl.classList.remove('rv-show-ctrl'), 3000);
+    };
+    wrapEl.addEventListener('mousemove', showCtrl);
+    wrapEl.addEventListener('touchstart', showCtrl, { passive: true });
+  }
+
+  // ── Wire YouTube iframe controls via postMessage ──
+  function _rvWireYT(iframe, wrapEl) {
+    let _paused = false;
+    const playBtn  = wrapEl.querySelector('.rv-play-btn');
+    const speedSel = wrapEl.querySelector('.rv-speed-sel');
+    const fsBtn    = wrapEl.querySelector('.rv-fs-btn');
+
+    const ytCmd = (fn, arg) => {
+      try { iframe.contentWindow?.postMessage(JSON.stringify({ event:'command', func:fn, args: arg !== undefined ? [arg] : [] }), '*'); } catch(_) {}
+    };
+
+    const syncPlayBtn = (paused) => {
+      if (!playBtn) return;
+      playBtn.innerHTML = paused
+        ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>`
+        : `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>`;
+    };
+
+    playBtn?.addEventListener('click', e => {
+      e.stopPropagation(); _paused = !_paused;
+      ytCmd(_paused ? 'pauseVideo' : 'playVideo'); syncPlayBtn(_paused);
+    });
+    speedSel?.addEventListener('change', () => ytCmd('setPlaybackRate', parseFloat(speedSel.value)));
+    fsBtn?.addEventListener('click', e => {
+      e.stopPropagation();
+      const wrap = document.getElementById('rv-player-wrap');
+      if (!document.fullscreenElement) {
+        (wrap?.requestFullscreen || wrap?.webkitRequestFullscreen || wrap?.mozRequestFullScreen)?.call(wrap);
+      } else {
+        (document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen)?.call(document);
+      }
+    });
+
+    // Click on wrap area to toggle play/pause
+    wrapEl.addEventListener('click', e => {
+      if (e.target.closest('.rv-ctrl-bar') || e.target.closest('.rv-dim-overlay')) return;
+      _paused = !_paused; ytCmd(_paused ? 'pauseVideo' : 'playVideo'); syncPlayBtn(_paused);
+    });
+
+    // Register global pause hook (cleared when new video loads)
+    _rvPauseCurrent = () => { ytCmd('pauseVideo'); _paused = true; syncPlayBtn(true); };
+
+    // Auto-hide controls
+    let _ht;
+    const showCtrl = () => {
+      wrapEl.classList.add('rv-show-ctrl');
+      clearTimeout(_ht);
+      _ht = setTimeout(() => wrapEl.classList.remove('rv-show-ctrl'), 3000);
+    };
+    wrapEl.addEventListener('mousemove', showCtrl);
+    wrapEl.addEventListener('touchstart', showCtrl, { passive: true });
+  }
+
+  // ── Build secure embed HTML (async — needs user session for watermark) ──
+  async function _rvBuildEmbed(v) {
+    const user = await _rvGetUser();
+    const rawEmail = user?.email || '';
+    const wLabel = rawEmail
+      ? rawEmail.slice(0, 3) + '***' + rawEmail.slice(rawEmail.indexOf('@')) + ' · SkillUpNow'
+      : '© SkillUpNow · Unauthorized sharing prohibited';
+    const wm = _rvWatermark(wLabel);
+
+    const dimHtml = `<div class="rv-dim-overlay" id="rv-dim">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <span>Video paused</span>
+      </div>`;
+
+    const fsBtn = `<button class="rv-ctrl-btn rv-fs-btn" title="Fullscreen">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+        </button>`;
+
+    const speedCtrl = `<select class="rv-speed-sel" title="Playback speed">
+          <option value="0.5">0.5×</option><option value="0.75">0.75×</option>
+          <option value="1" selected>1×</option><option value="1.25">1.25×</option>
+          <option value="1.5">1.5×</option><option value="2">2×</option>
+        </select>`;
+
+    const url = v.videoUrl;
+    const isYT    = url.includes('youtube') || url.includes('youtu.be');
+    const isDrive = url.includes('drive.google.com');
+
+    if (isYT) {
+      const ytId = url.match(/(?:v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/)?.[1];
+      if (!ytId) return null;
+      const src = `https://www.youtube.com/embed/${ytId}?autoplay=1&rel=0&modestbranding=1&enablejsapi=1&controls=0&disablekb=1&fs=0&iv_load_policy=3&playsinline=1`;
+      return {
+        type: 'youtube',
+        html: `<div class="rv-secure-wrap">
+          <iframe id="rv-sec-iframe" src="${src}"
+            allow="autoplay; encrypted-media"
+            sandbox="allow-scripts allow-same-origin allow-presentation"
+            referrerpolicy="no-referrer"
+            style="width:100%;height:100%;border:none;display:block;"></iframe>
+          <div class="rv-player-shield"></div>
+          <div class="rv-watermark">${wm}</div>
+          ${dimHtml}
+          <div class="rv-ctrl-bar">
+            <div class="rv-btn-row">
+              <button class="rv-ctrl-btn rv-play-btn" title="Play/Pause">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+              </button>
+              <div class="rv-ctrl-spacer"></div>
+              ${speedCtrl}
+              ${fsBtn}
+            </div>
+          </div>
+        </div>`,
+      };
+    }
+
+    if (isDrive) {
+      const driveId = url.match(/\/d\/([a-zA-Z0-9_-]+)/)?.[1];
+      const src = driveId ? `https://drive.google.com/file/d/${driveId}/preview` : url;
+      return {
+        type: 'drive',
+        html: `<div class="rv-secure-wrap">
+          <iframe id="rv-sec-iframe" src="${src}"
+            allow="autoplay; encrypted-media"
+            allowfullscreen
+            style="width:100%;height:100%;border:none;display:block;"></iframe>
+          <div class="rv-player-shield"></div>
+          <div class="rv-watermark">${wm}</div>
+          ${dimHtml}
+          <div class="rv-ctrl-bar">
+            <div class="rv-btn-row">
+              <div class="rv-ctrl-spacer"></div>
+              ${fsBtn}
+            </div>
+          </div>
+        </div>`,
+      };
+    }
+
+    // Native video (direct URL — not YouTube/Drive)
+    return {
+      type: 'video',
+      html: `<div class="rv-secure-wrap">
+        <video id="rv-sec-video" autoplay playsinline
+          controlsList="nodownload noremoteplayback nofullscreen"
+          disablePictureInPicture disableRemotePlayback
+          draggable="false"
+          oncontextmenu="return false;" ondragstart="return false;"
+          style="width:100%;height:100%;display:block;background:#000;-webkit-user-drag:none;"
+          src="${url}"></video>
+        <div class="rv-player-shield"></div>
+        <div class="rv-watermark">${wm}</div>
+        ${dimHtml}
+        <div class="rv-ctrl-bar">
+          <div class="rv-progress-row">
+            <div class="rv-progress-track"><div class="rv-progress-fill"></div></div>
+            <span class="rv-time-txt">0:00 / 0:00</span>
+          </div>
+          <div class="rv-btn-row">
+            <button class="rv-ctrl-btn rv-play-btn" title="Play/Pause">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+            </button>
+            <div class="rv-ctrl-spacer"></div>
+            ${speedCtrl}
+            ${fsBtn}
+          </div>
+        </div>
+      </div>`,
+    };
+  }
+
+  // ── Play video securely in main panel (paid users only) ──
+  async function playVideo(v) {
     const playerEl    = document.getElementById('rv-player');
     const placeholder = document.getElementById('rv-player-placeholder');
     const nowPlaying  = document.getElementById('rv-now-playing');
     const detailsView = document.getElementById('rv-details-view');
 
-    // Hide details panel when actual video starts playing
     if (detailsView) detailsView.classList.remove('active');
 
-    let embed = '';
+    // Reset global pause hook each time a new video loads
+    _rvPauseCurrent = null;
+
     if (v.videoUrl && v.videoUrl.startsWith('http')) {
-      const isYT   = v.videoUrl.includes('youtube') || v.videoUrl.includes('youtu.be');
-      const isDrive = v.videoUrl.includes('drive.google.com');
-      if (isYT) {
-        const ytId = v.videoUrl.match(/(?:v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/)?.[1];
-        embed = `<iframe src="https://www.youtube.com/embed/${ytId}?autoplay=1&rel=0&modestbranding=1&fs=1"
-          allow="autoplay; fullscreen" allowfullscreen style="width:100%;height:100%;border:none;pointer-events:auto;"></iframe>`;
-      } else if (isDrive) {
-        const driveId = v.videoUrl.match(/\/d\/([a-zA-Z0-9_-]+)/)?.[1];
-        const src = driveId ? `https://drive.google.com/file/d/${driveId}/preview` : v.videoUrl;
-        embed = `<iframe src="${src}" allow="autoplay; fullscreen" allowfullscreen style="width:100%;height:100%;border:none;pointer-events:auto;"></iframe>`;
-      } else {
-        embed = `<video controls autoplay playsinline src="${v.videoUrl}"
-          controlslist="nodownload noremoteplayback" disablepictureinpicture disableremoteplayback
-          style="width:100%;height:100%;" oncontextmenu="return false;"></video>`;
+      const result = await _rvBuildEmbed(v);
+      if (result) {
+        if (playerEl) { playerEl.innerHTML = result.html; playerEl.style.display = ''; }
+        if (placeholder) placeholder.style.display = 'none';
+
+        const wrapEl = playerEl?.querySelector('.rv-secure-wrap');
+        if (wrapEl) {
+          if (result.type === 'video') {
+            const vid = document.getElementById('rv-sec-video');
+            if (vid) _rvWireVideo(vid, wrapEl);
+          } else if (result.type === 'youtube') {
+            const iframe = document.getElementById('rv-sec-iframe');
+            if (iframe) _rvWireYT(iframe, wrapEl);
+          } else if (result.type === 'drive') {
+            // Google Drive: wire fullscreen + show controls on hover/touch
+            const fsBtn = wrapEl.querySelector('.rv-fs-btn');
+            fsBtn?.addEventListener('click', e => {
+              e.stopPropagation();
+              const wrap = document.getElementById('rv-player-wrap');
+              if (!document.fullscreenElement) {
+                (wrap?.requestFullscreen || wrap?.webkitRequestFullscreen || wrap?.mozRequestFullScreen)?.call(wrap);
+              } else {
+                (document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen)?.call(document);
+              }
+            });
+            let _ht;
+            const showCtrl = () => {
+              wrapEl.classList.add('rv-show-ctrl');
+              clearTimeout(_ht);
+              _ht = setTimeout(() => wrapEl.classList.remove('rv-show-ctrl'), 3000);
+            };
+            wrapEl.addEventListener('mousemove', showCtrl);
+            wrapEl.addEventListener('touchstart', showCtrl, { passive: true });
+          }
+        }
       }
     } else {
-      embed = `<div class="rv-player-placeholder"><div class="rv-ph-pulse" style="margin-bottom:.5rem;">${v.icon || '🎬'}</div><p>Recording not yet available. Check back soon.</p></div>`;
+      const embed = `<div class="rv-player-placeholder"><div class="rv-ph-pulse" style="margin-bottom:.5rem;">${v.icon || '🎬'}</div><p>Recording not yet available. Check back soon.</p></div>`;
+      if (playerEl) { playerEl.innerHTML = embed; playerEl.style.display = ''; }
+      if (placeholder) placeholder.style.display = 'none';
     }
-
-    if (playerEl) { playerEl.innerHTML = embed; playerEl.style.display = ''; }
-    if (placeholder) placeholder.style.display = 'none';
 
     // Update "Now Playing" info
     if (nowPlaying) {
@@ -1183,7 +1642,7 @@
       // so the video URL is never sent to users who haven't paid.
       const { data, error } = await window.supabaseConfig.client
         .from('live_recordings')
-        .select('id,title,provider_name,course_id,created_at,base_amount,gst_percentage,total_amount,courses(title,course_pricing(sale_price,list_price,is_active))')
+        .select('id,title,provider_name,course_id,created_at,base_amount,gst_percentage,total_amount,courses(title,course_categories(name),course_pricing(sale_price,list_price,is_active))')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -1198,8 +1657,11 @@
 
       allVideos = data.map(r => {
         const { icon, gradient } = videoMeta(r.provider_name);
-        const courseTitle = r.courses?.title || '';
-        const filterKey = courseTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+        const courseTitle  = r.courses?.title || '';
+        const categoryName = r.courses?.course_categories?.name || '';
+        // Group label: prefer course title, fall back to category name
+        const groupLabel   = courseTitle || categoryName;
+        const filterKey    = groupLabel.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'other';
         // Resolve price: recording-level base_amount → course pricing → null
         const activePricing = (r.courses?.course_pricing || []).find(p => p.is_active);
         const basePrice = r.base_amount ?? activePricing?.sale_price ?? activePricing?.list_price ?? null;
@@ -1209,12 +1671,14 @@
           id: r.id,
           title: r.title || 'Session Recording',
           courseTitle,
-          filterKey: filterKey || 'session',
+          categoryName,
+          groupLabel,
+          filterKey,
           duration: r.duration_minutes ? r.duration_minutes + ' min' : '—',
           icon,
           gradient,
           isNew: (Date.now() - new Date(r.created_at).getTime()) < 7 * 24 * 3600 * 1000,
-          tags: courseTitle ? [courseTitle] : [],
+          tags: groupLabel ? [groupLabel] : [],
           videoUrl: null, // fetched after access verification, not during listing
           courseId: r.course_id || null,
           thumbnail: r.thumbnail_url || null,
