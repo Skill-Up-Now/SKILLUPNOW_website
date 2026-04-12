@@ -1,0 +1,15 @@
+[build]
+  publish = "."
+
+# Clean URLs: serve /pages/courses → /pages/courses.html
+[[redirects]]
+  from = "/pages/:page"
+  to   = "/pages/:page.html"
+  status = 200
+  force  = false
+
+[[redirects]]
+  from = "/:page"
+  to   = "/:page.html"
+  status = 200
+  force  = false

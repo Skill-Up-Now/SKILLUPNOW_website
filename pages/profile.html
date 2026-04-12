@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,220 +7,542 @@
   <link rel="stylesheet" href="../css/variables.css">
   <link rel="stylesheet" href="../css/main.css">
   <link rel="stylesheet" href="../css/responsive.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
-    .page-wrap { position:relative; z-index:1; padding-top:80px; min-height:100vh; }
+    /* ═══════════════════════════════════════════════════════
+       RESET & BASE
+    ═══════════════════════════════════════════════════════ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --nav-h: 72px;
+      --sidebar-w: 300px;
+      --hero-grad: linear-gradient(135deg, #7c5cfc 0%, #3d6bff 60%, #06b6d4 100%);
+    }
 
-    /* Profile Header */
+    /* ═══════════════════════════════════════════════════════
+       PAGE SHELL — flush against nav, no gap
+    ═══════════════════════════════════════════════════════ */
+    .page-shell {
+      min-height: 100vh;
+      position: relative;
+      z-index: 1;
+      padding-top: var(--nav-h);
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       HERO BANNER
+    ═══════════════════════════════════════════════════════ */
     .profile-hero {
-      background: var(--grad); padding: 2.5rem 2rem 4rem;
-      position: relative; overflow: hidden;
+      background: var(--hero-grad);
+      padding: 2.5rem 2rem 3.5rem;
+      position: relative;
+      overflow: hidden;
     }
     .profile-hero::before {
-      content:''; position:absolute; inset:0;
-      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='rgba(255,255,255,0.06)' stroke-width='1'%3E%3Ccircle cx='30' cy='30' r='25'/%3E%3C/g%3E%3C/svg%3E") repeat;
+      content: '';
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 70% 60% at 80% 120%, rgba(0,0,0,.18) 0%, transparent 55%),
+        url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='rgba(255,255,255,0.06)' stroke-width='1'%3E%3Ccircle cx='30' cy='30' r='25'/%3E%3C/g%3E%3C/svg%3E") repeat;
+      pointer-events: none;
     }
-    .profile-hero-inner { max-width:1100px; margin:0 auto; display:flex; align-items:center; gap:1.5rem; position:relative; }
-    .avatar-wrap { position:relative; flex-shrink:0; }
-    .avatar {
-      width:80px; height:80px; border-radius:50%;
-      background:rgba(255,255,255,0.2);
-      border:3px solid rgba(255,255,255,0.4);
-      display:flex; align-items:center; justify-content:center;
-      font-size:2rem; font-weight:800; color:#fff;
-      overflow:hidden;
-    }
-    .avatar img { width:100%; height:100%; object-fit:cover; }
-    .avatar-edit {
-      position:absolute; bottom:0; right:0;
-      width:26px; height:26px; border-radius:50%;
-      background:#fff; border:2px solid rgba(255,255,255,0.5);
-      display:flex; align-items:center; justify-content:center;
-      font-size:0.75rem; cursor:pointer; color:var(--v1);
-      transition:transform .2s;
-    }
-    /* Avatar click menu (works on desktop, tablet, mobile) */
-    .avatar-wrap { cursor:pointer; }
-    .avatar-hover-menu {
-      position:absolute; top:calc(100% + 10px); left:50%; transform:translateX(-50%) scale(.95) translateY(-6px);
-      background:rgba(18,12,42,.96); border:1.5px solid rgba(124,92,252,.3);
-      border-radius:16px; padding:.5rem; min-width:170px;
-      box-shadow:0 16px 48px rgba(0,0,0,.45), 0 4px 16px rgba(124,92,252,.2);
-      opacity:0; visibility:hidden; pointer-events:none;
-      transition:all .2s cubic-bezier(.23,1,.32,1);
-      z-index:999; backdrop-filter:blur(16px);
-    }
-    .avatar-hover-menu.open { opacity:1; visibility:visible; pointer-events:all; transform:translateX(-50%) scale(1) translateY(0); }
-    .ahm-item {
-      display:flex; align-items:center; gap:.65rem;
-      padding:.6rem .85rem; border-radius:10px; cursor:pointer;
-      font-size:.82rem; font-weight:600; color:rgba(200,191,255,.85);
-      transition:all .15s; white-space:nowrap; text-decoration:none;
-    }
-    .ahm-item:hover { background:rgba(124,92,252,.18); color:#fff; }
-    .ahm-item.danger:hover { background:rgba(239,68,68,.15); color:#ff6b6b; }
-    .ahm-icon { font-size:.95rem; width:18px; text-align:center; flex-shrink:0; }
-    .ahm-divider { height:1px; background:rgba(124,92,252,.15); margin:.35rem .5rem; }
-    .ahm-item-hidden { display:none; }
-    .profile-info h2 { color:#fff; font-size:1.5rem; font-weight:800; }
-    .profile-info p  { color:rgba(255,255,255,0.75); font-size:0.85rem; }
-    .profile-badges { display:flex; gap:0.5rem; margin-top:0.5rem; flex-wrap:wrap; }
-    .pbadge { background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.25); border-radius:999px; padding:0.2rem 0.75rem; font-size:0.75rem; color:#fff; font-weight:600; }
-
-    /* Tabs */
-    .tabs-wrap {
-      max-width:1100px; margin:0 auto;
-      position:relative; z-index:3;
-      margin-top:-28px; padding:0 2rem;
-    }
-    .tabs {
-      background:color-mix(in srgb, var(--panel) 88%, var(--bg));
-      border:1.5px solid var(--border); border-radius:var(--r2);
-      display:flex; gap:0; overflow-x:auto; overflow-y:hidden;
-      box-shadow:var(--shadow-card);
-      backdrop-filter:blur(18px);
-      -webkit-backdrop-filter:blur(18px);
-      scrollbar-width:none;
-    }
-    .tabs::-webkit-scrollbar { display:none; }
-    .tab-btn {
-      padding:1rem 1.25rem; font-size:0.85rem; font-weight:600;
-      color:var(--txt3); cursor:pointer; white-space:nowrap; flex-shrink:0;
-      border-bottom:2.5px solid transparent; transition:all 0.2s;
-      background:none; border-top:none; border-left:none; border-right:none;
-      font-family:inherit;
-    }
-    .tab-btn:hover { color:var(--txt); background:var(--bg2); }
-    .tab-btn.active {
-      color:var(--txt);
-      border-bottom-color:var(--v1);
-      background:color-mix(in srgb, var(--v1) 12%, var(--bg));
-      box-shadow:inset 0 -1px 0 color-mix(in srgb, var(--v1) 35%, transparent);
+    .hero-inner {
+      max-width: 1260px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 1.75rem;
+      position: relative;
     }
 
-    /* Content */
-    .profile-content { max-width:1100px; margin:0 auto; padding:0 2rem 3rem; }
-    .tab-section { display:none; }
-    .tab-section.active { display:block; }
+    /* avatar */
+    .avatar-wrap {
+      flex-shrink: 0;
+      position: relative;
+      width: 100px; height: 100px;
+      cursor: pointer;
+    }
+    .avatar-circle {
+      width: 100px; height: 100px; border-radius: 50%;
+      border: 3.5px solid rgba(255,255,255,.55);
+      background: rgba(255,255,255,.2);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2.5rem; font-weight: 800; color: #fff;
+      overflow: hidden;
+      box-shadow: 0 8px 32px rgba(0,0,0,.3);
+      transition: border-color .22s;
+    }
+    .avatar-circle img { width: 100%; height: 100%; object-fit: cover; display: none; }
+    .avatar-wrap:hover .avatar-circle { border-color: rgba(255,255,255,.9); }
 
-    /* Cards */
-    .card { background:var(--panel); border:1.5px solid var(--border); border-radius:var(--r2); padding:1.5rem; margin-bottom:1.25rem; }
-    .card-title { font-size:1rem; font-weight:800; margin-bottom:1.25rem; display:flex; align-items:center; gap:0.5rem; justify-content:space-between; }
-    .card-title span { font-size:0.85rem; }
+    /* pencil overlay — direct upload trigger */
+    .avatar-pencil {
+      position: absolute;
+      bottom: 2px; right: 2px;
+      width: 30px; height: 30px; border-radius: 50%;
+      background: #fff;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,.28);
+      border: 2px solid rgba(255,255,255,.6);
+      transition: transform .2s, box-shadow .2s;
+      z-index: 2;
+    }
+    .avatar-pencil:hover { transform: scale(1.15); box-shadow: 0 4px 14px rgba(0,0,0,.35); }
+    .avatar-pencil svg { width: 14px; height: 14px; color: #7c5cfc; }
 
-    /* Course progress cards */
-    .course-list { display:flex; flex-direction:column; gap:1rem; }
+    /* hero info */
+    .hero-info { flex: 1; min-width: 0; }
+    .hero-name {
+      font-size: clamp(1.35rem, 3vw, 2rem);
+      font-weight: 800; color: #fff;
+      letter-spacing: -.02em; line-height: 1.15;
+      margin-bottom: .35rem;
+    }
+    .hero-email { font-size: .88rem; color: rgba(255,255,255,.75); margin-bottom: .7rem; }
+    .hero-badges { display: flex; gap: .5rem; flex-wrap: wrap; }
+    .hbadge {
+      display: inline-flex; align-items: center; gap: .3rem;
+      background: rgba(255,255,255,.18);
+      border: 1px solid rgba(255,255,255,.28);
+      border-radius: 999px;
+      padding: .22rem .75rem;
+      font-size: .74rem; font-weight: 700; color: #fff;
+      backdrop-filter: blur(6px);
+      animation: fadeUp .5s ease both;
+    }
+    .hbadge.streak { background: linear-gradient(135deg, rgba(255,107,53,.8), rgba(245,158,11,.8)); border-color: transparent; }
+    .hbadge.access { background: linear-gradient(135deg, rgba(34,197,94,.7), rgba(16,185,129,.7)); border-color: transparent; }
+
+    /* ═══════════════════════════════════════════════════════
+       THREE-COLUMN BODY  [nav | main | stats]
+    ═══════════════════════════════════════════════════════ */
+    .profile-body {
+      max-width: 1360px;
+      margin: 0 auto;
+      padding: 0 1.5rem 3rem;
+      display: grid;
+      grid-template-columns: 210px 1fr 276px;
+      grid-template-areas: "nav main stats";
+      gap: 1.5rem;
+      align-items: start;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       LEFT NAV PANEL
+    ═══════════════════════════════════════════════════════ */
+    .profile-nav-panel {
+      grid-area: nav;
+      position: sticky;
+      top: calc(var(--nav-h) + 1rem);
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       RIGHT STATS PANEL
+    ═══════════════════════════════════════════════════════ */
+    .profile-stat-panel {
+      grid-area: stats;
+      position: sticky;
+      top: calc(var(--nav-h) + 1rem);
+      display: flex; flex-direction: column; gap: 1rem;
+    }
+    .sidebar-card {
+      background: var(--panel);
+      border: 1.5px solid var(--border);
+      border-radius: 18px;
+      overflow: hidden;
+      transition: box-shadow .28s;
+    }
+    .sidebar-card:hover { box-shadow: 0 8px 32px rgba(124,92,252,.1); }
+
+    /* stats grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1px;
+      background: var(--border);
+    }
+    .stat-cell {
+      background: var(--panel);
+      padding: 1rem .75rem;
+      text-align: center;
+      transition: background .2s;
+    }
+    .stat-cell:hover { background: var(--bg2); }
+    .stat-val {
+      font-size: 1.6rem; font-weight: 800;
+      background: var(--grad);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+      display: block; line-height: 1.1;
+    }
+    .stat-val.streak-val { background: linear-gradient(135deg,#ff6b35,#f59e0b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .stat-lbl { font-size: .7rem; color: var(--txt4); font-weight: 600; margin-top: .25rem; text-transform: uppercase; letter-spacing: .06em; }
+
+    /* streak mini-calendar */
+    .streak-header { padding: .85rem 1rem .6rem; display: flex; align-items: center; justify-content: space-between; }
+    .streak-title { font-size: .8rem; font-weight: 800; color: var(--txt2); }
+    .streak-count { font-size: .75rem; font-weight: 700; color: #f59e0b; }
+    .streak-cal {
+      display: grid;
+      grid-template-columns: repeat(10, 1fr);
+      gap: 3px;
+      padding: 0 1rem .9rem;
+    }
+    .scal-dot {
+      aspect-ratio: 1;
+      border-radius: 3px;
+      transition: transform .15s;
+      cursor: default;
+    }
+    .scal-dot:hover { transform: scale(1.4); }
+    .scal-dot.logged { background: #7c5cfc; }
+    .scal-dot.today  { background: #f59e0b; box-shadow: 0 0 5px #f59e0b88; }
+    .scal-dot.empty  { background: var(--bg2); opacity: .4; }
+
+    /* sidebar nav links */
+    .sidebar-nav { padding: .5rem; display: flex; flex-direction: column; gap: 2px; }
+    .snav-item {
+      display: flex; align-items: center; justify-content: flex-start; gap: .7rem;
+      padding: .68rem .9rem; border-radius: 12px;
+      font-size: .83rem; font-weight: 600; color: var(--txt3);
+      cursor: pointer; transition: all .18s; user-select: none;
+      text-align: left; white-space: nowrap;
+    }
+    .snav-item:hover { background: rgba(124,92,252,.1); color: var(--txt); transform: translateX(2px); }
+    .snav-item.active {
+      background: linear-gradient(135deg, rgba(124,92,252,.2), rgba(61,107,255,.12));
+      color: var(--v1);
+      border-left: 3px solid var(--v1);
+      padding-left: calc(.9rem - 3px);
+    }
+    .snav-icon { font-size: 1rem; width: 22px; text-align: center; flex-shrink: 0; }
+
+    /* ═══════════════════════════════════════════════════════
+       MAIN CONTENT
+    ═══════════════════════════════════════════════════════ */
+    .profile-main { grid-area: main; min-width: 0; padding-top: 1.2rem; }
+
+    .tab-section { display: none; animation: fadeUp .35s ease both; }
+    .tab-section.active { display: block; }
+
+    /* card */
+    .pcard {
+      background: var(--panel);
+      border: 1.5px solid var(--border);
+      border-radius: 18px;
+      padding: 1.5rem;
+      margin-bottom: 1.25rem;
+      transition: box-shadow .28s;
+    }
+    .pcard:hover { box-shadow: 0 8px 32px rgba(124,92,252,.1); }
+    .pcard-title {
+      font-size: .9rem; font-weight: 800;
+      color: var(--txt); margin-bottom: 1.25rem;
+      display: flex; align-items: center; justify-content: space-between; gap: .75rem;
+    }
+
+    /* alert toast */
+    .p-toast {
+      position: fixed; top: calc(var(--nav-h) + .75rem); left: 50%;
+      transform: translateX(-50%) translateY(-8px);
+      z-index: 9999;
+      padding: .65rem 1.4rem; border-radius: 50px;
+      font-size: .84rem; font-weight: 700;
+      box-shadow: 0 8px 28px rgba(0,0,0,.3);
+      opacity: 0; pointer-events: none;
+      transition: all .3s ease;
+      white-space: nowrap;
+    }
+    .p-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .p-toast.success { background: linear-gradient(135deg,#4ade80,#22d3ee); color: #0a2a1a; }
+    .p-toast.error   { background: linear-gradient(135deg,#f87171,#ef4444); color: #fff; }
+
+    /* ═══════════════════════════════════════════════════════
+       LEARNING PATH TAB
+    ═══════════════════════════════════════════════════════ */
     .course-progress-card {
-      background:var(--bg); border:1.5px solid var(--border); border-radius:var(--r2);
-      padding:1.25rem; display:flex; gap:1rem; align-items:flex-start;
-      transition:all 0.2s;
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: 14px;
+      padding: 1.2rem;
+      display: flex; gap: 1rem; align-items: flex-start;
+      margin-bottom: .85rem;
+      transition: border-color .22s, transform .22s, box-shadow .22s;
     }
-    .course-progress-card:hover { border-color:var(--v1); }
-    .cp-icon { width:52px; height:52px; border-radius:var(--r1); background:var(--grad2); display:flex; align-items:center; justify-content:center; font-size:1.5rem; flex-shrink:0; }
-    .cp-info { flex:1; min-width:0; }
-    .cp-name { font-size:0.95rem; font-weight:700; margin-bottom:0.2rem; }
-    .cp-meta { font-size:0.78rem; color:var(--txt3); margin-bottom:0.75rem; }
-    .progress-bar { height:6px; background:var(--border); border-radius:999px; overflow:hidden; margin-bottom:0.35rem; }
-    .progress-fill { height:100%; border-radius:999px; background:var(--grad); transition:width 0.8s ease; }
-    .progress-label { font-size:0.75rem; color:var(--txt3); display:flex; justify-content:space-between; }
-    .cp-actions { display:flex; gap:0.5rem; margin-top:0.75rem; flex-wrap:wrap; }
-    .cp-badge { display:inline-flex; align-items:center; padding:0.2rem 0.6rem; border-radius:999px; font-size:0.7rem; font-weight:700; }
-    .cp-badge-green  { background:rgba(34,197,94,0.12); color:#16a34a; }
-    .cp-badge-yellow { background:rgba(234,179,8,0.12); color:#b45309; }
-    .cp-badge-red    { background:rgba(239,68,68,0.12); color:#dc2626; }
-    .cp-badge-blue   { background:rgba(59,130,246,0.1); color:#1d4ed8; }
-    .btn-sm { padding:0.4rem 0.85rem; border-radius:var(--r1); font-size:0.78rem; font-weight:700; cursor:pointer; transition:all 0.2s; border:none; font-family:inherit; }
-    .btn-sm-primary { background:var(--grad); color:#fff; }
-    .btn-sm-outline { background:transparent; border:1.5px solid var(--border); color:var(--txt3); }
-    .btn-sm-outline:hover { border-color:var(--v1); color:var(--v1); }
-
-    /* Schedule */
-    .schedule-cards { display:flex; flex-direction:column; gap:0.75rem; }
-    .schedule-item {
-      background:var(--bg); border:1.5px solid var(--border); border-radius:var(--r1);
-      padding:1rem 1.25rem; display:flex; align-items:center; gap:1rem;
-      transition:border-color 0.2s;
+    .course-progress-card:hover {
+      border-color: var(--v1);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(124,92,252,.14);
     }
-    .schedule-item:hover { border-color:var(--v1); }
-    .schedule-date { text-align:center; min-width:50px; }
-    .schedule-date .day  { font-size:1.4rem; font-weight:800; color:var(--v1); }
-    .schedule-date .month{ font-size:0.7rem; color:var(--txt4); text-transform:uppercase; }
-    .schedule-details h4 { font-size:0.9rem; font-weight:700; }
-    .schedule-details p  { font-size:0.78rem; color:var(--txt3); }
-    .schedule-action { margin-left:auto; }
-
-    /* Payments table */
-    .pay-table { width:100%; border-collapse:collapse; font-size:0.85rem; }
-    .pay-table th { padding:0.6rem 0.75rem; text-align:left; color:var(--txt4); font-size:0.75rem; font-weight:700; text-transform:uppercase; border-bottom:1px solid var(--border); }
-    .pay-table td { padding:0.75rem; border-bottom:1px solid var(--border); color:var(--txt2); }
-    .pay-table tr:last-child td { border:none; }
-    .pay-table tr:hover td { background:var(--bg2); }
-
-    /* Profile edit form */
-    .edit-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
-    .f-group { margin-bottom:0; }
-    .f-group label { display:block; font-size:0.8rem; font-weight:600; color:var(--txt3); margin-bottom:0.35rem; }
-    .f-group input, .f-group select, .f-group textarea {
-      width:100%; background:var(--bg); border:1.5px solid var(--border); border-radius:var(--r1);
-      padding:0.65rem 0.9rem; color:var(--txt); font-size:0.88rem; outline:none; font-family:inherit;
-      transition:border-color 0.2s;
+    .cp-icon {
+      width: 54px; height: 54px; border-radius: 12px;
+      background: var(--grad2);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem; flex-shrink: 0; overflow: hidden;
     }
-    .f-group input:focus, .f-group select:focus { border-color:var(--v1); box-shadow:0 0 0 3px var(--v5); }
-    .f-group.full { grid-column:1/-1; }
-    .btn-save { background:var(--grad); color:#fff; border:none; border-radius:var(--r1); padding:0.7rem 2rem; font-size:0.9rem; font-weight:700; cursor:pointer; transition:all 0.25s; font-family:inherit; }
-    .btn-save:hover { opacity:0.88; }
-
-    /* Certificates */
-    .cert-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:1rem; }
-    .cert-card {
-      background:var(--bg); border:1.5px solid var(--border); border-radius:var(--r1);
-      padding:1.25rem; text-align:center; transition:all 0.2s;
+    .cp-info { flex: 1; min-width: 0; }
+    .cp-name { font-size: .95rem; font-weight: 700; margin-bottom: .2rem; }
+    .cp-meta { font-size: .76rem; color: var(--txt3); margin-bottom: .65rem; }
+    .progress-bar { height: 6px; background: var(--border); border-radius: 999px; overflow: hidden; margin-bottom: .3rem; }
+    .progress-fill { height: 100%; border-radius: 999px; background: var(--grad); transition: width .8s cubic-bezier(.23,1,.32,1); }
+    .progress-label { font-size: .72rem; color: var(--txt4); display: flex; justify-content: space-between; margin-bottom: .55rem; }
+    .cp-badges { display: flex; gap: .4rem; flex-wrap: wrap; }
+    .cpb {
+      display: inline-flex; align-items: center; gap: .25rem;
+      padding: .18rem .55rem; border-radius: 999px; font-size: .68rem; font-weight: 700;
     }
-    .cert-card:hover { border-color:var(--v1); }
-    .cert-icon { font-size:2.5rem; margin-bottom:0.75rem; }
-    .cert-name { font-size:0.88rem; font-weight:700; margin-bottom:0.3rem; }
-    .cert-date { font-size:0.75rem; color:var(--txt4); }
-    .cert-download { margin-top:0.75rem; }
+    .cpb-green  { background: rgba(34,197,94,.12);  color: #16a34a; }
+    .cpb-yellow { background: rgba(234,179,8,.12);  color: #b45309; }
+    .cpb-red    { background: rgba(239,68,68,.12);  color: #dc2626; }
+    .cpb-blue   { background: rgba(59,130,246,.1);  color: #1d4ed8; }
+    .cpb-purple { background: rgba(124,92,252,.12); color: var(--v1); }
+    .btn-sm {
+      padding: .38rem .8rem; border-radius: 10px; font-size: .76rem; font-weight: 700;
+      cursor: pointer; transition: all .2s; border: none; font-family: inherit;
+    }
+    .btn-sm-primary { background: var(--grad); color: #fff; }
+    .btn-sm-outline {
+      background: transparent; border: 1.5px solid var(--border); color: var(--txt3);
+    }
+    .btn-sm-outline:hover { border-color: var(--v1); color: var(--v1); }
+    .empty-state { text-align: center; padding: 2.5rem 1rem; color: var(--txt3); }
+    .empty-state .ei { font-size: 3rem; margin-bottom: .75rem; opacity: .4; }
 
-    /* Stats row */
-    .stats-row { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:1rem; margin-bottom:1.5rem; }
-    .stat-box { background:var(--bg); border:1.5px solid var(--border); border-radius:var(--r1); padding:1rem; text-align:center; }
-    .stat-box .val { font-size:1.6rem; font-weight:800; color:var(--v1); }
-    .stat-box .lbl { font-size:0.75rem; color:var(--txt4); margin-top:0.25rem; }
+    /* ═══════════════════════════════════════════════════════
+       SCHEDULE TAB — MINI CALENDAR
+    ═══════════════════════════════════════════════════════ */
+    .sched-layout { display: grid; grid-template-columns: 260px 1fr; gap: 1.25rem; }
+    .mini-cal-wrap { position: sticky; top: calc(var(--nav-h) + 1rem); }
+    .mini-cal {
+      background: var(--panel); border: 1.5px solid var(--border);
+      border-radius: 18px; padding: 1rem;
+    }
+    .cal-nav {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: .75rem;
+    }
+    .cal-nav-btn {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: var(--bg2); border: 1.5px solid var(--border);
+      color: var(--txt2); font-size: .9rem; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all .18s; font-family: inherit;
+    }
+    .cal-nav-btn:hover { background: rgba(124,92,252,.18); border-color: var(--v1); color: var(--v1); }
+    .cal-month-label { font-size: .82rem; font-weight: 800; color: var(--txt); }
+    .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+    .cal-day-head { font-size: .62rem; font-weight: 700; color: var(--txt4); text-align: center; padding: .2rem 0; }
+    .cal-day {
+      aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+      font-size: .74rem; font-weight: 600; border-radius: 8px;
+      cursor: default; transition: all .15s; color: var(--txt3);
+    }
+    .cal-day.other-month { opacity: .25; }
+    .cal-day.today { background: rgba(124,92,252,.15); color: var(--v1); font-weight: 800; }
+    .cal-day.has-class {
+      background: var(--grad);
+      color: #fff; font-weight: 800;
+      box-shadow: 0 2px 8px rgba(124,92,252,.4);
+      cursor: pointer;
+    }
+    .cal-day.has-class:hover { transform: scale(1.15); box-shadow: 0 4px 14px rgba(124,92,252,.5); }
+    .cal-day.today.has-class { box-shadow: 0 4px 14px rgba(245,158,11,.5); }
+    .cal-legend { display: flex; align-items: center; gap: .5rem; margin-top: .65rem; font-size: .68rem; color: var(--txt4); }
+    .cal-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--grad); flex-shrink: 0; }
 
-    /* EMI breakdown */
-    .emi-row { display:flex; align-items:center; justify-content:space-between; padding:0.6rem 0; border-bottom:1px solid var(--border); font-size:0.85rem; }
-    .emi-row:last-child { border:none; }
+    /* upcoming class list */
+    .schedule-list { display: flex; flex-direction: column; gap: .75rem; }
+    .sched-item {
+      background: var(--bg); border: 1.5px solid var(--border);
+      border-radius: 14px; padding: 1rem 1.2rem;
+      display: flex; align-items: center; gap: 1rem;
+      transition: border-color .22s, transform .22s;
+    }
+    .sched-item:hover { border-color: var(--v1); transform: translateX(4px); }
+    .sched-item.today-class { border-color: rgba(245,158,11,.45); background: rgba(245,158,11,.05); }
+    .sched-date { text-align: center; min-width: 48px; flex-shrink: 0; }
+    .sched-day  { font-size: 1.4rem; font-weight: 800; color: var(--v1); line-height: 1; }
+    .sched-mon  { font-size: .65rem; color: var(--txt4); text-transform: uppercase; font-weight: 700; }
+    .sched-info { flex: 1; min-width: 0; }
+    .sched-info h4 { font-size: .9rem; font-weight: 700; color: var(--txt); margin-bottom: .2rem; }
+    .sched-info p  { font-size: .76rem; color: var(--txt3); }
+    .sched-action { flex-shrink: 0; }
 
-    /* Google Calendar */
     .gcal-btn {
-      display:inline-flex; align-items:center; gap:0.5rem;
-      background:#fff; border:1.5px solid #dadce0; border-radius:var(--r1);
-      padding:0.6rem 1rem; font-size:0.83rem; font-weight:600; color:#3c4043;
-      cursor:pointer; transition:all 0.2s; text-decoration:none;
+      display: inline-flex; align-items: center; gap: .4rem;
+      background: #fff; border: 1.5px solid #dadce0;
+      border-radius: 10px; padding: .45rem .85rem;
+      font-size: .76rem; font-weight: 600; color: #3c4043;
+      cursor: pointer; text-decoration: none; transition: box-shadow .2s;
     }
-    .gcal-btn:hover { box-shadow:0 2px 8px rgba(0,0,0,0.12); }
+    .gcal-btn:hover { box-shadow: 0 2px 10px rgba(0,0,0,.14); }
 
-    /* Alert */
-    .alert { padding:0.75rem 1rem; border-radius:var(--r1); font-size:0.83rem; margin-bottom:1rem; display:none; }
-    .alert.success { background:rgba(34,197,94,0.1); border:1px solid rgba(34,197,94,0.25); color:#16a34a; }
-    .alert.error   { background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.25); color:#dc2626; }
-    .alert.show { display:block; }
-
-    .empty-state { text-align:center; padding:2.5rem; color:var(--txt3); }
-    .empty-state .ei { font-size:3rem; margin-bottom:0.75rem; opacity:0.4; }
-
-    @media(max-width:768px) {
-      .profile-hero-inner { flex-direction:column; text-align:center; }
-      .edit-grid { grid-template-columns:1fr; }
-      .tabs-wrap { margin-top:-22px; padding:0 1rem; }
-      .tabs { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); overflow:visible; }
-      .tab-btn { min-width:0; padding:0.95rem 0.8rem; text-align:center; }
-      .profile-content { padding:0 1rem 3rem; }
+    /* ═══════════════════════════════════════════════════════
+       RECORDINGS TAB
+    ═══════════════════════════════════════════════════════ */
+    .rec-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1rem;
+    }
+    .rec-card {
+      background: var(--bg); border: 1.5px solid var(--border);
+      border-radius: 16px; overflow: hidden;
+      transition: transform .32s cubic-bezier(.34,1.56,.64,1), border-color .28s, box-shadow .28s;
+      cursor: pointer;
+    }
+    .rec-card:hover {
+      transform: translateY(-6px) scale(1.01);
+      border-color: rgba(124,92,252,.5);
+      box-shadow: 0 16px 48px rgba(124,92,252,.2);
+    }
+    .rec-thumb {
+      aspect-ratio: 16/9; background: linear-gradient(135deg,#0d0b1a,#1d1a3e);
+      position: relative; display: flex; align-items: center; justify-content: center;
+      overflow: hidden;
+    }
+    .rec-thumb-icon { font-size: 3rem; opacity: .35; }
+    .rec-thumb-grad { position: absolute; inset: 0; opacity: .55; }
+    .rec-play {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .rec-play-circle {
+      width: 50px; height: 50px; border-radius: 50%;
+      background: rgba(255,255,255,.18); border: 2px solid rgba(255,255,255,.4);
+      display: flex; align-items: center; justify-content: center;
+      backdrop-filter: blur(8px);
+      transition: background .28s, box-shadow .28s;
+    }
+    .rec-card:hover .rec-play-circle {
+      background: rgba(124,92,252,.7); box-shadow: 0 8px 28px rgba(124,92,252,.5);
+    }
+    .rec-access-badge {
+      position: absolute; top: .5rem; right: .5rem;
+      background: rgba(34,197,94,.2); border: 1px solid rgba(34,197,94,.4);
+      border-radius: 50px; padding: .18rem .55rem;
+      font-size: .65rem; font-weight: 700; color: #4ade80;
+      backdrop-filter: blur(6px);
+    }
+    .rec-body { padding: 1rem 1.1rem 1.2rem; }
+    .rec-title { font-size: .9rem; font-weight: 700; color: var(--txt); margin-bottom: .3rem; line-height: 1.35; }
+    .rec-meta { font-size: .74rem; color: var(--txt4); display: flex; align-items: center; gap: .65rem; flex-wrap: wrap; }
+    .rec-price {
+      font-size: .9rem; font-weight: 800;
+      background: var(--grad);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      margin-top: .35rem;
     }
 
-    @media(max-width:520px) {
-      .tabs { grid-template-columns:1fr; }
-      .tab-btn { white-space:normal; line-height:1.35; }
+    /* ═══════════════════════════════════════════════════════
+       PAYMENTS TABLE
+    ═══════════════════════════════════════════════════════ */
+    .pay-table { width: 100%; border-collapse: collapse; font-size: .84rem; }
+    .pay-table th { padding: .6rem .75rem; text-align: left; color: var(--txt4); font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; border-bottom: 1px solid var(--border); }
+    .pay-table td { padding: .75rem; border-bottom: 1px solid var(--border); color: var(--txt2); }
+    .pay-table tr:last-child td { border: none; }
+    .pay-table tr:hover td { background: var(--bg2); }
+
+    /* ═══════════════════════════════════════════════════════
+       ACCOUNT SETTINGS
+    ═══════════════════════════════════════════════════════ */
+    .edit-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .f-group { margin-bottom: 0; }
+    .f-group label { display: block; font-size: .78rem; font-weight: 700; color: var(--txt3); margin-bottom: .35rem; }
+    .f-group input, .f-group select, .f-group textarea {
+      width: 100%; background: var(--bg); border: 1.5px solid var(--border);
+      border-radius: 10px; padding: .65rem .9rem;
+      color: var(--txt); font-size: .87rem; outline: none; font-family: inherit;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .f-group input:focus, .f-group select:focus { border-color: var(--v1); box-shadow: 0 0 0 3px rgba(124,92,252,.12); }
+    .f-group.full { grid-column: 1 / -1; }
+    .btn-save {
+      background: var(--grad); color: #fff; border: none;
+      border-radius: 12px; padding: .72rem 1.75rem;
+      font-size: .88rem; font-weight: 700;
+      cursor: pointer; transition: all .22s; font-family: inherit;
+      box-shadow: 0 4px 14px rgba(124,92,252,.28);
+    }
+    .btn-save:hover { opacity: .88; transform: translateY(-1px); box-shadow: 0 8px 22px rgba(124,92,252,.38); }
+
+    /* emi row */
+    .emi-row { display: flex; align-items: center; justify-content: space-between; padding: .65rem 0; border-bottom: 1px solid var(--border); font-size: .84rem; }
+    .emi-row:last-child { border: none; }
+
+    /* certs */
+    .cert-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1rem; }
+    .cert-card {
+      background: var(--bg); border: 1.5px solid var(--border); border-radius: 14px;
+      padding: 1.25rem; text-align: center; transition: all .22s;
+    }
+    .cert-card:hover { border-color: var(--v1); transform: translateY(-4px); box-shadow: 0 8px 24px rgba(124,92,252,.15); }
+
+    /* ═══════════════════════════════════════════════════════
+       ANIMATIONS
+    ═══════════════════════════════════════════════════════ */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes shimmer {
+      0%   { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+    .skeleton {
+      animation: shimmer 1.4s infinite;
+      background: linear-gradient(90deg, var(--panel) 25%, rgba(124,92,252,.07) 50%, var(--panel) 75%);
+      background-size: 200% 100%;
+      border-radius: 8px;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       HIDDEN FILE INPUT
+    ═══════════════════════════════════════════════════════ */
+    #avatar-upload { display: none; }
+
+    /* ═══════════════════════════════════════════════════════
+       RESPONSIVE
+    ═══════════════════════════════════════════════════════ */
+    /* ── Tablet: 2-col [nav | main], stats panel drops under nav ── */
+    @media (max-width: 1100px) {
+      .profile-body {
+        grid-template-columns: 220px 1fr;
+        grid-template-areas:
+          "nav  main"
+          "stats main";
+        grid-template-rows: auto 1fr;
+      }
+      .profile-stat-panel { position: static; }
+      .profile-nav-panel  { position: sticky; top: calc(var(--nav-h) + 1rem); align-self: start; }
+    }
+    /* ── Laptop breakpoint: shrink sidebar a bit ── */
+    @media (max-width: 900px) {
+      .profile-body {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+          "stats"
+          "nav"
+          "main";
+      }
+      .profile-nav-panel, .profile-stat-panel { position: static; }
+      .stats-grid { grid-template-columns: repeat(4, 1fr); }
+      .sidebar-nav { flex-direction: row; flex-wrap: wrap; padding: .4rem; gap: 2px; }
+      .snav-item   { white-space: nowrap; font-size: .78rem; padding: .5rem .7rem; }
+      .snav-item.active { border-left: none; border-bottom: 3px solid var(--v1); padding-left: .7rem; padding-bottom: calc(.5rem - 3px); }
+      .sched-layout { grid-template-columns: 1fr; }
+      .mini-cal-wrap { position: static; }
+    }
+    @media (max-width: 640px) {
+      .hero-inner  { flex-direction: column; text-align: center; }
+      .hero-badges { justify-content: center; }
+      .edit-grid   { grid-template-columns: 1fr; }
+      .rec-grid    { grid-template-columns: 1fr; }
+      .profile-body { padding: 0 .9rem 2rem; }
+      .stats-grid  { grid-template-columns: 1fr 1fr; }
+      .profile-hero { padding: 2rem 1rem 3rem; }
+      .snav-item   { font-size: .74rem; padding: .45rem .55rem; gap: .4rem; }
     }
   </style>
 </head>
@@ -228,250 +550,368 @@
 <div class="mesh-bg"></div>
 <div class="orb orb1"></div>
 <div class="orb orb2"></div>
+
+<!-- Hidden file input — directly triggered by pencil icon -->
+<input type="file" id="avatar-upload" accept="image/*" onchange="uploadAvatar(this)">
+
+<!-- Toast notification -->
+<div class="p-toast" id="p-toast"></div>
+
 <nav></nav>
 
-<div class="page-wrap">
-  <!-- Profile Hero -->
+<div class="page-shell">
+  <!-- ── Hero ── -->
   <div class="profile-hero">
-    <div class="profile-hero-inner">
-      <div class="avatar-wrap" id="avatar-wrap" onclick="toggleAvatarMenu(event)">
-        <div class="avatar" id="profile-avatar">
-          <img id="avatar-img" src="" alt="" style="display:none">
+    <div class="hero-inner">
+      <div class="avatar-wrap" id="avatar-wrap">
+        <div class="avatar-circle" id="avatar-circle">
+          <img id="avatar-img" src="" alt="">
           <span id="avatar-initial">U</span>
         </div>
-        <div class="avatar-edit" title="Options">✏</div>
-        <input type="file" id="avatar-upload" accept="image/*" style="display:none" onchange="uploadAvatar(this)">
-        <!-- Click-toggle menu (works on all devices) -->
-        <div class="avatar-hover-menu" id="avatar-menu">
-          <div class="ahm-item" onclick="document.getElementById('avatar-upload').click()">
-            <span class="ahm-icon">📷</span> Change Photo
-          </div>
-          <div class="ahm-item ahm-item-hidden" id="ahm-remove-photo" onclick="removeAvatar()">
-            <span class="ahm-icon">🗑️</span> Remove Photo
-          </div>
-          <div class="ahm-item" onclick="switchTab('account')">
-            <span class="ahm-icon">✏️</span> Edit Profile
-          </div>
-          <div class="ahm-item" onclick="switchTab('emi')">
-            <span class="ahm-icon">📅</span> My EMI
-          </div>
-          <div class="ahm-divider"></div>
-          <div class="ahm-item danger" onclick="window.profileNav?.logout()">
-            <span class="ahm-icon">🚪</span> Sign Out
-          </div>
+        <!-- Pencil = direct upload trigger, no dropdown needed -->
+        <div class="avatar-pencil" onclick="document.getElementById('avatar-upload').click()" title="Change profile photo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+          </svg>
         </div>
       </div>
-      <div class="profile-info">
-        <h2 id="hero-name">Loading…</h2>
-        <p id="hero-email"></p>
-        <div class="profile-badges">
-          <span class="pbadge" id="hero-role">Student</span>
-          <span class="pbadge" id="hero-joined"></span>
-          <span class="pbadge" id="hero-courses">0 Courses</span>
-          <span class="pbadge" id="hero-streak" style="background:linear-gradient(135deg,#ff6b35,#f59e0b);color:#fff;display:none;">🔥 <span id="hero-streak-count">0</span> Day Streak</span>
+      <div class="hero-info">
+        <div class="hero-name" id="hero-name">Loading…</div>
+        <div class="hero-email" id="hero-email"></div>
+        <div class="hero-badges">
+          <span class="hbadge" id="hero-role" style="animation-delay:.05s">🎓 Student</span>
+          <span class="hbadge" id="hero-joined" style="animation-delay:.1s"></span>
+          <span class="hbadge" id="hero-courses" style="animation-delay:.15s">0 Courses</span>
+          <span class="hbadge streak" id="hero-streak" style="display:none;animation-delay:.2s">🔥 <span id="hero-streak-n">0</span> Day Streak</span>
+          <span class="hbadge access" id="hero-access" style="display:none;animation-delay:.25s">✓ Access Active</span>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Tabs -->
-  <div class="tabs-wrap">
-    <div class="tabs">
-      <button class="tab-btn active" data-tab="learning">📚 My Learning Path</button>
-      <button class="tab-btn" data-tab="schedule">📆 Schedule</button>
-      <button class="tab-btn" data-tab="payments">💳 Payments</button>
-      <button class="tab-btn" data-tab="emi">📅 EMI Tracker</button>
-      <button class="tab-btn" data-tab="certificates">🎓 Certificates</button>
-      <button class="tab-btn" data-tab="account">⚙ Account</button>
-    </div>
-  </div>
+  <!-- ── Body ── -->
+  <div class="profile-body">
 
-  <!-- Content -->
-  <div class="profile-content">
-    <div class="alert success" id="suc-alert"></div>
-    <div class="alert error"   id="err-alert"></div>
+    <!-- ── LEFT: Navigation panel ── -->
+    <aside class="profile-nav-panel">
+      <div class="sidebar-card">
+        <div class="sidebar-nav">
+          <div class="snav-item active" onclick="switchTab('learning')" data-tab="learning"><span class="snav-icon">📚</span> My Learning Path</div>
+          <div class="snav-item" onclick="switchTab('schedule')" data-tab="schedule"><span class="snav-icon">📆</span> Schedule</div>
+          <div class="snav-item" onclick="switchTab('recordings')" data-tab="recordings"><span class="snav-icon">🎬</span> My Recordings</div>
+          <div class="snav-item" onclick="switchTab('payments')" data-tab="payments"><span class="snav-icon">💳</span> Payments</div>
+          <div class="snav-item" onclick="switchTab('emi')" data-tab="emi"><span class="snav-icon">📅</span> EMI Tracker</div>
+          <div class="snav-item" onclick="switchTab('certificates')" data-tab="certificates"><span class="snav-icon">🎓</span> Certificates</div>
+          <div class="snav-item" onclick="switchTab('account')" data-tab="account"><span class="snav-icon">⚙</span> Account Settings</div>
+          <div style="height:1px;background:var(--border);margin:.4rem .5rem;"></div>
+          <div class="snav-item" onclick="window.profileNav?.logout()" style="color:var(--txt4)"><span class="snav-icon">🚪</span> Sign Out</div>
+        </div>
+      </div>
+    </aside>
 
-    <!-- MY LEARNING PATH -->
-    <div class="tab-section active" id="tab-learning">
-      <div class="stats-row" id="learn-stats">
-        <div class="stat-box"><div class="val" id="ls-enrolled">—</div><div class="lbl">Enrolled</div></div>
-        <div class="stat-box"><div class="val" id="ls-active">—</div><div class="lbl">Active</div></div>
-        <div class="stat-box"><div class="val" id="ls-completed">—</div><div class="lbl">Completed</div></div>
-        <div class="stat-box"><div class="val" id="ls-certs">—</div><div class="lbl">Certificates</div></div>
-        <div class="stat-box" id="streak-stat-box" style="background:linear-gradient(135deg,rgba(255,107,53,.15),rgba(245,158,11,.12));border-color:rgba(255,107,53,.3);">
-          <div class="val" id="ls-streak" style="color:#f59e0b;">—</div>
-          <div class="lbl">🔥 Login Streak</div>
+    <!-- ── MAIN CONTENT ── -->
+    <main class="profile-main">
+
+      <!-- MY LEARNING PATH -->
+      <div class="tab-section active" id="tab-learning">
+        <div id="my-courses">
+          <div class="empty-state"><div class="ei skeleton" style="width:3rem;height:3rem;border-radius:50%;margin:0 auto .75rem;"></div><p>Loading your courses…</p></div>
         </div>
       </div>
 
-      <!-- Streak Calendar -->
-      <div class="card" id="streak-card" style="margin-bottom:1.5rem;display:none;">
-        <div class="card-title">🔥 Login Streak</div>
-        <div id="streak-summary" style="display:flex;gap:2rem;flex-wrap:wrap;margin-bottom:1.25rem;">
-          <div style="text-align:center;">
-            <div style="font-size:2.5rem;font-weight:800;color:#f59e0b;" id="streak-current">0</div>
-            <div style="font-size:.8rem;color:var(--txt3);">Current Streak</div>
+      <!-- SCHEDULE -->
+      <div class="tab-section" id="tab-schedule">
+        <div class="sched-layout">
+          <div class="mini-cal-wrap">
+            <div class="mini-cal">
+              <div class="cal-nav">
+                <button class="cal-nav-btn" onclick="calPrev()">‹</button>
+                <span class="cal-month-label" id="cal-month-label">—</span>
+                <button class="cal-nav-btn" onclick="calNext()">›</button>
+              </div>
+              <div class="cal-grid" id="cal-grid">
+                <!-- Headers + days rendered entirely by renderCal() -->
+              </div>
+              <div class="cal-legend">
+                <div class="cal-dot"></div> Class scheduled
+              </div>
+            </div>
+
+            <div style="margin-top:1rem;">
+              <a class="gcal-btn" id="gcal-link" href="https://calendar.google.com" target="_blank" rel="noopener">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Google_Calendar_icon_%282020%29.svg/32px-Google_Calendar_icon_%282020%29.svg.png" width="16" alt=""> Add to Google Calendar
+              </a>
+            </div>
           </div>
-          <div style="text-align:center;">
-            <div style="font-size:2.5rem;font-weight:800;color:var(--v1);" id="streak-longest">0</div>
-            <div style="font-size:.8rem;color:var(--txt3);">Longest Streak</div>
+
+          <div>
+            <div class="pcard">
+              <div class="pcard-title">Upcoming Classes</div>
+              <div class="schedule-list" id="schedule-list">
+                <div class="empty-state"><div class="ei">📆</div><p>No upcoming classes scheduled</p></div>
+              </div>
+            </div>
+            <div class="pcard">
+              <div class="pcard-title">Past Classes &amp; Recordings</div>
+              <div class="schedule-list" id="past-list">
+                <div class="empty-state"><div class="ei">🎬</div><p>No past recordings</p></div>
+              </div>
+            </div>
           </div>
-          <div style="text-align:center;">
-            <div style="font-size:2.5rem;font-weight:800;color:var(--txt2);" id="streak-total">0</div>
-            <div style="font-size:.8rem;color:var(--txt3);">Total Days</div>
+        </div>
+      </div>
+
+      <!-- MY RECORDINGS -->
+      <div class="tab-section" id="tab-recordings">
+        <div class="pcard">
+          <div class="pcard-title">
+            My Recordings
+            <span style="font-size:.78rem;color:var(--txt4);font-weight:500">Admin-granted access only</span>
+          </div>
+          <div class="rec-grid" id="rec-grid">
+            <div class="empty-state" style="grid-column:1/-1"><div class="ei">🎬</div><p>Loading recordings…</p></div>
           </div>
         </div>
-        <div id="streak-calendar" style="display:flex;flex-wrap:wrap;gap:4px;max-width:420px;"></div>
-        <p style="font-size:.75rem;color:var(--txt4);margin-top:.75rem;">Keep logging in every day to maintain your streak!</p>
       </div>
-      <div class="course-list" id="my-courses">
-        <div class="empty-state"><div class="ei">📚</div><p>Loading your courses…</p></div>
-      </div>
-    </div>
 
-    <!-- SCHEDULE -->
-    <div class="tab-section" id="tab-schedule">
-      <div class="card">
-        <div class="card-title">
-          Upcoming Classes
-          <span>
-            <a class="gcal-btn" id="gcal-link" href="#" target="_blank">
-              <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Google_Calendar_icon_%282020%29.svg/32px-Google_Calendar_icon_%282020%29.svg.png" width="18" alt="Google Calendar"> Add to Google Calendar
-            </a>
-          </span>
-        </div>
-        <div class="schedule-cards" id="schedule-list">
-          <div class="empty-state"><div class="ei">📆</div><p>No upcoming classes</p></div>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-title">Past Classes & Recordings</div>
-        <div id="past-classes">
-          <div class="empty-state"><div class="ei">🎬</div><p>No past recordings</p></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- PAYMENTS -->
-    <div class="tab-section" id="tab-payments">
-      <div class="card">
-        <div class="card-title">Fee Summary</div>
-        <div class="stats-row">
-          <div class="stat-box"><div class="val" id="pay-total">₹0</div><div class="lbl">Total Fee</div></div>
-          <div class="stat-box"><div class="val" id="pay-paid">₹0</div><div class="lbl">Paid</div></div>
-          <div class="stat-box"><div class="val" id="pay-balance">₹0</div><div class="lbl">Balance</div></div>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-title">Payment History</div>
-        <div style="overflow-x:auto">
-          <table class="pay-table">
-            <thead>
-              <tr><th>Invoice</th><th>Course</th><th>Amount</th><th>Method</th><th>Date</th><th>Status</th><th>Download</th></tr>
-            </thead>
-            <tbody id="payment-history">
-              <tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--txt4)">Loading payments…</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- EMI TRACKER -->
-    <div class="tab-section" id="tab-emi">
-      <div class="card">
-        <div class="card-title">EMI Schedule</div>
-        <div id="emi-list">
-          <div class="empty-state"><div class="ei">📅</div><p>No EMI plans active</p></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- CERTIFICATES -->
-    <div class="tab-section" id="tab-certificates">
-      <div class="card">
-        <div class="card-title">My Certificates</div>
-        <div class="cert-grid" id="cert-grid">
-          <div class="empty-state" style="grid-column:1/-1"><div class="ei">🎓</div><p>Complete a course to earn your certificate</p></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ACCOUNT SETTINGS -->
-    <div class="tab-section" id="tab-account">
-      <div class="card">
-        <div class="card-title">Personal Information</div>
-        <div class="edit-grid" id="profile-form">
-          <div class="f-group"><label>Full Name</label><input type="text" id="edit-name" placeholder="Full name"></div>
-          <div class="f-group"><label>Username</label><input type="text" id="edit-username" placeholder="username"></div>
-          <div class="f-group"><label>Email</label><input type="email" id="edit-email" placeholder="Email" disabled style="opacity:0.6"></div>
-          <div class="f-group"><label>Phone</label><input type="tel" id="edit-phone" placeholder="10-digit phone"></div>
-          <div class="f-group"><label>Date of Birth</label><input type="date" id="edit-dob"></div>
-          <div class="f-group"><label>Gender</label>
-            <select id="edit-gender">
-              <option value="">Select…</option>
-              <option value="male">Male</option>
-              <option value="female">Female</option>
-              <option value="other">Other</option>
-              <option value="prefer_not_to_say">Prefer not to say</option>
-            </select>
+      <!-- PAYMENTS -->
+      <div class="tab-section" id="tab-payments">
+        <div class="pcard">
+          <div class="pcard-title">Fee Summary</div>
+          <div class="stats-grid" style="border-radius:12px;overflow:hidden;margin-bottom:0;">
+            <div class="stat-cell"><span class="stat-val" id="pay-total">₹0</span><div class="stat-lbl">Total Fee</div></div>
+            <div class="stat-cell"><span class="stat-val" id="pay-paid">₹0</span><div class="stat-lbl">Paid</div></div>
+            <div class="stat-cell"><span class="stat-val" id="pay-balance">₹0</span><div class="stat-lbl">Balance</div></div>
+            <div class="stat-cell"><span class="stat-val" id="pay-count">0</span><div class="stat-lbl">Transactions</div></div>
           </div>
-          <div class="f-group"><label>City</label><input type="text" id="edit-city" placeholder="City"></div>
-          <div class="f-group"><label>State</label><input type="text" id="edit-state" placeholder="State"></div>
-          <div class="f-group"><label>Pincode</label><input type="text" id="edit-pincode" placeholder="6-digit pincode" maxlength="6"></div>
-          <div class="f-group"><label>Address</label><input type="text" id="edit-address" placeholder="Full address"></div>
         </div>
-        <div style="margin-top:1.25rem;display:flex;gap:0.75rem;flex-wrap:wrap">
-          <button class="btn-save" onclick="saveProfile()">Save Changes</button>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-title">Change Password</div>
-        <div style="max-width:400px;display:flex;flex-direction:column;gap:0.75rem">
-          <div class="f-group"><label>Current Password</label><input type="password" id="curr-pass" placeholder="Current password"></div>
-          <div class="f-group"><label>New Password</label><input type="password" id="new-pass" placeholder="Min. 8 characters"></div>
-          <div class="f-group"><label>Confirm New Password</label><input type="password" id="conf-pass" placeholder="Repeat new password"></div>
-          <button class="btn-save" onclick="changePassword()">Update Password</button>
+        <div class="pcard">
+          <div class="pcard-title">Payment History</div>
+          <div style="overflow-x:auto">
+            <table class="pay-table">
+              <thead><tr><th>Invoice</th><th>Course</th><th>Amount</th><th>Method</th><th>Date</th><th>Status</th><th>Download</th></tr></thead>
+              <tbody id="payment-history"><tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--txt4)">Loading…</td></tr></tbody>
+            </table>
+          </div>
         </div>
       </div>
 
-      <div class="card">
-        <div class="card-title">Referral Program</div>
-        <p style="font-size:0.85rem;color:var(--txt3);margin-bottom:1rem">Share your referral code and earn reward points for every friend who enrolls.</p>
-        <div style="display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap">
-          <div style="background:var(--bg);border:1.5px solid var(--border);border-radius:var(--r1);padding:0.6rem 1.25rem;font-weight:800;font-size:1.1rem;color:var(--v1);letter-spacing:0.1em" id="referral-code">—</div>
-          <button class="btn-sm btn-sm-outline" onclick="copyReferral()">📋 Copy Code</button>
-          <button class="btn-sm btn-sm-outline" onclick="shareReferral()">📤 Share</button>
+      <!-- EMI TRACKER -->
+      <div class="tab-section" id="tab-emi">
+        <div class="pcard">
+          <div class="pcard-title">EMI Schedule</div>
+          <div id="emi-list"><div class="empty-state"><div class="ei">📅</div><p>No EMI plans active</p></div></div>
         </div>
-        <p style="font-size:0.8rem;color:var(--txt4);margin-top:0.75rem">Reward Points: <strong id="reward-points" style="color:var(--v1)">0</strong></p>
       </div>
-    </div>
 
-  </div><!-- /profile-content -->
-</div>
+      <!-- CERTIFICATES -->
+      <div class="tab-section" id="tab-certificates">
+        <div class="pcard">
+          <div class="pcard-title">My Certificates</div>
+          <div class="cert-grid" id="cert-grid">
+            <div class="empty-state" style="grid-column:1/-1"><div class="ei">🎓</div><p>Complete a course to earn your certificate</p></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ACCOUNT SETTINGS -->
+      <div class="tab-section" id="tab-account">
+        <div class="pcard">
+          <div class="pcard-title">Personal Information</div>
+          <div class="edit-grid">
+            <div class="f-group"><label>Full Name</label><input type="text" id="edit-name" placeholder="Full name"></div>
+            <div class="f-group"><label>Username</label><input type="text" id="edit-username" placeholder="username"></div>
+            <div class="f-group"><label>Email</label><input type="email" id="edit-email" disabled style="opacity:.6"></div>
+            <div class="f-group"><label>Phone</label><input type="tel" id="edit-phone" placeholder="10-digit phone"></div>
+            <div class="f-group"><label>Date of Birth</label><input type="date" id="edit-dob"></div>
+            <div class="f-group"><label>Gender</label>
+              <select id="edit-gender">
+                <option value="">Select…</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+                <option value="other">Other</option>
+                <option value="prefer_not_to_say">Prefer not to say</option>
+              </select>
+            </div>
+            <div class="f-group"><label>City</label><input type="text" id="edit-city" placeholder="City"></div>
+            <div class="f-group"><label>State</label><input type="text" id="edit-state" placeholder="State"></div>
+            <div class="f-group"><label>Pincode</label><input type="text" id="edit-pincode" placeholder="6-digit pincode" maxlength="6"></div>
+            <div class="f-group full"><label>Address</label><input type="text" id="edit-address" placeholder="Full address"></div>
+          </div>
+          <div style="margin-top:1.25rem;display:flex;gap:.75rem;flex-wrap:wrap">
+            <button class="btn-save" onclick="saveProfile()">Save Changes</button>
+          </div>
+        </div>
+
+        <div class="pcard">
+          <div class="pcard-title">Change Password</div>
+          <div style="max-width:400px;display:flex;flex-direction:column;gap:.75rem">
+            <div class="f-group"><label>Current Password</label><input type="password" id="curr-pass" placeholder="Current password"></div>
+            <div class="f-group"><label>New Password</label><input type="password" id="new-pass" placeholder="Min. 8 characters"></div>
+            <div class="f-group"><label>Confirm New Password</label><input type="password" id="conf-pass" placeholder="Repeat new password"></div>
+            <button class="btn-save" onclick="changePassword()">Update Password</button>
+          </div>
+        </div>
+
+        <div class="pcard">
+          <div class="pcard-title">
+            Referral Program
+            <span style="font-size:.75rem;color:var(--txt4);font-weight:500">Students only</span>
+          </div>
+
+          <!-- Points + code -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:.85rem;margin-bottom:1.2rem;">
+            <div style="background:linear-gradient(135deg,rgba(124,92,252,.12),rgba(61,107,255,.08));border:1.5px solid rgba(124,92,252,.22);border-radius:14px;padding:1rem;text-align:center;">
+              <div style="font-size:1.8rem;font-weight:900;background:linear-gradient(135deg,var(--v1),#3d6bff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1;" id="reward-points">0</div>
+              <div style="font-size:.68rem;color:var(--txt4);text-transform:uppercase;font-weight:700;letter-spacing:.06em;margin-top:.3rem;">Reward Points</div>
+            </div>
+            <div style="background:var(--bg);border:1.5px solid var(--border);border-radius:14px;padding:1rem;text-align:center;">
+              <div style="font-size:1.1rem;font-weight:800;color:var(--v1);letter-spacing:.12em;line-height:1.2;" id="referral-code">—</div>
+              <div style="font-size:.68rem;color:var(--txt4);text-transform:uppercase;font-weight:700;letter-spacing:.06em;margin-top:.3rem;">Your Code</div>
+            </div>
+          </div>
+
+          <!-- Current tier -->
+          <div id="ref-tier-display" style="display:none;background:linear-gradient(135deg,rgba(245,158,11,.1),rgba(239,68,68,.06));border:1.5px solid rgba(245,158,11,.3);border-radius:12px;padding:.85rem 1rem;margin-bottom:1rem;">
+            <div style="font-size:.72rem;font-weight:700;color:#f59e0b;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.2rem;">Current Reward Tier</div>
+            <div style="font-size:.92rem;font-weight:700;color:var(--txt);" id="ref-tier-label">—</div>
+          </div>
+
+          <!-- Next tier progress bar -->
+          <div id="ref-next-tier" style="display:none;margin-bottom:1rem;">
+            <div style="display:flex;justify-content:space-between;font-size:.74rem;color:var(--txt3);margin-bottom:.4rem;">
+              <span>Progress to next tier</span>
+              <span><span id="ref-pts-to-next">0</span> pts to go</span>
+            </div>
+            <div style="height:7px;background:var(--border);border-radius:999px;overflow:hidden;">
+              <div id="ref-progress-bar" style="height:100%;border-radius:999px;background:linear-gradient(135deg,var(--v1),#3d6bff);transition:width .8s cubic-bezier(.23,1,.32,1);width:0%"></div>
+            </div>
+          </div>
+
+          <!-- Action buttons -->
+          <div style="display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:1rem;">
+            <button class="btn-sm btn-sm-primary" onclick="copyReferral()">📋 Copy Code</button>
+            <button class="btn-sm btn-sm-outline" onclick="shareReferral()">📤 Share & Earn</button>
+          </div>
+          <p style="font-size:.76rem;color:var(--txt4);line-height:1.6;">
+            Share your code with friends. You earn <strong style="color:var(--v1)">10 pts</strong> per signup, they get <strong style="color:var(--v1)">10 pts</strong> too.<br>
+            Reach 100 pts → unlock <strong style="color:#f59e0b">₹500–₹1,000 voucher</strong>.
+          </p>
+
+          <!-- My referrals list -->
+          <div id="my-referrals-wrap" style="display:none;margin-top:1rem;">
+            <div style="font-size:.78rem;font-weight:700;color:var(--txt3);margin-bottom:.5rem;">People you referred (<span id="ref-count">0</span>)</div>
+            <div id="my-referrals-list"></div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- ── RIGHT: Stats + Streak panel ── -->
+    <aside class="profile-stat-panel">
+
+      <!-- Stats grid -->
+      <div class="sidebar-card">
+        <div class="stats-grid">
+          <div class="stat-cell">
+            <span class="stat-val" id="ls-enrolled">—</span>
+            <div class="stat-lbl">Enrolled</div>
+          </div>
+          <div class="stat-cell">
+            <span class="stat-val" id="ls-active">—</span>
+            <div class="stat-lbl">Active</div>
+          </div>
+          <div class="stat-cell">
+            <span class="stat-val" id="ls-completed">—</span>
+            <div class="stat-lbl">Done</div>
+          </div>
+          <div class="stat-cell">
+            <span class="stat-val streak-val" id="ls-streak">0</span>
+            <div class="stat-lbl">🔥 Streak</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Streak mini-calendar -->
+      <div class="sidebar-card" id="streak-card" style="display:none">
+        <div class="streak-header">
+          <span class="streak-title">Login Streak</span>
+          <span class="streak-count" id="streak-count-label">0 days</span>
+        </div>
+        <div class="streak-cal" id="streak-cal"></div>
+        <div style="padding:0 1rem .85rem;font-size:.7rem;color:var(--txt4)">
+          Longest: <strong id="streak-longest" style="color:var(--v1)">0</strong> days &nbsp;·&nbsp;
+          Total: <strong id="streak-total" style="color:var(--txt2)">0</strong> days
+        </div>
+      </div>
+
+    </aside>
+
+  </div><!-- /profile-body -->
+</div><!-- /page-shell -->
+
+<footer></footer>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../config/supabase-config.js"></script>
 <script src="../js/theme.js"></script>
 <script src="../js/profile-nav.js"></script>
 <script>
-// Use global supabase client — consistent across all pages
+/* ════════════════════════════════════════════════════════════
+   PROFILE PAGE — JAVASCRIPT
+════════════════════════════════════════════════════════════ */
 function _db() { return window.supabaseConfig?.client || null; }
-let currentUser = null, userProfile = null;
-const fmtCurr = v => '₹' + Number(v||0).toLocaleString('en-IN');
-const fmtDate = d => d ? new Date(d).toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' }) : '—';
+let currentUser = null, userProfile = null, _upcomingDates = [];
+const fmtCurr = v => '₹' + Number(v || 0).toLocaleString('en-IN');
+const fmtDate = d => d ? new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
 
-// Avatar menu toggle — click/tap works on all devices
-function toggleAvatarMenu(e) {
-  e.stopPropagation();
-  const menu = document.getElementById('avatar-menu');
-  menu.classList.toggle('open');
+/* ── Toast ──────────────────────────────────────────────── */
+function showMsg(type, msg) {
+  const el = document.getElementById('p-toast');
+  el.textContent = msg;
+  el.className = `p-toast ${type === 'err' ? 'error' : 'success'} show`;
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove('show'), 3500);
 }
-document.addEventListener('click', () => {
-  document.getElementById('avatar-menu')?.classList.remove('open');
+
+/* ── Avatar helpers ──────────────────────────────────────── */
+function _setAvatar(url) {
+  const img = document.getElementById('avatar-img');
+  const ini = document.getElementById('avatar-initial');
+  img.src = url; img.style.display = 'block'; ini.style.display = 'none';
+}
+function _syncNavAvatar(url) {
+  const btn = document.getElementById('profile-btn');
+  if (!btn) return;
+  btn.textContent = ''; btn.style.padding = '0'; btn.style.overflow = 'hidden';
+  const img = document.createElement('img');
+  img.src = url;
+  img.style.cssText = 'width:100%;height:100%;border-radius:50%;object-fit:cover;display:block;';
+  img.onerror = () => { btn.textContent = (currentUser?.email || 'U')[0].toUpperCase(); btn.style.padding = ''; btn.style.overflow = ''; };
+  btn.appendChild(img);
+}
+
+/* ── Tab switching ───────────────────────────────────────── */
+function switchTab(tab) {
+  document.querySelectorAll('.snav-item').forEach(i => {
+    i.classList.toggle('active', i.dataset.tab === tab);
+  });
+  document.querySelectorAll('.tab-section').forEach(s => s.classList.remove('active'));
+  const sec = document.getElementById('tab-' + tab);
+  if (sec) {
+    sec.classList.add('active');
+    // Lazy-load recordings only when that tab is opened
+    if (tab === 'recordings' && !sec.dataset.loaded) { sec.dataset.loaded = '1'; loadRecordings(); }
+  }
+}
+// Add data-tab to sidebar items
+document.querySelectorAll('.snav-item[data-tab]').forEach(item => {
+  item.dataset.tab = item.getAttribute('data-tab');
 });
 
+/* ── Init ────────────────────────────────────────────────── */
 async function init() {
   let tries = 0;
   while (!_db() && tries++ < 20) await new Promise(r => setTimeout(r, 150));
@@ -480,50 +920,45 @@ async function init() {
   if (!session) { window.location.href = '../index.html?login=1'; return; }
   currentUser = session.user;
 
-  // Check URL tab param
-  const urlParams = new URLSearchParams(window.location.search);
-  const urlTab = urlParams.get('tab');
+  // Handle URL params
+  const params = new URLSearchParams(window.location.search);
+  const urlTab = params.get('tab');
   if (urlTab) switchTab(urlTab);
 
-  // Show enrollment success toast
-  const enrolledCourse = urlParams.get('enrolled');
-  if (enrolledCourse) {
-    const toast = document.createElement('div');
-    toast.style.cssText = 'position:fixed;top:90px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#4ade80,#22d3ee);color:#0a2a1a;padding:0.75rem 1.5rem;border-radius:999px;font-weight:700;font-size:0.9rem;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,0.2);animation:fadeIn 0.3s ease';
-    toast.textContent = `✓ Enrolled in ${decodeURIComponent(enrolledCourse)}!`;
-    document.body.appendChild(toast);
-    setTimeout(() => toast.remove(), 4000);
-    // Clean URL
+  // Enrollment success toast
+  const enrolled = params.get('enrolled');
+  if (enrolled) {
+    showMsg('success', `✓ Enrolled in ${decodeURIComponent(enrolled)}!`);
     history.replaceState({}, '', window.location.pathname + (urlTab ? '?tab=' + urlTab : ''));
   }
 
   await loadProfile();
   loadLearningPath();
+  loadStreakData();
+  loadReferralStats();
 }
 
+/* ── Load profile ────────────────────────────────────────── */
 async function loadProfile() {
-  const { data } = await _db().from('user_profiles').select('*').eq('user_id', currentUser.id).single();
+  const { data, error } = await _db().from('user_profiles').select('*').eq('user_id', currentUser.id).single();
+  if (error) { console.warn('loadProfile:', error.message); return; }
   userProfile = data;
   if (!data) return;
 
-  // Hero
-  document.getElementById('hero-name').textContent = data.full_name || 'User';
-  document.getElementById('hero-email').textContent = data.email;
-  document.getElementById('hero-role').textContent = data.role === 'mentor' ? '👨‍🏫 Mentor' : '🎓 Student';
-  document.getElementById('hero-joined').textContent = 'Joined ' + fmtDate(data.account_created_at);
-  document.getElementById('avatar-initial').textContent = (data.full_name||'U')[0].toUpperCase();
-  document.getElementById('referral-code').textContent = data.referral_code || '—';
-  document.getElementById('reward-points').textContent = data.reward_points || 0;
+  document.getElementById('hero-name').textContent      = data.full_name || 'User';
+  document.getElementById('hero-email').textContent     = data.email || currentUser.email || '';
+  document.getElementById('hero-role').textContent      = data.role === 'mentor' ? '👨‍🏫 Mentor' : '🎓 Student';
+  document.getElementById('hero-joined').textContent    = 'Joined ' + fmtDate(data.account_created_at || data.created_at);
+  document.getElementById('avatar-initial').textContent = (data.full_name || 'U')[0].toUpperCase();
+  document.getElementById('referral-code').textContent  = data.referral_code || '—';
+  document.getElementById('reward-points').textContent  = data.reward_points || 0;
 
-  if (data.profile_picture_url) {
-    _setAvatarImage(data.profile_picture_url);
-    document.getElementById('ahm-remove-photo').classList.remove('ahm-item-hidden');
-  }
+  if (data.profile_picture_url) _setAvatar(data.profile_picture_url);
 
-  // Edit form
+  // Prefill edit form
   document.getElementById('edit-name').value     = data.full_name || '';
   document.getElementById('edit-username').value = data.username || '';
-  document.getElementById('edit-email').value    = data.email || '';
+  document.getElementById('edit-email').value    = data.email || currentUser.email || '';
   document.getElementById('edit-phone').value    = data.phone || '';
   document.getElementById('edit-dob').value      = data.date_of_birth || '';
   document.getElementById('edit-gender').value   = data.gender || '';
@@ -533,383 +968,535 @@ async function loadProfile() {
   document.getElementById('edit-address').value  = data.address || '';
 }
 
+/* ── Learning path ───────────────────────────────────────── */
 async function loadLearningPath() {
   const { data: enrollments } = await _db().from('enrollments')
     .select('*, courses(title, thumbnail_url, duration_days, duration_hours, course_categories(name))')
-    .eq('student_user_id', currentUser.id).order('created_at', { ascending: false });
+    .eq('student_user_id', currentUser.id)
+    .order('created_at', { ascending: false });
 
-  const total     = (enrollments||[]).length;
-  const active    = (enrollments||[]).filter(e => e.enrollment_status === 'active').length;
-  const completed = (enrollments||[]).filter(e => e.enrollment_status === 'completed').length;
-  const certs     = (enrollments||[]).filter(e => e.completed_at).length;
+  const total     = (enrollments || []).length;
+  const active    = (enrollments || []).filter(e => e.enrollment_status === 'active').length;
+  const completed = (enrollments || []).filter(e => e.enrollment_status === 'completed').length;
+  const hasActive = active > 0;
 
   document.getElementById('ls-enrolled').textContent  = total;
   document.getElementById('ls-active').textContent    = active;
   document.getElementById('ls-completed').textContent = completed;
-  document.getElementById('ls-certs').textContent     = certs;
   document.getElementById('hero-courses').textContent = total + ' Course' + (total !== 1 ? 's' : '');
-  loadStreakData();
+  if (hasActive) { document.getElementById('hero-access').style.display = ''; }
 
-  const icons = { 'Communication':'💬','Leadership':'👑','Interview':'🎯','Business':'💼','Speaking':'🎤','IT':'💻','Cloud':'☁️','AI/ML':'🤖' };
+  const icons = { Communication:'💬', Leadership:'👑', Interview:'🎯', Business:'💼', Speaking:'🎤', IT:'💻', Cloud:'☁️', 'AI/ML':'🤖', DevOps:'⚙️', Cybersecurity:'🔐', Data:'📊' };
 
   if (!enrollments?.length) {
-    document.getElementById('my-courses').innerHTML = `<div class="empty-state"><div class="ei">📚</div><h3>No courses enrolled yet</h3><p>Browse our course catalog and start your learning journey.</p><a href="courses.html"><button class="btn-save" style="margin-top:0.75rem">Browse Courses</button></a></div>`;
+    document.getElementById('my-courses').innerHTML = `<div class="empty-state"><div class="ei">📚</div><p style="font-size:.95rem;font-weight:700;margin-bottom:.4rem;color:var(--txt2)">No courses yet</p><p>Browse our catalog and start learning.</p><a href="courses"><button class="btn-save" style="margin-top:.9rem">Browse Courses</button></a></div>`;
+    loadPayments([]); loadEmi(); loadSchedule();
     return;
   }
 
-  document.getElementById('my-courses').innerHTML = enrollments.map(e => {
+  document.getElementById('my-courses').innerHTML = enrollments.map((e, i) => {
     const c = e.courses || {};
     const catName = c.course_categories?.name || '';
-    const icon = icons[catName] || '📚';
-    const paidBadge = e.paid_amount >= e.net_amount ? 'cp-badge-green' : e.paid_amount > 0 ? 'cp-badge-yellow' : 'cp-badge-red';
-    const paidLabel = e.paid_amount >= e.net_amount ? 'Paid' : e.paid_amount > 0 ? 'Partial' : 'Unpaid';
-    const statusBadge = e.enrollment_status === 'active' ? 'cp-badge-green' : e.enrollment_status === 'completed' ? 'cp-badge-blue' : 'cp-badge-yellow';
-    const duration = c.duration_days ? Math.round(c.duration_days / 30) + ' mo' : c.duration_hours ? c.duration_hours + ' hrs' : '—';
-    const hasAccess = e.access_status === 'active';
-    return `<div class="course-progress-card">
+    const icon    = icons[catName] || '📚';
+    const paidCl  = e.paid_amount >= e.net_amount ? 'cpb-green' : e.paid_amount > 0 ? 'cpb-yellow' : 'cpb-red';
+    const paidLbl = e.paid_amount >= e.net_amount ? 'Paid' : e.paid_amount > 0 ? 'Partial' : 'Unpaid';
+    const stCl    = e.enrollment_status === 'active' ? 'cpb-green' : e.enrollment_status === 'completed' ? 'cpb-blue' : 'cpb-yellow';
+    const dur     = c.duration_days ? Math.round(c.duration_days / 30) + ' mo' : c.duration_hours ? c.duration_hours + ' hrs' : '—';
+    const hasAcc  = e.access_status === 'active';
+    const pct     = e.progress_percentage || 0;
+    return `<div class="course-progress-card" style="animation:fadeUp .4s ${i * .05}s ease both">
       <div class="cp-icon">${c.thumbnail_url ? `<img src="${c.thumbnail_url}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit">` : icon}</div>
       <div class="cp-info">
         <div class="cp-name">${c.title || 'Course'}</div>
-        <div class="cp-meta">${catName || '—'} · ${duration}</div>
-        <div class="progress-bar"><div class="progress-fill" style="width:${e.progress_percentage||0}%"></div></div>
-        <div class="progress-label"><span>${e.progress_percentage||0}% complete</span><span>${e.enrollment_status}</span></div>
-        <div class="cp-actions">
-          <span class="cp-badge ${paidBadge}">Payment: ${paidLabel}</span>
-          <span class="cp-badge ${statusBadge}">${e.enrollment_status}</span>
-          ${hasAccess ? '<span class="cp-badge cp-badge-green">✓ Access Active</span>' : '<span class="cp-badge cp-badge-red">⚠ Access Pending</span>'}
+        <div class="cp-meta">${catName || '—'} · ${dur}</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+        <div class="progress-label"><span>${pct}% complete</span><span>${e.enrollment_status}</span></div>
+        <div class="cp-badges">
+          <span class="cpb ${paidCl}">💳 ${paidLbl}</span>
+          <span class="cpb ${stCl}">${e.enrollment_status}</span>
+          ${hasAcc ? '<span class="cpb cpb-purple">✓ Access Active</span>' : '<span class="cpb cpb-red">⚠ Access Pending</span>'}
           ${e.completed_at ? `<button class="btn-sm btn-sm-outline" onclick="alert('Certificate generation coming soon!')">🎓 Certificate</button>` : ''}
-          ${hasAccess ? '<button class="btn-sm btn-sm-primary" onclick="alert(\'Live session link sent to email\')">Join Class</button>' : ''}
         </div>
       </div>
     </div>`;
   }).join('');
 
-  // Load payments
   loadPayments(enrollments);
   loadEmi();
-  loadSchedule();
-  loadCertificates(enrollments.filter(e => e.completed_at));
+  loadSchedule(enrollments);
 }
 
+/* ── Payments ────────────────────────────────────────────── */
 async function loadPayments(enrollments) {
-  const { data: payments } = await _db().from('payments').select('*, enrollments(courses(title))').eq('student_user_id', currentUser.id).order('paid_at', { ascending: false });
+  const { data: payments } = await _db().from('payments')
+    .select('*, enrollments(courses(title))')
+    .eq('student_user_id', currentUser.id)
+    .order('paid_at', { ascending: false });
 
   let totalFee = 0, totalPaid = 0, totalBal = 0;
-  (enrollments||[]).forEach(e => { totalFee += e.net_amount||0; totalPaid += e.paid_amount||0; totalBal += e.due_amount||0; });
+  (enrollments || []).forEach(e => { totalFee += e.net_amount || 0; totalPaid += e.paid_amount || 0; totalBal += e.due_amount || 0; });
   document.getElementById('pay-total').textContent   = fmtCurr(totalFee);
   document.getElementById('pay-paid').textContent    = fmtCurr(totalPaid);
   document.getElementById('pay-balance').textContent = fmtCurr(totalBal);
+  document.getElementById('pay-count').textContent   = (payments || []).length;
 
-  const statusMap = { completed:'cp-badge-green', pending:'cp-badge-yellow', failed:'cp-badge-red', refunded:'cp-badge-blue' };
-  document.getElementById('payment-history').innerHTML = (payments||[]).map(p => `
+  const stMap = { completed: 'cpb-green', pending: 'cpb-yellow', failed: 'cpb-red', refunded: 'cpb-blue' };
+  document.getElementById('payment-history').innerHTML = (payments || []).map(p => `
     <tr>
-      <td><code style="font-size:0.78rem;color:var(--txt3)">${p.invoice_number||'—'}</code></td>
-      <td>${p.enrollments?.courses?.title||'—'}</td>
+      <td><code style="font-size:.75rem;color:var(--txt3)">${p.invoice_number || '—'}</code></td>
+      <td>${p.enrollments?.courses?.title || '—'}</td>
       <td style="font-weight:700;color:var(--v1)">${fmtCurr(p.amount)}</td>
-      <td>${p.payment_method}</td>
+      <td>${p.payment_method || '—'}</td>
       <td>${fmtDate(p.paid_at || p.created_at)}</td>
-      <td><span class="cp-badge ${statusMap[p.payment_status]||'cp-badge-yellow'}">${p.payment_status}</span></td>
-      <td>
-        ${p.payment_status === 'completed'
-          ? `<button class="btn-sm btn-sm-outline" onclick="downloadInvoice('${p.id}','${p.invoice_id||''}')">⬇ Invoice</button>`
-          : '—'}
-      </td>
+      <td><span class="cpb ${stMap[p.payment_status] || 'cpb-yellow'}">${p.payment_status}</span></td>
+      <td>${p.payment_status === 'completed' ? `<button class="btn-sm btn-sm-outline" onclick="window.open('payment.html?invoice=${p.id}','_blank')">⬇</button>` : '—'}</td>
     </tr>`).join('') || '<tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--txt4)">No payments yet</td></tr>';
 }
 
+/* ── EMI ─────────────────────────────────────────────────── */
 async function loadEmi() {
-  // payment_schedules links via enrollment_id, need user's enrollment IDs first
-  const { data: myEnrollIds } = await _db().from('enrollments').select('id').eq('student_user_id', currentUser.id);
-  const ids = (myEnrollIds||[]).map(e => e.id);
-  if (!ids.length) return;
+  const { data: ids } = await _db().from('enrollments').select('id').eq('student_user_id', currentUser.id);
+  const enrollIds = (ids || []).map(e => e.id);
+  if (!enrollIds.length) return;
   const { data } = await _db().from('payment_schedules')
-    .select('*, enrollments(courses(title))').in('enrollment_id', ids).order('due_at');
+    .select('*, enrollments(courses(title))').in('enrollment_id', enrollIds).order('due_at');
   if (!data?.length) return;
-  const statusIcon = { paid:'✅', pending:'🕐', overdue:'⚠️', waived:'🚫' };
-  document.getElementById('emi-list').innerHTML = (data||[]).map(e => `
+  const statusIcon = { paid: '✅', pending: '🕐', overdue: '⚠️', waived: '🚫' };
+  document.getElementById('emi-list').innerHTML = data.map(e => `
     <div class="emi-row">
       <div>
-        <div style="font-weight:700;font-size:0.88rem">${e.enrollments?.courses?.title||'—'} — Installment #${e.installment_number}</div>
-        <div style="font-size:0.78rem;color:var(--txt3)">Due: ${fmtDate(e.due_at)}</div>
+        <div style="font-weight:700;font-size:.87rem">${e.enrollments?.courses?.title || '—'} — Inst. #${e.installment_number}</div>
+        <div style="font-size:.75rem;color:var(--txt3)">Due: ${fmtDate(e.due_at)}</div>
       </div>
       <div style="text-align:right">
         <div style="font-weight:800;color:var(--v1)">${fmtCurr(e.amount_due)}</div>
-        <div style="font-size:0.78rem">${statusIcon[e.schedule_status]||'🕐'} ${e.schedule_status}</div>
+        <div style="font-size:.75rem">${statusIcon[e.schedule_status] || '🕐'} ${e.schedule_status}</div>
       </div>
       ${e.schedule_status === 'pending' || e.schedule_status === 'overdue'
         ? `<a href="payment.html?emi=${e.id}" style="margin-left:1rem"><button class="btn-sm btn-sm-primary">Pay Now</button></a>` : ''}
     </div>`).join('');
 }
 
-async function loadSchedule() {
-  const { data: enrollments } = await _db().from('enrollments').select('batch_id').eq('student_user_id', currentUser.id).eq('enrollment_status', 'active');
-  const batchIds = (enrollments||[]).map(e => e.batch_id).filter(Boolean);
-  if (!batchIds.length) return;
+/* ── Schedule + Calendar ─────────────────────────────────── */
+let _calDate = new Date();
+_calDate.setDate(1);
+
+function calPrev() { _calDate.setMonth(_calDate.getMonth() - 1); renderCal(); }
+function calNext() { _calDate.setMonth(_calDate.getMonth() + 1); renderCal(); }
+
+function renderCal() {
+  const now    = new Date();
+  const yr     = _calDate.getFullYear();
+  const mo     = _calDate.getMonth();
+  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('cal-month-label').textContent = months[mo] + ' ' + yr;
+
+  const firstDay = new Date(yr, mo, 1).getDay(); // 0=Sun
+  const daysInMo = new Date(yr, mo + 1, 0).getDate();
+  const classSet  = new Set(_upcomingDates.map(d => d.slice(0, 10)));
+
+  // Day headers always included so the grid re-renders complete
+  const hdr = ['Su','Mo','Tu','We','Th','Fr','Sa']
+    .map(d => `<div class="cal-day-head">${d}</div>`).join('');
+
+  let html = hdr;
+  for (let i = 0; i < firstDay; i++) html += `<div class="cal-day other-month"></div>`;
+  for (let d = 1; d <= daysInMo; d++) {
+    const ds      = `${yr}-${String(mo + 1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isToday = ds === now.toISOString().slice(0, 10);
+    const hasCls  = classSet.has(ds);
+    let cls = 'cal-day';
+    if (isToday) cls += ' today';
+    if (hasCls)  cls += ' has-class';
+    const tip = hasCls ? ` title="Class on ${ds}"` : '';
+    html += `<div class="${cls}"${tip}${hasCls ? ` onclick="scrollToClass('${ds}')"` : ''}>${d}</div>`;
+  }
+  document.getElementById('cal-grid').innerHTML = html;
+}
+
+function scrollToClass(ds) {
+  const items = document.querySelectorAll('#schedule-list .sched-item[data-date]');
+  const target = Array.from(items).find(el => el.dataset.date === ds);
+  if (target) target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+async function loadSchedule(enrollments) {
+  const batches = (enrollments || []).map(e => e.batch_id).filter(Boolean);
+  if (!batches.length) { renderCal(); return; }
 
   const now = new Date().toISOString();
-  // class_sessions table: scheduled_start_at, session_status, session_title, meeting_url
-  const { data: upcoming } = await _db().from('class_sessions').select('*').in('batch_id', batchIds).eq('session_status','scheduled').gte('scheduled_start_at', now).order('scheduled_start_at').limit(5);
-  const { data: past } = await _db().from('class_sessions').select('*, live_recordings(external_url)').in('batch_id', batchIds).eq('session_status','completed').lt('scheduled_start_at', now).order('scheduled_start_at', { ascending: false }).limit(5);
+  const { data: upcoming } = await _db().from('class_sessions')
+    .select('*').in('batch_id', batches)
+    .eq('session_status', 'scheduled')
+    .gte('scheduled_start_at', now)
+    .order('scheduled_start_at').limit(10);
+
+  const { data: past } = await _db().from('class_sessions')
+    .select('*, live_recordings(external_url)')
+    .in('batch_id', batches)
+    .eq('session_status', 'completed')
+    .lt('scheduled_start_at', now)
+    .order('scheduled_start_at', { ascending: false }).limit(6);
+
+  // Store upcoming dates for calendar
+  _upcomingDates = (upcoming || []).map(s => s.scheduled_start_at);
+  renderCal();
+
+  const todayStr = new Date().toISOString().slice(0, 10);
 
   if (upcoming?.length) {
     document.getElementById('schedule-list').innerHTML = upcoming.map(s => {
-      const d = new Date(s.scheduled_start_at);
-      const dur = s.scheduled_end_at ? Math.round((new Date(s.scheduled_end_at) - d) / 60000) : '—';
-      return `<div class="schedule-item">
-        <div class="schedule-date"><div class="day">${d.getDate()}</div><div class="month">${d.toLocaleString('en-IN',{month:'short'})}</div></div>
-        <div class="schedule-details">
-          <h4>${s.session_title}</h4>
-          <p>${d.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})} IST · ${dur} min</p>
+      const d   = new Date(s.scheduled_start_at);
+      const ds  = d.toISOString().slice(0, 10);
+      const dur = s.scheduled_end_at ? Math.round((new Date(s.scheduled_end_at) - d) / 60000) + ' min' : '—';
+      const isToday = ds === todayStr;
+      return `<div class="sched-item${isToday ? ' today-class' : ''}" data-date="${ds}">
+        <div class="sched-date">
+          <div class="sched-day">${d.getDate()}</div>
+          <div class="sched-mon">${d.toLocaleString('en-IN', { month: 'short' })}</div>
         </div>
-        <div class="schedule-action">
-          ${s.meeting_url ? `<a href="${s.meeting_url}" target="_blank"><button class="btn-sm btn-sm-primary">Join</button></a>` : '<span style="font-size:0.78rem;color:var(--txt4)">Link pending</span>'}
+        <div class="sched-info">
+          <h4>${s.session_title}${isToday ? ' <span style="font-size:.68rem;background:rgba(245,158,11,.18);color:#f59e0b;padding:.1rem .45rem;border-radius:50px;font-weight:700;">Today</span>' : ''}</h4>
+          <p>${d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })} IST · ${dur}</p>
+        </div>
+        <div class="sched-action">
+          ${s.meeting_url
+            ? `<a href="${s.meeting_url}" target="_blank"><button class="btn-sm btn-sm-primary">Join</button></a>`
+            : '<span style="font-size:.74rem;color:var(--txt4)">Link pending</span>'}
         </div>
       </div>`;
     }).join('');
   }
 
   if (past?.length) {
-    document.getElementById('past-classes').innerHTML = past.map(s => {
+    document.getElementById('past-list').innerHTML = past.map(s => {
       const d = new Date(s.scheduled_start_at);
       const recUrl = s.live_recordings?.[0]?.external_url;
-      return `<div class="schedule-item" style="opacity:0.8">
-        <div class="schedule-date"><div class="day">${d.getDate()}</div><div class="month">${d.toLocaleString('en-IN',{month:'short'})}</div></div>
-        <div class="schedule-details"><h4>${s.session_title}</h4><p>${fmtDate(s.scheduled_start_at)}</p></div>
-        <div class="schedule-action">
+      return `<div class="sched-item" style="opacity:.75">
+        <div class="sched-date">
+          <div class="sched-day">${d.getDate()}</div>
+          <div class="sched-mon">${d.toLocaleString('en-IN', { month: 'short' })}</div>
+        </div>
+        <div class="sched-info"><h4>${s.session_title}</h4><p>${fmtDate(s.scheduled_start_at)}</p></div>
+        <div class="sched-action">
           ${recUrl
-            ? `<a href="${recUrl}" target="_blank"><button class="btn-sm btn-sm-outline">▶ Watch</button></a>`
-            : '<span style="font-size:0.78rem;color:var(--txt4)">No recording</span>'}
+            ? `<a href="recording-videos" target="_blank"><button class="btn-sm btn-sm-outline">▶ Watch</button></a>`
+            : '<span style="font-size:.74rem;color:var(--txt4)">No recording</span>'}
         </div>
       </div>`;
     }).join('');
   }
 }
 
+/* ── Recordings tab ──────────────────────────────────────── */
+async function loadRecordings() {
+  const grid = document.getElementById('rec-grid');
+  grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="skeleton" style="width:48px;height:48px;border-radius:50%;margin:0 auto .75rem;"></div><p>Loading recordings…</p></div>`;
+
+  try {
+    // Get courses user has admin-granted access for
+    const { data: enrs } = await _db().from('enrollments')
+      .select('course_id')
+      .eq('student_user_id', currentUser.id)
+      .eq('enrollment_status', 'active')
+      .eq('access_status', 'active');
+
+    const courseIds = (enrs || []).map(e => e.course_id).filter(Boolean);
+
+    // Also get courses with completed payments
+    const { data: pays } = await _db().from('payments')
+      .select('course_id')
+      .eq('student_user_id', currentUser.id)
+      .in('payment_status', ['success', 'completed']);
+    (pays || []).forEach(p => { if (p.course_id && !courseIds.includes(p.course_id)) courseIds.push(p.course_id); });
+
+    if (!courseIds.length) {
+      grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="ei">🎬</div><p style="font-size:.9rem;font-weight:700;margin-bottom:.4rem;color:var(--txt2)">No recordings available</p><p>Recordings appear here once admin grants you course access or after payment.</p></div>`;
+      return;
+    }
+
+    const { data: recs } = await _db().from('live_recordings')
+      .select('id,title,provider_name,course_id,created_at,total_amount,courses(title)')
+      .in('course_id', courseIds)
+      .eq('is_published', true)
+      .order('created_at', { ascending: false });
+
+    if (!recs?.length) {
+      grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="ei">🎬</div><p>No recordings uploaded yet for your courses.</p></div>`;
+      return;
+    }
+
+    const provGrad = { youtube: 'linear-gradient(135deg,#ff4e50,#f9d423)', google_drive: 'linear-gradient(135deg,#4285f4,#34a853)', vimeo: 'linear-gradient(135deg,#1ab7ea,#0075b2)' };
+    const provIcon = { youtube: '▶', google_drive: '📁', vimeo: '🎬' };
+
+    grid.innerHTML = recs.map((r, i) => {
+      const grad = provGrad[r.provider_name] || 'linear-gradient(135deg,#7c5cfc,#3d6bff)';
+      const icon = provIcon[r.provider_name] || '🎥';
+      const isNew = (Date.now() - new Date(r.created_at).getTime()) < 7 * 24 * 3600 * 1000;
+      return `<div class="rec-card" style="animation:fadeUp .4s ${i * .06}s ease both" onclick="openRecording('${r.id}')">
+        <div class="rec-thumb">
+          <div class="rec-thumb-icon">${icon}</div>
+          <div class="rec-thumb-grad" style="background:${grad}"></div>
+          <div class="rec-play">
+            <div class="rec-play-circle">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff" style="margin-left:3px"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            </div>
+          </div>
+          <div class="rec-access-badge">✓ Access Granted</div>
+          ${isNew ? '<div style="position:absolute;top:.5rem;left:.5rem;background:linear-gradient(135deg,#7c5cfc,#3d6bff);border-radius:6px;padding:.18rem .55rem;font-size:.62rem;font-weight:800;color:#fff;letter-spacing:.04em">NEW</div>' : ''}
+        </div>
+        <div class="rec-body">
+          <div class="rec-title">${r.title}</div>
+          <div class="rec-meta">
+            <span>📚 ${r.courses?.title || 'Course'}</span>
+            <span>📅 ${fmtDate(r.created_at)}</span>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  } catch(e) {
+    console.error('loadRecordings:', e);
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="ei">⚠️</div><p>Could not load recordings. Please refresh.</p></div>`;
+  }
+}
+
+async function openRecording(id) {
+  window.location.href = 'recording-videos';
+}
+
+/* ── Certificates ────────────────────────────────────────── */
 function loadCertificates(enrolled) {
   if (!enrolled.length) return;
   document.getElementById('cert-grid').innerHTML = enrolled.map(e => `
     <div class="cert-card">
-      <div class="cert-icon">🎓</div>
-      <div class="cert-name">${e.courses?.title || 'Course'}</div>
-      <div class="cert-date">Completed: ${fmtDate(e.completed_at)}</div>
-      <div class="cert-download" style="margin-top:0.75rem">
-        <button class="btn-sm btn-sm-primary" onclick="alert('Certificate generation coming soon!')">⬇ Download</button>
-      </div>
+      <div style="font-size:2.5rem;margin-bottom:.75rem">🎓</div>
+      <div style="font-size:.87rem;font-weight:700;margin-bottom:.3rem">${e.courses?.title || 'Course'}</div>
+      <div style="font-size:.73rem;color:var(--txt4)">Completed: ${fmtDate(e.completed_at)}</div>
+      <button class="btn-sm btn-sm-primary" style="margin-top:.75rem" onclick="alert('Certificate generation coming soon!')">⬇ Download</button>
     </div>`).join('');
 }
 
+/* ── Save profile ────────────────────────────────────────── */
 async function saveProfile() {
   const payload = {
-    full_name: document.getElementById('edit-name').value.trim(),
-    username:  document.getElementById('edit-username').value.trim(),
-    phone:     document.getElementById('edit-phone').value.trim(),
+    full_name:    document.getElementById('edit-name').value.trim(),
+    username:     document.getElementById('edit-username').value.trim(),
+    phone:        document.getElementById('edit-phone').value.trim(),
     date_of_birth: document.getElementById('edit-dob').value || null,
-    gender:    document.getElementById('edit-gender').value || null,
-    city:      document.getElementById('edit-city').value.trim(),
-    state:     document.getElementById('edit-state').value.trim(),
-    postal_code: document.getElementById('edit-pincode').value.trim(),
-    address:   document.getElementById('edit-address').value.trim(),
+    gender:       document.getElementById('edit-gender').value || null,
+    city:         document.getElementById('edit-city').value.trim(),
+    state:        document.getElementById('edit-state').value.trim(),
+    postal_code:  document.getElementById('edit-pincode').value.trim(),
+    address:      document.getElementById('edit-address').value.trim(),
   };
   const { error } = await _db().from('user_profiles').update(payload).eq('user_id', currentUser.id);
-  if (error) { showMsg('err', error.message); return; }
-  showMsg('suc', 'Profile updated successfully!');
-  document.getElementById('hero-name').textContent = payload.full_name;
+  if (error) { showMsg('err', 'Save failed: ' + error.message); return; }
+  showMsg('success', '✓ Profile updated!');
+  document.getElementById('hero-name').textContent = payload.full_name || document.getElementById('hero-name').textContent;
 }
 
+/* ── Change password ─────────────────────────────────────── */
 async function changePassword() {
-  const curr = document.getElementById('curr-pass').value;
   const newP = document.getElementById('new-pass').value;
   const conf = document.getElementById('conf-pass').value;
   if (!newP || newP !== conf) { showMsg('err', 'New passwords do not match.'); return; }
   if (newP.length < 8) { showMsg('err', 'Password must be at least 8 characters.'); return; }
   const { error } = await _db().auth.updateUser({ password: newP });
   if (error) { showMsg('err', error.message); return; }
-  showMsg('suc', 'Password updated successfully!');
-  document.getElementById('curr-pass').value = '';
-  document.getElementById('new-pass').value = '';
-  document.getElementById('conf-pass').value = '';
+  showMsg('success', '✓ Password updated!');
+  ['curr-pass','new-pass','conf-pass'].forEach(id => { document.getElementById(id).value = ''; });
 }
 
+/* ── Upload avatar — pencil triggers directly ────────────── */
 async function uploadAvatar(input) {
   const file = input.files[0];
   if (!file) return;
-  if (!currentUser?.id) { showMsg('err', 'Not logged in. Please refresh and try again.'); return; }
+  if (!currentUser?.id) { showMsg('err', 'Not logged in. Please refresh.'); return; }
   if (file.size > 2 * 1024 * 1024) { showMsg('err', 'Image must be under 2 MB.'); return; }
-  const allowed = ['jpg','jpeg','png','webp','gif'];
   const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
-  if (!allowed.includes(ext)) { showMsg('err', 'Only JPG, PNG, WEBP, or GIF images are allowed.'); return; }
+  if (!['jpg','jpeg','png','webp','gif'].includes(ext)) { showMsg('err', 'Only JPG, PNG, WEBP or GIF allowed.'); return; }
 
-  showMsg('suc', 'Uploading photo…');
+  // Show uploading spinner on pencil
+  const pencil = document.querySelector('.avatar-pencil');
+  if (pencil) { pencil.style.opacity = '.5'; pencil.style.pointerEvents = 'none'; }
+  showMsg('success', '⏳ Uploading photo…');
+
   try {
     const path = `${currentUser.id}/avatar.${ext}`;
-    const { data: uploadData, error: uploadErr } = await _db().storage
-      .from('avatars').upload(path, file, { upsert: true, contentType: file.type });
-    if (uploadErr) throw new Error('Upload failed: ' + uploadErr.message);
 
-    const filePath = uploadData?.path || path;
-    const { data: urlData } = _db().storage.from('avatars').getPublicUrl(filePath);
+    // Step 1: Upload to storage
+    const { data: up, error: upErr } = await _db().storage
+      .from('avatars')
+      .upload(path, file, { upsert: true, contentType: file.type });
+
+    if (upErr) {
+      // Bucket missing → tell user to apply v6 migration
+      if (upErr.message?.includes('Bucket not found') || upErr.statusCode === 404) {
+        throw new Error('Storage bucket not set up. Please ask admin to apply the v6 database migration (db/v6-profile-rls-fix.sql).');
+      }
+      throw new Error('Upload failed: ' + upErr.message);
+    }
+
+    // Step 2: Get public URL
+    const { data: urlData } = _db().storage.from('avatars').getPublicUrl(up?.path || path);
     const url = urlData?.publicUrl;
-    if (!url) throw new Error('Could not retrieve image URL after upload.');
+    if (!url) throw new Error('Could not get image URL after upload.');
 
-    const { error: updateErr } = await _db()
-      .from('user_profiles')
+    // Step 3: Show image in UI immediately (upload succeeded)
+    const bust = url + '?t=' + Date.now();
+    _setAvatar(bust);
+    _syncNavAvatar(bust);
+
+    // Step 4: Save URL to profile
+    const { error: dbErr } = await _db().from('user_profiles')
       .update({ profile_picture_url: url })
       .eq('user_id', currentUser.id);
-    if (updateErr) throw new Error('Profile update failed: ' + updateErr.message);
 
-    const bust = url + '?t=' + Date.now();
-    _setAvatarImage(bust);
-    _syncNavAvatar(bust);
-    document.getElementById('ahm-remove-photo').classList.remove('ahm-item-hidden');
-    showMsg('suc', 'Profile photo updated!');
-  } catch(e) {
-    console.error('Avatar upload error:', e);
-    showMsg('err', e.message || 'Upload failed. Please try again.');
-  }
-  input.value = '';
-}
-
-async function removeAvatar() {
-  if (!confirm('Remove your profile photo?')) return;
-  try {
-    const { error } = await _db().from('user_profiles')
-      .update({ profile_picture_url: null })
-      .eq('user_id', currentUser.id);
-    if (error) throw error;
-    document.getElementById('avatar-img').style.display = 'none';
-    document.getElementById('avatar-initial').style.display = '';
-    document.getElementById('ahm-remove-photo').classList.add('ahm-item-hidden');
-    document.getElementById('avatar-menu').classList.remove('open');
-    const navBtn = document.getElementById('profile-btn');
-    if (navBtn) {
-      navBtn.innerHTML = '';
-      navBtn.textContent = (currentUser.email||'U')[0].toUpperCase();
-      navBtn.style.padding = ''; navBtn.style.overflow = '';
+    if (dbErr) {
+      // Image IS uploaded and showing — just the DB save failed (RLS issue)
+      if (dbErr.message?.includes('permission denied')) {
+        showMsg('err', 'Photo displayed but not saved — run v6 SQL migration to fix permissions.');
+      } else {
+        showMsg('err', 'Photo shown but save failed: ' + dbErr.message);
+      }
+      return;
     }
-    showMsg('suc', 'Profile photo removed.');
+
+    showMsg('success', '✓ Profile photo updated!');
   } catch(e) {
-    showMsg('err', e.message || 'Could not remove photo. Please try again.');
+    showMsg('err', e.message || 'Upload failed. Please try again.');
+  } finally {
+    if (pencil) { pencil.style.opacity = ''; pencil.style.pointerEvents = ''; }
+    input.value = '';
   }
 }
 
-function _setAvatarImage(url) {
-  document.getElementById('avatar-img').src = url;
-  document.getElementById('avatar-img').style.display = 'block';
-  document.getElementById('avatar-initial').style.display = 'none';
-}
-
-function _syncNavAvatar(url) {
-  const navBtn = document.getElementById('profile-btn');
-  if (!navBtn) return;
-  navBtn.textContent = '';
-  navBtn.style.padding = '0'; navBtn.style.overflow = 'hidden';
-  const img = document.createElement('img');
-  img.src = url;
-  img.style.cssText = 'width:100%;height:100%;border-radius:50%;object-fit:cover;display:block;';
-  img.onerror = () => { navBtn.textContent = (currentUser.email||'U')[0].toUpperCase(); navBtn.style.padding=''; navBtn.style.overflow=''; };
-  navBtn.appendChild(img);
-}
-
-function downloadInvoice(paymentId, invoiceNo) {
-  window.open(`payment.html?invoice=${paymentId}`, '_blank');
-}
-
-function downloadCert(url) {
-  if (url) window.open(url, '_blank');
-  else alert('Certificate URL not available. Please contact support.');
-}
-
-function copyReferral() {
-  const code = document.getElementById('referral-code').textContent;
-  navigator.clipboard.writeText(code).then(() => showMsg('suc', 'Referral code copied!'));
-}
-
-function shareReferral() {
-  const code = document.getElementById('referral-code').textContent;
-  const text = `Join SkillUpNow with my referral code ${code} and get a discount on your first course! https://skillupnowadmin.org`;
-  if (navigator.share) navigator.share({ title: 'SkillUpNow Referral', text });
-  else navigator.clipboard.writeText(text).then(() => showMsg('suc', 'Share link copied!'));
-}
-
-function showMsg(type, msg) {
-  const id = type === 'err' ? 'err-alert' : 'suc-alert';
-  const el = document.getElementById(id);
-  el.textContent = msg; el.classList.add('show');
-  setTimeout(() => el.classList.remove('show'), 3000);
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-// ==================== LOGIN STREAK ====================
-function _getStreakDates() {
-  if (!currentUser?.id) return [];
-  const key = 'pn_streak_v2_' + currentUser.id;
-  try { const d = JSON.parse(localStorage.getItem(key) || '[]'); return Array.isArray(d) ? d : []; }
-  catch(_) { return []; }
-}
-
+/* ── Streak ──────────────────────────────────────────────── */
 function loadStreakData() {
   try {
-    const today   = new Date().toISOString().slice(0, 10);
-    const dates   = _getStreakDates();
+    const today  = new Date().toISOString().slice(0, 10);
+    const key    = 'pn_streak_v2_' + (currentUser?.id || '');
+    const dates  = (() => { try { const d = JSON.parse(localStorage.getItem(key) || '[]'); return Array.isArray(d) ? d : []; } catch(_) { return []; } })();
     const dateSet = new Set(dates);
 
-    // Calculate streaks using the same static helpers from ProfileNavigationManager
-    const current = ProfileNavigationManager.calcCurrentStreak(dates);
-    const longest = ProfileNavigationManager.calcLongestStreak(dates);
-    const total   = dates.length;
+    const current = typeof ProfileNavigationManager !== 'undefined'
+      ? ProfileNavigationManager.calcCurrentStreak(dates)
+      : dates.length;
+    const longest = typeof ProfileNavigationManager !== 'undefined'
+      ? ProfileNavigationManager.calcLongestStreak(dates)
+      : dates.length;
 
-    if (current < 1) return; // Nothing to show
+    if (current < 1) return;
 
-    document.getElementById('ls-streak').textContent     = current + (current === 1 ? ' day' : ' days');
-    document.getElementById('streak-current').textContent = current;
-    document.getElementById('streak-longest').textContent = longest;
-    document.getElementById('streak-total').textContent   = total;
+    document.getElementById('ls-streak').textContent       = current;
+    document.getElementById('streak-count-label').textContent = current + ' day' + (current !== 1 ? 's' : '');
+    document.getElementById('streak-longest').textContent   = longest;
+    document.getElementById('streak-total').textContent     = dates.length;
+    document.getElementById('streak-card').style.display    = '';
 
-    // Hero badge
     const heroBadge = document.getElementById('hero-streak');
-    const heroCount = document.getElementById('hero-streak-count');
-    if (heroBadge && heroCount) { heroCount.textContent = current; heroBadge.style.display = ''; }
+    if (heroBadge) { document.getElementById('hero-streak-n').textContent = current; heroBadge.style.display = ''; }
 
-    // Show streak card
-    const card = document.getElementById('streak-card');
-    if (card) card.style.display = '';
-
-    // Render accurate 60-day calendar using actual login dates
-    const cal = document.getElementById('streak-calendar');
+    // Mini streak calendar (last 60 days, 10 per row)
+    const cal = document.getElementById('streak-cal');
     if (cal) {
       let html = '';
       for (let i = 59; i >= 0; i--) {
-        const d  = new Date();
-        d.setDate(d.getDate() - i);
-        const ds      = d.toISOString().slice(0, 10);
+        const d  = new Date(); d.setDate(d.getDate() - i);
+        const ds = d.toISOString().slice(0, 10);
         const isToday = ds === today;
-        const logged  = dateSet.has(ds);
-        const color   = logged ? (isToday ? '#f59e0b' : '#7c5cfc') : 'var(--bg2)';
-        const border  = isToday ? '2px solid #f59e0b' : '1px solid var(--border)';
-        const opacity = logged ? '1' : '0.35';
-        html += `<div title="${ds}${isToday ? ' (today)' : ''}" style="width:18px;height:18px;border-radius:4px;background:${color};border:${border};opacity:${opacity};transition:transform .15s;cursor:default;" onmouseover="this.style.transform='scale(1.35)'" onmouseout="this.style.transform=''"></div>`;
+        const cls = isToday ? 'scal-dot today' : dateSet.has(ds) ? 'scal-dot logged' : 'scal-dot empty';
+        html += `<div class="${cls}" title="${ds}${isToday ? ' (today)' : ''}"></div>`;
       }
       cal.innerHTML = html;
     }
-  } catch(e) { console.warn('Streak load error:', e); }
+  } catch(e) { console.warn('Streak:', e); }
 }
 
-// Tab switching
-function switchTab(tab) {
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.querySelectorAll('.tab-section').forEach(s => s.classList.remove('active'));
-  const btn = document.querySelector(`.tab-btn[data-tab="${tab}"]`);
-  const sec = document.getElementById('tab-' + tab);
-  if (btn) btn.classList.add('active');
-  if (sec) sec.classList.add('active');
+/* ── Referral ────────────────────────────────────────────── */
+function copyReferral() {
+  const code = document.getElementById('referral-code').textContent.trim();
+  if (!code || code === '—') { showMsg('err', 'No referral code yet.'); return; }
+  navigator.clipboard?.writeText(code).then(() => showMsg('success', '📋 Referral code copied!'));
+}
+function shareReferral() {
+  const code = document.getElementById('referral-code').textContent.trim();
+  if (!code || code === '—') return;
+  const text = `Join SkillUpNow with my referral code ${code} and get 10 reward points free! 🎁\nhttps://skillupnowadmin.org`;
+  if (navigator.share) navigator.share({ title: 'Join SkillUpNow — Free Reward Points!', text });
+  else navigator.clipboard?.writeText(text).then(() => showMsg('success', '📤 Share text copied!'));
 }
 
-document.querySelectorAll('.tab-btn').forEach(btn => {
-  btn.addEventListener('click', () => switchTab(btn.dataset.tab));
-});
+async function loadReferralStats() {
+  try {
+    const { data, error } = await _db().rpc('get_referral_stats', { p_user_id: currentUser.id });
+    if (error || !data) return;
+
+    const pts     = data.points || 0;
+    const code    = data.referral_code || '—';
+    const total   = data.total_referrals || 0;
+    const tier    = data.current_tier;
+    const next    = data.next_tier;
+    const toNext  = data.points_to_next || 0;
+
+    document.getElementById('reward-points').textContent = pts;
+    document.getElementById('referral-code').textContent = code || '—';
+
+    // Current tier badge
+    if (tier) {
+      document.getElementById('ref-tier-display').style.display = '';
+      document.getElementById('ref-tier-label').textContent = tier.label || '—';
+    }
+
+    // Progress to next tier
+    if (next && toNext > 0) {
+      const prevMin = tier ? tier.min_points : 0;
+      const rangeTotal = next.min_points - prevMin;
+      const progress = Math.max(0, Math.min(100, ((pts - prevMin) / rangeTotal) * 100));
+      document.getElementById('ref-next-tier').style.display = '';
+      document.getElementById('ref-pts-to-next').textContent = toNext;
+      document.getElementById('ref-progress-bar').style.width = progress + '%';
+    }
+
+    // My referrals list
+    if (total > 0) {
+      const { data: logs } = await _db().from('referral_logs')
+        .select('created_at, referee:referred_user_id(full_name)')
+        .eq('referrer_user_id', currentUser.id)
+        .order('created_at', { ascending: false })
+        .limit(10);
+
+      if (logs?.length) {
+        document.getElementById('my-referrals-wrap').style.display = '';
+        document.getElementById('ref-count').textContent = total;
+        document.getElementById('my-referrals-list').innerHTML = logs.map(l => `
+          <div style="display:flex;justify-content:space-between;padding:.45rem 0;border-bottom:1px solid var(--border);font-size:.8rem;">
+            <span style="color:var(--txt2)">${l.referee?.full_name || 'New user'}</span>
+            <span style="color:var(--txt4)">${fmtDate(l.created_at)}</span>
+          </div>`).join('');
+      }
+    }
+
+    // Also update hero streak badge if points are high
+    if (pts >= 100) {
+      const ptsEl = document.getElementById('hero-courses');
+      if (ptsEl && ptsEl.textContent.includes('Course')) {
+        // Add a reward badge next to courses
+        const badge = document.getElementById('hero-pts-badge') || (() => {
+          const b = document.createElement('span');
+          b.id = 'hero-pts-badge';
+          b.className = 'hbadge access';
+          b.style.animationDelay = '.3s';
+          document.querySelector('.hero-badges')?.appendChild(b);
+          return b;
+        })();
+        badge.textContent = `⭐ ${pts} pts`;
+      }
+    }
+  } catch(e) { console.warn('loadReferralStats:', e); }
+}
 
 init();
 </script>
-<footer></footer>
 </body>
 </html>

@@ -18,6 +18,13 @@ class ProfileNavigationManager {
   }
 
   async init() {
+    // Strip .html extension for clean URLs on all pages
+    if (window.location.protocol !== 'file:') {
+      const _p = window.location.pathname;
+      if (_p.endsWith('.html')) {
+        history.replaceState(null, '', _p.replace(/\.html$/, '').replace(/\/index$/, '/'));
+      }
+    }
     this.injectFavicon();
     this.injectNeuralCursor(); // Always inject cursor — including admin and mentor pages
     if (this.isAdminPage || this.isMentorPage) return;
@@ -61,11 +68,11 @@ class ProfileNavigationManager {
       // Alt + key — page navigation
       if (e.altKey && !e.ctrlKey && !e.metaKey) {
         const nav = {
-          h: r + 'index.html',
-          c: p + 'courses.html',
-          f: p + 'forms.html',
-          e: p + 'contact-enquiry.html',
-          p: p + 'profile.html',
+          h: r || '/',
+          c: p + 'courses',
+          f: p + 'forms',
+          e: p + 'contact-enquiry',
+          p: p + 'profile',
         };
         const dest = nav[e.key?.toLowerCase()];
         if (dest) { e.preventDefault(); window.location.href = dest; return; }
@@ -367,18 +374,18 @@ class ProfileNavigationManager {
     const isForms   = path.includes('forms');
 
     return `
-      <a href="${r}index.html" class="nav-logo" aria-label="SkillUpNow Home" style="padding:0;background:none;gap:0;">
+      <a href="${r || '/'}" class="nav-logo" aria-label="SkillUpNow Home" style="padding:0;background:none;gap:0;">
         <img src="${r}icon/Main logo.png" alt="SkillUpNow" style="height:44px;width:auto;object-fit:contain;display:block;" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
         <span style="display:none;align-items:center;gap:.5rem;font-size:1.1rem;font-weight:800;">SkillUpNow</span>
       </a>
 
       <ul class="nav-links" id="nav-links-list" role="navigation" aria-label="Main navigation">
-        <li><a href="${r}index.html"                     class="nav-link-item ${isHome    ? 'active' : ''}">Home</a></li>
-        <li><a href="${p}courses.html"                   class="nav-link-item ${isCourses ? 'active' : ''}">Courses</a></li>
-        <li><a href="${p}recording-videos.html"          class="nav-link-item ${isVideos  ? 'active' : ''}">
+        <li><a href="${r || '/'}"                        class="nav-link-item ${isHome    ? 'active' : ''}">Home</a></li>
+        <li><a href="${p}courses"                        class="nav-link-item ${isCourses ? 'active' : ''}">Courses</a></li>
+        <li><a href="${p}recording-videos"               class="nav-link-item ${isVideos  ? 'active' : ''}">
           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="margin-right:.25rem;vertical-align:-1px"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>Videos</a></li>
-        <li><a href="${p}forms.html" class="nav-link-item ${isForms ? 'active' : ''}">Forms</a></li>
-        <li><a href="${p}contact-enquiry.html"           class="nav-link-item ${isEnquiry ? 'active' : ''}">Enquiry</a></li>
+        <li><a href="${p}forms" class="nav-link-item ${isForms ? 'active' : ''}">Forms</a></li>
+        <li><a href="${p}contact-enquiry"                class="nav-link-item ${isEnquiry ? 'active' : ''}">Enquiry</a></li>
       </ul>
 
       <div class="nav-actions" id="nav-actions">
@@ -398,19 +405,19 @@ class ProfileNavigationManager {
               </div>
             </div>
             <div class="pd-divider"></div>
-            <a href="${p}profile.html" class="pd-item" role="menuitem">
+            <a href="${p}profile" class="pd-item" role="menuitem">
               <span class="pd-icon">🎓</span>
               <div><div class="pd-title">My Dashboard</div><div class="pd-sub">Learning path & progress</div></div>
             </a>
-            <a href="${p}profile.html?tab=payments" class="pd-item" role="menuitem">
+            <a href="${p}profile?tab=payments" class="pd-item" role="menuitem">
               <span class="pd-icon">💳</span>
               <div><div class="pd-title">Payments & EMI</div><div class="pd-sub">Invoices & installments</div></div>
             </a>
-            <a id="dd-mentor-link" href="${p}mentor-dashboard.html" class="pd-item" role="menuitem" style="display:none;">
+            <a id="dd-mentor-link" href="${p}mentor-dashboard" class="pd-item" role="menuitem" style="display:none;">
               <span class="pd-icon">📋</span>
               <div><div class="pd-title">Mentor Portal</div><div class="pd-sub">Batches & schedules</div></div>
             </a>
-            <a id="dd-admin-link" href="${p}admin-dashboard.html" class="pd-item" role="menuitem" style="display:none;">
+            <a id="dd-admin-link" href="${p}admin-dashboard" class="pd-item" role="menuitem" style="display:none;">
               <span class="pd-icon">⚙️</span>
               <div><div class="pd-title">Admin Panel</div><div class="pd-sub">Manage platform</div></div>
             </a>
@@ -476,7 +483,7 @@ class ProfileNavigationManager {
       <div class="footer-inner">
         <!-- Logo -->
         <div class="pn-f-logo">
-          <a href="${r}index.html" aria-label="SkillUpNow Home" style="display:block;">
+          <a href="${r || '/'}" aria-label="SkillUpNow Home" style="display:block;">
             <img src="${r}icon/Main logo.png" alt="SkillUpNow" style="height:48px;width:auto;object-fit:contain;" onerror="this.alt='SkillUpNow';this.style.display='none';">
           </a>
         </div>
@@ -506,10 +513,10 @@ class ProfileNavigationManager {
         <div class="pn-f-platform">
           <h5 class="footer-col-title" style="margin-bottom:.3rem;">Platform</h5>
           <ul class="footer-col-links">
-            <li><a href="${p}courses.html"         class="footer-link">All Courses</a></li>
-            <li><a href="${p}recording-videos.html" class="footer-link">Recorded Sessions</a></li>
-            <li><a href="${p}emi-application.html"  class="footer-link">EMI Options</a></li>
-            <li><a href="${p}pamphlet.html"          class="footer-link">Brochure</a></li>
+            <li><a href="${p}courses"         class="footer-link">All Courses</a></li>
+            <li><a href="${p}recording-videos" class="footer-link">Recorded Sessions</a></li>
+            <li><a href="${p}emi-application"  class="footer-link">EMI Options</a></li>
+            <li><a href="${p}pamphlet"          class="footer-link">Brochure</a></li>
           </ul>
         </div>
 
@@ -517,8 +524,8 @@ class ProfileNavigationManager {
         <div class="pn-f-company">
           <h5 class="footer-col-title" style="margin-bottom:.3rem;">Company</h5>
           <ul class="footer-col-links">
-            <li><a href="${r}index.html#about-us"  class="footer-link">About Us</a></li>
-            <li><a href="${p}contact-enquiry.html"  class="footer-link">Contact</a></li>
+            <li><a href="${r || '/'}#about-us"       class="footer-link">About Us</a></li>
+            <li><a href="${p}contact-enquiry"        class="footer-link">Contact</a></li>
             <li><a href="#"                         class="footer-link">Privacy Policy</a></li>
             <li><a href="#"                         class="footer-link">Terms of Service</a></li>
           </ul>
@@ -1202,7 +1209,7 @@ class ProfileNavigationManager {
           </div>
           <div class="pn-forgot"><a onclick="window._pnForgotPw()">Forgot password?</a></div>
           <button class="pn-btn" id="pn-ml-btn" onclick="window._pnMentorLogin()">Sign In to Portal</button>
-          <div class="pn-switch">Not a mentor yet? <a href="javascript:void(0)" onclick="window._pnClose();window.location.href=window.profileNav?.pagesPfx+'mentor-signup.html'">Apply to become one →</a></div>
+          <div class="pn-switch">Not a mentor yet? <a href="javascript:void(0)" onclick="window._pnClose();window.location.href=window.profileNav?.pagesPfx+'mentor-signup'">Apply to become one →</a></div>
         </div>
 
         <!-- ═══════════ SIGNUP ROLE SELECT ═══════════ -->
@@ -1219,7 +1226,7 @@ class ProfileNavigationManager {
               <div class="pn-role-name">Student</div>
               <div class="pn-role-desc">Enroll in courses &amp; learn</div>
             </div>
-            <div class="pn-role-card" onclick="window._pnClose();window.location.href=(window.profileNav?.pagesPfx||'pages/')+'mentor-signup.html'" role="button" tabindex="0">
+            <div class="pn-role-card" onclick="window._pnClose();window.location.href=(window.profileNav?.pagesPfx||'pages/')+'mentor-signup'" role="button" tabindex="0">
               <span class="pn-role-icon">🎓</span>
               <div class="pn-role-name">Mentor</div>
               <div class="pn-role-desc">Teach &amp; earn with SkillUpNow</div>
@@ -1460,7 +1467,7 @@ class ProfileNavigationManager {
       if (!window.supabaseConfig) return;
       try {
         const { error } = await window.supabaseConfig.client.auth.resetPasswordForEmail(email, {
-          redirectTo: window.location.origin + '/index.html'
+          redirectTo: window.location.origin + '/'
         });
         if (error) throw error;
         alert('Password reset link sent to ' + email + '. Check your inbox.');
@@ -1567,14 +1574,14 @@ class ProfileNavigationManager {
         const { data: mentor } = await window.supabaseConfig.client
           .from('mentor_profiles').select('user_id,status').eq('user_id', user.id).maybeSingle();
         if (mentor?.status === 'approved') {
-          window.location.href = self.pagesPfx + 'mentor-dashboard.html';
+          window.location.href = self.pagesPfx + 'mentor-dashboard';
         } else if (mentor) {
           alert('Your mentor application is ' + (mentor.status || 'under review') + '. You will be notified once approved.');
           window.location.reload();
         } else {
           // Has account but no mentor record — prompt to apply
           if (confirm('No mentor application found. Would you like to apply as a mentor?')) {
-            window.location.href = self.pagesPfx + 'mentor-signup.html';
+            window.location.href = self.pagesPfx + 'mentor-signup';
           } else { window.location.reload(); }
         }
       } catch(e) { _pnErr(err, e.message); btn.disabled = false; btn.textContent = 'Sign In to Portal'; }
@@ -1613,7 +1620,7 @@ class ProfileNavigationManager {
       err.style.display = 'none';
 
       const fullName = fname + ' ' + lname;
-      const redirectTo = window.location.origin + (window.location.pathname.includes('/pages/') ? window.location.pathname.replace(/\/[^/]+$/, '/') : '/') + 'index.html';
+      const redirectTo = window.location.origin + '/';
 
       try {
         if (!window.supabaseConfig) throw new Error('Auth service not ready. Please refresh and try again.');
@@ -1690,7 +1697,7 @@ class ProfileNavigationManager {
       err.style.display = 'none';
 
       const fullName = fname + ' ' + lname;
-      const mentorSignupUrl = (self.pagesPfx || 'pages/') + 'mentor-signup.html';
+      const mentorSignupUrl = (self.pagesPfx || 'pages/') + 'mentor-signup';
       const redirectTo = window.location.origin + '/' + mentorSignupUrl;
 
       try {
@@ -1871,7 +1878,7 @@ class ProfileNavigationManager {
     localStorage.removeItem('user_id');
     localStorage.removeItem('user_email');
     sessionStorage.clear();
-    window.location.href = this.rootPfx + 'index.html';
+    window.location.href = this.rootPfx || '/';
   }
 
   /* Backward-compat stubs */

@@ -106,7 +106,7 @@ class SupabaseConfig {
 
       // Determine the redirect URL for email verification
       const origin = typeof window !== 'undefined' ? window.location.origin : '';
-      const emailRedirectTo = origin ? origin + '/index.html' : undefined;
+      const emailRedirectTo = origin ? origin + '/' : undefined;
 
       const { data, error } = await this.client.auth.signUp({
         email,

@@ -5,310 +5,328 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Dashboard — SkillUpNow</title>
   <link rel="stylesheet" href="../css/variables.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
-    /* ===== ADMIN SHELL ===== */
-    * { margin:0; padding:0; box-sizing:border-box; }
-    :root { --sidebar-w: 240px; --header-h: 60px; }
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    :root {
+      --sw: 248px; --hh: 60px;
+      --bg: #0d0b1a; --bg2: #100d22;
+      --panel: rgba(255,255,255,0.03); --panel2: rgba(255,255,255,0.06);
+      --border: rgba(124,92,252,0.15); --border2: rgba(124,92,252,0.28);
+      --v1: #9b8fff; --v2: #7c6cff;
+      --txt: #f0eeff; --txt2: #c8bfff;
+      --txt3: rgba(200,191,255,0.45); --txt4: rgba(200,191,255,0.28);
+      --grad: linear-gradient(135deg,#9b8fff,#7c6cff);
+      --r: 14px; --r2: 10px;
+    }
+    html { font-size: 14px; }
     body {
       font-family: 'Plus Jakarta Sans','Inter',sans-serif;
-      background: #0d0b1a; color: #f0eeff;
-      min-height: 100vh; display: flex;
+      background: var(--bg); color: var(--txt);
+      min-height: 100vh; display: flex; overflow-x: hidden;
       -webkit-font-smoothing: antialiased;
     }
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
-    /* ===== SIDEBAR ===== */
+    /* ── SIDEBAR ── */
     .sidebar {
-      width: var(--sidebar-w); min-height: 100vh;
-      background: rgba(255,255,255,0.03);
-      border-right: 1px solid rgba(124,92,252,0.15);
+      width: var(--sw); min-height: 100vh; background: var(--bg2);
+      border-right: 1px solid var(--border);
       display: flex; flex-direction: column;
-      position: fixed; left: 0; top: 0; bottom: 0; z-index: 100;
-      transition: transform 0.3s ease;
+      position: fixed; left: 0; top: 0; bottom: 0;
+      z-index: 200; overflow: hidden;
+      transition: transform 0.28s cubic-bezier(.4,0,.2,1);
     }
     .sidebar-brand {
-      padding: 1.25rem 1.25rem 1rem;
-      border-bottom: 1px solid rgba(124,92,252,0.12);
-      display: flex; align-items: center; gap: 0.75rem;
+      padding: 0 1rem; height: var(--hh);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 0.7rem; flex-shrink: 0;
     }
-    .brand-icon {
-      width: 36px; height: 36px; border-radius: 10px;
-      background: linear-gradient(135deg,#9b8fff,#7c6cff);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1rem; flex-shrink: 0;
-      box-shadow: 0 4px 12px rgba(124,108,255,0.4);
-    }
-    .brand-text .name { font-size: 0.95rem; font-weight: 800; }
-    .brand-text .sub  { font-size: 0.7rem; color: rgba(200,191,255,0.45); font-weight: 500; }
-    .nav-section { padding: 0.75rem 0.75rem 0; }
+    .brand-logo { height: 32px; width: auto; object-fit: contain; flex-shrink: 0; border-radius: 8px; }
+    .brand-text .name { font-size: 0.88rem; font-weight: 800; white-space: nowrap; }
+    .brand-text .sub  { font-size: 0.65rem; color: var(--txt4); white-space: nowrap; }
+    .nav-scroll { flex: 1; overflow-y: auto; padding-bottom: 0.75rem; }
+    .nav-scroll::-webkit-scrollbar { width: 3px; }
+    .nav-scroll::-webkit-scrollbar-thumb { background: rgba(124,92,252,.22); border-radius: 99px; }
+    .nav-section { padding: 0.55rem 0.6rem 0; }
     .nav-label {
-      font-size: 0.65rem; font-weight: 700; letter-spacing: 0.12em;
-      text-transform: uppercase; color: rgba(200,191,255,0.3);
-      padding: 0.5rem 0.5rem 0.25rem;
+      font-size: 0.6rem; font-weight: 700; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--txt4); padding: 0.45rem 0.65rem 0.18rem;
     }
     .nav-item {
-      display: flex; align-items: center; gap: 0.7rem;
-      padding: 0.6rem 0.75rem; border-radius: 10px;
-      cursor: pointer; font-size: 0.85rem; font-weight: 500;
-      color: rgba(200,191,255,0.55); margin-bottom: 2px;
-      transition: all 0.2s; user-select: none;
-    }
-    .nav-item:hover  { background: rgba(124,92,252,0.1); color: #c8bfff; }
-    .nav-item.active { background: rgba(124,92,252,0.18); color: #b5adff; font-weight: 700; }
-    .nav-item .nav-icon { font-size: 1rem; width: 20px; text-align: center; flex-shrink: 0; }
-    .nav-item .badge {
-      margin-left: auto; background: rgba(239,68,68,0.85);
-      color: #fff; border-radius: 999px;
-      padding: 0.1rem 0.5rem; font-size: 0.68rem; font-weight: 700;
-    }
-    .sidebar-footer {
-      margin-top: auto; padding: 1rem 0.75rem;
-      border-top: 1px solid rgba(124,92,252,0.12);
-    }
-    .admin-user {
       display: flex; align-items: center; gap: 0.65rem;
-      padding: 0.6rem 0.75rem; border-radius: 10px;
-      cursor: pointer; transition: background 0.2s;
+      padding: 0.58rem 0.75rem; border-radius: var(--r2);
+      cursor: pointer; font-size: 0.82rem; font-weight: 500;
+      color: var(--txt3); margin-bottom: 1px;
+      transition: all 0.18s; user-select: none;
+      position: relative; white-space: nowrap; overflow: hidden;
+    }
+    .nav-item:hover  { background: rgba(124,92,252,0.1); color: var(--txt2); }
+    .nav-item.active { background: rgba(124,92,252,0.18); color: var(--v1); font-weight: 700; }
+    .nav-item.active::before {
+      content: ''; position: absolute; left: 0; top: 25%; bottom: 25%;
+      width: 3px; background: var(--v1); border-radius: 0 3px 3px 0;
+    }
+    .nav-icon { font-size: 0.95rem; width: 20px; text-align: center; flex-shrink: 0; }
+    .badge {
+      margin-left: auto; flex-shrink: 0; display: inline-flex; align-items: center;
+      background: rgba(239,68,68,0.85); color: #fff;
+      border-radius: 999px; padding: 0.08rem 0.45rem; font-size: 0.63rem; font-weight: 700;
+    }
+    .sidebar-footer { flex-shrink: 0; padding: 0.7rem 0.6rem; border-top: 1px solid var(--border); }
+    .admin-user {
+      display: flex; align-items: center; gap: 0.6rem;
+      padding: 0.58rem 0.75rem; border-radius: var(--r2);
+      cursor: pointer; transition: background 0.18s;
     }
     .admin-user:hover { background: rgba(124,92,252,0.1); }
     .admin-avatar {
-      width: 32px; height: 32px; border-radius: 50%;
-      background: linear-gradient(135deg,#9b8fff,#7c6cff);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 0.85rem; font-weight: 700; flex-shrink: 0;
+      width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0; background: var(--grad);
+      display: flex; align-items: center; justify-content: center; font-size: 0.82rem; font-weight: 700;
     }
-    .admin-info .aname { font-size: 0.82rem; font-weight: 700; }
-    .admin-info .arole { font-size: 0.7rem; color: rgba(200,191,255,0.4); }
+    .admin-info .aname { font-size: 0.8rem; font-weight: 700; white-space: nowrap; }
+    .admin-info .arole { font-size: 0.65rem; color: var(--txt4); }
 
-    /* ===== MAIN AREA ===== */
+    /* ── OVERLAY ── */
+    #sidebar-overlay {
+      display: none; position: fixed; inset: 0; z-index: 199;
+      background: rgba(6,4,18,0.75);
+      backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); cursor: pointer;
+    }
+    #sidebar-overlay.show { display: block; }
+
+    /* ── HAMBURGER ── */
+    .hamburger {
+      display: none;
+      background: rgba(124,92,252,0.12); border: 1px solid var(--border2);
+      border-radius: var(--r2); padding: 0.4rem 0.62rem;
+      cursor: pointer; color: var(--v1); font-size: 1.1rem; line-height: 1;
+      flex-shrink: 0; align-items: center; justify-content: center;
+    }
+
+    /* ── MAIN ── */
     .main {
-      margin-left: var(--sidebar-w);
-      flex: 1; display: flex; flex-direction: column; min-height: 100vh;
+      margin-left: var(--sw); flex: 1; display: flex; flex-direction: column;
+      min-height: 100vh; min-width: 0;
+      transition: margin-left 0.28s cubic-bezier(.4,0,.2,1);
     }
+
+    /* ── TOPBAR ── */
     .topbar {
-      height: var(--header-h); padding: 0 1.5rem;
-      background: rgba(255,255,255,0.02);
-      border-bottom: 1px solid rgba(124,92,252,0.12);
-      display: flex; align-items: center; gap: 1rem;
-      position: sticky; top: 0; z-index: 50;
-      backdrop-filter: blur(10px);
+      height: var(--hh); padding: 0 1.25rem;
+      background: rgba(13,11,26,0.88); border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 0.75rem;
+      position: sticky; top: 0; z-index: 100;
+      backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
     }
-    .topbar-title { font-size: 1rem; font-weight: 700; flex: 1; }
+    .topbar-title {
+      font-size: 0.95rem; font-weight: 700; flex: 1;
+      min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
     .topbar-search {
-      display: flex; align-items: center; gap: 0.5rem;
-      background: rgba(255,255,255,0.05); border: 1px solid rgba(124,92,252,0.2);
-      border-radius: 10px; padding: 0.4rem 0.75rem;
+      display: flex; align-items: center; gap: 0.45rem;
+      background: var(--panel2); border: 1px solid var(--border);
+      border-radius: var(--r2); padding: 0.38rem 0.7rem;
     }
     .topbar-search input {
       background: transparent; border: none; outline: none;
-      color: #f0eeff; font-size: 0.83rem; width: 180px;
+      color: var(--txt); font-size: 0.82rem; width: 160px; font-family: inherit;
     }
-    .topbar-search input::placeholder { color: rgba(200,191,255,0.3); }
+    .topbar-search input::placeholder { color: var(--txt4); }
     .topbar-btn {
-      background: rgba(124,92,252,0.15); border: 1px solid rgba(124,92,252,0.25);
-      border-radius: 10px; padding: 0.4rem 0.75rem;
-      color: #c8bfff; font-size: 0.82rem; cursor: pointer;
-      transition: all 0.2s; font-family: inherit;
+      background: rgba(124,92,252,0.14); border: 1px solid var(--border2);
+      border-radius: var(--r2); padding: 0.4rem 0.82rem;
+      color: var(--txt2); font-size: 0.8rem; cursor: pointer;
+      transition: all 0.18s; font-family: inherit; white-space: nowrap; flex-shrink: 0;
     }
-    .topbar-btn:hover { background: rgba(124,92,252,0.25); }
+    .topbar-btn:hover { background: rgba(124,92,252,0.26); }
 
-    /* ===== CONTENT ===== */
-    .content { padding: 1.5rem; flex: 1; }
-
-    /* ===== SECTIONS ===== */
+    /* ── CONTENT ── */
+    .content { padding: 1.25rem; flex: 1; min-width: 0; }
     .section { display: none; }
     .section.active { display: block; }
 
-    /* ===== STAT CARDS ===== */
+    /* ── STAT CARDS ── */
     .stats-grid {
-      display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
-      gap: 1rem; margin-bottom: 1.5rem;
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(172px, 1fr));
+      gap: 0.85rem; margin-bottom: 1.25rem;
     }
     .stat-card {
-      background: rgba(255,255,255,0.04); border: 1px solid rgba(124,92,252,0.15);
-      border-radius: 16px; padding: 1.25rem; position: relative; overflow: hidden;
-      transition: all 0.2s;
+      background: var(--panel); border: 1px solid var(--border);
+      border-radius: var(--r); padding: 1.1rem;
+      position: relative; overflow: hidden; transition: all 0.2s; cursor: pointer;
     }
-    .stat-card:hover { border-color: rgba(124,92,252,0.35); transform: translateY(-2px); }
+    .stat-card:hover { border-color: rgba(124,92,252,0.4); transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,0,0,.3); }
     .stat-card::before {
-      content: ''; position: absolute; top: 0; left: 0; right: 0;
-      height: 2px; background: var(--grad);
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--grad);
     }
-    .stat-icon { font-size: 1.6rem; margin-bottom: 0.75rem; }
-    .stat-value { font-size: 1.8rem; font-weight: 800; color: #b5adff; }
-    .stat-label { font-size: 0.75rem; color: rgba(200,191,255,0.4); margin-top: 0.2rem; }
-    .stat-change { font-size: 0.75rem; margin-top: 0.5rem; }
-    .stat-change.up   { color: #4ade80; }
-    .stat-change.down { color: #f87171; }
+    .stat-icon { font-size: 1.5rem; margin-bottom: 0.65rem; }
+    .stat-value { font-size: 1.7rem; font-weight: 800; color: var(--v1); line-height: 1; }
+    .stat-label { font-size: 0.7rem; color: var(--txt3); margin-top: 0.25rem; }
 
-    /* ===== DATA TABLE ===== */
+    /* ── TABLE ── */
     .table-card {
-      background: rgba(255,255,255,0.03); border: 1px solid rgba(124,92,252,0.15);
-      border-radius: 16px; overflow: hidden; margin-bottom: 1.5rem;
+      background: var(--panel); border: 1px solid var(--border);
+      border-radius: var(--r); overflow: hidden; margin-bottom: 1.25rem;
     }
     .table-header {
-      padding: 1rem 1.25rem; border-bottom: 1px solid rgba(124,92,252,0.12);
-      display: flex; align-items: center; justify-content: space-between; gap: 1rem;
-      flex-wrap: wrap;
+      padding: 0.9rem 1.1rem; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between; gap: 0.6rem; flex-wrap: wrap;
     }
-    .table-header h3 { font-size: 0.95rem; font-weight: 700; }
-    .table-actions { display: flex; gap: 0.5rem; align-items: center; }
+    .table-header h3 { font-size: 0.88rem; font-weight: 700; }
+    .table-actions { display: flex; gap: 0.4rem; align-items: center; flex-wrap: wrap; }
+    .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .table-scroll::-webkit-scrollbar { height: 4px; }
+    .table-scroll::-webkit-scrollbar-thumb { background: rgba(124,92,252,.18); border-radius: 99px; }
     .tbl-search {
-      background: rgba(255,255,255,0.05); border: 1px solid rgba(124,92,252,0.2);
-      border-radius: 8px; padding: 0.35rem 0.65rem;
-      color: #f0eeff; font-size: 0.8rem; outline: none;
-      font-family: inherit; width: 160px;
+      background: var(--panel2); border: 1px solid var(--border); border-radius: 8px;
+      padding: 0.32rem 0.6rem; color: var(--txt); font-size: 0.77rem; outline: none;
+      font-family: inherit; width: 140px; transition: border-color 0.18s;
     }
-    .tbl-search::placeholder { color: rgba(200,191,255,0.3); }
+    .tbl-search:focus { border-color: var(--border2); }
+    .tbl-search::placeholder { color: var(--txt4); }
     .btn-primary {
-      background: linear-gradient(135deg,#9b8fff,#7c6cff); color: #fff;
-      border: none; border-radius: 8px; padding: 0.4rem 0.9rem;
-      font-size: 0.8rem; font-weight: 700; cursor: pointer;
-      font-family: inherit; transition: all 0.2s;
+      background: var(--grad); color: #fff; border: none; border-radius: 8px;
+      padding: 0.4rem 0.88rem; font-size: 0.77rem; font-weight: 700; cursor: pointer;
+      font-family: inherit; transition: opacity 0.18s; white-space: nowrap;
     }
-    .btn-primary:hover { opacity: 0.88; }
+    .btn-primary:hover { opacity: 0.86; }
     .btn-secondary {
-      background: rgba(124,92,252,0.15); border: 1px solid rgba(124,92,252,0.25);
-      border-radius: 8px; padding: 0.4rem 0.8rem;
-      color: #c8bfff; font-size: 0.8rem; cursor: pointer;
-      font-family: inherit; transition: all 0.2s;
+      background: rgba(124,92,252,0.11); border: 1px solid var(--border2); border-radius: 8px;
+      padding: 0.4rem 0.78rem; color: var(--txt2); font-size: 0.77rem; cursor: pointer;
+      font-family: inherit; transition: all 0.18s; white-space: nowrap;
     }
-    .btn-secondary:hover { background: rgba(124,92,252,0.25); }
-    .data-table { width: 100%; border-collapse: collapse; font-size: 0.83rem; }
+    .btn-secondary:hover { background: rgba(124,92,252,0.22); }
+    .data-table { width: 100%; border-collapse: collapse; font-size: 0.79rem; min-width: 520px; }
     .data-table th {
-      padding: 0.65rem 1rem; text-align: left;
-      color: rgba(200,191,255,0.45); font-size: 0.72rem; font-weight: 700;
-      text-transform: uppercase; letter-spacing: 0.06em;
-      border-bottom: 1px solid rgba(124,92,252,0.1);
+      padding: 0.58rem 0.85rem; text-align: left; color: var(--txt3);
+      font-size: 0.66rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;
+      border-bottom: 1px solid var(--border); white-space: nowrap; background: rgba(124,92,252,0.04);
     }
     .data-table td {
-      padding: 0.75rem 1rem; border-bottom: 1px solid rgba(124,92,252,0.07);
-      color: #c8bfff;
+      padding: 0.68rem 0.85rem; border-bottom: 1px solid rgba(124,92,252,0.06);
+      color: var(--txt2); vertical-align: middle;
     }
     .data-table tr:last-child td { border-bottom: none; }
-    .data-table tr:hover td { background: rgba(124,92,252,0.05); }
-    .badge {
-      display: inline-flex; align-items: center;
-      padding: 0.2rem 0.6rem; border-radius: 999px;
-      font-size: 0.7rem; font-weight: 700;
-    }
-    .badge-green  { background: rgba(34,197,94,0.15);  color: #4ade80; }
-    .badge-yellow { background: rgba(234,179,8,0.15);  color: #facc15; }
-    .badge-red    { background: rgba(239,68,68,0.15);  color: #f87171; }
-    .badge-blue   { background: rgba(59,130,246,0.15); color: #60a5fa; }
-    .badge-purple { background: rgba(124,92,252,0.15); color: #a78bfa; }
-    .badge-gray   { background: rgba(100,116,139,0.2); color: #94a3b8; }
-    .action-btns { display: flex; gap: 0.35rem; }
+    .data-table tr:hover td { background: rgba(124,92,252,0.04); }
+    .badge-green  { background: rgba(34,197,94,0.14);  color: #4ade80; }
+    .badge-yellow { background: rgba(234,179,8,0.14);  color: #facc15; }
+    .badge-red    { background: rgba(239,68,68,0.14);  color: #f87171; }
+    .badge-blue   { background: rgba(59,130,246,0.14); color: #60a5fa; }
+    .badge-purple { background: rgba(124,92,252,0.14); color: #a78bfa; }
+    .badge-gray   { background: rgba(100,116,139,0.18);color: #94a3b8; }
+    .action-btns { display: flex; gap: 0.28rem; flex-wrap: wrap; }
     .action-btn {
-      background: none; border: 1px solid rgba(124,92,252,0.2);
-      border-radius: 6px; padding: 0.25rem 0.5rem;
-      color: #9b8fff; font-size: 0.75rem; cursor: pointer;
-      transition: all 0.2s; font-family: inherit;
+      background: none; border: 1px solid var(--border); border-radius: 6px;
+      padding: 0.2rem 0.44rem; color: var(--v1); font-size: 0.7rem; cursor: pointer;
+      transition: all 0.18s; font-family: inherit; white-space: nowrap;
     }
-    .action-btn:hover { background: rgba(124,92,252,0.15); }
-    .action-btn.danger { border-color: rgba(239,68,68,0.3); color: #f87171; }
+    .action-btn:hover { background: rgba(124,92,252,0.13); border-color: var(--border2); }
+    .action-btn.danger { border-color: rgba(239,68,68,0.28); color: #f87171; }
     .action-btn.danger:hover { background: rgba(239,68,68,0.1); }
-    .table-empty {
-      text-align: center; padding: 2.5rem; color: rgba(200,191,255,0.3);
-      font-size: 0.85rem;
-    }
+    .table-empty { text-align: center; padding: 2.5rem 1rem; color: var(--txt4); font-size: 0.82rem; }
 
-    /* ===== MODAL ===== */
+    /* ── MODAL ── */
     .modal-overlay {
-      position: fixed; inset: 0; z-index: 1000;
-      background: rgba(0,0,0,0.7); backdrop-filter: blur(8px);
-      display: flex; align-items: center; justify-content: center;
-      opacity: 0; visibility: hidden; transition: all 0.3s;
+      position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,0.72);
+      backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+      display: flex; align-items: center; justify-content: center; padding: 1rem;
+      opacity: 0; visibility: hidden; transition: all 0.25s;
     }
     .modal-overlay.open { opacity: 1; visibility: visible; }
     .modal-box {
-      background: #130f2a; border: 1.5px solid rgba(124,92,252,0.25);
-      border-radius: 20px; padding: 1.75rem;
-      width: 92vw; max-width: 560px; max-height: 85vh; overflow-y: auto;
-      transform: scale(0.95); transition: transform 0.3s;
-      position: relative;
+      background: #130f2a; border: 1.5px solid var(--border2); border-radius: 18px; padding: 1.6rem;
+      width: 100%; max-width: 540px; max-height: 88vh; overflow-y: auto;
+      transform: scale(0.94) translateY(10px); transition: transform 0.25s; position: relative;
     }
-    .modal-overlay.open .modal-box { transform: scale(1); }
-    .modal-title { font-size: 1.1rem; font-weight: 800; margin-bottom: 1.25rem; }
+    .modal-overlay.open .modal-box { transform: scale(1) translateY(0); }
+    .modal-title { font-size: 1.02rem; font-weight: 800; margin-bottom: 1.1rem; }
     .modal-close {
-      position: absolute; top: 1rem; right: 1rem;
-      background: rgba(124,92,252,0.15); border: 1px solid rgba(124,92,252,0.25);
-      border-radius: 50%; width: 30px; height: 30px;
+      position: absolute; top: 0.9rem; right: 0.9rem;
+      background: rgba(124,92,252,0.13); border: 1px solid var(--border2);
+      border-radius: 50%; width: 28px; height: 28px;
       display: flex; align-items: center; justify-content: center;
-      cursor: pointer; color: #9b8fff; font-size: 0.9rem;
+      cursor: pointer; color: var(--v1); font-size: 0.85rem; transition: background 0.18s;
     }
-    .modal-close:hover { background: rgba(124,92,252,0.3); }
-    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
-    .f-group { margin-bottom: 1rem; }
-    .f-group label { display: block; font-size: 0.78rem; font-weight: 600; color: rgba(200,191,255,0.55); margin-bottom: 0.35rem; }
+    .modal-close:hover { background: rgba(124,92,252,0.28); }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.7rem; }
+    .f-group { margin-bottom: 0.9rem; }
+    .f-group label { display: block; font-size: 0.73rem; font-weight: 600; color: var(--txt3); margin-bottom: 0.28rem; }
     .f-group input, .f-group select, .f-group textarea {
-      width: 100%; background: rgba(255,255,255,0.05);
-      border: 1.5px solid rgba(124,92,252,0.2); border-radius: 10px;
-      padding: 0.6rem 0.85rem; color: #f0eeff; font-size: 0.85rem;
-      outline: none; font-family: inherit; transition: border-color 0.2s;
+      width: 100%; background: var(--panel2); border: 1.5px solid var(--border); border-radius: var(--r2);
+      padding: 0.56rem 0.78rem; color: var(--txt); font-size: 0.82rem;
+      outline: none; font-family: inherit; transition: border-color 0.18s;
     }
-    .f-group input:focus, .f-group select:focus, .f-group textarea:focus {
-      border-color: rgba(155,143,255,0.5);
-    }
+    .f-group input:focus, .f-group select:focus, .f-group textarea:focus { border-color: rgba(155,143,255,0.55); }
     .f-group select option { background: #130f2a; }
-    .f-group textarea { resize: vertical; min-height: 80px; }
-    .modal-actions { display: flex; gap: 0.65rem; justify-content: flex-end; margin-top: 1.25rem; }
+    .f-group textarea { resize: vertical; min-height: 76px; }
+    .modal-actions { display: flex; gap: 0.6rem; justify-content: flex-end; margin-top: 1.1rem; flex-wrap: wrap; }
 
-    /* ===== REPORT SECTION ===== */
+    /* ── REPORTS ── */
     .report-filters {
-      display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1.25rem;
-      padding: 1rem 1.25rem; background: rgba(255,255,255,0.03);
-      border: 1px solid rgba(124,92,252,0.12); border-radius: 14px;
+      display: flex; gap: 0.65rem; flex-wrap: wrap; margin-bottom: 1.1rem;
+      padding: 0.88rem 1rem; background: var(--panel); border: 1px solid var(--border); border-radius: var(--r);
     }
     .report-filters select, .report-filters input {
-      background: rgba(255,255,255,0.05); border: 1px solid rgba(124,92,252,0.2);
-      border-radius: 8px; padding: 0.4rem 0.75rem;
-      color: #f0eeff; font-size: 0.82rem; outline: none; font-family: inherit;
+      background: var(--panel2); border: 1px solid var(--border); border-radius: 8px;
+      padding: 0.36rem 0.68rem; color: var(--txt); font-size: 0.8rem; outline: none; font-family: inherit;
     }
-    .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; }
-    .chart-card {
-      background: rgba(255,255,255,0.03); border: 1px solid rgba(124,92,252,0.15);
-      border-radius: 16px; padding: 1.25rem;
-    }
-    .chart-card h4 { font-size: 0.85rem; margin-bottom: 1rem; color: rgba(200,191,255,0.7); }
-    .chart-bar-list { display: flex; flex-direction: column; gap: 0.6rem; }
-    .chart-bar-item { display: flex; align-items: center; gap: 0.75rem; font-size: 0.8rem; }
-    .chart-bar-label { width: 120px; color: rgba(200,191,255,0.6); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .chart-bar-track { flex: 1; height: 6px; background: rgba(124,92,252,0.1); border-radius: 999px; }
-    .chart-bar-fill  { height: 100%; border-radius: 999px; background: linear-gradient(90deg,#7c6cff,#9b8fff); transition: width 0.8s ease; }
-    .chart-bar-val   { width: 60px; text-align: right; color: #b5adff; font-weight: 700; }
+    .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; margin-bottom: 1.25rem; }
+    .chart-card { background: var(--panel); border: 1px solid var(--border); border-radius: var(--r); padding: 1.1rem; }
+    .chart-card h4 { font-size: 0.82rem; margin-bottom: 0.85rem; color: var(--txt2); font-weight: 700; }
+    .chart-bar-list { display: flex; flex-direction: column; gap: 0.55rem; }
+    .chart-bar-item { display: flex; align-items: center; gap: 0.65rem; font-size: 0.76rem; }
+    .chart-bar-label { width: 110px; color: var(--txt3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-shrink: 0; }
+    .chart-bar-track { flex: 1; height: 5px; background: rgba(124,92,252,0.1); border-radius: 999px; min-width: 30px; }
+    .chart-bar-fill  { height: 100%; border-radius: 999px; background: var(--grad); transition: width 0.8s ease; }
+    .chart-bar-val   { width: 52px; text-align: right; color: var(--v1); font-weight: 700; flex-shrink: 0; }
 
-    /* ===== SIDEBAR TOGGLE (mobile) ===== */
-    .mob-menu { display: none; }
-    .hamburger {
-      background: rgba(124,92,252,0.15); border: 1px solid rgba(124,92,252,0.25);
-      border-radius: 8px; padding: 0.4rem 0.6rem;
-      cursor: pointer; color: #9b8fff; font-size: 1.1rem;
-    }
-
-    @media (max-width: 768px) {
-      .sidebar { transform: translateX(-100%); }
+    /* ── BREAKPOINTS ── */
+    @media (max-width: 1023px) {
+      .hamburger { display: flex; }
+      .sidebar { transform: translateX(-100%); box-shadow: 4px 0 40px rgba(0,0,0,.6); }
       .sidebar.open { transform: translateX(0); }
       .main { margin-left: 0; }
-      .mob-menu { display: block; }
-      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .topbar-search { display: none; }
       .charts-grid { grid-template-columns: 1fr; }
+      .stats-grid { grid-template-columns: repeat(auto-fill, minmax(145px,1fr)); }
+    }
+    @media (max-width: 640px) {
+      html { font-size: 13px; }
+      .content { padding: 0.85rem; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 0.55rem; }
+      .stat-value { font-size: 1.4rem; }
       .form-row { grid-template-columns: 1fr; }
+      .table-header { flex-direction: column; align-items: flex-start; }
+      .table-actions { width: 100%; }
+      .tbl-search { width: 100%; }
+      .topbar { padding: 0 0.75rem; gap: 0.5rem; }
+      .report-filters { flex-direction: column; }
+      .report-filters select, .report-filters input { width: 100%; }
+      .modal-actions { flex-direction: column; }
+      .modal-actions .btn-primary,
+      .modal-actions .btn-secondary { width: 100%; text-align: center; }
+    }
+    @media (max-width: 380px) {
+      .stats-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
 
+<!-- Sidebar mobile overlay -->
+<div id="sidebar-overlay"></div>
+
 <!-- SIDEBAR -->
 <aside class="sidebar" id="sidebar">
   <div class="sidebar-brand">
-    <img src="../icon/Main logo.png" alt="SkillUpNow" style="height:36px;width:auto;object-fit:contain;flex-shrink:0;" onerror="this.style.display='none';">
+    <img src="../icon/Main logo.png" alt="SkillUpNow" class="brand-logo" onerror="this.style.display='none';">
     <div class="brand-text">
-      <div class="name">SkillUpNow</div>
       <div class="sub">Admin Panel</div>
     </div>
   </div>
 
+  <div class="nav-scroll">
   <nav>
     <div class="nav-section">
       <div class="nav-label">Overview</div>
@@ -352,6 +370,9 @@
       <div class="nav-item" data-section="discounts">
         <span class="nav-icon">🏷</span> Discounts
       </div>
+      <div class="nav-item" data-section="referrals">
+        <span class="nav-icon">🎁</span> Referrals
+      </div>
       <div class="nav-item" data-section="reports">
         <span class="nav-icon">📈</span> Reports
       </div>
@@ -377,6 +398,7 @@
       </div>
     </div>
   </nav>
+  </div><!-- /.nav-scroll -->
 
   <div class="sidebar-footer">
     <div class="admin-user" id="admin-user-info">
@@ -396,13 +418,13 @@
 <main class="main">
   <!-- Topbar -->
   <header class="topbar">
-    <button class="hamburger mob-menu" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+    <button class="hamburger" id="hamburger-btn" aria-label="Toggle menu">☰</button>
     <div class="topbar-title" id="topbar-title">Dashboard</div>
     <div class="topbar-search">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
       <input type="text" placeholder="Quick search…" id="global-search">
     </div>
-    <button class="topbar-btn" onclick="window.open('../index.html','_blank')">↗ View Site</button>
+    <button class="topbar-btn" onclick="window.open('../','_blank')">↗ View Site</button>
   </header>
 
   <div class="content">
@@ -410,14 +432,14 @@
     <!-- ===== DASHBOARD ===== -->
     <div class="section active" id="section-dashboard">
       <div class="stats-grid" id="stat-cards">
-        <div class="stat-card"><div class="stat-icon">👥</div><div class="stat-value" id="s-users">—</div><div class="stat-label">Total Users</div></div>
-        <div class="stat-card"><div class="stat-icon">👨‍🏫</div><div class="stat-value" id="s-mentors">—</div><div class="stat-label">Mentors</div></div>
-        <div class="stat-card"><div class="stat-icon">📚</div><div class="stat-value" id="s-courses">—</div><div class="stat-label">Active Courses</div></div>
-        <div class="stat-card"><div class="stat-icon">📋</div><div class="stat-value" id="s-enrollments">—</div><div class="stat-label">Enrollments</div></div>
-        <div class="stat-card"><div class="stat-icon">💰</div><div class="stat-value" id="s-revenue">—</div><div class="stat-label">Total Revenue</div></div>
-        <div class="stat-card"><div class="stat-icon">📆</div><div class="stat-value" id="s-revenue-month">—</div><div class="stat-label">Revenue This Month</div></div>
-        <div class="stat-card"><div class="stat-icon">⚠️</div><div class="stat-value" id="s-pending-pay">—</div><div class="stat-label">Pending Payments</div></div>
-        <div class="stat-card"><div class="stat-icon">💬</div><div class="stat-value" id="s-inquiries">—</div><div class="stat-label">Open Inquiries</div></div>
+        <div class="stat-card" style="cursor:pointer" title="View all users" onclick="navTo('users')"><div class="stat-icon">👥</div><div class="stat-value" id="s-users">—</div><div class="stat-label">Total Users <span style="font-size:.6rem;opacity:.5">↗</span></div></div>
+        <div class="stat-card" style="cursor:pointer" title="View all mentors" onclick="navTo('mentors')"><div class="stat-icon">👨‍🏫</div><div class="stat-value" id="s-mentors">—</div><div class="stat-label">Mentors <span style="font-size:.6rem;opacity:.5">↗</span></div></div>
+        <div class="stat-card" style="cursor:pointer" title="View all courses" onclick="navTo('courses')"><div class="stat-icon">📚</div><div class="stat-value" id="s-courses">—</div><div class="stat-label">Active Courses <span style="font-size:.6rem;opacity:.5">↗</span></div></div>
+        <div class="stat-card" style="cursor:pointer" title="View enrollments" onclick="navTo('enrollments')"><div class="stat-icon">📋</div><div class="stat-value" id="s-enrollments">—</div><div class="stat-label">Enrollments <span style="font-size:.6rem;opacity:.5">↗</span></div></div>
+        <div class="stat-card" style="cursor:pointer" title="View payments" onclick="navTo('payments')"><div class="stat-icon">💰</div><div class="stat-value" id="s-revenue">—</div><div class="stat-label">Total Revenue <span style="font-size:.6rem;opacity:.5">↗</span></div></div>
+        <div class="stat-card" style="cursor:pointer" title="View this month payments" onclick="navTo('payments')"><div class="stat-icon">📆</div><div class="stat-value" id="s-revenue-month">—</div><div class="stat-label">Revenue This Month <span style="font-size:.6rem;opacity:.5">↗</span></div></div>
+        <div class="stat-card" style="cursor:pointer" title="View pending payments" onclick="navTo('payments')"><div class="stat-icon">⚠️</div><div class="stat-value" id="s-pending-pay">—</div><div class="stat-label">Pending Payments <span style="font-size:.6rem;opacity:.5">↗</span></div></div>
+        <div class="stat-card" style="cursor:pointer" title="View inquiries" onclick="navTo('inquiries')"><div class="stat-icon">💬</div><div class="stat-value" id="s-inquiries">—</div><div class="stat-label">Open Inquiries <span style="font-size:.6rem;opacity:.5">↗</span></div></div>
       </div>
 
       <!-- Revenue chart -->
@@ -435,10 +457,10 @@
       <!-- Recent activity -->
       <div class="table-card">
         <div class="table-header"><h3>Recent Enrollments</h3></div>
-        <table class="data-table">
+        <div class="table-scroll"><table class="data-table">
           <thead><tr><th>User</th><th>Course</th><th>Amount</th><th>Payment</th><th>Status</th><th>Date</th></tr></thead>
           <tbody id="recent-enrollments"><tr><td colspan="6" class="table-empty">Loading…</td></tr></tbody>
-        </table>
+        </table></div>
       </div>
     </div>
 
@@ -452,10 +474,10 @@
             <button class="btn-primary" onclick="document.getElementById('course-id').value='';document.getElementById('course-modal-title').textContent='Add New Course';initDropdowns();openModal('course-modal')">+ Add Course</button>
           </div>
         </div>
-        <table class="data-table">
+        <div class="table-scroll"><table class="data-table">
           <thead><tr><th>Name</th><th>Category</th><th>Mentor</th><th>Fee</th><th>Enrolled</th><th>Rating</th><th>Status</th><th>Actions</th></tr></thead>
           <tbody id="course-tbody"><tr><td colspan="8" class="table-empty">Loading…</td></tr></tbody>
-        </table>
+        </table></div>
       </div>
     </div>
 
@@ -468,10 +490,10 @@
             <button class="btn-primary" onclick="document.getElementById('cat-id').value='';document.getElementById('category-modal').querySelector('.modal-title').textContent='Add Category';openModal('category-modal')">+ Add Category</button>
           </div>
         </div>
-        <table class="data-table">
+        <div class="table-scroll"><table class="data-table">
           <thead><tr><th>Name</th><th>Slug</th><th>Courses</th><th>Status</th><th>Actions</th></tr></thead>
           <tbody id="category-tbody"><tr><td colspan="5" class="table-empty">Loading…</td></tr></tbody>
-        </table>
+        </table></div>
       </div>
     </div>
 
@@ -485,10 +507,10 @@
             <button class="btn-secondary" onclick="exportTable('users')">⬇ Export</button>
           </div>
         </div>
-        <table class="data-table">
+        <div class="table-scroll"><table class="data-table">
           <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Role</th><th>Enrolled</th><th>Joined</th><th>Status</th><th>Actions</th></tr></thead>
           <tbody id="user-tbody"><tr><td colspan="8" class="table-empty">Loading…</td></tr></tbody>
-        </table>
+        </table></div>
       </div>
     </div>
 
@@ -507,10 +529,10 @@
             </select>
           </div>
         </div>
-        <table class="data-table">
+        <div class="table-scroll"><table class="data-table">
           <thead><tr><th>Name</th><th>Email</th><th>Qualifications</th><th>Expertise</th><th>Students</th><th>Rating</th><th>Status</th><th>Actions</th></tr></thead>
           <tbody id="mentor-tbody"><tr><td colspan="8" class="table-empty">Loading…</td></tr></tbody>
-        </table>
+        </table></div>
       </div>
     </div>
 
@@ -528,12 +550,13 @@
               <option value="cancelled">Cancelled</option>
             </select>
             <button class="btn-secondary" onclick="exportTable('enrollments')">⬇ Export</button>
+            <button class="btn-primary" onclick="openAdminEnrollModal()">+ Enroll User</button>
           </div>
         </div>
-        <table class="data-table">
+        <div class="table-scroll"><table class="data-table">
           <thead><tr><th>User</th><th>Course</th><th>Type</th><th>Total Fee</th><th>Paid</th><th>Balance</th><th>Access</th><th>Status</th><th>Actions</th></tr></thead>
           <tbody id="enrollment-tbody"><tr><td colspan="9" class="table-empty">Loading…</td></tr></tbody>
-        </table>
+        </table></div>
       </div>
     </div>
 
@@ -543,13 +566,16 @@
         <div class="table-header">
           <h3>Batch Management</h3>
           <div class="table-actions">
+            <select id="batch-course-filter" onchange="loadBatches()" style="min-width:160px;">
+              <option value="">All Courses / Skills</option>
+            </select>
             <button class="btn-primary" onclick="document.getElementById('batch-id').value='';document.getElementById('batch-modal').querySelector('.modal-title').textContent='Create Batch';document.querySelector('#batch-modal .btn-primary').textContent='Create Batch';initDropdowns();openModal('batch-modal')">+ New Batch</button>
           </div>
         </div>
-        <table class="data-table">
-          <thead><tr><th>Batch</th><th>Course</th><th>Mentor</th><th>Start</th><th>End</th><th>Students</th><th>Status</th><th>Actions</th></tr></thead>
+        <div class="table-scroll"><table class="data-table">
+          <thead><tr><th>Batch</th><th>Course / Skill</th><th>Mentor</th><th>Start</th><th>End</th><th>Students</th><th>Status</th><th>Actions</th></tr></thead>
           <tbody id="batch-tbody"><tr><td colspan="8" class="table-empty">Loading…</td></tr></tbody>
-        </table>
+        </table></div>
       </div>
     </div>
 
@@ -569,10 +595,10 @@
             <button class="btn-secondary" onclick="exportTable('payments')">⬇ Export PDF</button>
           </div>
         </div>
-        <table class="data-table">
+        <div class="table-scroll"><table class="data-table">
           <thead><tr><th>Invoice</th><th>User</th><th>Course</th><th>Amount</th><th>Method</th><th>Gateway Ref</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead>
           <tbody id="payment-tbody"><tr><td colspan="9" class="table-empty">Loading…</td></tr></tbody>
-        </table>
+        </table></div>
       </div>
     </div>
 
@@ -590,10 +616,10 @@
             </select>
           </div>
         </div>
-        <table class="data-table">
+        <div class="table-scroll"><table class="data-table">
           <thead><tr><th>User</th><th>Course</th><th>Installment #</th><th>Due Date</th><th>Amount</th><th>Late Fee</th><th>Status</th><th>Actions</th></tr></thead>
           <tbody id="emi-tbody"><tr><td colspan="8" class="table-empty">Loading…</td></tr></tbody>
-        </table>
+        </table></div>
       </div>
     </div>
 
@@ -607,10 +633,10 @@
             <button class="btn-primary" onclick="openPricingModal()">+ Set Pricing</button>
           </div>
         </div>
-        <table class="data-table">
+        <div class="table-scroll"><table class="data-table">
           <thead><tr><th>Course</th><th>Pricing Type</th><th>List Price</th><th>Sale Price</th><th>Discount %</th><th>EMI Months</th><th>Status</th><th>Actions</th></tr></thead>
           <tbody id="pricing-tbody"><tr><td colspan="8" class="table-empty">Loading…</td></tr></tbody>
-        </table>
+        </table></div>
       </div>
     </div>
 
@@ -623,10 +649,67 @@
             <button class="btn-primary" onclick="openModal('discount-modal');document.getElementById('disc-id').value=''">+ New Discount</button>
           </div>
         </div>
-        <table class="data-table">
+        <div class="table-scroll"><table class="data-table">
           <thead><tr><th>Campaign Name</th><th>Code</th><th>Type</th><th>Value</th><th>Course</th><th>Valid Until</th><th>Uses</th><th>Status</th><th>Actions</th></tr></thead>
           <tbody id="discount-tbody"><tr><td colspan="9" class="table-empty">Loading…</td></tr></tbody>
-        </table>
+        </table></div>
+      </div>
+    </div>
+
+    <!-- ===== REFERRALS ===== -->
+    <div class="section" id="section-referrals">
+      <!-- Summary cards -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem;margin-bottom:1.5rem;" id="ref-summary-cards">
+        <div class="stat-card"><div class="stat-card-icon">🎁</div><div class="stat-card-content"><div class="stat-card-value" id="ref-total-count">—</div><div class="stat-card-label">Total Referrals</div></div></div>
+        <div class="stat-card"><div class="stat-card-icon">⭐</div><div class="stat-card-content"><div class="stat-card-value" id="ref-total-points">—</div><div class="stat-card-label">Points Issued</div></div></div>
+        <div class="stat-card"><div class="stat-card-icon">🏆</div><div class="stat-card-content"><div class="stat-card-value" id="ref-top-count">—</div><div class="stat-card-label">Top Referrer Refs</div></div></div>
+      </div>
+      <!-- Reward Tiers -->
+      <div class="table-card" style="margin-bottom:1rem;">
+        <div class="table-header"><h3>Reward Tiers</h3></div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:.75rem;padding:1rem 1.25rem;">
+          <div style="background:linear-gradient(135deg,rgba(124,92,252,.12),rgba(61,107,255,.08));border:1px solid rgba(124,92,252,.25);border-radius:12px;padding:1rem;text-align:center;">
+            <div style="font-size:1.2rem;font-weight:800;color:var(--v1);">100 pts</div>
+            <div style="font-size:.78rem;color:var(--txt3);margin-top:.2rem;">₹500 – ₹1,000 voucher</div>
+          </div>
+          <div style="background:linear-gradient(135deg,rgba(124,92,252,.15),rgba(61,107,255,.1));border:1px solid rgba(124,92,252,.3);border-radius:12px;padding:1rem;text-align:center;">
+            <div style="font-size:1.2rem;font-weight:800;color:var(--v1);">200 pts</div>
+            <div style="font-size:.78rem;color:var(--txt3);margin-top:.2rem;">₹1,000 – ₹1,500 voucher</div>
+          </div>
+          <div style="background:linear-gradient(135deg,rgba(124,92,252,.18),rgba(61,107,255,.12));border:1px solid rgba(124,92,252,.35);border-radius:12px;padding:1rem;text-align:center;">
+            <div style="font-size:1.2rem;font-weight:800;color:var(--v1);">300 pts</div>
+            <div style="font-size:.78rem;color:var(--txt3);margin-top:.2rem;">₹1,500 – ₹2,000 voucher</div>
+          </div>
+          <div style="background:linear-gradient(135deg,rgba(124,92,252,.22),rgba(61,107,255,.15));border:1px solid rgba(124,92,252,.4);border-radius:12px;padding:1rem;text-align:center;">
+            <div style="font-size:1.2rem;font-weight:800;color:var(--v1);">500 pts</div>
+            <div style="font-size:.78rem;color:var(--txt3);margin-top:.2rem;">₹2,000 – ₹3,000 voucher</div>
+          </div>
+          <div style="background:linear-gradient(135deg,rgba(245,158,11,.15),rgba(239,68,68,.08));border:1px solid rgba(245,158,11,.3);border-radius:12px;padding:1rem;text-align:center;">
+            <div style="font-size:1.2rem;font-weight:800;color:#f59e0b;">800 pts</div>
+            <div style="font-size:.78rem;color:var(--txt3);margin-top:.2rem;">₹3,000 – ₹5,000 voucher</div>
+          </div>
+        </div>
+      </div>
+      <!-- Referral Logs Table -->
+      <div class="table-card">
+        <div class="table-header">
+          <h3>Referral Log</h3>
+          <div class="table-actions">
+            <input type="text" id="ref-search" placeholder="Search name or code…" class="search-input" oninput="filterReferralTable(this.value)" style="width:220px;">
+          </div>
+        </div>
+        <div class="table-scroll"><table class="data-table">
+          <thead><tr><th>Referrer</th><th>Referred User</th><th>Code Used</th><th>Pts → Referrer</th><th>Pts → Referee</th><th>Date</th><th>Status</th></tr></thead>
+          <tbody id="referral-tbody"><tr><td colspan="7" class="table-empty">Loading…</td></tr></tbody>
+        </table></div>
+      </div>
+      <!-- Top Referrers -->
+      <div class="table-card" style="margin-top:1rem;">
+        <div class="table-header"><h3>Top Referrers (by points earned)</h3></div>
+        <div class="table-scroll"><table class="data-table">
+          <thead><tr><th>#</th><th>Name</th><th>Email</th><th>Phone</th><th>Referral Code</th><th>Referrals Made</th><th>Reward Points</th><th>Current Tier</th></tr></thead>
+          <tbody id="top-referrers-tbody"><tr><td colspan="8" class="table-empty">Loading…</td></tr></tbody>
+        </table></div>
       </div>
     </div>
 
@@ -662,10 +745,10 @@
 
       <div class="table-card">
         <div class="table-header"><h3>Detailed Revenue Table</h3></div>
-        <table class="data-table">
+        <div class="table-scroll"><table class="data-table">
           <thead><tr><th>Course</th><th>Category</th><th>Enrolled</th><th>Revenue</th><th>Outstanding</th><th>Avg Rating</th></tr></thead>
           <tbody id="rpt-table"><tr><td colspan="6" class="table-empty">Apply filters to view report</td></tr></tbody>
-        </table>
+        </table></div>
       </div>
     </div>
 
@@ -678,10 +761,10 @@
             <button class="btn-primary" onclick="openRecordingModal()">+ Add Recording</button>
           </div>
         </div>
-        <table class="data-table">
-          <thead><tr><th>Title</th><th>Course</th><th>Provider</th><th>Date Added</th><th>Recording URL</th><th>Actions</th></tr></thead>
-          <tbody id="recording-tbody"><tr><td colspan="6" class="table-empty">Loading…</td></tr></tbody>
-        </table>
+        <div class="table-scroll"><table class="data-table">
+          <thead><tr><th>Title</th><th>Course</th><th>Provider</th><th>Base Amt</th><th>GST %</th><th>Total (incl. GST)</th><th>Date Added</th><th>URL</th><th>Actions</th></tr></thead>
+          <tbody id="recording-tbody"><tr><td colspan="9" class="table-empty">Loading…</td></tr></tbody>
+        </table></div>
       </div>
     </div>
 
@@ -694,10 +777,10 @@
             <button class="btn-primary" onclick="initDropdowns();openModal('schedule-modal')">+ Schedule Class</button>
           </div>
         </div>
-        <table class="data-table">
+        <div class="table-scroll"><table class="data-table">
           <thead><tr><th>Title</th><th>Batch</th><th>Mentor</th><th>Date & Time</th><th>Meet Link</th><th>Status</th><th>Actions</th></tr></thead>
           <tbody id="schedule-tbody"><tr><td colspan="7" class="table-empty">Loading…</td></tr></tbody>
-        </table>
+        </table></div>
       </div>
     </div>
 
@@ -714,10 +797,10 @@
             </select>
           </div>
         </div>
-        <table class="data-table">
+        <div class="table-scroll"><table class="data-table">
           <thead><tr><th>User</th><th>Course</th><th>Rating</th><th>Comment</th><th>Date</th><th>Actions</th></tr></thead>
           <tbody id="review-tbody"><tr><td colspan="6" class="table-empty">Loading…</td></tr></tbody>
-        </table>
+        </table></div>
       </div>
     </div>
 
@@ -857,7 +940,7 @@
           <div>
             <div style="font-size:1rem;font-weight:800;color:var(--txt);margin-bottom:.2rem;">Public Form Links</div>
             <div style="font-size:.8rem;color:var(--txt3);">These appear as cards on the public <strong>Forms</strong> page ·
-              <a href="forms.html" target="_blank" style="color:var(--v1);font-weight:600;text-decoration:none;">Preview →</a>
+              <a href="forms" target="_blank" style="color:var(--v1);font-weight:600;text-decoration:none;">Preview →</a>
             </div>
           </div>
           <button class="sf-add-btn" onclick="openSFModal()">
@@ -950,10 +1033,10 @@
               <button class="table-btn" onclick="exportFormsCsv()" style="background:var(--v1);color:#fff;border:none;padding:.4rem .9rem;border-radius:8px;font-size:.8rem;font-weight:700;cursor:pointer;">⬇ Export CSV</button>
             </div>
           </div>
-          <table class="data-table">
+          <div class="table-scroll"><table class="data-table">
             <thead><tr><th>Type</th><th>Name</th><th>Email</th><th>Course</th><th>Submitted</th><th>Status</th><th>Actions</th></tr></thead>
             <tbody id="form-tbody"><tr><td colspan="7" class="table-empty">Loading…</td></tr></tbody>
-          </table>
+          </table></div>
         </div>
       </div>
 
@@ -967,10 +1050,10 @@
         </div>
         <div class="table-card">
           <div class="table-header"><h3>Submissions by Form Type</h3><button class="table-btn" onclick="exportFormsCsv()" style="background:var(--v1);color:#fff;border:none;padding:.4rem .9rem;border-radius:8px;font-size:.8rem;font-weight:700;cursor:pointer;">⬇ Export Report</button></div>
-          <table class="data-table">
+          <div class="table-scroll"><table class="data-table">
             <thead><tr><th>Form Type</th><th>Total</th><th>Pending</th><th>Completed</th><th>Last Submission</th></tr></thead>
             <tbody id="form-report-tbody"><tr><td colspan="5" class="table-empty">Loading…</td></tr></tbody>
-          </table>
+          </table></div>
         </div>
       </div>
     </div>
@@ -1058,10 +1141,10 @@
             </select>
           </div>
         </div>
-        <table class="data-table">
+        <div class="table-scroll"><table class="data-table">
           <thead><tr><th>Name</th><th>Contact</th><th>Type</th><th>Subject</th><th>Priority</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead>
           <tbody id="inquiry-tbody"><tr><td colspan="8" class="table-empty">Loading…</td></tr></tbody>
-        </table>
+        </table></div>
       </div>
     </div>
 
@@ -1161,6 +1244,56 @@
     <div class="modal-actions">
       <button class="btn-secondary" onclick="closeModal('category-modal')">Cancel</button>
       <button class="btn-primary" onclick="saveCategory()">Save Category</button>
+    </div>
+  </div>
+</div>
+
+<!-- Admin Enroll User Modal -->
+<div class="modal-overlay" id="admin-enroll-modal">
+  <div class="modal-box" style="max-width:500px;">
+    <div class="modal-close" onclick="closeModal('admin-enroll-modal')">✕</div>
+    <div class="modal-title">Enroll User in Course</div>
+    <p style="font-size:.82rem;color:var(--txt3);margin-bottom:1.25rem;">
+      Manually grant course access. The enrollment is marked <strong>active</strong> immediately.
+      A payment record is created as <strong>pending</strong> unless the fee is ₹0 (free access).
+    </p>
+    <div class="f-group">
+      <label>User *</label>
+      <select id="ae-user" style="width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:var(--r1);padding:.55rem .75rem;color:var(--txt);font-size:.9rem;outline:none;">
+        <option value="">Loading users…</option>
+      </select>
+    </div>
+    <div class="f-group">
+      <label>Course *</label>
+      <select id="ae-course" style="width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:var(--r1);padding:.55rem .75rem;color:var(--txt);font-size:.9rem;outline:none;">
+        <option value="">Loading courses…</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <div class="f-group">
+        <label>Course Fee (₹)</label>
+        <input type="number" id="ae-amount" min="0" placeholder="0 = Free access" style="width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:var(--r1);padding:.55rem .75rem;color:var(--txt);font-size:.9rem;outline:none;">
+      </div>
+      <div class="f-group">
+        <label>Payment Mode</label>
+        <select id="ae-paymode" style="width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:var(--r1);padding:.55rem .75rem;color:var(--txt);font-size:.9rem;outline:none;">
+          <option value="cash">Cash / Offline</option>
+          <option value="bank_transfer">Bank Transfer</option>
+          <option value="upi">UPI</option>
+          <option value="gateway_link">Razorpay</option>
+        </select>
+      </div>
+    </div>
+    <div class="f-group">
+      <label>Admin Notes</label>
+      <input type="text" id="ae-notes" placeholder="e.g. Scholarship, offline payment, promo…" style="width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:var(--r1);padding:.55rem .75rem;color:var(--txt);font-size:.9rem;outline:none;">
+    </div>
+    <div style="background:rgba(124,92,252,.07);border:1px solid rgba(124,92,252,.2);border-radius:10px;padding:.75rem;font-size:.8rem;color:var(--txt3);margin-bottom:1rem;line-height:1.6;">
+      ℹ️ <strong>Access is granted immediately.</strong> If fee &gt; ₹0, a <em>pending</em> payment record is created — student must settle it offline. If fee = ₹0, access is marked as fully paid (free/admin grant).
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal('admin-enroll-modal')">Cancel</button>
+      <button class="btn-primary" id="ae-submit-btn" onclick="adminEnrollUser()">Grant Access</button>
     </div>
   </div>
 </div>
@@ -1272,8 +1405,15 @@
       </div>
     </div>
     <div class="form-row">
-      <div class="f-group"><label>List Price (₹) *</label><input type="number" id="pr-list" placeholder="e.g. 25000" min="0" step="100"></div>
-      <div class="f-group"><label>Sale Price (₹) <span style="font-size:.7rem;color:rgba(200,191,255,.4)">(optional)</span></label><input type="number" id="pr-sale" placeholder="e.g. 19999" min="0" step="100"></div>
+      <div class="f-group"><label>List Price (₹) *</label><input type="number" id="pr-list" placeholder="e.g. 25000" min="0" step="100" oninput="previewPricing()"></div>
+      <div class="f-group"><label>Sale Price (₹) <span style="font-size:.7rem;color:rgba(200,191,255,.4)">(optional)</span></label><input type="number" id="pr-sale" placeholder="e.g. 19999" min="0" step="100" oninput="previewPricing()"></div>
+    </div>
+    <!-- Live price preview -->
+    <div id="pricing-preview" style="display:none;background:rgba(124,92,252,0.06);border:1px solid rgba(124,92,252,0.2);border-radius:10px;padding:.75rem 1rem;margin-bottom:1rem;font-size:.8rem;">
+      <div style="display:flex;justify-content:space-between;margin-bottom:.3rem;"><span style="color:rgba(200,191,255,.5)">Base (sale price)</span><span id="prev-base">—</span></div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:.3rem;"><span style="color:rgba(200,191,255,.5)">GST @ 18%</span><span id="prev-gst">—</span></div>
+      <div style="display:flex;justify-content:space-between;border-top:1px solid rgba(124,92,252,.2);padding-top:.3rem;font-weight:800;color:#b5adff;"><span>Total (incl. GST)</span><span id="prev-total">—</span></div>
+      <div style="display:flex;justify-content:space-between;margin-top:.4rem;font-size:.72rem;color:rgba(200,191,255,.4)"><span>Discount on list price</span><span id="prev-disc">—</span></div>
     </div>
     <div class="f-group" id="pr-emi-wrap" style="display:none">
       <label>EMI Installments</label>
@@ -1342,7 +1482,8 @@
 <div class="modal-overlay" id="recording-modal">
   <div class="modal-box">
     <div class="modal-close" onclick="closeModal('recording-modal')">✕</div>
-    <div class="modal-title">Add Recording</div>
+    <div class="modal-title" id="rec-modal-title">Add Recording</div>
+    <input type="hidden" id="rec-id">
     <div class="f-group"><label>Title *</label><input type="text" id="rec-title" placeholder="Session recording title…"></div>
     <div class="form-row">
       <div class="f-group"><label>Course *</label><select id="rec-course"><option value="">Select course…</option></select></div>
@@ -1353,13 +1494,34 @@
         <select id="rec-provider">
           <option value="google_drive">Google Drive</option>
           <option value="youtube">YouTube</option>
+          <option value="vimeo">Vimeo</option>
+          <option value="other">Other</option>
         </select>
       </div>
       <div class="f-group"><label>Recording URL *</label><input type="url" id="rec-url" placeholder="Paste the recording link here…"></div>
     </div>
+    <!-- Pricing fields -->
+    <div style="background:rgba(124,92,252,0.06);border:1px solid rgba(124,92,252,0.2);border-radius:12px;padding:1rem;margin-bottom:1rem;">
+      <div style="font-size:.78rem;font-weight:700;color:#b5adff;margin-bottom:.75rem;text-transform:uppercase;letter-spacing:.06em;">💰 Access Pricing</div>
+      <div class="form-row">
+        <div class="f-group">
+          <label>Base Amount (₹)</label>
+          <input type="number" id="rec-base-amount" placeholder="e.g. 999" min="0" step="0.01" oninput="calcRecGst()">
+          <div style="font-size:.72rem;color:rgba(200,191,255,.4);margin-top:.25rem;">Leave blank = use course pricing</div>
+        </div>
+        <div class="f-group">
+          <label>GST %</label>
+          <input type="number" id="rec-gst-pct" placeholder="18" min="0" max="100" value="18" oninput="calcRecGst()">
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:.5rem .75rem;background:rgba(124,92,252,0.12);border-radius:8px;font-size:.85rem;">
+        <span style="color:rgba(200,191,255,.6);">Total (incl. GST)</span>
+        <span id="rec-total-display" style="font-weight:800;color:#b5adff;">—</span>
+      </div>
+    </div>
     <div class="modal-actions">
       <button class="btn-secondary" onclick="closeModal('recording-modal')">Cancel</button>
-      <button class="btn-primary" onclick="saveRecording()">Save Recording</button>
+      <button class="btn-primary" id="rec-save-btn" onclick="saveRecording()">Save Recording</button>
     </div>
   </div>
 </div>
@@ -1376,13 +1538,13 @@ const ADMIN_ROLES = ['admin', 'super_admin', 'support'];
 
 async function checkAdminAuth() {
   const { data: { session } } = await db.client.auth.getSession();
-  if (!session) return window.location.href = 'admin-login.html';
+  if (!session) return window.location.href = 'admin-login';
 
   const [{ data: profile }, adminCtx] = await Promise.all([
     db.client.from('user_profiles').select('full_name').eq('user_id', session.user.id).maybeSingle(),
     db.getAdminAuthContext()
   ]);
-  if (!adminCtx?.success || !adminCtx?.isAdmin) return window.location.href = 'admin-login.html';
+  if (!adminCtx?.success || !adminCtx?.isAdmin) return window.location.href = 'admin-login';
 
   adminUser = session.user;
   const name = profile?.full_name || session.user.email.split('@')[0];
@@ -1410,11 +1572,26 @@ function loadSection(sec) {
     dashboard: loadDashboard, courses: loadCourses, categories: loadCategories,
     users: loadUsers, mentors: loadMentors, enrollments: loadEnrollments,
     batches: loadBatches, payments: loadPayments, emi: loadEmi,
-    pricing: loadPricing, discounts: loadDiscounts,
+    pricing: loadPricing, discounts: loadDiscounts, referrals: loadReferrals,
     reports: loadReports, recordings: loadRecordings, schedules: loadSchedules,
     reviews: loadReviews, forms: loadFormsSection, inquiries: loadInquiries,
   };
   loaders[sec]?.();
+}
+
+// Navigate to a section programmatically (used by clickable stat cards)
+function navTo(sec) {
+  const navItem = document.querySelector(`.nav-item[data-section="${sec}"]`);
+  if (navItem) {
+    navItem.click();
+  } else {
+    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    const sectionEl = document.getElementById('section-' + sec);
+    if (sectionEl) { sectionEl.classList.add('active'); loadSection(sec); }
+    const titleEl = document.getElementById('topbar-title');
+    if (titleEl) titleEl.textContent = sec.charAt(0).toUpperCase() + sec.slice(1);
+  }
 }
 
 // ===== MODAL HELPERS =====
@@ -1455,6 +1632,7 @@ async function fetchProfileMap(userIds) {
 
 // ===== DASHBOARD =====
 async function loadDashboard() {
+  try {
   const monthStart = new Date();
   monthStart.setDate(1);
   monthStart.setHours(0, 0, 0, 0);
@@ -1470,7 +1648,7 @@ async function loadDashboard() {
     pendingReviewsRes,
     recentEnrollmentsRes
   ] = await Promise.all([
-    db.client.from('user_profiles').select('user_id', { count: 'exact', head: true }).in('role', ['user', 'student']),
+    db.client.from('user_profiles').select('user_id', { count: 'exact', head: true }).or('role.eq.user,role.eq.student,role.is.null'),
     db.client.from('mentor_profiles').select('user_id', { count: 'exact', head: true }),
     db.client.from('courses').select('id', { count: 'exact', head: true }).eq('course_status', 'published'),
     db.client.from('enrollments').select('id', { count: 'exact', head: true }).eq('enrollment_status', 'active'),
@@ -1481,8 +1659,9 @@ async function loadDashboard() {
     db.client.from('enrollments').select('id, student_user_id, course_id, net_amount, paid_amount, enrollment_status, created_at').order('created_at', { ascending: false }).limit(10)
   ]);
 
+  // Log any individual errors but don't throw — show 0 for failed queries
   [usersRes, mentorsRes, coursesRes, enrollmentsRes, paymentsRes, inquiriesRes, pendingMentorsRes, pendingReviewsRes, recentEnrollmentsRes]
-    .forEach(res => { if (res.error) throw res.error; });
+    .forEach(res => { if (res.error) console.warn('Dashboard query error:', res.error.message); });
 
   const completedPayments = (paymentsRes.data || []).filter(p => p.payment_status === 'completed');
   const totalRevenue = completedPayments.reduce((sum, payment) => sum + Number(payment.amount || 0), 0);
@@ -1547,27 +1726,41 @@ async function loadDashboard() {
       <td>${statusBadge(item.enrollment_status)}</td>
       <td>${fmtDate(item.created_at)}</td>
     </tr>`).join('') || '<tr><td colspan="6" class="table-empty">No enrollments yet</td></tr>';
+  } catch(e) {
+    console.error('loadDashboard error:', e);
+    _showAdminToast('Dashboard data failed to load: ' + (e.message || 'Check console'), 'error');
+  }
 }
 
 // ===== COURSES =====
 async function loadCourses() {
   const { data, error } = await db.client.from('courses')
-    .select('*, course_categories(name), course_pricing(list_price, sale_price, is_active)')
+    .select('*, course_categories(name), course_pricing(id,list_price, sale_price, is_active)')
     .order('created_at', { ascending: false });
   if (error) { console.error('loadCourses:', error.message); return; }
   document.getElementById('course-tbody').innerHTML = (data||[]).map(c => {
-    const pricing = (c.course_pricing||[]).find(p => p.is_active);
+    const pricing = (c.course_pricing||[]).find(p => p.is_active) || (c.course_pricing||[])[0];
+    const salePrice = pricing?.sale_price ?? pricing?.list_price ?? 0;
+    const listPrice = pricing?.list_price ?? 0;
+    const isTrending = !!c.is_trending;
     return `<tr>
-      <td>${c.title}</td>
+      <td style="font-weight:600">${c.title}${isTrending ? ' <span style="background:linear-gradient(135deg,#f97316,#ea580c);color:#fff;font-size:.6rem;border-radius:50px;padding:.1rem .4rem;font-weight:700;vertical-align:middle">🔥 Trending</span>' : ''}</td>
       <td>${c.course_categories?.name||'—'}</td>
       <td>—</td>
-      <td>${pricing ? fmtCurr(pricing.sale_price || pricing.list_price) : '—'}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:.4rem;">
+          <span style="font-weight:700;color:#b5adff;">${fmtCurr(salePrice)}</span>
+          ${listPrice && listPrice !== salePrice ? `<span style="text-decoration:line-through;font-size:.72rem;color:rgba(200,191,255,.35);">${fmtCurr(listPrice)}</span>` : ''}
+          <button class="action-btn" style="padding:.15rem .5rem;font-size:.68rem" onclick="inlineEditPrice('${c.id}','${pricing?.id||''}',${salePrice},${listPrice})">✏</button>
+        </div>
+      </td>
       <td>—</td>
       <td>—</td>
       <td>${statusBadge(c.course_status === 'published' ? 'active' : c.course_status || 'draft')}</td>
       <td><div class="action-btns">
         <button class="action-btn" onclick="editCourse('${c.id}')">Edit</button>
         <button class="action-btn" onclick="toggleCoursePublish('${c.id}','${c.course_status}')">${c.course_status === 'published' ? 'Unpublish' : 'Publish'}</button>
+        <button class="action-btn ${isTrending ? '' : ''}" style="${isTrending ? 'background:rgba(249,115,22,.15);color:#fb923c;border-color:rgba(249,115,22,.3)' : ''}" onclick="toggleTrending('${c.id}',${isTrending})">${isTrending ? '🔥 Untrend' : 'Mark Trending'}</button>
         <button class="action-btn danger" onclick="deleteCourse('${c.id}')">Delete</button>
       </div></td>
     </tr>`;
@@ -1577,27 +1770,68 @@ async function loadCourses() {
   ['rec-course', 'b-course'].forEach(id => {
     const el = document.getElementById(id); if (el) el.innerHTML = '<option value="">Select…</option>' + opts;
   });
-  // Refresh pricing course dropdown too
   const prEl = document.getElementById('pr-course');
   if (prEl) prEl.innerHTML = '<option value="">Select course…</option>' + opts;
+}
+
+async function toggleTrending(courseId, currentState) {
+  const { error } = await db.client.from('courses').update({ is_trending: !currentState }).eq('id', courseId);
+  if (error) { _showAdminToast('Error: ' + error.message, 'error'); return; }
+  _showAdminToast(currentState ? 'Removed from trending' : '🔥 Marked as trending', 'success');
+  loadCourses();
+}
+
+function inlineEditPrice(courseId, pricingId, salePrice, listPrice) {
+  const newSale = prompt('Enter new sale price (₹):', salePrice);
+  if (newSale === null) return;
+  const newList = prompt('Enter list/strike-through price (₹):', listPrice || salePrice);
+  if (newList === null) return;
+  const saleNum = parseFloat(newSale);
+  const listNum = parseFloat(newList) || saleNum;
+  if (isNaN(saleNum) || saleNum < 0) { _showAdminToast('Invalid price', 'error'); return; }
+  (async () => {
+    if (pricingId) {
+      const { error } = await db.client.from('course_pricing')
+        .update({ sale_price: saleNum, list_price: listNum, updated_at: new Date().toISOString() })
+        .eq('id', pricingId);
+      if (error) { _showAdminToast('Price update failed: ' + error.message, 'error'); return; }
+    } else {
+      const { error } = await db.client.from('course_pricing').insert({
+        course_id: courseId, sale_price: saleNum, list_price: listNum,
+        pricing_type: 'full_payment', is_active: true
+      });
+      if (error) { _showAdminToast('Price create failed: ' + error.message, 'error'); return; }
+    }
+    _showAdminToast('✓ Price updated', 'success');
+    loadCourses();
+  })();
 }
 
 async function loadCategories() {
   const { data, error } = await db.client.from('course_categories').select('*').order('sort_order');
   if (error) { console.error('loadCategories:', error.message); return; }
-  document.getElementById('category-tbody').innerHTML = (data||[]).map(c => `
-    <tr>
-      <td>${c.icon_name || c.icon || ''} ${c.name}</td>
-      <td><code>${c.slug}</code></td>
+  // Helper: clean slug by removing redundant "courses" segments
+  const cleanSlug = s => (s || '').replace(/\bcourses[-_]?/gi, '').replace(/[-_]+/g, '-').replace(/^-|-$/g, '') || s;
+  document.getElementById('category-tbody').innerHTML = (data||[]).map(c => {
+    const icon = c.icon || c.icon_name || '📚';
+    const slug = cleanSlug(c.slug);
+    return `<tr>
+      <td>
+        <div style="display:flex;align-items:center;gap:.65rem;">
+          <div style="width:36px;height:36px;border-radius:10px;background:rgba(124,92,252,0.12);border:1px solid rgba(124,92,252,.2);display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;">${icon}</div>
+          <span style="font-weight:600">${c.name}</span>
+        </div>
+      </td>
+      <td><code style="background:rgba(124,92,252,.1);padding:.15rem .4rem;border-radius:4px;font-size:.78rem;">${slug}</code></td>
       <td>—</td>
       <td>${statusBadge(c.is_active ? 'active' : 'draft')}</td>
       <td><div class="action-btns">
         <button class="action-btn" onclick="editCategory('${c.id}')">Edit</button>
         <button class="action-btn danger" onclick="deleteCategory('${c.id}')">Delete</button>
       </div></td>
-    </tr>`).join('') || '<tr><td colspan="5" class="table-empty">No categories</td></tr>';
-  // Refresh category dropdown in course modal (UUID as value for FK match)
-  const opts = (data||[]).map(c => `<option value="${c.id}">${c.icon_name || c.icon || ''} ${c.name}</option>`).join('');
+    </tr>`;
+  }).join('') || '<tr><td colspan="5" class="table-empty">No categories</td></tr>';
+  const opts = (data||[]).map(c => `<option value="${c.id}">${c.icon || c.icon_name || '📚'} ${c.name}</option>`).join('');
   const el = document.getElementById('c-category'); if (el) el.innerHTML = '<option value="">None</option>' + opts;
 }
 
@@ -1614,19 +1848,155 @@ async function loadUsers() {
     enrollmentCountMap[item.student_user_id] = (enrollmentCountMap[item.student_user_id] || 0) + 1;
   });
 
+  // Normalize role: 'user' → 'Student', 'mentor' → 'Mentor', etc.
+  const roleLabel = r => {
+    const m = { user: 'Student', student: 'Student', mentor: 'Mentor', admin: 'Admin', super_admin: 'Super Admin', support: 'Support' };
+    return m[r] || (r ? r.charAt(0).toUpperCase() + r.slice(1) : 'Student');
+  };
+  const roleBadge = r => {
+    const color = { user: '#60a5fa', student: '#60a5fa', mentor: '#a78bfa', admin: '#f97316', super_admin: '#ef4444', support: '#34d399' }[r] || '#9ca3af';
+    return `<span style="background:${color}22;color:${color};border:1px solid ${color}55;border-radius:50px;padding:.15rem .55rem;font-size:.68rem;font-weight:700;">${roleLabel(r)}</span>`;
+  };
   document.getElementById('user-tbody').innerHTML = (users || []).map(u => `
     <tr>
-      <td>${u.full_name}</td>
-      <td>${u.email}</td>
-      <td>${u.phone || '—'}</td>
-      <td>${u.role === 'student' ? 'user' : u.role}</td>
+      <td style="font-weight:600">${u.full_name || '—'}</td>
+      <td style="font-size:.82rem">${u.email}</td>
+      <td>${u.phone ? `<span style="font-family:monospace;font-size:.82rem">${u.phone}</span>` : '<span style="color:rgba(200,191,255,.3)">—</span>'}</td>
+      <td>${roleBadge(u.role)}</td>
       <td>${enrollmentCountMap[u.user_id] || 0}</td>
       <td>${fmtDate(u.account_created_at || u.created_at)}</td>
       <td>${statusBadge(u.is_active === false ? 'inactive' : 'active')}</td>
       <td><div class="action-btns">
         <button class="action-btn" onclick="viewUser('${u.user_id}')">View</button>
+        <button class="action-btn danger" onclick="deleteUser('${u.user_id}', ${JSON.stringify(u.full_name || u.email || 'this user')})">Delete</button>
       </div></td>
     </tr>`).join('') || '<tr><td colspan="8" class="table-empty">No users</td></tr>';
+}
+
+// ── Admin manually enroll a user ──────────────────────────────
+async function openAdminEnrollModal() {
+  // Populate user dropdown
+  const userSel = document.getElementById('ae-user');
+  const courseSel = document.getElementById('ae-course');
+  userSel.innerHTML = '<option value="">Select user…</option>';
+  courseSel.innerHTML = '<option value="">Select course…</option>';
+  openModal('admin-enroll-modal');
+
+  const [{ data: users }, { data: courses }] = await Promise.all([
+    db.client.from('user_profiles').select('user_id, full_name, email').order('full_name').limit(300),
+    db.client.from('courses').select('id, title').eq('course_status', 'published').order('title'),
+  ]);
+  userSel.innerHTML = '<option value="">Select user…</option>' +
+    (users||[]).map(u => `<option value="${u.user_id}">${u.full_name || u.email} (${u.email})</option>`).join('');
+  courseSel.innerHTML = '<option value="">Select course…</option>' +
+    (courses||[]).map(c => `<option value="${c.id}">${c.title}</option>`).join('');
+
+  document.getElementById('ae-amount').value = '';
+  document.getElementById('ae-notes').value = '';
+}
+
+async function adminEnrollUser() {
+  const userId   = document.getElementById('ae-user').value;
+  const courseId = document.getElementById('ae-course').value;
+  const amount   = parseFloat(document.getElementById('ae-amount').value) || 0;
+  const payMode  = document.getElementById('ae-paymode').value;
+  const notes    = document.getElementById('ae-notes').value.trim();
+
+  if (!userId)   { alert('Please select a user.'); return; }
+  if (!courseId) { alert('Please select a course.'); return; }
+
+  const btn = document.getElementById('ae-submit-btn');
+  btn.disabled = true; btn.textContent = 'Processing…';
+
+  try {
+    const now = new Date().toISOString();
+    const isFree = amount === 0;
+
+    // 1. Get active pricing for the course (for pricing_id FK)
+    const { data: pricingRows } = await db.client.from('course_pricing')
+      .select('id').eq('course_id', courseId).eq('is_active', true).limit(1);
+    const pricingId = pricingRows?.[0]?.id || null;
+
+    // 2. Create / update enrollment — grant active access immediately
+    const { data: enroll, error: enrollErr } = await db.client.from('enrollments').upsert({
+      student_user_id: userId,
+      course_id: courseId,
+      pricing_id: pricingId,
+      enrollment_status: 'active',
+      access_status: 'active',
+      net_amount: amount,
+      paid_amount: isFree ? 0 : 0,   // paid_amount updated when payment confirmed
+      due_amount: isFree ? 0 : amount,
+      activated_at: now,
+      notes: notes || null,
+    }, { onConflict: 'student_user_id,course_id' }).select().maybeSingle();
+    if (enrollErr) throw enrollErr;
+
+    // 3. Create payment record
+    const { error: payErr } = await db.client.from('payments').insert({
+      student_user_id: userId,
+      enrollment_id: enroll?.id || null,
+      course_id: courseId,
+      amount: amount,
+      payment_method: payMode,
+      payment_gateway: 'offline',
+      payment_status: isFree ? 'completed' : 'pending',
+      paid_at: isFree ? now : null,
+      notes: { admin_note: notes || 'Admin-granted enrollment', source: 'admin_panel' },
+    });
+    if (payErr) throw payErr;
+
+    closeModal('admin-enroll-modal');
+    _showAdminToast(
+      isFree
+        ? '✓ Free access granted — student can now watch videos'
+        : `✓ Enrolled — payment of ₹${amount.toLocaleString('en-IN')} marked as pending`,
+      'success'
+    );
+    loadEnrollments();
+    loadDashboard();
+  } catch(e) {
+    console.error('adminEnrollUser:', e);
+    _showAdminToast('Enrollment failed: ' + (e.message || e), 'error');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Grant Access';
+  }
+}
+
+async function deleteUser(userId, displayName) {
+  const confirmed = confirm(
+    `⚠️ PERMANENTLY DELETE USER\n\n` +
+    `Name: ${displayName}\n\n` +
+    `This will remove:\n` +
+    `  • All enrollments & payments\n` +
+    `  • All reviews & inquiries\n` +
+    `  • Mentor profile (if any)\n` +
+    `  • Auth account (login disabled)\n\n` +
+    `This CANNOT be undone. Continue?`
+  );
+  if (!confirmed) return;
+
+  // Double-confirm for safety
+  const reconfirmed = confirm(`Final confirmation: Delete "${displayName}" and all their data?`);
+  if (!reconfirmed) return;
+
+  try {
+    const { data, error } = await db.client.rpc('admin_delete_user', { target_user_id: userId });
+    if (error) throw error;
+    _showAdminToast(`✓ User "${displayName}" permanently deleted`, 'success');
+    loadUsers();
+    loadDashboard();
+  } catch (e) {
+    console.error('deleteUser error:', e);
+    const msg = e.message || 'Unknown error';
+    if (msg.includes('Unauthorized')) {
+      alert('Permission denied: Only super admins can delete users.');
+    } else if (msg.includes('Cannot delete your own')) {
+      alert('You cannot delete your own account.');
+    } else {
+      alert('Delete failed: ' + msg + '\n\nMake sure db/v3-user-delete-fix.sql has been run in Supabase SQL editor.');
+    }
+  }
 }
 
 async function loadMentors() {
@@ -1698,20 +2068,28 @@ async function loadEnrollments() {
       paid_amount: e.paid_amount, due_amount: e.due_amount,
       progress_percentage: e.progress_percentage, notes: e.notes,
     }));
+    const paidPct = e.net_amount > 0 ? Math.min(100, Math.round((e.paid_amount / e.net_amount) * 100)) : 0;
+    const balanceColor = e.due_amount > 0 ? '#f87171' : '#4ade80';
     return `<tr>
       <td>
         <div style="font-weight:600;font-size:.85rem;">${name}</div>
         <div style="font-size:.74rem;color:var(--txt4);">${email}</div>
       </td>
       <td>${e.courses?.title||'—'}</td>
-      <td>${payType}</td>
+      <td><span style="font-size:.72rem;background:rgba(124,92,252,.12);padding:.15rem .45rem;border-radius:50px;">${payType}</span></td>
       <td>${fmtCurr(e.net_amount)}</td>
-      <td>${fmtCurr(e.paid_amount)}</td>
-      <td>${fmtCurr(e.due_amount)}</td>
+      <td>
+        <div>${fmtCurr(e.paid_amount)}</div>
+        <div style="height:4px;background:rgba(124,92,252,.15);border-radius:4px;margin-top:3px;width:60px;">
+          <div style="height:100%;width:${paidPct}%;background:${paidPct===100?'#4ade80':'#7c5cfc'};border-radius:4px;"></div>
+        </div>
+      </td>
+      <td><span style="color:${balanceColor};font-weight:${e.due_amount>0?'700':'400'}">${fmtCurr(e.due_amount)}</span></td>
       <td>${accessHtml}</td>
       <td>${statusBadge(e.enrollment_status)}</td>
       <td><div class="action-btns">
         <button class="action-btn" onclick="editEnrollmentById('${safe}')">Edit</button>
+        ${e.due_amount > 0 ? `<button class="action-btn" style="background:rgba(124,92,252,.15);color:#a78bfa;border-color:rgba(124,92,252,.3);font-size:.72rem" onclick="recordPartialPayment('${e.id}',${e.due_amount})">+ Pay</button>` : ''}
         ${!hasAccess(e.access_status) ? `<button class="action-btn" style="background:rgba(74,222,128,.15);color:#4ade80;border-color:rgba(74,222,128,.3);" onclick="grantAccess('${e.id}')">Grant</button>` : ''}
       </div></td>
     </tr>`;
@@ -1729,6 +2107,49 @@ async function grantAccess(enrollId) {
   loadEnrollments();
 }
 
+async function recordPartialPayment(enrollId, dueAmount) {
+  const amtStr = prompt(`Record partial payment\nBalance due: ₹${Number(dueAmount).toLocaleString('en-IN')}\n\nEnter amount received (₹):`);
+  if (amtStr === null) return;
+  const amt = parseFloat(amtStr);
+  if (isNaN(amt) || amt <= 0) { _showAdminToast('Invalid amount', 'error'); return; }
+  if (amt > dueAmount) { _showAdminToast('Amount exceeds balance due', 'error'); return; }
+
+  // Fetch current enrollment data
+  const { data: enr, error: fetchErr } = await db.client.from('enrollments')
+    .select('paid_amount, net_amount, due_amount, student_user_id, course_id')
+    .eq('id', enrollId).maybeSingle();
+  if (fetchErr || !enr) { _showAdminToast('Could not fetch enrollment', 'error'); return; }
+
+  const newPaid = Number(enr.paid_amount) + amt;
+  const newDue  = Math.max(0, Number(enr.net_amount) - newPaid);
+  const isFullyPaid = newDue <= 0;
+
+  const { error: updErr } = await db.client.from('enrollments').update({
+    paid_amount: newPaid,
+    due_amount: newDue,
+    enrollment_status: isFullyPaid ? 'active' : 'active',
+    access_status: isFullyPaid ? 'active' : 'restricted',
+    updated_at: new Date().toISOString(),
+  }).eq('id', enrollId);
+  if (updErr) { _showAdminToast('Update failed: ' + updErr.message, 'error'); return; }
+
+  // Record payment entry
+  await db.client.from('payments').insert({
+    student_user_id: enr.student_user_id,
+    enrollment_id: enrollId,
+    course_id: enr.course_id,
+    amount: amt,
+    payment_method: 'cash',
+    payment_gateway: 'manual',
+    payment_status: 'completed',
+    paid_at: new Date().toISOString(),
+    transaction_reference: 'ADMIN-PARTIAL-' + Date.now(),
+  });
+
+  _showAdminToast(`✓ Payment of ₹${Number(amt).toLocaleString('en-IN')} recorded. Balance: ₹${Number(newDue).toLocaleString('en-IN')}`, 'success');
+  loadEnrollments();
+}
+
 function editEnrollmentById(safeEncoded) {
   const e = JSON.parse(decodeURIComponent(safeEncoded));
   document.getElementById('enroll-id').value = e.id;
@@ -1743,13 +2164,39 @@ function editEnrollmentById(safeEncoded) {
 }
 
 async function loadBatches() {
-  const { data } = await db.client.from('course_batches')
-    .select('*, courses(title), mentor_profiles:primary_mentor_user_id(user_profiles(full_name))')
+  const courseFilter = document.getElementById('batch-course-filter')?.value || '';
+  let q = db.client.from('course_batches')
+    .select('*, courses(title,id), mentor_profiles:primary_mentor_user_id(user_profiles(full_name))')
     .order('created_at', { ascending: false });
-  document.getElementById('batch-tbody').innerHTML = (data||[]).map(b => `
-    <tr>
-      <td>${b.batch_name}</td>
-      <td>${b.courses?.title||'—'}</td>
+  if (courseFilter) q = q.eq('course_id', courseFilter);
+  const { data } = await q;
+
+  // Populate filter dropdown on first load
+  const filterEl = document.getElementById('batch-course-filter');
+  if (filterEl && filterEl.options.length <= 1 && data?.length) {
+    const seen = new Map();
+    (data||[]).filter(b => b.courses?.id).forEach(b => seen.set(b.courses.id, b.courses.title));
+    seen.forEach((title, id) => {
+      const opt = document.createElement('option');
+      opt.value = id; opt.textContent = title;
+      filterEl.appendChild(opt);
+    });
+    if (courseFilter) filterEl.value = courseFilter;
+  }
+
+  document.getElementById('batch-tbody').innerHTML = (data||[]).map(b => {
+    const skills = (b.skill_tags || []).length
+      ? b.skill_tags.map(s => `<span style="background:rgba(124,92,252,.1);border:1px solid rgba(124,92,252,.2);border-radius:50px;padding:.1rem .4rem;font-size:.65rem;">${s}</span>`).join(' ')
+      : '';
+    return `<tr>
+      <td>
+        <div style="font-weight:600">${b.batch_name}</div>
+        ${b.batch_code ? `<code style="font-size:.68rem;color:rgba(200,191,255,.4)">${b.batch_code}</code>` : ''}
+      </td>
+      <td>
+        <div>${b.courses?.title||'—'}</div>
+        ${skills ? `<div style="margin-top:.3rem;display:flex;flex-wrap:wrap;gap:.25rem">${skills}</div>` : ''}
+      </td>
       <td>${b.mentor_profiles?.user_profiles?.full_name||'—'}</td>
       <td>${fmtDate(b.starts_on)}</td>
       <td>${fmtDate(b.ends_on)}</td>
@@ -1758,34 +2205,122 @@ async function loadBatches() {
       <td><div class="action-btns">
         <button class="action-btn" onclick="editBatch('${b.id}')">Edit</button>
       </div></td>
-    </tr>`).join('') || '<tr><td colspan="8" class="table-empty">No batches</td></tr>';
+    </tr>`;
+  }).join('') || '<tr><td colspan="8" class="table-empty">No batches found</td></tr>';
+
   const opts = (data||[]).map(b => `<option value="${b.id}">${b.batch_name} — ${b.courses?.title||''}</option>`).join('');
   const el = document.getElementById('sch-batch'); if (el) el.innerHTML = '<option value="">Select…</option>' + opts;
-  // Also refresh discount batch dropdown if it exists
   const discBatch = document.getElementById('disc-batch');
   if (discBatch) discBatch.innerHTML = '<option value="">All Batches</option>' + opts;
 }
 
 async function loadPayments() {
   const statusFilter = document.getElementById('pay-status-filter').value;
-  let q = db.client.from('payments').select('*, student_profiles(user_profiles(full_name)), enrollments(courses(title))');
+  let q = db.client.from('payments')
+    .select('*, invoice_number, student_profiles(user_profiles(full_name, email, phone)), enrollments(courses(title))');
   if (statusFilter) q = q.eq('payment_status', statusFilter);
   const { data } = await q.order('paid_at', { ascending: false }).limit(100);
-  document.getElementById('payment-tbody').innerHTML = (data||[]).map(p => `
-    <tr>
-      <td><code>${p.invoice_id||'—'}</code></td>
-      <td>${p.student_profiles?.user_profiles?.full_name||'—'}</td>
+  document.getElementById('payment-tbody').innerHTML = (data||[]).map(p => {
+    const invNum = p.invoice_number || p.invoice_id || null;
+    const invCell = invNum
+      ? `<code style="background:rgba(124,92,252,.1);padding:.15rem .4rem;border-radius:4px;font-size:.72rem;color:#b5adff;">${invNum}</code>`
+      : `<button class="action-btn" style="font-size:.68rem;padding:.15rem .5rem" onclick="generateInvoice('${p.id}')">Generate</button>`;
+    const methodLabel = { gateway_link:'Razorpay', card:'Card', upi:'UPI', cash:'Cash', bank_transfer:'Bank', net_banking:'Net Banking', wallet:'Wallet' }[p.payment_method] || p.payment_method || '—';
+    return `<tr>
+      <td>${invCell}</td>
+      <td>
+        <div style="font-weight:600;font-size:.85rem">${p.student_profiles?.user_profiles?.full_name||'—'}</div>
+        <div style="font-size:.72rem;color:rgba(200,191,255,.4)">${p.student_profiles?.user_profiles?.email||''}</div>
+      </td>
       <td>${p.enrollments?.courses?.title||'—'}</td>
-      <td>${fmtCurr(p.amount)}</td>
-      <td>${p.payment_method}</td>
-      <td><code>${(p.transaction_reference||'—').substring(0,14)}</code></td>
+      <td style="font-weight:700">${fmtCurr(p.amount)}</td>
+      <td>${methodLabel}</td>
+      <td><code style="font-size:.72rem">${(p.transaction_reference||'—').substring(0,16)}</code></td>
       <td>${fmtDate(p.paid_at || p.created_at)}</td>
       <td>${statusBadge(p.payment_status)}</td>
       <td><div class="action-btns">
-        <button class="action-btn" onclick="downloadInvoice('${p.id}')">Invoice</button>
+        <button class="action-btn" onclick="printInvoice(${JSON.stringify(p).replace(/"/g,'&quot;')})">🖨 Invoice</button>
+        ${p.payment_status !== 'completed' ? `<button class="action-btn" style="background:rgba(74,222,128,.15);color:#4ade80;border-color:rgba(74,222,128,.3);" onclick="confirmPayment('${p.id}')">Confirm</button>` : ''}
         ${p.payment_status === 'completed' ? `<button class="action-btn danger" onclick="refundPayment('${p.id}')">Refund</button>` : ''}
       </div></td>
-    </tr>`).join('') || '<tr><td colspan="9" class="table-empty">No payments</td></tr>';
+    </tr>`;
+  }).join('') || '<tr><td colspan="9" class="table-empty">No payments</td></tr>';
+}
+
+async function generateInvoice(paymentId) {
+  const { error } = await db.client.from('payments')
+    .update({ payment_status: 'completed', paid_at: new Date().toISOString() })
+    .eq('id', paymentId);
+  if (error) { _showAdminToast('Error: ' + error.message, 'error'); return; }
+  _showAdminToast('✓ Invoice generated', 'success');
+  loadPayments();
+}
+
+async function confirmPayment(paymentId) {
+  if (!confirm('Confirm this payment as completed? This will generate an invoice.')) return;
+  const { error } = await db.client.from('payments')
+    .update({ payment_status: 'completed', paid_at: new Date().toISOString() })
+    .eq('id', paymentId);
+  if (error) { _showAdminToast('Error: ' + error.message, 'error'); return; }
+  _showAdminToast('✓ Payment confirmed & invoice generated', 'success');
+  loadPayments();
+}
+
+function printInvoice(p) {
+  const studentName = p.student_profiles?.user_profiles?.full_name || 'Student';
+  const studentEmail = p.student_profiles?.user_profiles?.email || '';
+  const courseName = p.enrollments?.courses?.title || 'Course Enrollment';
+  const invNum = p.invoice_number || p.invoice_id || 'DRAFT';
+  const paidDate = p.paid_at ? new Date(p.paid_at).toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' }) : '—';
+  const amt = Number(p.amount || 0);
+  const base = Math.round(amt / 1.18);
+  const gst = amt - base;
+
+  const w = window.open('', '_blank', 'width=800,height=700');
+  w.document.write(`<!DOCTYPE html><html><head><title>Invoice ${invNum}</title>
+  <style>
+    body{font-family:Arial,sans-serif;margin:0;padding:40px;color:#1a1a1a;background:#fff}
+    .header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:32px;padding-bottom:20px;border-bottom:2px solid #7c5cfc;}
+    .brand{font-size:1.4rem;font-weight:800;color:#7c5cfc;}
+    .brand-sub{font-size:.75rem;color:#888;margin-top:2px;}
+    .inv-title{text-align:right;}
+    .inv-title h2{margin:0;font-size:1.6rem;color:#1a1a1a;}
+    .inv-title .num{font-size:.85rem;color:#666;margin-top:4px;}
+    .section{margin-bottom:24px;}
+    .section label{font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;color:#888;display:block;margin-bottom:4px;}
+    .section .val{font-size:.95rem;font-weight:600;}
+    table{width:100%;border-collapse:collapse;margin-bottom:24px;}
+    th{background:#f0ebff;padding:10px 14px;text-align:left;font-size:.8rem;text-transform:uppercase;letter-spacing:.06em;}
+    td{padding:10px 14px;border-bottom:1px solid #f0f0f0;font-size:.9rem;}
+    .total-row td{font-weight:800;font-size:1rem;border-top:2px solid #7c5cfc;border-bottom:none;}
+    .footer{text-align:center;font-size:.72rem;color:#aaa;margin-top:32px;padding-top:16px;border-top:1px solid #eee;}
+    .badge{display:inline-block;padding:.25rem .7rem;border-radius:50px;font-size:.75rem;font-weight:700;background:#dcfce7;color:#16a34a;}
+    @media print{body{padding:20px}}
+  </style></head><body>
+  <div class="header">
+    <div><div class="brand">SkillUpNow</div><div class="brand-sub">Premium IT & Professional Training</div></div>
+    <div class="inv-title"><h2>TAX INVOICE</h2><div class="num">Invoice #: <strong>${invNum}</strong></div><div class="num">Date: ${paidDate}</div></div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:28px;">
+    <div class="section"><label>Bill To</label><div class="val">${studentName}</div><div style="font-size:.82rem;color:#666">${studentEmail}</div></div>
+    <div class="section"><label>Payment Status</label><span class="badge">✓ PAID</span><div style="font-size:.8rem;color:#666;margin-top:6px">Method: ${p.payment_method||'—'}</div></div>
+  </div>
+  <table>
+    <thead><tr><th>Description</th><th>HSN/SAC</th><th>Amount (₹)</th></tr></thead>
+    <tbody>
+      <tr><td>${courseName}<br><span style="font-size:.75rem;color:#888">Course Enrollment • Access: Lifetime</span></td><td>998313</td><td>₹${base.toLocaleString('en-IN')}</td></tr>
+      <tr><td>GST @ 18% (CGST 9% + SGST 9%)</td><td>—</td><td>₹${gst.toLocaleString('en-IN')}</td></tr>
+      <tr class="total-row"><td colspan="2"><strong>Total Amount Paid</strong></td><td><strong>₹${amt.toLocaleString('en-IN')}</strong></td></tr>
+    </tbody>
+  </table>
+  <div style="background:#f9f7ff;border:1px solid #e0d9ff;border-radius:8px;padding:14px 18px;font-size:.78rem;color:#555;line-height:1.8">
+    Transaction Ref: <code>${p.transaction_reference||'—'}</code><br>
+    Payment Gateway: ${p.payment_gateway||'—'} • Gateway ID: ${p.gateway_payment_id||'—'}
+  </div>
+  <div class="footer">SkillUpNow • skillupnowadmin.org • This is a computer-generated invoice. No signature required.</div>
+  <script>window.onload=()=>{window.print();}<\/script>
+  </body></html>`);
+  w.document.close();
 }
 
 async function loadEmi() {
@@ -1810,53 +2345,175 @@ async function loadEmi() {
 }
 
 async function loadReports() {
-  const { data } = await db.client.from('v_revenue_by_course').select('*').order('revenue_collected', { ascending: false });
-  let totalRev = 0, totalOut = 0, totalEnroll = 0;
-  (data||[]).forEach(r => { totalRev += r.revenue_collected; totalOut += r.outstanding_balance; totalEnroll += r.total_enrolled; });
-  document.getElementById('rpt-total-rev').textContent = fmtCurr(totalRev);
-  document.getElementById('rpt-outstanding').textContent = fmtCurr(totalOut);
-  document.getElementById('rpt-enrollments').textContent = totalEnroll;
+  try {
+    // ── Try analytics view first ──────────────────────────────
+    const { data: viewData, error: viewErr } = await db.client
+      .from('v_revenue_by_course').select('*').order('revenue_collected', { ascending: false });
 
-  const maxRev = Math.max(...(data||[]).map(r => r.revenue_collected), 1);
-  document.getElementById('rpt-course-chart').innerHTML = (data||[]).slice(0,6).map(r => `
-    <div class="chart-bar-item">
-      <div class="chart-bar-label">${r.course_name}</div>
-      <div class="chart-bar-track"><div class="chart-bar-fill" style="width:${(r.revenue_collected/maxRev*100)}%"></div></div>
-      <div class="chart-bar-val">${fmtCurr(r.revenue_collected)}</div>
-    </div>`).join('');
+    let courseRows = [];
+    if (!viewErr && viewData?.length) {
+      courseRows = viewData;
+    } else {
+      // ── Fallback: build from raw tables ──────────────────────
+      const [{ data: payments }, { data: enrollments }, { data: courses }] = await Promise.all([
+        db.client.from('payments').select('course_id, amount, payment_status').eq('payment_status', 'completed'),
+        db.client.from('enrollments').select('course_id, student_user_id, net_amount, paid_amount, due_amount'),
+        db.client.from('courses').select('id, title, course_categories(name)'),
+      ]);
+      const courseMap = Object.fromEntries((courses||[]).map(c => [c.id, c]));
+      const revenueMap = {}, enrollMap = {}, dueMap = {};
+      (payments||[]).forEach(p => { revenueMap[p.course_id] = (revenueMap[p.course_id]||0) + Number(p.amount||0); });
+      (enrollments||[]).forEach(e => {
+        enrollMap[e.course_id] = (enrollMap[e.course_id]||0) + 1;
+        dueMap[e.course_id] = (dueMap[e.course_id]||0) + Number(e.due_amount||0);
+      });
+      courseRows = Object.keys({...revenueMap,...enrollMap}).map(id => ({
+        course_name: courseMap[id]?.title || 'Unknown',
+        category: courseMap[id]?.course_categories?.name || '—',
+        total_enrolled: enrollMap[id] || 0,
+        revenue_collected: revenueMap[id] || 0,
+        outstanding_balance: dueMap[id] || 0,
+        avg_rating: 0,
+      })).sort((a,b) => b.revenue_collected - a.revenue_collected);
+    }
 
-  document.getElementById('rpt-table').innerHTML = (data||[]).map(r => `
-    <tr>
-      <td>${r.course_name}</td>
-      <td>${r.category}</td>
-      <td>${r.total_enrolled}</td>
-      <td>${fmtCurr(r.revenue_collected)}</td>
-      <td>${fmtCurr(r.outstanding_balance)}</td>
-      <td>⭐ ${(r.avg_rating||0).toFixed(1)}</td>
-    </tr>`).join('') || '<tr><td colspan="6" class="table-empty">No data</td></tr>';
+    let totalRev = 0, totalOut = 0, totalEnroll = 0, totalPay = 0;
+    courseRows.forEach(r => { totalRev += r.revenue_collected; totalOut += r.outstanding_balance; totalEnroll += r.total_enrolled; });
 
-  // Monthly trend
-  const { data: months } = await db.client.from('v_revenue_by_month').select('*').limit(6);
-  const maxMonth = Math.max(...(months||[]).map(m => m.revenue), 1);
-  document.getElementById('rpt-month-chart').innerHTML = (months||[]).map(m => `
-    <div class="chart-bar-item">
-      <div class="chart-bar-label">${m.month_label}</div>
-      <div class="chart-bar-track"><div class="chart-bar-fill" style="width:${(m.revenue/maxMonth*100)}%"></div></div>
-      <div class="chart-bar-val">${fmtCurr(m.revenue)}</div>
-    </div>`).join('');
+    // Total payments count
+    const { count: payCount } = await db.client.from('payments').select('id', { count: 'exact', head: true }).eq('payment_status', 'completed');
+    totalPay = payCount || 0;
+
+    document.getElementById('rpt-total-rev').textContent = fmtCurr(totalRev);
+    document.getElementById('rpt-total-pay').textContent = totalPay;
+    document.getElementById('rpt-outstanding').textContent = fmtCurr(totalOut);
+    document.getElementById('rpt-enrollments').textContent = totalEnroll;
+
+    const maxRev = Math.max(...courseRows.map(r => r.revenue_collected), 1);
+    document.getElementById('rpt-course-chart').innerHTML = courseRows.slice(0,6).map(r => `
+      <div class="chart-bar-item">
+        <div class="chart-bar-label">${r.course_name}</div>
+        <div class="chart-bar-track"><div class="chart-bar-fill" style="width:${(r.revenue_collected/maxRev*100)}%"></div></div>
+        <div class="chart-bar-val">${fmtCurr(r.revenue_collected)}</div>
+      </div>`).join('') || '<div class="table-empty">No payment data</div>';
+
+    document.getElementById('rpt-table').innerHTML = courseRows.map(r => `
+      <tr>
+        <td>${r.course_name}</td>
+        <td>${r.category}</td>
+        <td>${r.total_enrolled}</td>
+        <td>${fmtCurr(r.revenue_collected)}</td>
+        <td>${fmtCurr(r.outstanding_balance)}</td>
+        <td>${r.avg_rating ? '⭐ ' + Number(r.avg_rating).toFixed(1) : '—'}</td>
+      </tr>`).join('') || '<tr><td colspan="6" class="table-empty">No data</td></tr>';
+
+    // ── Monthly trend: view or manual aggregation ─────────────
+    const { data: months, error: monthErr } = await db.client.from('v_revenue_by_month').select('*').limit(6);
+    if (!monthErr && months?.length) {
+      const maxMonth = Math.max(...months.map(m => m.revenue), 1);
+      document.getElementById('rpt-month-chart').innerHTML = months.map(m => `
+        <div class="chart-bar-item">
+          <div class="chart-bar-label">${m.month_label}</div>
+          <div class="chart-bar-track"><div class="chart-bar-fill" style="width:${(m.revenue/maxMonth*100)}%"></div></div>
+          <div class="chart-bar-val">${fmtCurr(m.revenue)}</div>
+        </div>`).join('');
+    } else {
+      // Build monthly trend from payments table directly
+      const { data: allPay } = await db.client.from('payments').select('amount, paid_at').eq('payment_status', 'completed').order('paid_at', { ascending: false }).limit(500);
+      const monthMap = {};
+      (allPay||[]).forEach(p => {
+        if (!p.paid_at) return;
+        const d = new Date(p.paid_at);
+        const key = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
+        const label = d.toLocaleString('en-IN', { month: 'short', year: 'numeric' });
+        if (!monthMap[key]) monthMap[key] = { label, revenue: 0 };
+        monthMap[key].revenue += Number(p.amount||0);
+      });
+      const monthRows = Object.entries(monthMap).sort((a,b)=>a[0].localeCompare(b[0])).slice(-6).map(([,v])=>v);
+      const maxM = Math.max(...monthRows.map(m=>m.revenue), 1);
+      document.getElementById('rpt-month-chart').innerHTML = monthRows.map(m => `
+        <div class="chart-bar-item">
+          <div class="chart-bar-label">${m.label}</div>
+          <div class="chart-bar-track"><div class="chart-bar-fill" style="width:${(m.revenue/maxM*100)}%"></div></div>
+          <div class="chart-bar-val">${fmtCurr(m.revenue)}</div>
+        </div>`).join('') || '<div class="table-empty">No payment history</div>';
+    }
+  } catch(e) {
+    console.error('loadReports error:', e);
+    _showAdminToast('Reports failed to load: ' + (e.message||'Check console'), 'error');
+  }
 }
 
 async function loadRecordings() {
-  const { data } = await db.client.from('live_recordings').select('*, courses(title)').order('created_at', { ascending: false });
-  document.getElementById('recording-tbody').innerHTML = (data||[]).map(r => `
-    <tr>
-      <td>${r.title}</td>
+  const { data } = await db.client.from('live_recordings')
+    .select('*, courses(title)')
+    .order('created_at', { ascending: false });
+  const providerLabel = p => p === 'youtube' ? '▶ YouTube' : p === 'google_drive' ? '📁 Google Drive' : p === 'vimeo' ? '🎬 Vimeo' : p || '—';
+  document.getElementById('recording-tbody').innerHTML = (data||[]).map(r => {
+    const base = r.base_amount != null ? fmtCurr(r.base_amount) : '—';
+    const gst  = r.gst_percentage != null ? r.gst_percentage + '%' : '18%';
+    const total = r.total_amount != null ? `<strong>${fmtCurr(r.total_amount)}</strong>` : (r.base_amount != null ? fmtCurr(Math.round(r.base_amount * 1.18)) : '—');
+    return `<tr>
+      <td style="font-weight:600">${r.title}</td>
       <td>${r.courses?.title||'—'}</td>
-      <td>${r.provider_name === 'youtube' ? '▶ YouTube' : r.provider_name === 'google_drive' ? '📁 Google Drive' : r.provider_name||'—'}</td>
+      <td>${providerLabel(r.provider_name)}</td>
+      <td>${base}</td>
+      <td>${gst}</td>
+      <td>${total}</td>
       <td>${fmtDate(r.published_at || r.created_at)}</td>
-      <td>${r.external_url ? `<a href="${r.external_url}" target="_blank" style="color:#7c5cfc;word-break:break-all;font-size:.78rem;">View Recording</a>` : '—'}</td>
-      <td><div class="action-btns"><button class="action-btn danger" onclick="deleteRecording('${r.id}')">Delete</button></div></td>
-    </tr>`).join('') || '<tr><td colspan="6" class="table-empty">No recordings found</td></tr>';
+      <td>${r.external_url ? `<a href="${r.external_url}" target="_blank" style="color:#7c5cfc;font-size:.78rem;">View</a>` : '—'}</td>
+      <td><div class="action-btns">
+        <button class="action-btn" onclick="editRecording(${JSON.stringify(r).replace(/"/g,'&quot;')})">Edit</button>
+        <button class="action-btn danger" onclick="deleteRecording('${r.id}')">Delete</button>
+      </div></td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="9" class="table-empty">No recordings found</td></tr>';
+}
+
+function calcRecGst() {
+  const base = parseFloat(document.getElementById('rec-base-amount').value) || 0;
+  const gst  = parseFloat(document.getElementById('rec-gst-pct').value) || 18;
+  const el   = document.getElementById('rec-total-display');
+  if (base > 0) {
+    el.textContent = '₹' + Math.round(base * (1 + gst / 100)).toLocaleString('en-IN') + ' (Total incl. GST)';
+  } else {
+    el.textContent = '— (uses course pricing)';
+  }
+}
+
+function openRecordingModal() {
+  document.getElementById('rec-id').value = '';
+  document.getElementById('rec-modal-title').textContent = 'Add Recording';
+  document.getElementById('rec-save-btn').textContent = 'Save Recording';
+  document.getElementById('rec-title').value = '';
+  document.getElementById('rec-url').value = '';
+  document.getElementById('rec-date').value = '';
+  document.getElementById('rec-base-amount').value = '';
+  document.getElementById('rec-gst-pct').value = '18';
+  document.getElementById('rec-total-display').textContent = '—';
+  document.getElementById('rec-provider').value = 'google_drive';
+  initDropdowns();
+  openModal('recording-modal');
+}
+
+function editRecording(r) {
+  document.getElementById('rec-id').value = r.id || '';
+  document.getElementById('rec-modal-title').textContent = 'Edit Recording';
+  document.getElementById('rec-save-btn').textContent = 'Update Recording';
+  document.getElementById('rec-title').value = r.title || '';
+  document.getElementById('rec-url').value = r.external_url || '';
+  document.getElementById('rec-provider').value = r.provider_name || 'google_drive';
+  document.getElementById('rec-base-amount').value = r.base_amount ?? '';
+  document.getElementById('rec-gst-pct').value = r.gst_percentage ?? 18;
+  if (r.published_at) {
+    document.getElementById('rec-date').value = r.published_at.split('T')[0];
+  }
+  // set course select after dropdown init
+  initDropdowns().then(() => {
+    if (r.course_id) document.getElementById('rec-course').value = r.course_id;
+    calcRecGst();
+  });
+  openModal('recording-modal');
 }
 
 async function loadSchedules() {
@@ -2204,19 +2861,36 @@ async function saveSchedule() {
 
 async function saveRecording() {
   const title = document.getElementById('rec-title').value.trim();
-  if (!title) { alert('Recording title is required.'); return; }
+  if (!title) { _showAdminToast('Recording title is required.', 'error'); return; }
   const providerUrl = document.getElementById('rec-url').value.trim();
-  if (!providerUrl) { alert('Please enter the recording URL.'); return; }
-  const provider = document.getElementById('rec-provider').value;
-  const { error } = await db.client.from('live_recordings').insert({
-    course_id: document.getElementById('rec-course').value || null,
+  if (!providerUrl) { _showAdminToast('Please enter the recording URL.', 'error'); return; }
+  const provider   = document.getElementById('rec-provider').value;
+  const courseId   = document.getElementById('rec-course').value || null;
+  const baseAmt    = document.getElementById('rec-base-amount').value;
+  const gstPct     = document.getElementById('rec-gst-pct').value;
+  const recId      = document.getElementById('rec-id').value;
+
+  const payload = {
+    course_id:      courseId,
     title,
-    external_url: providerUrl,
-    provider_name: provider,
-    is_published: true,
-    published_at: new Date().toISOString(),
-  });
-  if (error) { alert('Error saving recording: ' + error.message); return; }
+    external_url:   providerUrl,
+    provider_name:  provider,
+    is_published:   true,
+    published_at:   recId ? undefined : new Date().toISOString(), // keep original on edit
+    base_amount:    baseAmt !== '' ? parseFloat(baseAmt) : null,
+    gst_percentage: gstPct  !== '' ? parseFloat(gstPct)  : 18,
+  };
+  if (recId) delete payload.published_at; // don't overwrite on edit
+
+  let error;
+  if (recId) {
+    ({ error } = await db.client.from('live_recordings').update(payload).eq('id', recId));
+  } else {
+    payload.published_at = new Date().toISOString();
+    ({ error } = await db.client.from('live_recordings').insert(payload));
+  }
+  if (error) { _showAdminToast('Error saving recording: ' + error.message, 'error'); return; }
+  _showAdminToast(recId ? '✓ Recording updated' : '✓ Recording added', 'success');
   closeModal('recording-modal');
   loadRecordings();
 }
@@ -2252,7 +2926,7 @@ function downloadInvoice(id) {
 
 async function logout() {
   await db.client.auth.signOut();
-  window.location.href = 'admin-login.html';
+  window.location.href = 'admin-login';
 }
 
 /* ===== FORMS SECTION ENTRY ===== */
@@ -2265,12 +2939,12 @@ function loadFormsSection() {
 /* ===== FORMS MANAGEMENT ===== */
 
 const FORM_TYPES = [
-  { key: 'registration', label: 'Course Registration', icon: '📝', path: 'course-registration.html', desc: 'New course registrations' },
-  { key: 'emi',          label: 'EMI Application',     icon: '📅', path: 'emi-application.html',     desc: 'EMI payment requests' },
-  { key: 'contact',      label: 'Fee Enquiry',          icon: '💬', path: 'contact-enquiry.html',     desc: 'Fee and course queries' },
-  { key: 'mentor_signup',label: 'Mentor Application',  icon: '🎓', path: 'mentor-signup.html',       desc: 'Mentor onboarding forms' },
-  { key: 'feedback',     label: 'Feedback',             icon: '⭐', path: 'feedback.html',            desc: 'Student feedback' },
-  { key: 'quick',        label: 'Quick Register',       icon: '⚡', path: 'quick-registration.html',  desc: 'Fast enrollment form' },
+  { key: 'registration', label: 'Course Registration', icon: '📝', path: 'course-registration', desc: 'New course registrations' },
+  { key: 'emi',          label: 'EMI Application',     icon: '📅', path: 'emi-application',     desc: 'EMI payment requests' },
+  { key: 'contact',      label: 'Fee Enquiry',          icon: '💬', path: 'contact-enquiry',     desc: 'Fee and course queries' },
+  { key: 'mentor_signup',label: 'Mentor Application',  icon: '🎓', path: 'mentor-signup',       desc: 'Mentor onboarding forms' },
+  { key: 'feedback',     label: 'Feedback',             icon: '⭐', path: 'feedback',            desc: 'Student feedback' },
+  { key: 'quick',        label: 'Quick Register',       icon: '⚡', path: 'quick-registration',  desc: 'Fast enrollment form' },
 ];
 
 let _formCounts = {};
@@ -2454,7 +3128,7 @@ async function renderFormTypes() {
     (data || []).forEach(r => { _formCounts[r.form_type] = (_formCounts[r.form_type] || 0) + 1; });
   } catch(_) {}
 
-  const baseUrl = window.location.origin + window.location.pathname.replace('admin-dashboard.html', '');
+  const baseUrl = window.location.origin + window.location.pathname.replace(/admin-dashboard(\.html)?$/, '');
 
   grid.innerHTML = FORM_TYPES.map(f => `
     <div class="form-type-card">
@@ -2483,6 +3157,7 @@ function filterFormsByType(type) {
 
 /* ── QR Code Generation ── */
 let _qrCurrentUrl = '';
+let _qrRenderPromise = Promise.resolve();
 
 function showQrCode(formKey, formLabel, url) {
   _qrCurrentUrl = url;
@@ -2491,7 +3166,7 @@ function showQrCode(formKey, formLabel, url) {
   document.getElementById('qr-url-display').textContent = url;
 
   const canvas = document.getElementById('qr-canvas');
-  generateQr(canvas, url, 240);
+  _qrRenderPromise = generateQr(canvas, url, 240);
 
   document.getElementById('qr-popup-overlay').classList.add('open');
   document.body.style.overflow = 'hidden';
@@ -2503,29 +3178,31 @@ function closeQrPopup() {
 }
 
 function generateQr(canvas, url, size) {
-  // Pure JS QR code generator (no external lib needed for basic use)
-  // Uses qrcode-generator compatible approach via inline library
-  if (typeof QRCode !== 'undefined') {
-    QRCode.toCanvas(canvas, url, {
-      width: size, margin: 2,
-      color: { dark: '#1a1a2e', light: '#ffffff' },
-      errorCorrectionLevel: 'H'
-    }, err => { if (err) console.warn('QR error:', err); });
-    return;
-  }
-  // Fallback: draw placeholder with URL text
-  const ctx = canvas.getContext('2d');
-  canvas.width = size; canvas.height = size;
-  ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, size, size);
-  ctx.fillStyle = '#1a1a2e'; ctx.font = '11px monospace'; ctx.textAlign = 'center';
-  // Draw simple QR-like placeholder
-  const msg = 'QR: ' + url.split('/').pop();
-  ctx.fillText('QR Code', size/2, size/2 - 10);
-  ctx.font = '9px monospace'; ctx.fillStyle = '#7c5cfc';
-  ctx.fillText('(install qrcode.js)', size/2, size/2 + 10);
-  ctx.fillStyle = '#1a1a2e';
-  const lines = (url.match(/.{1,28}/g) || []).slice(0,3);
-  lines.forEach((l, i) => ctx.fillText(l, size/2, size/2 + 28 + i*13));
+  return new Promise((resolve) => {
+    if (typeof QRCode !== 'undefined') {
+      QRCode.toCanvas(canvas, url, {
+        width: size, margin: 2,
+        color: { dark: '#1a1a2e', light: '#ffffff' },
+        errorCorrectionLevel: 'H'
+      }, err => {
+        if (err) console.warn('QR error:', err);
+        resolve();
+      });
+    } else {
+      // Fallback: draw placeholder with URL text
+      const ctx = canvas.getContext('2d');
+      canvas.width = size; canvas.height = size;
+      ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, size, size);
+      ctx.fillStyle = '#1a1a2e'; ctx.font = '11px monospace'; ctx.textAlign = 'center';
+      ctx.fillText('QR Code', size/2, size/2 - 10);
+      ctx.font = '9px monospace'; ctx.fillStyle = '#7c5cfc';
+      ctx.fillText('(install qrcode.js)', size/2, size/2 + 10);
+      ctx.fillStyle = '#1a1a2e';
+      const lines = (url.match(/.{1,28}/g) || []).slice(0,3);
+      lines.forEach((l, i) => ctx.fillText(l, size/2, size/2 + 28 + i*13));
+      resolve();
+    }
+  });
 }
 
 function copyQrUrl() {
@@ -2537,13 +3214,18 @@ function copyQrUrl() {
   }).catch(() => { prompt('Copy this link:', _qrCurrentUrl); });
 }
 
-function downloadQr() {
+async function downloadQr() {
+  await _qrRenderPromise;
   const canvas = document.getElementById('qr-canvas');
   if (!canvas) return;
+  const dataUrl = canvas.toDataURL('image/png');
   const link = document.createElement('a');
-  link.download = 'skillupnow-qr-' + (_qrCurrentUrl.split('/').pop() || 'form') + '.png';
-  link.href = canvas.toDataURL('image/png');
+  const slug = (_qrCurrentUrl.split('/').pop() || 'form').replace(/[^a-z0-9\-_]/gi, '-');
+  link.download = 'skillupnow-qr-' + slug + '.png';
+  link.href = dataUrl;
+  document.body.appendChild(link);
   link.click();
+  document.body.removeChild(link);
 }
 
 function fullscreenQr() {
@@ -2839,6 +3521,23 @@ function toggleEmiField() {
   document.getElementById('pr-emi-wrap').style.display = type === 'emi' ? '' : 'none';
 }
 
+function previewPricing() {
+  const listPrice = parseFloat(document.getElementById('pr-list').value) || 0;
+  const salePrice = parseFloat(document.getElementById('pr-sale').value) || listPrice;
+  const prev = document.getElementById('pricing-preview');
+  if (salePrice <= 0) { if (prev) prev.style.display = 'none'; return; }
+  const gst   = Math.round(salePrice * 0.18);
+  const total = salePrice + gst;
+  const disc  = listPrice > salePrice ? Math.round((1 - salePrice / listPrice) * 100) + '%' : '—';
+  if (prev) {
+    prev.style.display = '';
+    document.getElementById('prev-base').textContent  = fmtCurr(salePrice);
+    document.getElementById('prev-gst').textContent   = fmtCurr(gst);
+    document.getElementById('prev-total').textContent = fmtCurr(total);
+    document.getElementById('prev-disc').textContent  = disc;
+  }
+}
+
 function openPricingModal(existingId) {
   document.getElementById('pricing-id').value = existingId || '';
   document.getElementById('pricing-modal-title').textContent = existingId ? 'Edit Pricing' : 'Set Course Pricing';
@@ -2858,20 +3557,47 @@ function openPricingModal(existingId) {
 }
 
 async function loadPricing() {
-  const { data, error } = await db.client
-    .from('course_pricing')
-    .select('*, courses(title)')
-    .order('created_at', { ascending: false });
+  // Also fetch active discounts to show live price impact
+  const [{ data, error }, { data: discounts }] = await Promise.all([
+    db.client.from('course_pricing').select('*, courses(title)').order('created_at', { ascending: false }),
+    db.client.from('discount_campaigns').select('*').eq('is_active', true)
+  ]);
   if (error) throw error;
+  const activeDc = discounts || [];
+
   document.getElementById('pricing-tbody').innerHTML = (data||[]).map(p => {
-    const disc = p.list_price && p.sale_price && p.list_price > p.sale_price
-      ? Math.round((1 - p.sale_price / p.list_price) * 100) + '%'
+    const listPrice = Number(p.list_price || 0);
+    const salePrice = Number(p.sale_price || listPrice);
+    const disc = listPrice > 0 && salePrice < listPrice
+      ? Math.round((1 - salePrice / listPrice) * 100) + '%'
       : '—';
+
+    // Find applicable discount for this course
+    const applicableDisc = activeDc.find(d => !d.course_id || d.course_id === p.course_id);
+    let finalPrice = salePrice;
+    let discLabel = '';
+    if (applicableDisc) {
+      if (applicableDisc.discount_type === 'percentage') {
+        const reduction = Math.min(salePrice * (applicableDisc.discount_value / 100), applicableDisc.max_discount_amount || Infinity);
+        finalPrice = Math.max(0, salePrice - reduction);
+        discLabel = `<span style="font-size:.65rem;background:rgba(74,222,128,.12);color:#4ade80;border:1px solid rgba(74,222,128,.3);padding:.1rem .4rem;border-radius:50px;margin-left:.3rem">-${applicableDisc.discount_value}% "${applicableDisc.campaign_name||''}"</span>`;
+      } else if (applicableDisc.discount_type === 'flat') {
+        finalPrice = Math.max(0, salePrice - applicableDisc.discount_value);
+        discLabel = `<span style="font-size:.65rem;background:rgba(74,222,128,.12);color:#4ade80;border:1px solid rgba(74,222,128,.3);padding:.1rem .4rem;border-radius:50px;margin-left:.3rem">-₹${applicableDisc.discount_value} "${applicableDisc.campaign_name||''}"</span>`;
+      }
+    }
+
+    const gstAmount = Math.round(finalPrice * 0.18);
+    const totalWithGst = finalPrice + gstAmount;
+
     return `<tr>
       <td>${p.courses?.title||'—'}</td>
       <td><span class="badge badge-blue">${p.pricing_type?.replace(/_/g,' ')||'—'}</span></td>
       <td>${fmtCurr(p.list_price)}</td>
-      <td>${p.sale_price ? fmtCurr(p.sale_price) : '—'}</td>
+      <td>
+        <span style="font-weight:700">${fmtCurr(salePrice)}</span>${discLabel}
+        ${applicableDisc ? `<div style="font-size:.72rem;margin-top:.2rem"><span style="color:#4ade80;font-weight:700">→ ${fmtCurr(finalPrice)}</span> <span style="color:rgba(200,191,255,.35)">+GST = ${fmtCurr(totalWithGst)}</span></div>` : ''}
+      </td>
       <td>${disc}</td>
       <td>${p.emi_installments ? p.emi_installments + ' months' : '—'}</td>
       <td>${statusBadge(p.is_active ? 'active' : 'paused')}</td>
@@ -3015,6 +3741,84 @@ async function deleteDiscount(id) {
   loadDiscounts();
 }
 
+// ===== REFERRALS =====
+let _allReferralRows = [];
+
+async function loadReferrals() {
+  const [{ data: logs }, { data: topUsers }] = await Promise.all([
+    db.client.from('referral_logs')
+      .select(`
+        id, referral_code_used, points_to_referrer, points_to_referee, status, created_at,
+        referrer:referrer_user_id ( full_name, email ),
+        referee:referred_user_id ( full_name, email )
+      `)
+      .order('created_at', { ascending: false })
+      .limit(500),
+    db.client.from('user_profiles')
+      .select('user_id, full_name, email, phone, referral_code, reward_points')
+      .gt('reward_points', 0)
+      .order('reward_points', { ascending: false })
+      .limit(50),
+  ]);
+
+  // Summary
+  const totalPts = (topUsers || []).reduce((s, u) => s + (u.reward_points || 0), 0);
+  document.getElementById('ref-total-count').textContent = (logs || []).length;
+  document.getElementById('ref-total-points').textContent = totalPts;
+  document.getElementById('ref-top-count').textContent = topUsers?.[0]
+    ? topUsers[0].reward_points + ' pts'
+    : '—';
+
+  // Referral log table
+  _allReferralRows = logs || [];
+  renderReferralTable(_allReferralRows);
+
+  // Top referrers
+  const tiers = [[100,199,'🥉'],[200,299,'🥈'],[300,499,'🥇'],[500,799,'💎'],[800,Infinity,'👑']];
+  function getTierLabel(pts) {
+    const t = tiers.find(([min,max]) => pts >= min && pts <= max);
+    return t ? t[2] + ' ' + t[0] + '+ pts' : pts > 0 ? '🌱 <100 pts' : '—';
+  }
+  document.getElementById('top-referrers-tbody').innerHTML = (topUsers || []).map((u, i) => {
+    const refCount = (logs || []).filter(l => l.referrer?.email === u.email).length;
+    return `<tr>
+      <td><strong>${i + 1}</strong></td>
+      <td>${escHtml(u.full_name || '—')}</td>
+      <td style="font-size:.8rem;">${escHtml(u.email || '—')}</td>
+      <td style="font-family:monospace;font-size:.8rem;">${u.phone ? escHtml(u.phone) : '<span style="color:rgba(200,191,255,.3)">—</span>'}</td>
+      <td><code style="background:rgba(124,92,252,.15);padding:.1rem .45rem;border-radius:6px;font-size:.82rem;">${escHtml(u.referral_code || '—')}</code></td>
+      <td>${refCount}</td>
+      <td><strong style="color:var(--v1)">${u.reward_points}</strong></td>
+      <td>${getTierLabel(u.reward_points)}</td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="8" class="table-empty">No referrals yet</td></tr>';
+}
+
+function renderReferralTable(rows) {
+  document.getElementById('referral-tbody').innerHTML = rows.map(r => `
+    <tr>
+      <td>${escHtml(r.referrer?.full_name || '—')}<br><span style="font-size:.72rem;color:rgba(200,191,255,.4);">${escHtml(r.referrer?.email || '')}</span></td>
+      <td>${escHtml(r.referee?.full_name || '—')}<br><span style="font-size:.72rem;color:rgba(200,191,255,.4);">${escHtml(r.referee?.email || '')}</span></td>
+      <td><code style="background:rgba(124,92,252,.12);padding:.1rem .4rem;border-radius:5px;">${escHtml(r.referral_code_used)}</code></td>
+      <td style="color:#4ade80;font-weight:700;">+${r.points_to_referrer}</td>
+      <td style="color:#60a5fa;font-weight:700;">+${r.points_to_referee}</td>
+      <td style="font-size:.78rem;">${fmtDate(r.created_at)}</td>
+      <td>${statusBadge(r.status)}</td>
+    </tr>`).join('') || '<tr><td colspan="7" class="table-empty">No referrals logged yet</td></tr>';
+}
+
+function filterReferralTable(q) {
+  const term = (q || '').toLowerCase();
+  if (!term) { renderReferralTable(_allReferralRows); return; }
+  renderReferralTable(_allReferralRows.filter(r =>
+    (r.referrer?.full_name || '').toLowerCase().includes(term) ||
+    (r.referrer?.email || '').toLowerCase().includes(term) ||
+    (r.referee?.full_name || '').toLowerCase().includes(term) ||
+    (r.referee?.email || '').toLowerCase().includes(term) ||
+    (r.referral_code_used || '').toLowerCase().includes(term)
+  ));
+}
+
 async function saveBatch() {
   const id = document.getElementById('batch-id').value;
   const courseId = document.getElementById('b-course').value;
@@ -3122,12 +3926,28 @@ function initRealtime() {
   });
 }
 
+// ===== SIDEBAR TOGGLE =====
+(function setupSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebar-overlay');
+  const btn     = document.getElementById('hamburger-btn');
+  function open()   { sidebar.classList.add('open');    overlay.classList.add('show');    document.body.style.overflow = 'hidden'; }
+  function close()  { sidebar.classList.remove('open'); overlay.classList.remove('show'); document.body.style.overflow = ''; }
+  function toggle() { sidebar.classList.contains('open') ? close() : open(); }
+  btn?.addEventListener('click', toggle);
+  overlay?.addEventListener('click', close);
+  document.querySelectorAll('.nav-item[data-section]').forEach(el => {
+    el.addEventListener('click', () => { if (window.innerWidth < 1024) close(); });
+  });
+  window.addEventListener('resize', () => { if (window.innerWidth >= 1024) close(); });
+})();
+
 // ===== ADMIN KEYBOARD SHORTCUTS =====
 (function setupAdminKeys() {
   const SECTIONS = [
     'dashboard','courses','categories','users','mentors',
     'enrollments','batches','payments','emi','pricing',
-    'discounts','reports','recordings','schedules',
+    'discounts','referrals','reports','recordings','schedules',
     'reviews','forms','inquiries',
   ];
   // Map single letter shortcuts → section keys (used with Alt)

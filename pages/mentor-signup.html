@@ -326,7 +326,7 @@
             🎓 Access to mentor dashboard granted
           </div>
         </div>
-        <a href="../index.html"><button class="btn-next">← Back to Home</button></a>
+        <a href="../"><button class="btn-next">← Back to Home</button></a>
       </div>
     </div>
 
@@ -338,6 +338,7 @@
 <script src="../config/supabase-config.js"></script>
 <script src="../js/theme.js"></script>
 <script src="../js/profile-nav.js"></script>
+<script src="../js/qr-share.js"></script>
 <script>
 const db = new SupabaseConfig();
 let currentStep = 1;
@@ -354,7 +355,30 @@ const USERNAME_RE = /^[a-zA-Z0-9._-]{3,30}$/;
 const PASSWORD_RE = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
 const PAN_RE = /^[A-Z]{5}[0-9]{4}[A-Z]$/;
 const AADHAAR_RE = /^[0-9]{12}$/;
-if (window.emailjs) window.emailjs.init(EMAILJS_PUBLIC_KEY);
+
+// ── Client-side OTP state (no RPC dependency) ──
+let _otpCode = null;
+let _otpExpiry = 0;
+let _otpAttempts = 0;
+const OTP_TTL_MS = 10 * 60 * 1000; // 10 minutes
+const OTP_MAX_ATTEMPTS = 5;
+
+function generateOtp() {
+  return String(Math.floor(100000 + Math.random() * 900000));
+}
+
+function otpIsValid(entered) {
+  if (!_otpCode) return false;
+  if (Date.now() > _otpExpiry) return false;
+  if (_otpAttempts >= OTP_MAX_ATTEMPTS) return false;
+  _otpAttempts++;
+  return entered === _otpCode;
+}
+
+if (typeof emailjs !== 'undefined') emailjs.init(EMAILJS_PUBLIC_KEY);
+else document.addEventListener('DOMContentLoaded', () => {
+  if (window.emailjs) window.emailjs.init(EMAILJS_PUBLIC_KEY);
+});
 
 document.addEventListener('DOMContentLoaded', async () => {
   try {
@@ -367,14 +391,26 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 async function sendEmailOtp(email, name, otp) {
-  if (!window.emailjs) throw new Error('Email service not ready. Refresh and try again.');
-  return window.emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+  const ejs = window.emailjs;
+  if (!ejs) throw new Error('Email service not ready. Please refresh the page and try again.');
+  return ejs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
     email,
+    to_email: email,
     name,
     to_name: name,
     otp,
-    otp_code: otp
+    otp_code: otp,
+    message: `Your SkillUpNow mentor verification code is: ${otp}. Valid for 10 minutes.`
   }, EMAILJS_PUBLIC_KEY);
+}
+
+async function sendAndStoreOtp(email, name) {
+  const otp = generateOtp();
+  _otpCode = otp;
+  _otpExpiry = Date.now() + OTP_TTL_MS;
+  _otpAttempts = 0;
+  await sendEmailOtp(email, name, otp);
+  return otp;
 }
 
 function setStep(n) {
@@ -455,13 +491,16 @@ async function goStep3() {
   document.getElementById('m-aadhaar').value = aadhaarNumber;
   const email = document.getElementById('m-email').value.trim().toLowerCase();
   document.getElementById('phone-display').textContent = email;
+  const sendBtn = document.querySelector('#step3 .btn-next');
+  if (sendBtn) { sendBtn.disabled = true; sendBtn.textContent = 'Sending OTP…'; }
   try {
-    const otpReq = await db.requestSignupOtp(email);
-    if (!otpReq.success || !otpReq.data?.otp) throw new Error(otpReq.error || 'Failed to send verification email.');
-    await sendEmailOtp(email, document.getElementById('m-fullname').value.trim() || 'Mentor', otpReq.data.otp);
+    const name = document.getElementById('m-fullname').value.trim() || 'Mentor';
+    await sendAndStoreOtp(email, name);
     setStep(4);
   } catch (err) {
-    showErr(err.message || 'Unable to send verification email. Please try again.');
+    showErr(err.message || 'Unable to send verification email. Please try again. Check your internet connection.');
+  } finally {
+    if (sendBtn) { sendBtn.disabled = false; sendBtn.textContent = 'Continue →'; }
   }
 }
 
@@ -472,13 +511,14 @@ function otpNav(el, prevId, nextId) {
 
 async function resendOtp() {
   const email = document.getElementById('m-email').value.trim().toLowerCase();
+  const name = document.getElementById('m-fullname').value.trim() || 'Mentor';
   try {
-    const otpReq = await db.requestSignupOtp(email);
-    if (!otpReq.success || !otpReq.data?.otp) throw new Error(otpReq.error || 'Failed to resend OTP.');
-    await sendEmailOtp(email, document.getElementById('m-fullname').value.trim() || 'Mentor', otpReq.data.otp);
-    alert('OTP resent to ' + email);
+    await sendAndStoreOtp(email, name);
+    const el = document.getElementById('suc-alert');
+    el.textContent = 'OTP resent to ' + email; el.classList.add('show');
+    setTimeout(() => el.classList.remove('show'), 4000);
   } catch (err) {
-    showErr(err.message || 'Unable to resend OTP right now.');
+    showErr(err.message || 'Unable to resend OTP right now. Check your internet connection.');
   }
 }
 
@@ -491,28 +531,42 @@ async function submitApplication() {
   submitBtn.textContent = 'Submitting...';
   try {
     const email = document.getElementById('m-email').value.trim().toLowerCase();
-    const verifyRes = await db.verifySignupOtp(email, otp);
-    if (!verifyRes.success) throw new Error(verifyRes.error || 'Invalid or expired OTP.');
+    // Client-side OTP verification (no RPC required)
+    if (!otpIsValid(otp)) {
+      const expired = Date.now() > _otpExpiry;
+      throw new Error(expired ? 'OTP has expired. Please click Resend OTP.' : 'Invalid OTP. Please check and try again.');
+    }
 
     let currentUser = existingUser;
     if (!currentUser) {
       const password = document.getElementById('m-pass').value;
-      const signupRes = await db.registerVerifiedUser({
-        email,
-        password,
-        full_name: document.getElementById('m-fullname').value.trim(),
-        username: document.getElementById('m-username').value.trim(),
-        phone: document.getElementById('m-phone').value.trim(),
-        role: 'user',
-        metadata: {
-          requested_role: 'mentor'
-        }
-      });
-      if (!signupRes.success) throw new Error(signupRes.error || 'Unable to create mentor account.');
+      const fullName = document.getElementById('m-fullname').value.trim();
+      const username = document.getElementById('m-username').value.trim();
+      const phone = document.getElementById('m-phone').value.trim();
 
-      const loginRes = await db.signIn(email, password);
-      if (!loginRes.success) throw new Error(loginRes.error || 'Account created, but automatic sign-in failed.');
-      currentUser = loginRes.data?.user || loginRes.user;
+      // Try RPC first, fall back to native signUp
+      let signedUpUser = null;
+      const signupRes = await db.registerVerifiedUser({
+        email, password, full_name: fullName, username, phone,
+        role: 'user', metadata: { requested_role: 'mentor' }
+      });
+      if (signupRes.success) {
+        const loginRes = await db.signIn(email, password);
+        if (!loginRes.success) throw new Error(loginRes.error || 'Account created but sign-in failed. Please sign in manually.');
+        signedUpUser = loginRes.data?.user || loginRes.user;
+      } else {
+        // Fallback: native Supabase signUp
+        const { data: sbData, error: sbErr } = await db.client.auth.signUp({
+          email, password,
+          options: { data: { full_name: fullName, username, phone, role: 'user', requested_role: 'mentor' } }
+        });
+        if (sbErr) throw new Error(sbErr.message || 'Unable to create mentor account.');
+        // If email confirmation enabled, sign in immediately
+        const { data: loginData, error: loginErr } = await db.client.auth.signInWithPassword({ email, password });
+        if (loginErr) throw new Error('Account created. Please verify your email then sign in to complete your mentor profile.');
+        signedUpUser = loginData?.user;
+      }
+      currentUser = signedUpUser;
       existingUser = currentUser;
     }
 

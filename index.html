@@ -412,8 +412,81 @@
   <script>
     if (window.location.protocol !== 'file:') {
       var p = window.location.pathname;
-      if (p.endsWith('.html')) history.replaceState(null, '', p.replace(/\.html$/, '').replace(/\/index$/, '/'));
+      if (p.endsWith('.html')) history.replaceState(null, '', p.replace(/\.html$/, '').replace(/\/index$/, '/') || '/');
     }
+  </script>
+  <!-- Email verification token handler (Supabase PKCE + implicit flow) -->
+  <script>
+  (function() {
+    var hash = window.location.hash;
+    var search = window.location.search;
+    var isVerification = false;
+
+    // PKCE flow: ?code=xxx
+    var codeMatch = search.match(/[?&]code=([^&]+)/);
+    // Implicit flow: #access_token=xxx&type=signup
+    var tokenMatch = hash.match(/access_token=([^&]+)/);
+    var typeMatch  = hash.match(/type=([^&]+)/);
+
+    if (codeMatch || (tokenMatch && typeMatch && decodeURIComponent(typeMatch[1]) === 'signup')) {
+      isVerification = true;
+    }
+
+    if (!isVerification) return;
+
+    // Show a verification banner immediately (before JS loads)
+    document.addEventListener('DOMContentLoaded', function() {
+      var banner = document.createElement('div');
+      banner.id = 'email-verify-banner';
+      banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:99999;background:linear-gradient(135deg,#7c5cfc,#3d6bff);color:#fff;text-align:center;padding:1rem 1.5rem;font-size:.95rem;font-weight:600;box-shadow:0 4px 20px rgba(124,92,252,.4);';
+      banner.textContent = 'Verifying your email address…';
+      document.body.prepend(banner);
+
+      // Wait for Supabase client to be ready, then exchange/set session
+      var attempts = 0;
+      var iv = setInterval(async function() {
+        attempts++;
+        var client = window.supabaseConfig?.client;
+        if (!client && attempts < 30) return;
+        clearInterval(iv);
+        try {
+          var session = null;
+          if (codeMatch) {
+            // PKCE: exchange code for session
+            var result = await client.auth.exchangeCodeForSession(decodeURIComponent(codeMatch[1]));
+            if (result.error) throw result.error;
+            session = result.data?.session;
+          } else if (tokenMatch) {
+            // Implicit: set session from hash tokens
+            var refreshMatch = hash.match(/refresh_token=([^&]+)/);
+            var result2 = await client.auth.setSession({
+              access_token: decodeURIComponent(tokenMatch[1]),
+              refresh_token: refreshMatch ? decodeURIComponent(refreshMatch[1]) : ''
+            });
+            if (result2.error) throw result2.error;
+            session = result2.data?.session;
+          }
+          // Mark email as verified in user_profiles
+          if (session?.user?.id && window.supabaseConfig) {
+            await window.supabaseConfig.client.from('user_profiles')
+              .update({ is_email_verified: true, updated_at: new Date().toISOString() })
+              .eq('user_id', session.user.id);
+          }
+          banner.style.background = 'linear-gradient(135deg,#22c55e,#16a34a)';
+          banner.textContent = '✅ Email verified! Redirecting to your dashboard…';
+          // Clean URL
+          history.replaceState(null, '', window.location.pathname);
+          setTimeout(function() {
+            window.location.href = 'pages/profile';
+          }, 1800);
+        } catch(err) {
+          banner.style.background = 'linear-gradient(135deg,#ef4444,#dc2626)';
+          banner.textContent = '❌ Verification failed: ' + (err.message || 'Invalid or expired link. Please request a new one.');
+          setTimeout(function() { banner.remove(); }, 6000);
+        }
+      }, 200);
+    });
+  })();
   </script>
 </head>
 <body>
@@ -477,13 +550,13 @@
 
       <div class="hero-actions" style="animation: fadeUp 0.7s 0.3s ease both; margin-bottom: 2.2rem;">
         <div style="display: flex; gap: 1.5rem; flex-wrap: wrap; justify-content: flex-start; align-items: center;">
-          <a href="pages/courses.html" class="btn-grad" style="min-width: 190px; padding: 1rem 2.2rem; font-size: 1rem; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; box-shadow: 0 0 28px rgba(124,92,252,0.45), 0 8px 28px rgba(124,92,252,0.28); transition: all 0.3s cubic-bezier(0.4,0,0.2,1);"
+          <a href="pages/courses" class="btn-grad" style="min-width: 190px; padding: 1rem 2.2rem; font-size: 1rem; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; box-shadow: 0 0 28px rgba(124,92,252,0.45), 0 8px 28px rgba(124,92,252,0.28); transition: all 0.3s cubic-bezier(0.4,0,0.2,1);"
             onmouseover="this.style.boxShadow='0 0 48px rgba(124,92,252,0.7), 0 12px 40px rgba(124,92,252,0.45)';this.style.transform='translateY(-3px)'"
             onmouseout="this.style.boxShadow='0 0 28px rgba(124,92,252,0.45), 0 8px 28px rgba(124,92,252,0.28)';this.style.transform=''">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
             Explore Courses
           </a>
-          <a href="pages/contact-enquiry.html" class="btn-outline" style="min-width: 190px; padding: 1rem 2.2rem; font-size: 1rem; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; transition: all 0.3s cubic-bezier(0.4,0,0.2,1);"
+          <a href="pages/contact-enquiry" class="btn-outline" style="min-width: 190px; padding: 1rem 2.2rem; font-size: 1rem; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; transition: all 0.3s cubic-bezier(0.4,0,0.2,1);"
             onmouseover="this.style.boxShadow='0 0 32px rgba(61,107,255,0.4), 0 8px 28px rgba(61,107,255,0.22)';this.style.transform='translateY(-3px)'"
             onmouseout="this.style.boxShadow='';this.style.transform=''">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
@@ -650,7 +723,7 @@
           <span style="display:inline-block;padding:.25rem .9rem;background:rgba(124,92,252,.1);border:1px solid rgba(124,92,252,.25);border-radius:50px;font-size:.72rem;font-weight:700;color:var(--v1);letter-spacing:.07em;text-transform:uppercase;margin-bottom:.7rem;">Live Programmes</span>
           <h2 style="font-family:'Cormorant Garamond',serif;font-size:clamp(1.8rem,3.5vw,2.6rem);font-weight:700;color:var(--txt);margin:0;line-height:1.15;">Courses <span style="background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Available Now</span></h2>
         </div>
-        <a href="pages/courses.html" class="btn-outline" style="display:inline-flex;align-items:center;gap:.5rem;white-space:nowrap;">
+        <a href="pages/courses" class="btn-outline" style="display:inline-flex;align-items:center;gap:.5rem;white-space:nowrap;">
           View All
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
         </a>
@@ -688,7 +761,7 @@
             <div style="width: 1px; height: 36px; background: var(--border);"></div>
             <div style="font-size: .78rem; color: #fbbf24;"><div style="font-weight: 700;">🕐 Ends in</div><div id="offer-timer-1" style="font-size: 1rem; font-weight: 800; font-family: monospace; color: #ef4444;">48:00:00</div></div>
           </div>
-          <a href="pages/contact-enquiry.html" class="liquid-btn" style="width: 100%; justify-content: center; padding: .85rem;">Claim Offer →</a>
+          <a href="pages/contact-enquiry" class="liquid-btn" style="width: 100%; justify-content: center; padding: .85rem;">Claim Offer →</a>
         </div>
 
         <!-- Offer 2 -->
@@ -701,7 +774,7 @@
             <div style="width: 1px; height: 36px; background: var(--border);"></div>
             <div style="font-size: .78rem; color: var(--txt4);"><div style="font-weight: 700; color: #4ade80;">✓ 0% Interest</div><div>6 months plan</div></div>
           </div>
-          <a href="pages/emi-application.html" class="liquid-btn" style="width: 100%; justify-content: center; padding: .85rem; background: linear-gradient(135deg, rgba(0,207,238,0.85), rgba(61,107,255,0.85));">Apply for EMI →</a>
+          <a href="pages/emi-application" class="liquid-btn" style="width: 100%; justify-content: center; padding: .85rem; background: linear-gradient(135deg, rgba(0,207,238,0.85), rgba(61,107,255,0.85));">Apply for EMI →</a>
         </div>
 
         <!-- Offer 3 -->
@@ -714,7 +787,7 @@
             <div style="width: 1px; height: 36px; background: var(--border);"></div>
             <div style="font-size: .78rem; color: var(--txt4);"><div style="font-weight: 700; color: #4ade80;">✓ Unlimited</div><div>referrals allowed</div></div>
           </div>
-          <a href="pages/contact-enquiry.html" class="liquid-btn" style="width: 100%; justify-content: center; padding: .85rem; background: linear-gradient(135deg, rgba(74,222,128,0.85), rgba(16,185,129,0.85));">Refer Now →</a>
+          <a href="pages/contact-enquiry" class="liquid-btn" style="width: 100%; justify-content: center; padding: .85rem; background: linear-gradient(135deg, rgba(74,222,128,0.85), rgba(16,185,129,0.85));">Refer Now →</a>
         </div>
 
         <!-- Offer 4 -->
@@ -727,7 +800,7 @@
             <div style="width: 1px; height: 36px; background: var(--border);"></div>
             <div style="font-size: .78rem; color: var(--txt4);"><div style="font-weight: 700; color: #a855f7;">✓ Any 2 courses</div><div>choose freely</div></div>
           </div>
-          <a href="pages/courses.html" class="liquid-btn" style="width: 100%; justify-content: center; padding: .85rem; background: linear-gradient(135deg, rgba(168,85,247,0.85), rgba(236,72,153,0.85));">View Bundles →</a>
+          <a href="pages/courses" class="liquid-btn" style="width: 100%; justify-content: center; padding: .85rem; background: linear-gradient(135deg, rgba(168,85,247,0.85), rgba(236,72,153,0.85));">View Bundles →</a>
         </div>
 
       </div>
@@ -744,7 +817,7 @@
 
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2.5rem;">
         <!-- Browse Courses -->
-        <a href="pages/courses.html" class="platform-card">
+        <a href="pages/courses" class="platform-card">
           <div style="position: absolute; inset: 0; background: linear-gradient(135deg, rgba(124,92,252,0.08), transparent); opacity: 0; transition: opacity 0.35s ease;"></div>
           <div style="position: relative; z-index: 1;">
             <div class="platform-icon" style="background: linear-gradient(135deg, var(--v1) 0%, var(--v2) 100%); animation-delay: 0s;">📚</div>
@@ -757,7 +830,7 @@
         </a>
 
         <!-- Fee Enquiry -->
-        <a href="pages/contact-enquiry.html" class="platform-card">
+        <a href="pages/contact-enquiry" class="platform-card">
           <div style="position: absolute; inset: 0; background: linear-gradient(135deg, rgba(61,107,255,0.08), transparent); opacity: 0; transition: opacity 0.35s ease;"></div>
           <div style="position: relative; z-index: 1;">
             <div class="platform-icon" style="background: linear-gradient(135deg, var(--b1) 0%, var(--b2) 100%); animation-delay: 0.5s;">💳</div>
@@ -770,7 +843,7 @@
         </a>
 
         <!-- Course Registration -->
-        <a href="pages/quick-registration.html" style="text-decoration: none; display: flex; flex-direction: column; background: var(--panel); border: 1.5px solid var(--border); border-radius: var(--r2); padding: 2rem; transition: all 0.35s cubic-bezier(0.4,0,0.2,1); position: relative; overflow: hidden;">
+        <a href="pages/quick-registration" style="text-decoration: none; display: flex; flex-direction: column; background: var(--panel); border: 1.5px solid var(--border); border-radius: var(--r2); padding: 2rem; transition: all 0.35s cubic-bezier(0.4,0,0.2,1); position: relative; overflow: hidden;">
           <div style="position: absolute; inset: 0; background: linear-gradient(135deg, rgba(124,92,252,0.08), transparent); opacity: 0; transition: opacity 0.35s ease;"></div>
           <div style="position: relative; z-index: 1;">
             <div class="platform-icon" style="background: linear-gradient(135deg, #ff8c5a 0%, #ff6b35 100%); animation-delay: 1s;">✍️</div>
@@ -783,7 +856,7 @@
         </a>
 
         <!-- EMI Application -->
-        <a href="pages/emi-application.html" class="platform-card">
+        <a href="pages/emi-application" class="platform-card">
           <div style="position: absolute; inset: 0; background: linear-gradient(135deg, rgba(16,185,129,0.08), transparent); opacity: 0; transition: opacity 0.35s ease;"></div>
           <div style="position: relative; z-index: 1;">
             <div class="platform-icon" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); animation-delay: 1.5s;">💰</div>
@@ -796,7 +869,7 @@
         </a>
 
         <!-- Payment & Checkout -->
-        <a href="pages/payment.html" class="platform-card">
+        <a href="pages/payment" class="platform-card">
           <div style="position: absolute; inset: 0; background: linear-gradient(135deg, rgba(168,85,247,0.08), transparent); opacity: 0; transition: opacity 0.35s ease;"></div>
           <div style="position: relative; z-index: 1;">
             <div class="platform-icon" style="background: linear-gradient(135deg, #a855f7 0%, #9333ea 100%); animation-delay: 2s;">🛒</div>
@@ -809,7 +882,7 @@
         </a>
 
         <!-- Student Feedback -->
-        <a href="pages/feedback.html" class="platform-card">
+        <a href="pages/feedback" class="platform-card">
           <div style="position: absolute; inset: 0; background: linear-gradient(135deg, rgba(59,130,246,0.08), transparent); opacity: 0; transition: opacity 0.35s ease;"></div>
           <div style="position: relative; z-index: 1;">
             <div class="platform-icon" style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); animation-delay: 2.5s;">⭐</div>
@@ -907,7 +980,7 @@
           <h3 style="font-family: 'Cormorant Garamond', serif; font-size: clamp(1.8rem, 3vw, 2.6rem); font-weight: 700; color: var(--txt); margin-bottom: 1.2rem; line-height: 1.2;">Why Professionals <span style="background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Choose Us</span></h3>
           <p style="font-size: 0.97rem; color: var(--txt3); line-height: 1.8; margin-bottom: 1.5rem;">Founded by seasoned HR leaders and communication coaches, SkillUpNow was built on a simple insight: technical talent alone no longer guarantees career success. The differentiator is how you communicate, collaborate, and lead.</p>
           <p style="font-size: 0.97rem; color: var(--txt3); line-height: 1.8; margin-bottom: 2rem;">Our live cohort model ensures you don't just watch videos — you practice real scenarios, get expert feedback, and build lasting professional habits in a supportive community.</p>
-          <a href="pages/courses.html" class="btn-grad" style="display: inline-flex; align-items: center; gap: 0.5rem;">Explore Our Courses <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+          <a href="pages/courses" class="btn-grad" style="display: inline-flex; align-items: center; gap: 0.5rem;">Explore Our Courses <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
         </div>
         <div style="display: flex; flex-direction: column; gap: 1.2rem;">
           <div style="background: var(--panel); border: 1.5px solid var(--border); border-radius: var(--r2); padding: 1.4rem 1.6rem; display: flex; align-items: flex-start; gap: 1rem; transition: border-color 0.25s, transform 0.25s;">
@@ -1070,11 +1143,11 @@
         </div>
         <!-- CTA -->
         <div style="display:flex;gap:1rem;flex-wrap:wrap;">
-          <a id="hcm-enroll-link" href="pages/courses.html" class="btn-grad" style="flex:1;text-align:center;justify-content:center;padding:.9rem 1.5rem;font-size:.95rem;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:.5rem;min-width:140px;">
+          <a id="hcm-enroll-link" href="pages/courses" class="btn-grad" style="flex:1;text-align:center;justify-content:center;padding:.9rem 1.5rem;font-size:.95rem;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:.5rem;min-width:140px;">
             Enroll Now
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
           </a>
-          <a href="pages/contact-enquiry.html" class="btn-outline" style="flex:1;text-align:center;justify-content:center;padding:.9rem 1.5rem;font-size:.95rem;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:.5rem;min-width:140px;">Get Fee Quote</a>
+          <a href="pages/contact-enquiry" class="btn-outline" style="flex:1;text-align:center;justify-content:center;padding:.9rem 1.5rem;font-size:.95rem;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:.5rem;min-width:140px;">Get Fee Quote</a>
         </div>
       </div>
     </div>
@@ -1084,7 +1157,7 @@
   function handleEnrollClick(courseId) {
     if (window.profileNav && window.profileNav.currentUser) {
       // User is logged in — go to courses page with course pre-selected
-      window.location.href = 'pages/courses.html?enroll=' + encodeURIComponent(courseId);
+      window.location.href = 'pages/courses?enroll=' + encodeURIComponent(courseId);
     } else {
       // Not logged in — open login modal with redirect note
       window._enrollAfterLogin = courseId;
@@ -1154,7 +1227,7 @@
             <span>User Login</span>
             <span style="font-size:0.72rem;font-weight:400;color:var(--txt3);">For students &amp; learners</span>
           </button>
-          <button onclick="window.location.href='pages/admin-login.html'" style="display:flex;flex-direction:column;align-items:center;gap:0.75rem;padding:1.5rem 1rem;background:rgba(61,107,255,0.07);border:1.5px solid rgba(61,107,255,0.22);border-radius:14px;color:var(--txt);font-weight:700;font-size:0.9rem;cursor:pointer;transition:all 0.22s;" onmouseover="this.style.background='rgba(61,107,255,0.18)';this.style.borderColor='rgba(61,107,255,0.6)';this.style.transform='translateY(-3px)'" onmouseout="this.style.background='rgba(61,107,255,0.07)';this.style.borderColor='rgba(61,107,255,0.22)';this.style.transform=''">
+          <button onclick="window.location.href='pages/admin-login'" style="display:flex;flex-direction:column;align-items:center;gap:0.75rem;padding:1.5rem 1rem;background:rgba(61,107,255,0.07);border:1.5px solid rgba(61,107,255,0.22);border-radius:14px;color:var(--txt);font-weight:700;font-size:0.9rem;cursor:pointer;transition:all 0.22s;" onmouseover="this.style.background='rgba(61,107,255,0.18)';this.style.borderColor='rgba(61,107,255,0.6)';this.style.transform='translateY(-3px)'" onmouseout="this.style.background='rgba(61,107,255,0.07)';this.style.borderColor='rgba(61,107,255,0.22)';this.style.transform=''">
             <span style="font-size:2rem;">🎓</span>
             <span>Mentor Login</span>
             <span style="font-size:0.72rem;font-weight:400;color:var(--txt3);">For instructors &amp; admins</span>
@@ -1256,6 +1329,19 @@
           <label>Password</label>
           <input id="reg-password" type="password" placeholder="Minimum 6 characters" style="background: rgba(255,255,255,0.04); border: 1px solid var(--border); color: var(--txt); padding: 0.8rem 1rem; border-radius: var(--r2); font-size: 0.9rem; width:100%;"/>
         </div>
+        <div class="form-group">
+          <label style="display:flex;align-items:center;gap:.4rem;">
+            Referral Code
+            <span style="font-size:.7rem;color:var(--txt4);font-weight:400;">(optional — earn 10 reward points)</span>
+          </label>
+          <div style="position:relative;">
+            <input id="reg-referral" type="text" placeholder="Enter friend's referral code" maxlength="12"
+              style="background:rgba(255,255,255,0.04);border:1px solid var(--border);color:var(--txt);padding:0.8rem 2.8rem 0.8rem 1rem;border-radius:var(--r2);font-size:0.9rem;width:100%;text-transform:uppercase;letter-spacing:.08em;"
+              oninput="this.value=this.value.toUpperCase()" />
+            <span id="ref-status" style="position:absolute;right:.8rem;top:50%;transform:translateY(-50%);font-size:.85rem;"></span>
+          </div>
+          <div id="ref-msg" style="font-size:.74rem;margin-top:.25rem;"></div>
+        </div>
 
         <button class="btn-grad" style="width: 100%; padding: 0.95rem;" onclick="submitRegister()">Create My Account</button>
 
@@ -1335,7 +1421,7 @@
             const adminCheck = await window.supabaseConfig.checkAdminAccess(result.data.user.id);
             if (adminCheck && adminCheck.isAdmin) {
               if (window.app) window.app.showNotification('Welcome, Admin! Redirecting to panel...', 'success');
-              setTimeout(() => { window.location.href = 'pages/admin-dashboard.html'; }, 1200);
+              setTimeout(() => { window.location.href = 'pages/admin-dashboard'; }, 1200);
               return;
             }
           } catch(e) { /* not admin, continue */ }
@@ -1429,15 +1515,52 @@
       document.querySelectorAll('#' + formId + ' input, #' + formId + ' select').forEach(f => f.style.borderColor = '');
     }
 
+    // Validate referral code on blur (debounced)
+    (function() {
+      const inp = document.getElementById('reg-referral');
+      if (!inp) return;
+      let _timer;
+      inp.addEventListener('input', () => {
+        clearTimeout(_timer);
+        const val = inp.value.trim();
+        document.getElementById('ref-status').textContent = '';
+        document.getElementById('ref-msg').textContent = '';
+        if (!val) return;
+        _timer = setTimeout(() => validateReferralCode(val), 600);
+      });
+    })();
+
+    async function validateReferralCode(code) {
+      if (!code || !window.supabaseConfig?.client) return;
+      const statusEl = document.getElementById('ref-status');
+      const msgEl    = document.getElementById('ref-msg');
+      statusEl.textContent = '⏳';
+      const { data } = await window.supabaseConfig.client
+        .from('user_profiles')
+        .select('full_name')
+        .eq('referral_code', code.toUpperCase())
+        .maybeSingle();
+      if (data) {
+        statusEl.textContent = '✅';
+        msgEl.style.color = '#4ade80';
+        msgEl.textContent = `Valid — referred by ${data.full_name || 'a friend'}`;
+      } else {
+        statusEl.textContent = '❌';
+        msgEl.style.color = '#f87171';
+        msgEl.textContent = 'Referral code not found.';
+      }
+    }
+
     async function submitRegister() {
       clearAllErrors('rf');
-      const name     = document.getElementById('reg-name').value.trim();
-      const email    = document.getElementById('reg-email').value.trim();
-      const phone    = document.getElementById('reg-phone').value.trim();
-      const city     = document.getElementById('reg-city').value.trim();
-      const state    = document.getElementById('reg-state').value;
-      const gender   = document.getElementById('reg-gender').value;
-      const password = document.getElementById('reg-password').value;
+      const name         = document.getElementById('reg-name').value.trim();
+      const email        = document.getElementById('reg-email').value.trim();
+      const phone        = document.getElementById('reg-phone').value.trim();
+      const city         = document.getElementById('reg-city').value.trim();
+      const state        = document.getElementById('reg-state').value;
+      const gender       = document.getElementById('reg-gender').value;
+      const password     = document.getElementById('reg-password').value;
+      const referralCode = (document.getElementById('reg-referral')?.value || '').trim().toUpperCase();
 
       let hasError = false;
       if (!name)     { showFieldError('reg-name', 'Full name is required'); hasError = true; }
@@ -1449,6 +1572,17 @@
       else if (password.length < 6) { showFieldError('reg-password', 'Password must be at least 6 characters'); hasError = true; }
       if (hasError) return;
 
+      // Validate referral code if entered
+      if (referralCode) {
+        const { data: refData } = await window.supabaseConfig.client
+          .from('user_profiles').select('user_id').eq('referral_code', referralCode).maybeSingle();
+        if (!refData) {
+          const msgEl = document.getElementById('ref-msg');
+          if (msgEl) { msgEl.style.color = '#f87171'; msgEl.textContent = 'Invalid referral code — please check and try again.'; }
+          return;
+        }
+      }
+
       const btn = document.querySelector('#rf button.btn-grad');
       const originalText = btn.textContent;
       btn.disabled = true;
@@ -1459,12 +1593,17 @@
           throw new Error('Database connection is not ready. Please refresh and try again.');
         }
 
-        const redirectTo = window.location.origin + '/index.html';
+        const redirectTo = window.location.origin + '/';
         const { data, error: signUpErr } = await window.supabaseConfig.client.auth.signUp({
           email,
           password,
           options: {
-            data: { full_name: name, phone, city: city || null, state: state || null, gender: gender || null, role: 'user' },
+            data: {
+              full_name: name, phone,
+              city: city || null, state: state || null, gender: gender || null,
+              role: 'user',
+              referred_by_code: referralCode || null
+            },
             emailRedirectTo: redirectTo
           }
         });
@@ -1507,7 +1646,7 @@
     // ==================== HERO CTA SUBMISSION ====================
     async function submitHeroCTA() {
       // Redirect to contact enquiry page for detailed form submission
-      window.location.href = 'pages/contact-enquiry.html';
+      window.location.href = 'pages/contact-enquiry';
     }
 
     // ==================== HERO VISUAL: SCROLL REVEAL + 3D PARALLAX ====================
@@ -1597,7 +1736,7 @@
       btn.disabled = true;
       try {
         const { error } = await window.supabaseConfig.client.auth.resetPasswordForEmail(user.email, {
-          redirectTo: window.location.origin + '/pages/profile.html'
+          redirectTo: window.location.origin + '/pages/profile'
         });
         if (error) throw error;
         msg.style.display = 'block';
@@ -1859,13 +1998,13 @@
             <div style="width:50px;height:50px;border-radius:14px;background:linear-gradient(135deg,var(--v1),var(--v2));display:flex;align-items:center;justify-content:center;font-size:1.4rem;box-shadow:0 4px 16px rgba(124,92,252,.3);">${getIcon(cat)}</div>
             <div style="font-weight:700;color:var(--txt);font-size:.88rem;line-height:1.35;flex:1;">${name}</div>
             ${cat ? `<div style="font-size:.72rem;color:var(--v1);font-weight:600;background:rgba(124,92,252,.08);padding:.2rem .65rem;border-radius:50px;border:1px solid rgba(124,92,252,.2);">${cat}</div>` : ''}
-            <button onclick="window.location.href='pages/courses.html?id=${c.id}'" style="width:100%;padding:.55rem .75rem;background:linear-gradient(135deg,#7c5cfc,#3d6bff);color:#fff;border:none;border-radius:10px;font-size:.78rem;font-weight:700;cursor:pointer;font-family:inherit;transition:opacity .2s;box-shadow:0 4px 12px rgba(124,92,252,.3);" onmouseover="this.style.opacity='.88'" onmouseout="this.style.opacity='1'">View Details</button>
+            <button onclick="window.location.href='pages/courses?id=${c.id}'" style="width:100%;padding:.55rem .75rem;background:linear-gradient(135deg,#7c5cfc,#3d6bff);color:#fff;border:none;border-radius:10px;font-size:.78rem;font-weight:700;cursor:pointer;font-family:inherit;transition:opacity .2s;box-shadow:0 4px 12px rgba(124,92,252,.3);" onmouseover="this.style.opacity='.88'" onmouseout="this.style.opacity='1'">View Details</button>
           </div>`;
         }).join('');
 
         const browseMore = hasMore
           ? `<div style="grid-column:1/-1;text-align:center;padding:.75rem 0 .25rem;">
-               <a href="pages/courses.html" style="display:inline-flex;align-items:center;gap:.4rem;color:var(--v1);font-size:.85rem;font-weight:700;text-decoration:none;padding:.5rem 1.4rem;border:1.5px solid rgba(124,92,252,.3);border-radius:50px;transition:all .2s;" onmouseover="this.style.background='rgba(124,92,252,.08)'" onmouseout="this.style.background=''">
+               <a href="pages/courses" style="display:inline-flex;align-items:center;gap:.4rem;color:var(--v1);font-size:.85rem;font-weight:700;text-decoration:none;padding:.5rem 1.4rem;border:1.5px solid rgba(124,92,252,.3);border-radius:50px;transition:all .2s;" onmouseover="this.style.background='rgba(124,92,252,.08)'" onmouseout="this.style.background=''">
                  Browse all courses
                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                </a>
@@ -1875,7 +2014,7 @@
         grid.innerHTML = cards + browseMore;
       } catch(e) {
         grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--txt4);font-size:.88rem;">
-          Could not load courses — <a href="pages/courses.html" style="color:var(--v1);font-weight:600;">Browse all courses →</a>
+          Could not load courses — <a href="pages/courses" style="color:var(--v1);font-weight:600;">Browse all courses →</a>
         </div>`;
       }
     }

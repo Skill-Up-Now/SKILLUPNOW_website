@@ -1,0 +1,4 @@
+# Netlify clean URL rewrites (200 = internal rewrite, not a redirect)
+# Serve pages without .html extension
+/pages/:page     /pages/:page.html    200
+/:page           /:page.html          200

@@ -211,14 +211,14 @@
   </button>
 
   <div class="divider"><hr><span>New admin account?</span><hr></div>
-  <a href="admin-signup.html" style="display:block;text-align:center;font-size:0.8rem;color:rgba(155,143,255,0.7);text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='#9b8fff'" onmouseout="this.style.color='rgba(155,143,255,0.7)'">Create admin account with invite code →</a>
+  <a href="admin-signup" style="display:block;text-align:center;font-size:0.8rem;color:rgba(155,143,255,0.7);text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='#9b8fff'" onmouseout="this.style.color='rgba(155,143,255,0.7)'">Create admin account with invite code →</a>
 
   <div class="card-footer">
     <div class="ssl-note">
       <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
       256-bit SSL encrypted · Authorized personnel only
     </div>
-    <a href="../index.html">← Return to Website</a>
+    <a href="../">← Return to Website</a>
   </div>
 </div>
 </main>
@@ -326,7 +326,7 @@ async function doLogin() {
     }));
 
     showSuc('Welcome back! Redirecting to dashboard…');
-    setTimeout(() => { window.location.href = 'admin-dashboard.html'; }, 700);
+    setTimeout(() => { window.location.href = 'admin-dashboard'; }, 700);
 
   } catch (err) {
     showErr(err.message || 'Authentication failed. Please try again.');
@@ -354,7 +354,7 @@ document.addEventListener('DOMContentLoaded', () => {
         .select('role').eq('user_id', session.user.id)
         .in('role', ADMIN_ROLES).eq('is_active', true).maybeSingle();
       if (ADMIN_ROLES.includes(profile?.role) || ADMIN_ROLES.includes(roleRow?.role)) {
-        window.location.href = 'admin-dashboard.html';
+        window.location.href = 'admin-dashboard';
       }
     } catch (_) {}
   })();

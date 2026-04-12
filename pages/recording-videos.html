@@ -332,14 +332,20 @@
       border: none;
       pointer-events: auto;
     }
-    /* Disable download controls on native video */
-    .rv-modal-video video {
-      -webkit-media-controls-download-button: none;
-      controlsList: "nodownload nofullscreen noremoteplayback";
-    }
+    /* Native video — strip download, PiP, and remote-playback browser controls */
+    .rv-modal-video video::-webkit-media-controls-download-button { display: none !important; }
+    .rv-modal-video video::-webkit-media-controls-picture-in-picture-button { display: none !important; }
+    .rv-modal-video video::-webkit-media-controls-fullscreen-button { }
     /* Prevent drag / selection of content */
     .rv-grid, .rv-modal-box {
       -webkit-user-select: none;
+      user-select: none;
+    }
+    /* Prevent drag-and-drop of iframe/video out of the modal */
+    .rv-modal-video iframe,
+    .rv-modal-video video {
+      -webkit-user-drag: none;   /* Chrome/Safari */
+      -webkit-user-select: none; /* Safari */
       user-select: none;
     }
     .rv-modal-placeholder {
@@ -402,6 +408,35 @@
       .rv-grid { grid-template-columns: 1fr; gap: 1.2rem; }
       .rv-hero h1 { font-size: 2.2rem; }
     }
+
+    /* ── Access-checking spinner ── */
+    @keyframes rvSpin { to { rotate: 1turn; } }
+    #rv-access-checking {
+      position: fixed; top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 9990;
+      background: rgba(13,11,26,.92);
+      -webkit-backdrop-filter: blur(16px);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(124,92,252,.35);
+      border-radius: 50px;
+      padding: .75rem 1.6rem;
+      display: flex; align-items: center; gap: .6rem;
+      color: #e9d5ff; font-size: .85rem; font-weight: 600;
+      box-shadow: 0 8px 32px rgba(0,0,0,.5);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity .18s ease;
+    }
+    #rv-access-checking.active { opacity: 1; }
+    #rv-access-checking .rv-spin {
+      width: 16px; height: 16px;
+      border: 2.5px solid rgba(124,92,252,.3);
+      border-top-color: #7c5cfc;
+      border-radius: 50%;
+      animation: rvSpin .65s linear infinite;
+      flex-shrink: 0;
+    }
   </style>
 </head>
 <body>
@@ -458,6 +493,12 @@
     </div>
   </div>
 
+  <!-- Access-checking overlay (shown while DB lookup is in flight) -->
+  <div id="rv-access-checking">
+    <div class="rv-spin"></div>
+    Checking access…
+  </div>
+
   <footer></footer>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -477,15 +518,25 @@
 
   // Block screenshot shortcuts only inside the video modal (not page-level)
   function blockScreenCapture() {
+    const modalOpen = () => document.getElementById('rv-modal')?.classList.contains('open');
+
+    // Block right-click inside modal (prevents "Save video as…" on native video + iframe)
     document.addEventListener('contextmenu', e => {
-      if (document.getElementById('rv-modal')?.classList.contains('open')) e.preventDefault();
+      if (modalOpen()) e.preventDefault();
     });
+
+    // Block screenshot / devtools / print shortcuts while video is playing
     document.addEventListener('keydown', e => {
-      if (!document.getElementById('rv-modal')?.classList.contains('open')) return;
+      if (!modalOpen()) return;
       if (e.key === 'PrintScreen') { navigator.clipboard?.writeText(''); e.preventDefault(); }
       if (e.key === 'F12') e.preventDefault();
       if ((e.ctrlKey || e.metaKey) && ['p','s','u'].includes(e.key.toLowerCase())) e.preventDefault();
       if ((e.ctrlKey || e.metaKey) && e.shiftKey && ['i','c','j'].includes(e.key.toLowerCase())) e.preventDefault();
+    });
+
+    // Block print-to-PDF while modal is open
+    window.addEventListener('beforeprint', e => {
+      if (modalOpen()) e.preventDefault();
     });
   }
   blockScreenCapture();
@@ -518,6 +569,22 @@
       </div>`).join('');
   }
 
+  // ── Per-card access badge (set by checkUserAccess after login) ──
+  // 'full'  → admin-granted OR paid → green "Access Granted"
+  // anything else → purple lock "Members Only" (click to pay)
+  function rvAccessBadge(v) {
+    if (v._access === 'full') {
+      return `<div style="position:absolute;top:.55rem;right:.55rem;background:rgba(34,197,94,.2);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border-radius:50px;padding:.25rem .6rem;display:flex;align-items:center;gap:.3rem;font-size:.72rem;font-weight:700;color:#4ade80;border:1px solid rgba(34,197,94,.4);">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+        Access Granted
+      </div>`;
+    }
+    return `<div style="position:absolute;top:.55rem;right:.55rem;background:rgba(0,0,0,.65);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border-radius:50px;padding:.25rem .6rem;display:flex;align-items:center;gap:.3rem;font-size:.72rem;font-weight:700;color:#e9d5ff;border:1px solid rgba(168,85,247,.35);">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      Members Only
+    </div>`;
+  }
+
   // ── Render video grid ──
   function renderVideos() {
     const q = document.getElementById('rv-search-input')?.value?.toLowerCase() || '';
@@ -546,14 +613,15 @@
           </div>
           ${v.duration !== '—' ? `<div class="rv-duration">⏱ ${v.duration}</div>` : ''}
           ${v.isNew ? '<div class="rv-new-badge">New</div>' : ''}
-          <div style="position:absolute;top:.55rem;right:.55rem;background:rgba(0,0,0,.65);backdrop-filter:blur(6px);border-radius:50px;padding:.25rem .6rem;display:flex;align-items:center;gap:.3rem;font-size:.72rem;font-weight:700;color:#e9d5ff;border:1px solid rgba(168,85,247,.35);">
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-            Members Only
-          </div>
+          ${rvAccessBadge(v)}
         </div>
         <div class="rv-card-body">
           <div class="rv-card-tags">${(v.tags||[]).map(t=>`<span class="rv-tag">${t}</span>`).join('')}</div>
           <div class="rv-card-title">${v.title}</div>
+          ${v.totalPrice != null ? `<div style="display:flex;align-items:center;gap:.5rem;margin:.45rem 0;">
+            <span style="background:linear-gradient(135deg,#7c5cfc,#3d6bff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:800;font-size:1.02rem;">₹${Number(v.totalPrice).toLocaleString('en-IN')}</span>
+            <span style="font-size:.65rem;color:var(--txt4);font-weight:600;background:rgba(124,92,252,.1);border:1px solid rgba(124,92,252,.2);padding:.1rem .42rem;border-radius:50px;">incl. GST</span>
+          </div>` : ''}
           <div class="rv-card-meta">
             <div class="rv-card-mentor">
               <div class="rv-mentor-dot">${(v.courseTitle||'S').charAt(0).toUpperCase()}</div>
@@ -586,7 +654,7 @@
 
   function filterVideos() { renderVideos(); }
 
-  // ── Access check: login → payment → play ──
+  // ── Access check: login → payment/access → fetch URL → play ──
   async function handleWatchClick(id) {
     const v = allVideos.find(x => x.id === id);
     if (!v) return;
@@ -594,36 +662,74 @@
     const client = window.supabaseConfig?.client;
     if (!client) { showVideoGate(v, 'noClient'); return; }
 
-    const { data: { session } } = await client.auth.getSession();
-    if (!session?.user) {
-      // Not logged in — show login prompt
-      showVideoGate(v, 'login');
-      return;
-    }
+    const spinner = document.getElementById('rv-access-checking');
+    spinner?.classList.add('active');
 
-    // Logged in — check payment/enrollment
-    const userId = session.user.id;
-    let isPaid = false;
     try {
-      const { data: enr } = await client.from('enrollments')
-        .select('id').eq('student_user_id', userId)
-        .in('enrollment_status', ['active', 'completed'])
-        .in('access_status', ['active', 'restricted'])
-        .limit(1);
-      if (enr?.length) { isPaid = true; }
-      if (!isPaid) {
-        const { data: pay } = await client.from('payments')
-          .select('id').eq('student_user_id', userId)
-          .in('payment_status', ['success', 'completed'])
-          .limit(1);
-        if (pay?.length) isPaid = true;
+      const { data: { session } } = await client.auth.getSession();
+      if (!session?.user) {
+        showVideoGate(v, 'login');
+        return;
       }
-    } catch(e) { isPaid = false; }
 
-    if (isPaid) {
-      playVideo(v);
-    } else {
+      // Logged in — check course-specific enrollment / payment
+      const userId = session.user.id;
+      let hasAccess = false;
+
+      // ── ACCESS RULES ─────────────────────────────────────────────
+      // 1. Admin-granted enrollment: enrollment for THIS course where
+      //    enrollment_status='active' AND access_status='active'.
+      //    → User is enrolled AND admin has explicitly granted access.
+      //    → Can watch for FREE (no payment needed).
+      //
+      // 2. Completed payment for THIS course (via Razorpay or manual).
+      //    → Can watch immediately.
+      //
+      // 3. Everything else (enrolled but access_status != 'active',
+      //    not enrolled, or different course) → payment gate.
+      // ─────────────────────────────────────────────────────────────
+      if (v.courseId) {
+        // Check 1 — admin-granted access for this exact course
+        const { data: enr } = await client.from('enrollments')
+          .select('id')
+          .eq('student_user_id', userId)
+          .eq('course_id', v.courseId)
+          .eq('enrollment_status', 'active')
+          .eq('access_status', 'active')
+          .limit(1);
+        if (enr?.length) hasAccess = true;
+
+        // Check 2 — completed payment for this exact course
+        if (!hasAccess) {
+          const { data: pay } = await client.from('payments')
+            .select('id')
+            .eq('student_user_id', userId)
+            .eq('course_id', v.courseId)
+            .in('payment_status', ['success', 'completed'])
+            .limit(1);
+          if (pay?.length) hasAccess = true;
+        }
+      }
+      // Note: recordings without a courseId require payment to access
+      // (no free fallback for uncategorized recordings)
+
+      if (hasAccess) {
+        // ── Fetch video URL now that access is confirmed ──
+        // external_url is not loaded during listing to prevent leakage.
+        const { data: rec } = await client.from('live_recordings')
+          .select('external_url')
+          .eq('id', id)
+          .single();
+        if (rec?.external_url) v.videoUrl = rec.external_url;
+        playVideo(v);
+      } else {
+        showVideoGate(v, 'payment');
+      }
+    } catch(e) {
+      console.error('handleWatchClick error:', e);
       showVideoGate(v, 'payment');
+    } finally {
+      spinner?.classList.remove('active');
     }
   }
 
@@ -655,28 +761,19 @@
         <p style="color:var(--txt3);font-size:.82rem;margin:0 0 1rem;line-height:1.65;">Purchase course access to watch all recorded sessions.</p>
         <div id="rv-pay-loading" style="color:var(--txt4);font-size:.82rem;margin-bottom:.75rem;">Loading pricing…</div>
         <div id="rv-pay-options" style="display:none;">
-          <div style="background:var(--panel,#f8f7ff);border:1.5px solid var(--border,#e8e0ff);border-radius:14px;padding:.9rem 1rem;margin-bottom:.85rem;text-align:left;">
-            <div style="display:flex;justify-content:space-between;padding:.22rem 0;font-size:.82rem;color:var(--txt3);">
-              <span>Base Price</span><span id="rv-base-price">—</span>
-            </div>
-            <div style="display:flex;justify-content:space-between;padding:.22rem 0;font-size:.82rem;color:var(--txt3);">
-              <span>SGST (18%)</span><span id="rv-sgst">—</span>
-            </div>
-            <div style="display:flex;justify-content:space-between;padding:.22rem 0;font-size:.82rem;color:var(--txt3);">
-              <span>CGST (18%)</span><span id="rv-cgst">—</span>
-            </div>
-            <div style="display:flex;justify-content:space-between;padding:.35rem 0 .1rem;font-size:1rem;font-weight:800;color:#7c5cfc;border-top:1px solid var(--border,#e8e0ff);margin-top:.3rem;">
-              <span>Total Amount</span><span id="rv-total-price">—</span>
-            </div>
+          <div style="background:linear-gradient(135deg,rgba(124,92,252,.07),rgba(61,107,255,.06));border:1.5px solid rgba(124,92,252,.22);border-radius:16px;padding:1.2rem 1rem;margin-bottom:.9rem;text-align:center;">
+            <div style="font-size:.68rem;text-transform:uppercase;letter-spacing:.08em;color:var(--txt4);font-weight:600;margin-bottom:.4rem;">Total Amount</div>
+            <div id="rv-total-price" style="font-size:2.1rem;font-weight:800;background:linear-gradient(135deg,#7c5cfc,#3d6bff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1;">—</div>
+            <div style="font-size:.7rem;color:var(--txt4);margin-top:.35rem;font-weight:500;">Inclusive of all taxes (GST 18%)</div>
           </div>
           <div style="font-size:.72rem;color:var(--txt4);margin-bottom:.75rem;display:flex;align-items:center;justify-content:center;gap:.3rem;">
             🔒 Secured by Razorpay · SSL Encrypted
           </div>
           <button id="rv-pay-btn"
-            style="width:100%;background:linear-gradient(135deg,#7c5cfc,#3d6bff);color:#fff;border:none;border-radius:50px;padding:.8rem 1rem;font-size:.9rem;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 6px 20px rgba(124,92,252,.4);margin-bottom:.6rem;">
+            style="width:100%;background:linear-gradient(135deg,#7c5cfc,#3d6bff);color:#fff;border:none;border-radius:50px;padding:.82rem 1rem;font-size:.9rem;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 6px 20px rgba(124,92,252,.4);margin-bottom:.65rem;">
             Pay Now via Razorpay
           </button>
-          <a href="courses.html" style="display:block;text-align:center;font-size:.78rem;color:var(--txt3);text-decoration:none;">
+          <a href="courses" style="display:block;text-align:center;font-size:.78rem;color:var(--txt3);text-decoration:none;">
             Browse all courses →
           </a>
         </div>`;
@@ -686,9 +783,9 @@
 
     const gate = document.createElement('div');
     gate.id = 'rv-access-gate';
-    gate.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(6,4,18,0.72);backdrop-filter:blur(14px);display:flex;align-items:center;justify-content:center;padding:1.5rem;';
-    gate.innerHTML = `<div style="background:var(--bg);border:1.5px solid var(--border);border-radius:22px;padding:2rem 1.75rem;max-width:400px;width:100%;text-align:center;position:relative;box-shadow:0 32px 80px rgba(0,0,0,.45);">
-      <button onclick="document.getElementById('rv-access-gate')?.remove();" style="position:absolute;top:.8rem;right:.8rem;background:none;border:none;color:var(--txt4);font-size:1.05rem;cursor:pointer;line-height:1;padding:.25rem;">✕</button>
+    gate.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(6,4,18,0.82);backdrop-filter:blur(16px) saturate(1.6);display:flex;align-items:center;justify-content:center;padding:1.5rem;';
+    gate.innerHTML = `<div style="background:var(--bg,#fff);border:1.5px solid rgba(124,92,252,0.3);border-radius:24px;padding:2.2rem 2rem 2rem;max-width:420px;width:100%;text-align:center;position:relative;box-shadow:0 32px 80px rgba(0,0,0,.55),0 0 0 1px rgba(124,92,252,0.1);">
+      <button onclick="document.getElementById('rv-access-gate')?.remove();" title="Close" style="position:absolute;top:.75rem;right:.75rem;width:32px;height:32px;background:rgba(124,92,252,0.15);border:1.5px solid rgba(124,92,252,0.3);border-radius:50%;color:#c4b5fd;font-size:.9rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;transition:background .2s,transform .2s;font-family:inherit;" onmouseover="this.style.background='rgba(124,92,252,0.3)';this.style.transform='rotate(90deg)'" onmouseout="this.style.background='rgba(124,92,252,0.15)';this.style.transform='rotate(0deg)'">✕</button>
       ${content}
     </div>`;
     gate.addEventListener('click', e => { if (e.target === gate) gate.remove(); });
@@ -709,68 +806,151 @@
     }
   }
 
-  // Re-attempt watch after login (works for OAuth redirect & modal login)
+  // ── Re-attempt watch after login ──
+  // modal login fires pn-login-success; OAuth redirect fires window focus
+  async function _onLoginResume() {
+    if (window._pendingVideoId) {
+      const vid = window._pendingVideoId;
+      window._pendingVideoId = null;
+      handleWatchClick(vid);
+    } else {
+      checkUserAccess(); // refresh per-card badges
+    }
+  }
+  document.addEventListener('pn-login-success', _onLoginResume);
+  // Focus only handles OAuth redirect case — when the user was sent to a login page
+  // and returns. We ONLY act if a pending video was set before the redirect.
+  // Without this guard every tab-switch would trigger unnecessary DB calls.
   window.addEventListener('focus', async () => {
     if (!window._pendingVideoId) return;
-    const vid = window._pendingVideoId;
     try {
       const { data: { session } } = await window.supabaseConfig?.client?.auth?.getSession() || { data: {} };
-      if (session?.user) { window._pendingVideoId = null; handleWatchClick(vid); }
+      if (session?.user) _onLoginResume();
     } catch(_) {}
   });
+
+  // ── Bottom toast notification ──
+  function _showRvToast(msg, type = 'success') {
+    const colors = {
+      success: { bg: 'rgba(34,197,94,.18)',   border: 'rgba(34,197,94,.4)',   text: '#4ade80' },
+      error:   { bg: 'rgba(239,68,68,.18)',   border: 'rgba(239,68,68,.4)',   text: '#f87171' },
+      info:    { bg: 'rgba(124,92,252,.18)',  border: 'rgba(124,92,252,.4)', text: '#a78bfa' },
+    };
+    const c = colors[type] || colors.info;
+    const t = document.createElement('div');
+    t.style.cssText = `position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(20px);z-index:99999;background:${c.bg};-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border:1.5px solid ${c.border};border-radius:50px;padding:.7rem 1.5rem;font-size:.85rem;font-weight:600;color:${c.text};box-shadow:0 8px 32px rgba(0,0,0,.4);white-space:nowrap;transition:opacity .4s ease,transform .4s ease;opacity:0;pointer-events:none;`;
+    t.textContent = msg;
+    document.body.appendChild(t);
+    requestAnimationFrame(() => { t.style.opacity = '1'; t.style.transform = 'translateX(-50%) translateY(0)'; });
+    setTimeout(() => {
+      t.style.opacity = '0'; t.style.transform = 'translateX(-50%) translateY(20px)';
+      setTimeout(() => t.remove(), 400);
+    }, 3500);
+  }
+
+  // ── Fetch per-user access state and re-render badges ──
+  async function checkUserAccess() {
+    const client = window.supabaseConfig?.client;
+    if (!client) return;
+    try {
+      const { data: { session } } = await client.auth.getSession();
+      if (!session?.user) return;
+      const userId = session.user.id;
+
+      // Fetch enrollments — only active enrollment_status matters for access
+      const { data: enrollments } = await client.from('enrollments')
+        .select('course_id, access_status, enrollment_status')
+        .eq('student_user_id', userId)
+        .eq('enrollment_status', 'active');
+
+      const courseAccess = {};
+      (enrollments || []).forEach(e => {
+        if (e.access_status === 'active') {
+          // Admin explicitly granted access — enrolled AND access granted → free to play
+          courseAccess[e.course_id] = 'full';
+        }
+        // Enrolled but access_status != 'active' means admin hasn't granted
+        // free access yet — user must pay. No special badge for this state.
+      });
+
+      // Completed payments also grant full access
+      const { data: payments } = await client.from('payments')
+        .select('course_id')
+        .eq('student_user_id', userId)
+        .in('payment_status', ['success', 'completed']);
+      (payments || []).forEach(p => { if (p.course_id) courseAccess[p.course_id] = 'full'; });
+
+      // Update _access on each video and re-render if anything changed
+      // Only 'full' unlocks the play button; everything else shows payment gate
+      let changed = false;
+      allVideos.forEach(v => {
+        const next = v.courseId ? (courseAccess[v.courseId] || 'locked') : 'locked';
+        if (v._access !== next) { v._access = next; changed = true; }
+      });
+      if (changed) renderVideos();
+    } catch(e) { console.warn('checkUserAccess:', e); }
+  }
 
   // ── Load course pricing for the payment gate ──
   async function loadCoursePricingForGate(v) {
     const loadEl = document.getElementById('rv-pay-loading');
     const optsEl = document.getElementById('rv-pay-options');
     const el = id => document.getElementById(id);
-    try {
-      let courseId = v.courseId || null;
-      let pricing = null;
 
-      if (courseId && window.supabaseConfig) {
-        const { data } = await window.supabaseConfig.client
-          .from('course_pricing')
-          .select('sale_price,list_price,pricing_type,is_active')
-          .eq('course_id', courseId).eq('is_active', true).limit(1);
-        pricing = data?.[0] || null;
-
-        if (!pricing) {
-          const { data: d2 } = await window.supabaseConfig.client
-            .from('course_pricing').select('sale_price,list_price,pricing_type')
-            .eq('course_id', courseId).limit(1);
-          pricing = d2?.[0] || null;
-        }
-        if (pricing) {
-          _gateCourse = { id: courseId, pricing };
-          const basePrice = pricing.sale_price ?? pricing.list_price ?? 0;
-          const sgst = Math.round(basePrice * 0.18);
-          const cgst = Math.round(basePrice * 0.18);
-          _gateTotalAmount = Math.round(basePrice * 1.36);
-          const fmt = n => n > 0 ? '₹' + Number(n).toLocaleString('en-IN') : 'Contact Us';
-          if (el('rv-base-price')) el('rv-base-price').textContent = fmt(basePrice);
-          if (el('rv-sgst')) el('rv-sgst').textContent = basePrice > 0 ? '₹' + Number(sgst).toLocaleString('en-IN') : '—';
-          if (el('rv-cgst')) el('rv-cgst').textContent = basePrice > 0 ? '₹' + Number(cgst).toLocaleString('en-IN') : '—';
-          if (el('rv-total-price')) el('rv-total-price').textContent = fmt(_gateTotalAmount);
-          const payBtn = el('rv-pay-btn');
-          if (payBtn && _gateTotalAmount > 0) {
-            payBtn.textContent = 'Pay ₹' + Number(_gateTotalAmount).toLocaleString('en-IN') + ' via Razorpay';
-          }
-        }
-      }
-
-      if (!pricing) {
-        if (el('rv-base-price')) el('rv-base-price').textContent = 'See pricing';
-        if (el('rv-total-price')) el('rv-total-price').textContent = 'See pricing';
-      }
-
+    const showPrice = (total, courseId) => {
+      _gateTotalAmount = total;
+      _gateCourse = { id: courseId || null };
+      const fmtTotal = total > 0 ? '₹' + Number(total).toLocaleString('en-IN') : 'Contact Us';
+      if (el('rv-total-price')) el('rv-total-price').textContent = fmtTotal;
+      const payBtn = el('rv-pay-btn');
+      if (payBtn && total > 0) payBtn.textContent = 'Pay ₹' + Number(total).toLocaleString('en-IN') + ' via Razorpay';
       if (loadEl) loadEl.style.display = 'none';
       if (optsEl) optsEl.style.display = '';
       el('rv-pay-btn')?.addEventListener('click', _gateInitiatePayment);
+    };
+
+    try {
+      // ── Priority 1: recording's own total_amount (set by admin in DB) ──
+      if (v.totalPrice != null && v.totalPrice > 0) {
+        showPrice(v.totalPrice, v.courseId);
+        return;
+      }
+
+      // ── Priority 2: calculate from recording's base_amount + 18% GST ──
+      if (v.basePrice != null && v.basePrice > 0) {
+        const total = Math.round(v.basePrice * 1.18);
+        showPrice(total, v.courseId);
+        return;
+      }
+
+      // ── Priority 3: fall back to course_pricing table ──
+      const courseId = v.courseId || null;
+      if (courseId && window.supabaseConfig) {
+        const { data } = await window.supabaseConfig.client
+          .from('course_pricing')
+          .select('sale_price,list_price,is_active')
+          .eq('course_id', courseId)
+          .order('is_active', { ascending: false })
+          .limit(1);
+        const pricing = data?.[0] || null;
+        if (pricing) {
+          const base = pricing.sale_price ?? pricing.list_price ?? 0;
+          const total = Math.round(base * 1.18);   // 18% GST (9% SGST + 9% CGST)
+          showPrice(total, courseId);
+          return;
+        }
+      }
+
+      // ── No pricing found ──
+      if (loadEl) loadEl.style.display = 'none';
+      if (optsEl) {
+        optsEl.innerHTML = `<p style="color:var(--txt3);font-size:.85rem;margin-bottom:1rem;">Pricing not available for this session.</p><a href="courses" style="color:#7c5cfc;font-weight:700;">Browse courses to enroll →</a>`;
+        optsEl.style.display = '';
+      }
     } catch(e) {
       console.warn('Pricing load error:', e);
       if (loadEl) loadEl.style.display = 'none';
-      if (optsEl) { optsEl.innerHTML = '<a href="courses.html" style="color:#7c5cfc;font-weight:700;">Browse courses to enroll →</a>'; optsEl.style.display = ''; }
+      if (optsEl) { optsEl.innerHTML = '<a href="courses" style="color:#7c5cfc;font-weight:700;">Browse courses to enroll →</a>'; optsEl.style.display = ''; }
     }
   }
 
@@ -793,7 +973,7 @@
       window.profileNav?.openLoginModal?.();
       return;
     }
-    if (!_gateCourse) { window.location.href = 'courses.html'; return; }
+    if (!_gateCourse) { window.location.href = 'courses'; return; }
 
     const totalAmount = _gateTotalAmount;
     if (!totalAmount || totalAmount <= 0) {
@@ -814,33 +994,63 @@
         currency: 'INR',
         name: 'SkillUpNow',
         description: _gateVideo?.title || 'Course Enrollment',
-        prefill: { name: user.user_metadata?.full_name || '', email: user.email },
+        image: '../icon/logo.png',
+        prefill: {
+          name: user.user_metadata?.full_name || '',
+          email: user.email,
+          contact: user.user_metadata?.phone || ''
+        },
+        notes: { course_id: _gateCourse?.id || '', video_title: _gateVideo?.title || '' },
         theme: { color: '#7c5cfc' },
+        modal: {
+          ondismiss: () => {
+            btn.disabled = false;
+            btn.textContent = 'Pay ₹' + Number(totalAmount).toLocaleString('en-IN') + ' via Razorpay';
+          }
+        },
         handler: async (response) => {
+          btn.textContent = 'Processing…';
           try {
-            const { data: enroll } = await window.supabaseConfig.client.from('enrollments').upsert({
-              student_user_id: user.id, course_id: _gateCourse.id,
-              pricing_id: null,
-              enrollment_status: 'active', access_status: 'active',
-              net_amount: totalAmount, paid_amount: totalAmount, due_amount: 0,
-            }, { onConflict: 'student_user_id,course_id' }).select().single();
-            await window.supabaseConfig.client.from('payments').insert({
+            // Upsert enrollment
+            const { data: enroll, error: enrollErr } = await window.supabaseConfig.client
+              .from('enrollments').upsert({
+                student_user_id: user.id, course_id: _gateCourse.id,
+                pricing_id: null,
+                enrollment_status: 'active', access_status: 'active',
+                net_amount: totalAmount, paid_amount: totalAmount, due_amount: 0,
+              }, { onConflict: 'student_user_id,course_id' }).select().maybeSingle();
+            if (enrollErr) console.warn('Enrollment upsert:', enrollErr.message);
+            // Record payment
+            const { error: payErr } = await window.supabaseConfig.client.from('payments').insert({
               student_user_id: user.id,
               enrollment_id: enroll?.id || null,
               course_id: _gateCourse.id,
               amount: totalAmount,
-              payment_method: 'razorpay',
+              payment_method: 'gateway_link',
               payment_gateway: 'razorpay',
-              gateway_order_id: response.razorpay_order_id,
-              gateway_payment_id: response.razorpay_payment_id,
-              gateway_signature: response.razorpay_signature,
-              transaction_reference: response.razorpay_payment_id,
+              gateway_order_id: response.razorpay_order_id || null,
+              gateway_payment_id: response.razorpay_payment_id || null,
+              gateway_signature: response.razorpay_signature || null,
+              transaction_reference: response.razorpay_payment_id || null,
               payment_status: 'completed',
               paid_at: new Date().toISOString(),
             });
+            if (payErr) console.warn('Payment record:', payErr.message);
           } catch(dbErr) { console.warn('DB record error:', dbErr); }
+          _showRvToast('Payment successful! Enjoy your session.', 'success');
+          // Update card badge immediately
+          if (_gateVideo?.courseId) {
+            const vid = allVideos.find(x => x.id === _gateVideo.id);
+            if (vid) { vid._access = 'full'; renderVideos(); }
+          }
           document.getElementById('rv-access-gate')?.remove();
-          if (_gateVideo) playVideo(_gateVideo);
+          // Fetch video URL now that payment is confirmed, then play
+          if (_gateVideo) {
+            const { data: rec } = await window.supabaseConfig.client
+              .from('live_recordings').select('external_url').eq('id', _gateVideo.id).single();
+            if (rec?.external_url) _gateVideo.videoUrl = rec.external_url;
+            playVideo(_gateVideo);
+          }
         },
       };
       const rzp = new window.Razorpay(options);
@@ -883,20 +1093,40 @@
     document.getElementById('rv-modal-dur').textContent = v.duration !== '—' ? '⏱ ' + v.duration : '';
     document.getElementById('rv-modal-cat').textContent = v.tags?.[0] ? '🏷 ' + v.tags[0] : '';
     if (v.videoUrl && v.videoUrl.startsWith('http')) {
-      const isYT = v.videoUrl.includes('youtube') || v.videoUrl.includes('youtu.be');
+      const isYT   = v.videoUrl.includes('youtube') || v.videoUrl.includes('youtu.be');
       const isDrive = v.videoUrl.includes('drive.google.com');
       if (isYT) {
+        // YouTube embed: disable related videos, branding, and download button
         const ytId = v.videoUrl.match(/(?:v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/)?.[1];
-        videoArea.innerHTML = `<iframe src="https://www.youtube.com/embed/${ytId}?autoplay=1&rel=0&modestbranding=1" allow="autoplay; fullscreen" allowfullscreen style="width:100%;height:100%;border:none;"></iframe>`;
+        videoArea.innerHTML = `<iframe
+          src="https://www.youtube.com/embed/${ytId}?autoplay=1&rel=0&modestbranding=1&disablekb=0&fs=1"
+          allow="autoplay; fullscreen"
+          allowfullscreen
+          style="width:100%;height:100%;border:none;pointer-events:auto;">
+        </iframe>`;
       } else if (isDrive) {
+        // Google Drive embed: preview mode hides download button in the Drive UI
         const driveId = v.videoUrl.match(/\/d\/([a-zA-Z0-9_-]+)/)?.[1];
-        if (driveId) {
-          videoArea.innerHTML = `<iframe src="https://drive.google.com/file/d/${driveId}/preview" allow="autoplay; fullscreen" allowfullscreen style="width:100%;height:100%;border:none;"></iframe>`;
-        } else {
-          videoArea.innerHTML = `<iframe src="${v.videoUrl}" allow="autoplay; fullscreen" allowfullscreen style="width:100%;height:100%;border:none;"></iframe>`;
-        }
+        const embedSrc = driveId
+          ? `https://drive.google.com/file/d/${driveId}/preview`
+          : v.videoUrl;
+        videoArea.innerHTML = `<iframe
+          src="${embedSrc}"
+          allow="autoplay; fullscreen"
+          allowfullscreen
+          style="width:100%;height:100%;border:none;pointer-events:auto;">
+        </iframe>`;
       } else {
-        videoArea.innerHTML = `<video controls autoplay src="${v.videoUrl}" controlslist="nodownload" style="width:100%;height:100%;" oncontextmenu="return false;"></video>`;
+        // Native video: strip all download/remote controls
+        videoArea.innerHTML = `<video
+          controls autoplay playsinline
+          src="${v.videoUrl}"
+          controlslist="nodownload noremoteplayback"
+          disablepictureinpicture
+          disableremoteplayback
+          style="width:100%;height:100%;"
+          oncontextmenu="return false;">
+        </video>`;
       }
     } else {
       videoArea.innerHTML = `
@@ -933,11 +1163,13 @@
       }
       if (!window.supabaseConfig?.client) throw new Error('Database not ready');
 
-      // Select only columns that exist in live_recordings table
+      // Select ALL published recordings for public listing.
+      // external_url is intentionally excluded here — it is fetched
+      // separately by handleWatchClick ONLY after access is verified,
+      // so the video URL is never sent to users who haven't paid.
       const { data, error } = await window.supabaseConfig.client
         .from('live_recordings')
-        .select('id,title,external_url,provider_name,course_id,created_at,courses(title)')
-        .eq('is_published', true)
+        .select('id,title,provider_name,course_id,created_at,base_amount,gst_percentage,total_amount,courses(title,course_pricing(sale_price,list_price,is_active))')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -956,6 +1188,11 @@
         const { icon, gradient } = videoMeta(r.provider_name);
         const courseTitle = r.courses?.title || '';
         const filterKey = courseTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+        // Resolve price: recording-level base_amount → course pricing → null
+        const activePricing = (r.courses?.course_pricing || []).find(p => p.is_active);
+        const basePrice = r.base_amount ?? activePricing?.sale_price ?? activePricing?.list_price ?? null;
+        const gstPct = r.gst_percentage ?? 18;
+        const totalPrice = r.total_amount ?? (basePrice != null ? Math.round(basePrice * (1 + gstPct / 100)) : null);
         return {
           id: r.id,
           title: r.title || 'Session Recording',
@@ -966,14 +1203,18 @@
           gradient,
           isNew: (Date.now() - new Date(r.created_at).getTime()) < 7 * 24 * 3600 * 1000,
           tags: courseTitle ? [courseTitle] : [],
-          videoUrl: r.external_url,
+          videoUrl: null, // fetched after access verification, not during listing
           courseId: r.course_id || null,
           thumbnail: r.thumbnail_url || null,
+          basePrice,
+          gstPct,
+          totalPrice,
         };
       });
 
       buildFilterButtons();
       renderVideos();
+      checkUserAccess(); // async: enriches badges for logged-in users
     } catch(e) {
       console.error('loadVideos error:', e);
       document.getElementById('rv-grid').innerHTML = `

@@ -125,7 +125,7 @@
         <div class="card-title" style="margin:0">Payment Invoice</div>
         <div style="display:flex;gap:0.5rem">
           <button class="btn-download" onclick="printInvoice()">🖨 Print / PDF</button>
-          <button class="btn-outline" onclick="window.location.href='profile.html'">← Back to Profile</button>
+          <button class="btn-outline" onclick="window.location.href='profile'">← Back to Profile</button>
         </div>
       </div>
 
@@ -466,7 +466,7 @@ async function initiatePayment() {
         transaction_id: utr, status: 'processing',
       });
       alert('Bank transfer recorded. Admin will verify and activate your access within 24 hours.');
-      window.location.href = 'profile.html';
+      window.location.href = 'profile';
     } else if (selectedMethod === 'cash') {
       await db.client.from('payments').insert({
         user_id: currentUser.id, enrollment_id: enrollmentData.id,
@@ -474,7 +474,7 @@ async function initiatePayment() {
         status: 'pending',
       });
       alert('Cash payment recorded. Please visit our office with the exact amount.');
-      window.location.href = 'profile.html';
+      window.location.href = 'profile';
     }
   } catch (err) {
     alert('Payment error: ' + err.message);
