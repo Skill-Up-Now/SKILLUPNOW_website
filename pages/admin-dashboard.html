@@ -658,58 +658,174 @@
 
     <!-- ===== REFERRALS ===== -->
     <div class="section" id="section-referrals">
-      <!-- Summary cards -->
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem;margin-bottom:1.5rem;" id="ref-summary-cards">
-        <div class="stat-card"><div class="stat-card-icon">🎁</div><div class="stat-card-content"><div class="stat-card-value" id="ref-total-count">—</div><div class="stat-card-label">Total Referrals</div></div></div>
-        <div class="stat-card"><div class="stat-card-icon">⭐</div><div class="stat-card-content"><div class="stat-card-value" id="ref-total-points">—</div><div class="stat-card-label">Points Issued</div></div></div>
-        <div class="stat-card"><div class="stat-card-icon">🏆</div><div class="stat-card-content"><div class="stat-card-value" id="ref-top-count">—</div><div class="stat-card-label">Top Referrer Refs</div></div></div>
+
+      <!-- Sub-navigation tabs -->
+      <div style="display:flex;gap:0;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:var(--r);padding:3px;margin-bottom:1.25rem;width:fit-content;">
+        <button class="ref-tab-btn active" data-tab="codes"   onclick="switchRefTab('codes',this)"   style="border:none;background:var(--grad);color:#fff;border-radius:calc(var(--r) - 2px);padding:.42rem 1.1rem;font-size:.78rem;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;transition:all .18s;">🎟 Referral Codes</button>
+        <button class="ref-tab-btn"        data-tab="logs"    onclick="switchRefTab('logs',this)"    style="border:none;background:none;color:var(--txt3);border-radius:calc(var(--r) - 2px);padding:.42rem 1.1rem;font-size:.78rem;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;transition:all .18s;">📋 Referral Log</button>
+        <button class="ref-tab-btn"        data-tab="leaders" onclick="switchRefTab('leaders',this)" style="border:none;background:none;color:var(--txt3);border-radius:calc(var(--r) - 2px);padding:.42rem 1.1rem;font-size:.78rem;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;transition:all .18s;">🏆 Leaderboard</button>
       </div>
-      <!-- Reward Tiers -->
-      <div class="table-card" style="margin-bottom:1rem;">
-        <div class="table-header"><h3>Reward Tiers</h3></div>
-        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:.75rem;padding:1rem 1.25rem;">
-          <div style="background:linear-gradient(135deg,rgba(124,92,252,.12),rgba(61,107,255,.08));border:1px solid rgba(124,92,252,.25);border-radius:12px;padding:1rem;text-align:center;">
-            <div style="font-size:1.2rem;font-weight:800;color:var(--v1);">100 pts</div>
-            <div style="font-size:.78rem;color:var(--txt3);margin-top:.2rem;">₹500 – ₹1,000 voucher</div>
+
+      <!-- Summary stat cards -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:.85rem;margin-bottom:1.25rem;">
+        <div class="stat-card"><div class="stat-icon">🎟</div><div class="stat-value" id="ref-codes-count">—</div><div class="stat-label">Total Codes</div></div>
+        <div class="stat-card"><div class="stat-icon">✅</div><div class="stat-value" id="ref-codes-active">—</div><div class="stat-label">Active Codes</div></div>
+        <div class="stat-card"><div class="stat-icon">🎁</div><div class="stat-value" id="ref-total-count">—</div><div class="stat-label">Total Referrals</div></div>
+        <div class="stat-card"><div class="stat-icon">⭐</div><div class="stat-value" id="ref-total-points">—</div><div class="stat-label">Points Issued</div></div>
+        <div class="stat-card"><div class="stat-icon">🏆</div><div class="stat-value" id="ref-top-count">—</div><div class="stat-label">Top Referrer Pts</div></div>
+      </div>
+
+      <!-- ── TAB: REFERRAL CODES ── -->
+      <div id="ref-tab-codes">
+        <div class="table-card">
+          <div class="table-header">
+            <h3>Referral Code Management</h3>
+            <div class="table-actions">
+              <input class="tbl-search" placeholder="Search code or description…" oninput="filterRefCodes(this.value)">
+              <button class="btn-secondary" onclick="exportRefCodes()">⬇ Export</button>
+              <button class="btn-primary" onclick="openRefCodeModal()">+ Create Code</button>
+            </div>
           </div>
-          <div style="background:linear-gradient(135deg,rgba(124,92,252,.15),rgba(61,107,255,.1));border:1px solid rgba(124,92,252,.3);border-radius:12px;padding:1rem;text-align:center;">
-            <div style="font-size:1.2rem;font-weight:800;color:var(--v1);">200 pts</div>
-            <div style="font-size:.78rem;color:var(--txt3);margin-top:.2rem;">₹1,000 – ₹1,500 voucher</div>
-          </div>
-          <div style="background:linear-gradient(135deg,rgba(124,92,252,.18),rgba(61,107,255,.12));border:1px solid rgba(124,92,252,.35);border-radius:12px;padding:1rem;text-align:center;">
-            <div style="font-size:1.2rem;font-weight:800;color:var(--v1);">300 pts</div>
-            <div style="font-size:.78rem;color:var(--txt3);margin-top:.2rem;">₹1,500 – ₹2,000 voucher</div>
-          </div>
-          <div style="background:linear-gradient(135deg,rgba(124,92,252,.22),rgba(61,107,255,.15));border:1px solid rgba(124,92,252,.4);border-radius:12px;padding:1rem;text-align:center;">
-            <div style="font-size:1.2rem;font-weight:800;color:var(--v1);">500 pts</div>
-            <div style="font-size:.78rem;color:var(--txt3);margin-top:.2rem;">₹2,000 – ₹3,000 voucher</div>
-          </div>
-          <div style="background:linear-gradient(135deg,rgba(245,158,11,.15),rgba(239,68,68,.08));border:1px solid rgba(245,158,11,.3);border-radius:12px;padding:1rem;text-align:center;">
-            <div style="font-size:1.2rem;font-weight:800;color:#f59e0b;">800 pts</div>
-            <div style="font-size:.78rem;color:var(--txt3);margin-top:.2rem;">₹3,000 – ₹5,000 voucher</div>
+          <div class="table-scroll"><table class="data-table">
+            <thead><tr>
+              <th>Code</th><th>Description</th><th>Referrer</th>
+              <th>Pts → Referrer</th><th>Pts → Referee</th>
+              <th>Uses</th><th>Expires</th><th>Status</th><th>Actions</th>
+            </tr></thead>
+            <tbody id="ref-codes-tbody"><tr><td colspan="9" class="table-empty">Loading…</td></tr></tbody>
+          </table></div>
+        </div>
+
+        <!-- Reward Tiers info card -->
+        <div class="table-card" style="margin-top:1rem;">
+          <div class="table-header"><h3>Reward Tiers Reference</h3></div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(165px,1fr));gap:.65rem;padding:1rem 1.1rem;">
+            <div style="background:linear-gradient(135deg,rgba(124,92,252,.1),rgba(61,107,255,.07));border:1px solid rgba(124,92,252,.22);border-radius:11px;padding:.85rem;text-align:center;">
+              <div style="font-size:1.1rem;font-weight:800;color:var(--v1);">100 pts</div>
+              <div style="font-size:.72rem;color:var(--txt3);margin-top:.2rem;">₹500 – ₹1,000 voucher</div>
+            </div>
+            <div style="background:linear-gradient(135deg,rgba(124,92,252,.13),rgba(61,107,255,.09));border:1px solid rgba(124,92,252,.27);border-radius:11px;padding:.85rem;text-align:center;">
+              <div style="font-size:1.1rem;font-weight:800;color:var(--v1);">200 pts</div>
+              <div style="font-size:.72rem;color:var(--txt3);margin-top:.2rem;">₹1,000 – ₹1,500 voucher</div>
+            </div>
+            <div style="background:linear-gradient(135deg,rgba(124,92,252,.16),rgba(61,107,255,.1));border:1px solid rgba(124,92,252,.3);border-radius:11px;padding:.85rem;text-align:center;">
+              <div style="font-size:1.1rem;font-weight:800;color:var(--v1);">300 pts</div>
+              <div style="font-size:.72rem;color:var(--txt3);margin-top:.2rem;">₹1,500 – ₹2,000 voucher</div>
+            </div>
+            <div style="background:linear-gradient(135deg,rgba(124,92,252,.2),rgba(61,107,255,.13));border:1px solid rgba(124,92,252,.36);border-radius:11px;padding:.85rem;text-align:center;">
+              <div style="font-size:1.1rem;font-weight:800;color:var(--v1);">500 pts</div>
+              <div style="font-size:.72rem;color:var(--txt3);margin-top:.2rem;">₹2,000 – ₹3,000 voucher</div>
+            </div>
+            <div style="background:linear-gradient(135deg,rgba(245,158,11,.12),rgba(239,68,68,.07));border:1px solid rgba(245,158,11,.28);border-radius:11px;padding:.85rem;text-align:center;">
+              <div style="font-size:1.1rem;font-weight:800;color:#f59e0b;">800 pts</div>
+              <div style="font-size:.72rem;color:var(--txt3);margin-top:.2rem;">₹3,000 – ₹5,000 voucher</div>
+            </div>
           </div>
         </div>
       </div>
-      <!-- Referral Logs Table -->
-      <div class="table-card">
-        <div class="table-header">
-          <h3>Referral Log</h3>
-          <div class="table-actions">
-            <input type="text" id="ref-search" placeholder="Search name or code…" class="search-input" oninput="filterReferralTable(this.value)" style="width:220px;">
+
+      <!-- ── TAB: REFERRAL LOG ── -->
+      <div id="ref-tab-logs" style="display:none;">
+        <div class="table-card">
+          <div class="table-header">
+            <h3>Referral Log</h3>
+            <div class="table-actions">
+              <input type="text" id="ref-search" class="tbl-search" placeholder="Search name or code…" oninput="filterReferralTable(this.value)">
+              <button class="btn-secondary" onclick="exportTable('referrals')">⬇ Export</button>
+            </div>
+          </div>
+          <div class="table-scroll"><table class="data-table">
+            <thead><tr><th>Referrer</th><th>Referred User</th><th>Code Used</th><th>Pts → Referrer</th><th>Pts → Referee</th><th>Date</th><th>Status</th></tr></thead>
+            <tbody id="referral-tbody"><tr><td colspan="7" class="table-empty">Loading…</td></tr></tbody>
+          </table></div>
+        </div>
+      </div>
+
+      <!-- ── TAB: LEADERBOARD ── -->
+      <div id="ref-tab-leaders" style="display:none;">
+        <div class="table-card">
+          <div class="table-header"><h3>Top Referrers (by reward points)</h3></div>
+          <div class="table-scroll"><table class="data-table">
+            <thead><tr><th>#</th><th>Name</th><th>Email</th><th>Phone</th><th>Code</th><th>Referrals</th><th>Points</th><th>Tier</th></tr></thead>
+            <tbody id="top-referrers-tbody"><tr><td colspan="8" class="table-empty">Loading…</td></tr></tbody>
+          </table></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ REFERRAL CODE MODAL ═══ -->
+    <div class="modal-overlay" id="ref-code-modal" onclick="if(event.target===this)closeModal('ref-code-modal')">
+      <div class="modal-box" style="max-width:580px;">
+        <button class="modal-close" onclick="closeModal('ref-code-modal')">✕</button>
+        <div class="modal-title" id="ref-code-modal-title">Create Referral Code</div>
+
+        <input type="hidden" id="rfc-id">
+
+        <!-- Code + Description row -->
+        <div class="form-row">
+          <div class="f-group">
+            <label>Code <span style="color:#f87171">*</span></label>
+            <input type="text" id="rfc-code" placeholder="e.g. PROMO2025" style="text-transform:uppercase;letter-spacing:.06em;"
+              oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9_-]/g,'')">
+            <div style="font-size:.68rem;color:var(--txt4);margin-top:.2rem;">Letters, numbers, hyphens &amp; underscores only</div>
+          </div>
+          <div class="f-group">
+            <label>Status</label>
+            <select id="rfc-active">
+              <option value="true">Active</option>
+              <option value="false">Inactive</option>
+            </select>
           </div>
         </div>
-        <div class="table-scroll"><table class="data-table">
-          <thead><tr><th>Referrer</th><th>Referred User</th><th>Code Used</th><th>Pts → Referrer</th><th>Pts → Referee</th><th>Date</th><th>Status</th></tr></thead>
-          <tbody id="referral-tbody"><tr><td colspan="7" class="table-empty">Loading…</td></tr></tbody>
-        </table></div>
-      </div>
-      <!-- Top Referrers -->
-      <div class="table-card" style="margin-top:1rem;">
-        <div class="table-header"><h3>Top Referrers (by points earned)</h3></div>
-        <div class="table-scroll"><table class="data-table">
-          <thead><tr><th>#</th><th>Name</th><th>Email</th><th>Phone</th><th>Referral Code</th><th>Referrals Made</th><th>Reward Points</th><th>Current Tier</th></tr></thead>
-          <tbody id="top-referrers-tbody"><tr><td colspan="8" class="table-empty">Loading…</td></tr></tbody>
-        </table></div>
+
+        <div class="f-group">
+          <label>Description <span style="color:var(--txt4);font-weight:400;">(optional — shown to user on validation)</span></label>
+          <input type="text" id="rfc-desc" placeholder="e.g. Summer 2025 Campaign">
+        </div>
+
+        <!-- Referrer -->
+        <div class="f-group">
+          <label>Referrer User <span style="color:var(--txt4);font-weight:400;">(optional — user who receives points)</span></label>
+          <select id="rfc-referrer">
+            <option value="">No referrer (promotional code)</option>
+          </select>
+        </div>
+
+        <!-- Points row -->
+        <div class="form-row">
+          <div class="f-group">
+            <label>Points → Referrer</label>
+            <input type="number" id="rfc-pts-referrer" placeholder="50" min="0" max="9999" value="50">
+          </div>
+          <div class="f-group">
+            <label>Points → New User (Referee)</label>
+            <input type="number" id="rfc-pts-referee" placeholder="10" min="0" max="9999" value="10">
+          </div>
+        </div>
+
+        <!-- Usage limits -->
+        <div class="form-row">
+          <div class="f-group">
+            <label>Max Uses <span style="color:var(--txt4);font-weight:400;">(blank = unlimited)</span></label>
+            <input type="number" id="rfc-max-uses" placeholder="Unlimited" min="1">
+          </div>
+          <div class="f-group">
+            <label>Expires At <span style="color:var(--txt4);font-weight:400;">(blank = no expiry)</span></label>
+            <input type="datetime-local" id="rfc-expires">
+          </div>
+        </div>
+
+        <!-- Current usage info (edit mode) -->
+        <div id="rfc-usage-info" style="display:none;background:rgba(124,92,252,.07);border:1px solid var(--border);border-radius:10px;padding:.7rem .9rem;margin-bottom:.9rem;font-size:.78rem;color:var(--txt3);">
+          <strong style="color:var(--txt2);">Current Usage:</strong>
+          <span id="rfc-use-count">0</span> times used
+          <button onclick="resetRefCodeUses()" style="margin-left:.75rem;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.28);color:#f87171;border-radius:6px;padding:.15rem .5rem;font-size:.68rem;cursor:pointer;font-family:inherit;">Reset Uses</button>
+        </div>
+
+        <div class="modal-actions">
+          <button class="btn-secondary" onclick="closeModal('ref-code-modal')">Cancel</button>
+          <button class="btn-primary"   onclick="saveRefCode()">💾 Save Code</button>
+        </div>
       </div>
     </div>
 
@@ -3743,9 +3859,28 @@ async function deleteDiscount(id) {
 
 // ===== REFERRALS =====
 let _allReferralRows = [];
+let _allRefCodes     = [];
 
+/* ── Tab switcher ── */
+function switchRefTab(tab, btn) {
+  ['codes','logs','leaders'].forEach(t => {
+    const el = document.getElementById('ref-tab-' + t);
+    if (el) el.style.display = t === tab ? 'block' : 'none';
+  });
+  document.querySelectorAll('.ref-tab-btn').forEach(b => {
+    const isActive = b.dataset.tab === tab;
+    b.style.background = isActive ? 'var(--grad)' : 'none';
+    b.style.color = isActive ? '#fff' : 'var(--txt3)';
+    b.style.boxShadow = isActive ? '0 4px 14px rgba(124,92,252,.35)' : 'none';
+  });
+}
+
+/* ── Main loader ── */
 async function loadReferrals() {
-  const [{ data: logs }, { data: topUsers }] = await Promise.all([
+  const [{ data: codes }, { data: logs }, { data: topUsers }] = await Promise.all([
+    db.client.from('referral_codes')
+      .select('id, code, description, referrer_user_id, points_for_referrer, points_for_referee, is_active, max_uses, use_count, expires_at, created_at')
+      .order('created_at', { ascending: false }),
     db.client.from('referral_logs')
       .select(`
         id, referral_code_used, points_to_referrer, points_to_referee, status, created_at,
@@ -3761,23 +3896,37 @@ async function loadReferrals() {
       .limit(50),
   ]);
 
-  // Summary
+  // Load referrer user names for codes table
+  const referrerIds = [...new Set((codes || []).filter(c => c.referrer_user_id).map(c => c.referrer_user_id))];
+  let referrerMap = {};
+  if (referrerIds.length) {
+    const { data: referrers } = await db.client.from('user_profiles')
+      .select('user_id, full_name, email').in('user_id', referrerIds);
+    (referrers || []).forEach(r => { referrerMap[r.user_id] = r; });
+  }
+
+  // Summary stats
+  const activeCodes = (codes || []).filter(c => c.is_active).length;
   const totalPts = (topUsers || []).reduce((s, u) => s + (u.reward_points || 0), 0);
-  document.getElementById('ref-total-count').textContent = (logs || []).length;
+  document.getElementById('ref-codes-count').textContent  = (codes || []).length;
+  document.getElementById('ref-codes-active').textContent = activeCodes;
+  document.getElementById('ref-total-count').textContent  = (logs || []).length;
   document.getElementById('ref-total-points').textContent = totalPts;
-  document.getElementById('ref-top-count').textContent = topUsers?.[0]
-    ? topUsers[0].reward_points + ' pts'
-    : '—';
+  document.getElementById('ref-top-count').textContent    = topUsers?.[0] ? topUsers[0].reward_points + ' pts' : '—';
+
+  // Referral codes table
+  _allRefCodes = (codes || []).map(c => ({ ...c, _referrer: referrerMap[c.referrer_user_id] || null }));
+  renderRefCodesTable(_allRefCodes);
 
   // Referral log table
   _allReferralRows = logs || [];
   renderReferralTable(_allReferralRows);
 
-  // Top referrers
+  // Top referrers leaderboard
   const tiers = [[100,199,'🥉'],[200,299,'🥈'],[300,499,'🥇'],[500,799,'💎'],[800,Infinity,'👑']];
   function getTierLabel(pts) {
     const t = tiers.find(([min,max]) => pts >= min && pts <= max);
-    return t ? t[2] + ' ' + t[0] + '+ pts' : pts > 0 ? '🌱 <100 pts' : '—';
+    return t ? `${t[2]} ${t[0]}+ pts` : pts > 0 ? '🌱 <100 pts' : '—';
   }
   document.getElementById('top-referrers-tbody').innerHTML = (topUsers || []).map((u, i) => {
     const refCount = (logs || []).filter(l => l.referrer?.email === u.email).length;
@@ -3791,9 +3940,191 @@ async function loadReferrals() {
       <td><strong style="color:var(--v1)">${u.reward_points}</strong></td>
       <td>${getTierLabel(u.reward_points)}</td>
     </tr>`;
-  }).join('') || '<tr><td colspan="8" class="table-empty">No referrals yet</td></tr>';
+  }).join('') || '<tr><td colspan="8" class="table-empty">No referrers yet</td></tr>';
 }
 
+/* ── Referral Codes Table ── */
+function renderRefCodesTable(rows) {
+  const now = new Date();
+  document.getElementById('ref-codes-tbody').innerHTML = rows.length ? rows.map(c => {
+    const referrer  = c._referrer;
+    const isExpired = c.expires_at && new Date(c.expires_at) < now;
+    const isFull    = c.max_uses != null && c.use_count >= c.max_uses;
+    const effActive = c.is_active && !isExpired && !isFull;
+    const statusBadgeStr = effActive
+      ? '<span class="badge badge-green">Active</span>'
+      : isExpired
+        ? '<span class="badge badge-yellow">Expired</span>'
+        : isFull
+          ? '<span class="badge badge-blue">Limit Reached</span>'
+          : '<span class="badge badge-gray">Inactive</span>';
+    const usesStr = c.max_uses != null
+      ? `${c.use_count || 0} / ${c.max_uses}`
+      : `${c.use_count || 0} / ∞`;
+    const expiresStr = c.expires_at
+      ? `<span title="${c.expires_at}">${fmtDate(c.expires_at)}</span>`
+      : '<span style="color:rgba(200,191,255,.3)">No expiry</span>';
+    return `<tr>
+      <td><code style="background:rgba(124,92,252,.14);padding:.15rem .55rem;border-radius:7px;font-size:.84rem;letter-spacing:.05em;font-weight:700;">${escHtml(c.code)}</code></td>
+      <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(c.description || '—')}</td>
+      <td>${referrer ? `<span title="${escHtml(referrer.email)}">${escHtml(referrer.full_name || referrer.email)}</span>` : '<span style="color:rgba(200,191,255,.3)">Promo (no referrer)</span>'}</td>
+      <td style="color:#4ade80;font-weight:700;">+${c.points_for_referrer || 0}</td>
+      <td style="color:#60a5fa;font-weight:700;">+${c.points_for_referee || 0}</td>
+      <td style="font-family:monospace;font-size:.8rem;">${usesStr}</td>
+      <td style="font-size:.78rem;">${expiresStr}</td>
+      <td>${statusBadgeStr}</td>
+      <td>
+        <div class="action-btns">
+          <button class="action-btn" onclick="editRefCode('${c.id}')">✏ Edit</button>
+          <button class="action-btn" onclick="toggleRefCode('${c.id}', ${c.is_active})">${c.is_active ? '⏸ Disable' : '▶ Enable'}</button>
+          <button class="action-btn danger" onclick="deleteRefCode('${c.id}', '${escHtml(c.code)}')">✕ Delete</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('') : '<tr><td colspan="9" class="table-empty">No referral codes yet — click "+ Create Code" to add one</td></tr>';
+}
+
+function filterRefCodes(q) {
+  const term = (q || '').toLowerCase();
+  if (!term) { renderRefCodesTable(_allRefCodes); return; }
+  renderRefCodesTable(_allRefCodes.filter(c =>
+    (c.code || '').toLowerCase().includes(term) ||
+    (c.description || '').toLowerCase().includes(term) ||
+    (c._referrer?.full_name || '').toLowerCase().includes(term) ||
+    (c._referrer?.email || '').toLowerCase().includes(term)
+  ));
+}
+
+function exportRefCodes() {
+  if (!_allRefCodes.length) { alert('No codes to export.'); return; }
+  const headers = ['Code','Description','Referrer','Pts→Referrer','Pts→Referee','Uses','MaxUses','Expires','Status'];
+  const rows = _allRefCodes.map(c => [
+    c.code, c.description || '', c._referrer?.email || '',
+    c.points_for_referrer || 0, c.points_for_referee || 0,
+    c.use_count || 0, c.max_uses || 'unlimited',
+    c.expires_at || '', c.is_active ? 'active' : 'inactive'
+  ]);
+  const csv = [headers, ...rows].map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+  a.download = 'referral-codes.csv'; a.click();
+}
+
+/* ── Create / Edit Code Modal ── */
+async function openRefCodeModal(codeId) {
+  document.getElementById('rfc-id').value = '';
+  document.getElementById('rfc-code').value = '';
+  document.getElementById('rfc-code').disabled = false;
+  document.getElementById('rfc-desc').value = '';
+  document.getElementById('rfc-pts-referrer').value = '50';
+  document.getElementById('rfc-pts-referee').value = '10';
+  document.getElementById('rfc-max-uses').value = '';
+  document.getElementById('rfc-expires').value = '';
+  document.getElementById('rfc-active').value = 'true';
+  document.getElementById('rfc-usage-info').style.display = 'none';
+  document.getElementById('ref-code-modal-title').textContent = 'Create Referral Code';
+
+  // Load all users into referrer dropdown
+  const { data: users } = await db.client.from('user_profiles')
+    .select('user_id, full_name, email').order('full_name');
+  const opts = (users || []).map(u =>
+    `<option value="${u.user_id}">${escHtml(u.full_name || u.email)} (${escHtml(u.email)})</option>`
+  ).join('');
+  document.getElementById('rfc-referrer').innerHTML = '<option value="">No referrer (promotional code)</option>' + opts;
+
+  openModal('ref-code-modal');
+}
+
+async function editRefCode(id) {
+  const code = _allRefCodes.find(c => c.id === id);
+  if (!code) return;
+
+  await openRefCodeModal(); // loads users dropdown first
+
+  document.getElementById('ref-code-modal-title').textContent = 'Edit Referral Code';
+  document.getElementById('rfc-id').value              = code.id;
+  document.getElementById('rfc-code').value            = code.code;
+  document.getElementById('rfc-code').disabled         = true; // code cannot change once created
+  document.getElementById('rfc-desc').value            = code.description || '';
+  document.getElementById('rfc-pts-referrer').value    = code.points_for_referrer ?? 50;
+  document.getElementById('rfc-pts-referee').value     = code.points_for_referee  ?? 10;
+  document.getElementById('rfc-max-uses').value        = code.max_uses != null ? code.max_uses : '';
+  document.getElementById('rfc-active').value          = code.is_active ? 'true' : 'false';
+  document.getElementById('rfc-referrer').value        = code.referrer_user_id || '';
+  if (code.expires_at) {
+    document.getElementById('rfc-expires').value = code.expires_at.slice(0, 16);
+  }
+
+  document.getElementById('rfc-use-count').textContent = code.use_count || 0;
+  document.getElementById('rfc-usage-info').style.display = 'block';
+}
+
+async function saveRefCode() {
+  const id          = document.getElementById('rfc-id').value;
+  const rawCode     = document.getElementById('rfc-code').value.trim().toUpperCase();
+  const description = document.getElementById('rfc-desc').value.trim() || null;
+  const referrerId  = document.getElementById('rfc-referrer').value || null;
+  const ptsReferrer = parseInt(document.getElementById('rfc-pts-referrer').value) || 0;
+  const ptsReferee  = parseInt(document.getElementById('rfc-pts-referee').value)  || 0;
+  const maxUsesRaw  = document.getElementById('rfc-max-uses').value.trim();
+  const maxUses     = maxUsesRaw ? parseInt(maxUsesRaw) : null;
+  const expiresRaw  = document.getElementById('rfc-expires').value;
+  const expiresAt   = expiresRaw ? new Date(expiresRaw).toISOString() : null;
+  const isActive    = document.getElementById('rfc-active').value === 'true';
+
+  if (!rawCode) { alert('Code is required.'); return; }
+  if (!/^[A-Z0-9_-]{2,30}$/.test(rawCode)) {
+    alert('Code must be 2–30 characters: uppercase letters, numbers, hyphens or underscores.');
+    return;
+  }
+
+  const session = JSON.parse(sessionStorage.getItem('admin_session') || '{}');
+  const payload = {
+    code: rawCode, description, referrer_user_id: referrerId,
+    points_for_referrer: ptsReferrer, points_for_referee: ptsReferee,
+    max_uses: maxUses, expires_at: expiresAt, is_active: isActive,
+    created_by: session.email || 'admin'
+  };
+
+  const { error } = id
+    ? await db.client.from('referral_codes').update(payload).eq('id', id)
+    : await db.client.from('referral_codes').insert(payload);
+
+  if (error) {
+    if (error.code === '23505') alert(`Code "${rawCode}" already exists. Please use a different code.`);
+    else alert('Error saving referral code: ' + error.message);
+    return;
+  }
+
+  closeModal('ref-code-modal');
+  loadReferrals();
+}
+
+async function toggleRefCode(id, currentActive) {
+  const { error } = await db.client.from('referral_codes')
+    .update({ is_active: !currentActive }).eq('id', id);
+  if (error) { alert('Error updating code: ' + error.message); return; }
+  loadReferrals();
+}
+
+async function deleteRefCode(id, code) {
+  if (!confirm(`Delete referral code "${code}"?\n\nThis cannot be undone. Referral logs using this code will remain.`)) return;
+  const { error } = await db.client.from('referral_codes').delete().eq('id', id);
+  if (error) { alert('Error deleting code: ' + error.message); return; }
+  loadReferrals();
+}
+
+async function resetRefCodeUses() {
+  const id = document.getElementById('rfc-id').value;
+  if (!id) return;
+  if (!confirm('Reset the use count for this code to 0?')) return;
+  const { error } = await db.client.from('referral_codes').update({ use_count: 0 }).eq('id', id);
+  if (error) { alert('Error resetting uses: ' + error.message); return; }
+  document.getElementById('rfc-use-count').textContent = '0';
+  loadReferrals();
+}
+
+/* ── Referral Log Table ── */
 function renderReferralTable(rows) {
   document.getElementById('referral-tbody').innerHTML = rows.map(r => `
     <tr>

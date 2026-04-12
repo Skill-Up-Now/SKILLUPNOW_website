@@ -271,12 +271,37 @@ function setLoading(loading) {
 }
 
 /* ── Main login handler ── */
+/* ── Field highlighting helpers ── */
+function setFieldError(id, msg) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.style.borderColor = 'rgba(239,68,68,0.6)';
+  el.style.boxShadow   = '0 0 0 3px rgba(239,68,68,0.12)';
+}
+function clearFieldErrors() {
+  ['a-email','a-pass'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.style.borderColor = ''; el.style.boxShadow = ''; }
+  });
+}
+
 async function doLogin() {
+  clearFieldErrors();
   const email = document.getElementById('a-email').value.trim().toLowerCase();
   const pass  = document.getElementById('a-pass').value;
 
-  if (!email) return showErr('Please enter your email address.');
-  if (!pass)  return showErr('Please enter your password.');
+  if (!email) {
+    setFieldError('a-email');
+    return showErr('⚠ Email address is required.');
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    setFieldError('a-email');
+    return showErr('⚠ Please enter a valid email address.');
+  }
+  if (!pass) {
+    setFieldError('a-pass');
+    return showErr('⚠ Password is required.');
+  }
 
   setLoading(true);
 
@@ -287,15 +312,29 @@ async function doLogin() {
     });
     if (authErr) {
       const msg = authErr.message || '';
-      if (msg.includes('Invalid login') || msg.includes('invalid_credentials') || msg.includes('wrong'))
-        throw new Error('Incorrect email or password. Please try again.');
-      if (msg.includes('Email not confirmed'))
-        throw new Error('Your email is not confirmed. Please check your inbox or contact support.');
-      throw new Error(msg || 'Sign-in failed. Please try again.');
+      const code = authErr.code || '';
+      // Exact credential mismatch
+      if (msg.includes('Invalid login credentials') || code === 'invalid_credentials' ||
+          msg.includes('invalid_credentials') || msg.includes('wrong password'))
+        throw new Error('⚠ Incorrect email or password — please check your credentials and try again.');
+      // Too many attempts
+      if (msg.includes('too many') || msg.includes('rate limit') || code === 'over_request_rate_limit' || code === 'over_email_send_rate_limit')
+        throw new Error('⚠ Too many failed attempts. Please wait a few minutes before trying again.');
+      // Email not verified
+      if (msg.includes('Email not confirmed') || code === 'email_not_confirmed')
+        throw new Error('⚠ Your email address has not been confirmed. Please check your inbox or contact support.');
+      // Account disabled / banned
+      if (msg.includes('banned') || msg.includes('disabled') || msg.includes('blocked'))
+        throw new Error('⚠ This account has been disabled. Contact support for assistance.');
+      // Network / server errors
+      if (msg.includes('fetch') || msg.includes('network') || msg.includes('Failed to fetch'))
+        throw new Error('⚠ Network error — check your connection and try again.');
+      // Fallback with original message
+      throw new Error('⚠ Sign-in failed: ' + (msg || 'Please try again.'));
     }
 
     const userId = authData.user?.id;
-    if (!userId) throw new Error('Sign-in returned no user. Please try again.');
+    if (!userId) throw new Error('⚠ Sign-in returned no user. Please try again.');
 
     /* 2. Parallel role check — user_profiles + user_role_assignments */
     const [{ data: profile }, { data: roleRow }] = await Promise.all([
@@ -314,7 +353,9 @@ async function doLogin() {
     const isAdmin = ADMIN_ROLES.includes(profile?.role) || ADMIN_ROLES.includes(roleRow?.role);
     if (!isAdmin) {
       await db.client.auth.signOut();
-      throw new Error('Access denied. This account does not have admin privileges.');
+      setFieldError('a-email');
+      setFieldError('a-pass');
+      throw new Error('⚠ Access denied — this account does not have admin privileges. Contact your super-admin if this is a mistake.');
     }
 
     /* 3. Store lightweight session flag for dashboard and redirect */
@@ -325,14 +366,21 @@ async function doLogin() {
       at: Date.now()
     }));
 
-    showSuc('Welcome back! Redirecting to dashboard…');
+    showSuc('✓ Welcome back! Redirecting to dashboard…');
     setTimeout(() => { window.location.href = 'admin-dashboard'; }, 700);
 
   } catch (err) {
-    showErr(err.message || 'Authentication failed. Please try again.');
+    showErr(err.message || '⚠ Authentication failed. Please try again.');
     setLoading(false);
   }
 }
+
+/* Clear field error styles on input */
+document.addEventListener('DOMContentLoaded', () => {
+  ['a-email','a-pass'].forEach(id => {
+    document.getElementById(id)?.addEventListener('input', clearFieldErrors);
+  });
+});
 
 /* ── Enter key support ── */
 document.addEventListener('DOMContentLoaded', () => {

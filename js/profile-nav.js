@@ -1076,6 +1076,28 @@ class ProfileNavigationManager {
       }
       .pn-info-note strong { color: #7c5cfc; }
 
+      /* ── Referral code field ── */
+      .pn-ref-wrap { position: relative; }
+      .pn-ref-wrap input { padding-right: 2.8rem !important; text-transform: uppercase; letter-spacing: .05em; }
+      .pn-ref-spin {
+        position: absolute; right: .8rem; top: 50%; transform: translateY(-50%);
+        width: 14px; height: 14px;
+        border: 2px solid rgba(124,92,252,.18); border-top-color: #7c5cfc;
+        border-radius: 50%; animation: pn-spin .7s linear infinite; display: none;
+      }
+      @keyframes pn-spin { to { transform: translateY(-50%) rotate(360deg); } }
+      .pn-ref-icon {
+        position: absolute; right: .8rem; top: 50%; transform: translateY(-50%);
+        font-size: .9rem; pointer-events: none; display: none;
+        line-height: 1; font-style: normal;
+      }
+      /* Input state variants */
+      .pn-field input.pn-valid   { border-color: #22c55e !important; box-shadow: 0 0 0 3px rgba(34,197,94,.09) !important; }
+      .pn-field input.pn-invalid { border-color: #ef4444 !important; box-shadow: 0 0 0 3px rgba(239,68,68,.09) !important; }
+      .pn-field input.pn-loading { border-color: rgba(245,158,11,.45) !important; box-shadow: 0 0 0 3px rgba(245,158,11,.08) !important; }
+      /* Alert icon prefix */
+      .pn-err::before { content: '⚠ '; }
+
       /* ── Responsive ── */
       @media (max-width: 480px) {
         .pn-box { padding: 1.8rem 1.3rem; border-radius: 20px; }
@@ -1277,7 +1299,8 @@ class ProfileNavigationManager {
             <div class="pn-field">
               <label>Password <span class="pn-req">*</span></label>
               <div class="pn-pw-wrap">
-                <input type="password" id="pn-ss-pw" placeholder="Min. 8 chars, A-Z, 0-9" autocomplete="new-password" oninput="window._pnStrength('pn-ss-pw','pn-ss-strength','pn-ss-strength-lbl','pn-ss-hints')">
+                <input type="password" id="pn-ss-pw" placeholder="Min. 8 chars, A-Z, 0-9" autocomplete="new-password"
+                  oninput="window._pnStrength('pn-ss-pw','pn-ss-strength','pn-ss-strength-lbl','pn-ss-hints');window._pnCheckPwMatch('pn-ss-pw','pn-ss-cpw','pn-ss-cpw-h')">
                 <button class="pn-pw-toggle" type="button" onclick="window._pnTogglePw('pn-ss-pw',this)" title="Show/hide password" aria-label="Toggle password visibility"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
               </div>
               <div class="pn-strength" id="pn-ss-strength"></div>
@@ -1291,10 +1314,29 @@ class ProfileNavigationManager {
             <div class="pn-field">
               <label>Confirm Password <span class="pn-req">*</span></label>
               <div class="pn-pw-wrap">
-                <input type="password" id="pn-ss-cpw" placeholder="Re-enter password" autocomplete="new-password">
+                <input type="password" id="pn-ss-cpw" placeholder="Re-enter password" autocomplete="new-password"
+                  oninput="window._pnCheckPwMatch('pn-ss-pw','pn-ss-cpw','pn-ss-cpw-h')">
                 <button class="pn-pw-toggle" type="button" onclick="window._pnTogglePw('pn-ss-cpw',this)" title="Show/hide password" aria-label="Toggle password visibility"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
               </div>
+              <div class="pn-field-hint" id="pn-ss-cpw-h" aria-live="polite"></div>
             </div>
+          </div>
+
+          <!-- Referral Code (optional) -->
+          <div class="pn-field">
+            <label style="display:flex;align-items:center;gap:.4rem;">
+              Referral Code
+              <span style="font-size:.6rem;background:rgba(124,92,252,.1);border:1px solid rgba(124,92,252,.22);border-radius:999px;padding:.06rem .42rem;color:rgba(124,92,252,.7);font-weight:600;text-transform:uppercase;letter-spacing:.05em;">Optional</span>
+            </label>
+            <div class="pn-ref-wrap">
+              <input type="text" id="pn-ss-ref" placeholder="Enter code if you have one"
+                autocomplete="off" spellcheck="false"
+                oninput="window._pnRefCodeInput('pn-ss-ref','pn-ss-ref-h','pn-ss-ref-icon','pn-ss-ref-spin')"
+                onblur="window._pnValidateRefCode(this.value,'pn-ss-ref','pn-ss-ref-h','pn-ss-ref-icon','pn-ss-ref-spin')">
+              <div class="pn-ref-spin" id="pn-ss-ref-spin" aria-hidden="true"></div>
+              <i class="pn-ref-icon" id="pn-ss-ref-icon" aria-hidden="true"></i>
+            </div>
+            <div class="pn-field-hint" id="pn-ss-ref-h" aria-live="polite"></div>
           </div>
 
           <label class="pn-terms">
@@ -1347,9 +1389,11 @@ class ProfileNavigationManager {
           <div class="pn-field">
             <label>Confirm Password <span class="pn-req">*</span></label>
             <div class="pn-pw-wrap">
-              <input type="password" id="pn-sm-cpw" placeholder="Re-enter your password" autocomplete="new-password">
+              <input type="password" id="pn-sm-cpw" placeholder="Re-enter your password" autocomplete="new-password"
+                oninput="window._pnCheckPwMatch('pn-sm-pw','pn-sm-cpw','pn-sm-cpw-h')">
               <button class="pn-pw-toggle" type="button" onclick="window._pnTogglePw('pn-sm-cpw',this)" title="Show/hide password" aria-label="Toggle password visibility"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
             </div>
+            <div class="pn-field-hint" id="pn-sm-cpw-h" aria-live="polite"></div>
           </div>
           <label class="pn-terms">
             <input type="checkbox" id="pn-sm-terms">
@@ -1423,6 +1467,10 @@ class ProfileNavigationManager {
        ══════════════════════════════════════════ */
     const self = this;
 
+    /* Referral code validation state — reset on every view switch */
+    let _pnRefState = null;  // null | 'valid' | 'invalid'
+    let _pnRefData  = null;  // row from referral_codes table if valid
+
     const ALL_VIEWS = ['pn-v-welcome','pn-v-student-login','pn-v-mentor-login',
                        'pn-v-signup-role','pn-v-signup-student','pn-v-signup-mentor',
                        'pn-v-email-sent','pn-v-success'];
@@ -1436,6 +1484,21 @@ class ProfileNavigationManager {
       ['pn-sl-err','pn-ml-err','pn-ss-err','pn-ss-ok','pn-sm-err','pn-sm-ok','pn-otp-err'].forEach(id => {
         const el = document.getElementById(id);
         if (el) { el.style.display = 'none'; el.textContent = ''; }
+      });
+      // Reset referral code state and clear hint/input on every view change
+      _pnRefState = null; _pnRefData = null;
+      const refInp  = document.getElementById('pn-ss-ref');
+      const refHint = document.getElementById('pn-ss-ref-h');
+      const refIcon = document.getElementById('pn-ss-ref-icon');
+      const refSpin = document.getElementById('pn-ss-ref-spin');
+      if (refInp)  { refInp.value = ''; refInp.classList.remove('pn-valid','pn-invalid','pn-loading'); }
+      if (refHint) { refHint.textContent = ''; refHint.className = 'pn-field-hint'; }
+      if (refIcon) { refIcon.style.display = 'none'; refIcon.textContent = ''; }
+      if (refSpin) refSpin.style.display = 'none';
+      // Clear password mismatch hints
+      ['pn-ss-cpw-h','pn-sm-cpw-h'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) { el.textContent = ''; el.className = 'pn-field-hint'; }
       });
     };
 
@@ -1542,7 +1605,21 @@ class ProfileNavigationManager {
       try {
         if (!window.supabaseConfig) throw new Error('Auth service not ready. Refresh and try again.');
         const r = await window.supabaseConfig.signIn(email, pw);
-        if (!r.success) throw new Error(r.error || 'Incorrect email or password.');
+        if (!r.success) {
+          const raw = (r.error || '').toLowerCase();
+          if (raw.includes('invalid') || raw.includes('invalid_credentials') || raw.includes('wrong') || raw.includes('incorrect')) {
+            throw new Error('Incorrect email or password. Please check your details and try again.');
+          } else if (raw.includes('rate') || raw.includes('too many')) {
+            throw new Error('Too many login attempts. Please wait a few minutes before trying again.');
+          } else if (raw.includes('email') && (raw.includes('confirm') || raw.includes('verified') || raw.includes('not confirmed'))) {
+            throw new Error('Please verify your email address first. Check your inbox for a verification link.');
+          } else if (raw.includes('banned') || raw.includes('disabled') || raw.includes('deactivated')) {
+            throw new Error('This account has been disabled. Please contact support.');
+          } else if (raw.includes('network') || raw.includes('fetch')) {
+            throw new Error('Connection error. Please check your internet and try again.');
+          }
+          throw new Error(r.error || 'Incorrect email or password. Please try again.');
+        }
         const user = r.data?.user || r.user;
         if (!user) throw new Error('Login failed — no user returned.');
         self.currentUser = user;
@@ -1564,7 +1641,21 @@ class ProfileNavigationManager {
       try {
         if (!window.supabaseConfig) throw new Error('Auth service not ready. Refresh and try again.');
         const r = await window.supabaseConfig.signIn(email, pw);
-        if (!r.success) throw new Error(r.error || 'Incorrect email or password.');
+        if (!r.success) {
+          const raw = (r.error || '').toLowerCase();
+          if (raw.includes('invalid') || raw.includes('invalid_credentials') || raw.includes('wrong') || raw.includes('incorrect')) {
+            throw new Error('Incorrect email or password. Please check your details and try again.');
+          } else if (raw.includes('rate') || raw.includes('too many')) {
+            throw new Error('Too many login attempts. Please wait a few minutes before trying again.');
+          } else if (raw.includes('email') && (raw.includes('confirm') || raw.includes('verified') || raw.includes('not confirmed'))) {
+            throw new Error('Please verify your email address first. Check your inbox for a verification link.');
+          } else if (raw.includes('banned') || raw.includes('disabled') || raw.includes('deactivated')) {
+            throw new Error('This account has been disabled. Please contact support.');
+          } else if (raw.includes('network') || raw.includes('fetch')) {
+            throw new Error('Connection error. Please check your internet and try again.');
+          }
+          throw new Error(r.error || 'Incorrect email or password. Please try again.');
+        }
         const user = r.data?.user || r.user;
         if (!user) throw new Error('Login failed — no user returned.');
         self.currentUser = user;
@@ -1596,6 +1687,7 @@ class ProfileNavigationManager {
       const pw     = document.getElementById('pn-ss-pw')?.value;
       const cpw    = document.getElementById('pn-ss-cpw')?.value;
       const terms  = document.getElementById('pn-ss-terms')?.checked;
+      const refRaw = (document.getElementById('pn-ss-ref')?.value?.trim() || '').toUpperCase();
       const err    = document.getElementById('pn-ss-err');
       const btn    = document.getElementById('pn-ss-btn');
 
@@ -1614,6 +1706,18 @@ class ProfileNavigationManager {
       if (!pnPasswordRe.test(pw || '')) setInvalid('pn-ss-pw', 'Password must be at least 8 characters with uppercase, lowercase, and a number.');
       if (pw !== cpw) { setInvalid('pn-ss-cpw', 'Passwords do not match.'); hasErr = true; }
       if (!terms) { _pnErr(err, 'Please agree to the Terms of Service to continue.'); hasErr = true; }
+
+      // Block submit if referral code was entered but is invalid
+      if (refRaw && _pnRefState === 'invalid') {
+        _pnErr(err, 'The referral code you entered is invalid or expired. Remove it or enter a valid code.');
+        hasErr = true;
+      }
+      // If code entered but not yet validated (state is null/pending) — validate now
+      if (refRaw && _pnRefState === null) {
+        _pnErr(err, 'Please wait — validating your referral code…');
+        hasErr = true;
+      }
+
       if (hasErr) return;
 
       btn.disabled = true; btn.textContent = 'Creating account…';
@@ -1629,7 +1733,10 @@ class ProfileNavigationManager {
           email,
           password: pw,
           options: {
-            data: { full_name: fullName, phone, role: 'user' },
+            data: {
+              full_name: fullName, phone, role: 'user',
+              ...(refRaw && _pnRefState === 'valid' ? { referral_code_used: refRaw } : {})
+            },
             emailRedirectTo: redirectTo
           }
         });
@@ -1642,11 +1749,18 @@ class ProfileNavigationManager {
           throw signUpErr;
         }
 
+        const newUserId = data?.user?.id;
+
         // Sync profile first while session still exists (best-effort)
-        if (data?.user?.id) {
-          await window.supabaseConfig.upsertUserProfile?.(data.user.id, {
+        if (newUserId) {
+          await window.supabaseConfig.upsertUserProfile?.(newUserId, {
             full_name: fullName, email, phone, role: 'user', is_email_verified: false
           }).catch(() => {});
+
+          // Process referral while session exists (before signOut)
+          if (refRaw && _pnRefState === 'valid' && _pnRefData) {
+            await window._pnProcessReferral(newUserId, _pnRefData).catch(() => {});
+          }
         }
 
         // Sign out — prevent auto-login until email is verified
@@ -1740,6 +1854,170 @@ class ProfileNavigationManager {
     /* ── OTP functions removed — email verification handled by Supabase ── */
     window._pnVerifyOtp = () => {}; // No-op: kept for backward compat only
 
+
+    /* ── Referral code: clear state on typing ── */
+    window._pnRefCodeInput = (inputId, hintId, iconId, spinId) => {
+      _pnRefState = null;
+      _pnRefData  = null;
+      const inp  = document.getElementById(inputId);
+      const hint = document.getElementById(hintId);
+      const icon = document.getElementById(iconId);
+      const spin = document.getElementById(spinId);
+      if (inp)  { inp.classList.remove('pn-valid','pn-invalid','pn-loading'); }
+      if (hint) { hint.textContent = ''; hint.className = 'pn-field-hint'; }
+      if (icon) { icon.style.display = 'none'; icon.textContent = ''; }
+      if (spin) { spin.style.display = 'none'; }
+    };
+
+    /* ── Referral code: async validation on blur ── */
+    window._pnValidateRefCode = async (raw, inputId, hintId, iconId, spinId) => {
+      const code = (raw || '').trim().toUpperCase();
+      const inp  = document.getElementById(inputId);
+      const hint = document.getElementById(hintId);
+      const icon = document.getElementById(iconId);
+      const spin = document.getElementById(spinId);
+
+      // Clear state if blank (optional field)
+      if (!code) {
+        _pnRefState = null; _pnRefData = null;
+        if (inp)  inp.classList.remove('pn-valid','pn-invalid','pn-loading');
+        if (hint) { hint.textContent = ''; hint.className = 'pn-field-hint'; }
+        if (icon) { icon.style.display = 'none'; }
+        if (spin) spin.style.display = 'none';
+        return;
+      }
+
+      // Show loading
+      _pnRefState = null; _pnRefData = null;
+      if (inp)  { inp.classList.remove('pn-valid','pn-invalid'); inp.classList.add('pn-loading'); }
+      if (hint) { hint.textContent = 'Checking code…'; hint.className = 'pn-field-hint show'; }
+      if (icon) icon.style.display = 'none';
+      if (spin) spin.style.display = '';
+
+      try {
+        if (!window.supabaseConfig) throw new Error('service_unavailable');
+        const { data, error } = await window.supabaseConfig.client
+          .from('referral_codes')
+          .select('id,code,description,referrer_user_id,points_for_referrer,points_for_referee,is_active,max_uses,use_count,expires_at')
+          .eq('code', code)
+          .maybeSingle();
+
+        if (spin) spin.style.display = 'none';
+        if (inp) inp.classList.remove('pn-loading');
+
+        if (error || !data) {
+          // Code not found
+          _pnRefState = 'invalid'; _pnRefData = null;
+          if (inp)  inp.classList.add('pn-invalid');
+          if (icon) { icon.textContent = '✗'; icon.style.display = ''; icon.style.color = '#ef4444'; }
+          if (hint) { hint.textContent = 'Invalid referral code. Please check and try again.'; hint.className = 'pn-field-hint show err'; }
+          return;
+        }
+
+        // Validate: active flag
+        if (!data.is_active) {
+          _pnRefState = 'invalid'; _pnRefData = null;
+          if (inp)  inp.classList.add('pn-invalid');
+          if (icon) { icon.textContent = '✗'; icon.style.display = ''; icon.style.color = '#ef4444'; }
+          if (hint) { hint.textContent = 'This referral code is no longer active.'; hint.className = 'pn-field-hint show err'; }
+          return;
+        }
+
+        // Validate: expiry
+        if (data.expires_at && new Date(data.expires_at) < new Date()) {
+          _pnRefState = 'invalid'; _pnRefData = null;
+          if (inp)  inp.classList.add('pn-invalid');
+          if (icon) { icon.textContent = '✗'; icon.style.display = ''; icon.style.color = '#ef4444'; }
+          if (hint) { hint.textContent = 'This referral code has expired.'; hint.className = 'pn-field-hint show err'; }
+          return;
+        }
+
+        // Validate: usage limit
+        if (data.max_uses !== null && data.use_count >= data.max_uses) {
+          _pnRefState = 'invalid'; _pnRefData = null;
+          if (inp)  inp.classList.add('pn-invalid');
+          if (icon) { icon.textContent = '✗'; icon.style.display = ''; icon.style.color = '#ef4444'; }
+          if (hint) { hint.textContent = 'This referral code has reached its usage limit.'; hint.className = 'pn-field-hint show err'; }
+          return;
+        }
+
+        // Valid!
+        _pnRefState = 'valid'; _pnRefData = data;
+        if (inp)  inp.classList.add('pn-valid');
+        if (icon) { icon.textContent = '✓'; icon.style.display = ''; icon.style.color = '#22c55e'; }
+        const pts = data.points_for_referee || 0;
+        if (hint) {
+          hint.textContent = pts > 0
+            ? `Code accepted! You'll earn ${pts} reward points on signup.`
+            : 'Referral code accepted!';
+          hint.className = 'pn-field-hint show ok';
+        }
+
+      } catch(e) {
+        if (spin) spin.style.display = 'none';
+        if (inp)  inp.classList.remove('pn-loading');
+        // On network/service error — don't block signup, just clear
+        _pnRefState = null; _pnRefData = null;
+        if (hint) { hint.textContent = 'Could not verify code right now. You can still sign up.'; hint.className = 'pn-field-hint show'; }
+      }
+    };
+
+    /* ── Password mismatch check (real-time) ── */
+    window._pnCheckPwMatch = (pwId, cpwId, hintId) => {
+      const pw  = document.getElementById(pwId)?.value  || '';
+      const cpw = document.getElementById(cpwId)?.value || '';
+      const el  = document.getElementById(hintId);
+      if (!el) return;
+      if (!cpw) { el.textContent = ''; el.className = 'pn-field-hint'; return; }
+      if (pw === cpw) {
+        el.textContent = 'Passwords match.';
+        el.className   = 'pn-field-hint show ok';
+      } else {
+        el.textContent = 'Passwords do not match.';
+        el.className   = 'pn-field-hint show err';
+      }
+    };
+
+    /* ── Process referral after successful signUp (before signOut) ── */
+    window._pnProcessReferral = async (newUserId, codeData) => {
+      if (!newUserId || !codeData || !window.supabaseConfig) return;
+      const client = window.supabaseConfig.client;
+      const ptRef   = codeData.points_for_referee  || 0;
+      const ptReferrer = codeData.points_for_referrer || 0;
+
+      // Award points to referee (new user)
+      if (ptRef > 0) {
+        await client.rpc('increment_reward_points', { p_user_id: newUserId, p_points: ptRef })
+          .catch(() =>
+            client.from('user_profiles')
+              .update({ reward_points: client.rpc('coalesce_points', {}) })
+              .eq('user_id', newUserId)
+              .catch(() => {})
+          );
+      }
+
+      // Award points to referrer
+      if (ptReferrer > 0 && codeData.referrer_user_id) {
+        await client.rpc('increment_reward_points', { p_user_id: codeData.referrer_user_id, p_points: ptReferrer })
+          .catch(() => {});
+      }
+
+      // Log referral event
+      await client.from('referral_logs').insert({
+        referrer_user_id:  codeData.referrer_user_id || null,
+        referred_user_id:  newUserId,
+        referral_code_used: codeData.code,
+        points_to_referrer: ptReferrer,
+        points_to_referee:  ptRef,
+        status: 'completed'
+      }).catch(() => {});
+
+      // Increment use_count on the code
+      await client.from('referral_codes')
+        .update({ use_count: (codeData.use_count || 0) + 1 })
+        .eq('id', codeData.id)
+        .catch(() => {});
+    };
 
     /* ── Helpers ── */
     function _pnErr(el, msg) {
