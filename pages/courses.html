@@ -304,9 +304,9 @@
     }
     .course-name { font-size: 1.02rem; font-weight: 700; color: var(--txt); line-height: 1.38; }
     .course-desc {
-      font-size: .82rem; color: var(--txt3); line-height: 1.62; flex: 1;
+      font-size: .82rem; color: var(--txt3); line-height: 1.65; flex: 1;
       overflow: hidden; display: -webkit-box;
-      -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+      -webkit-line-clamp: 3; -webkit-box-orient: vertical;
     }
     .course-meta { display: flex; gap: .75rem; font-size: .78rem; color: var(--txt3); flex-wrap: wrap; }
     .course-meta span { display: flex; align-items: center; gap: .3rem; }
@@ -615,7 +615,7 @@
           Tech &amp; Beyond
           <span class="hero-gradient-word">Master Any Skill</span>
         </h1>
-        <p class="courses-hero-sub">Industry-aligned programs with live expert mentorship, flexible EMI, and  placement Guideness
+        <p class="courses-hero-sub">Industry-aligned programs with live expert mentorship, flexible EMI, and placement guidance.</p>
 
         <!-- Search bar lives here — drives the filter below -->
         <div class="hero-search-bar">
@@ -769,7 +769,8 @@
           <div style="font-size:.82rem;font-weight:700;color:var(--txt);" id="em-level-val">—</div>
         </div>
       </div>
-      <div id="em-desc" style="font-size:.83rem;color:var(--txt3);line-height:1.7;margin-bottom:.85rem;max-height:88px;overflow-y:auto;"></div>
+      <div id="em-desc" style="font-size:.82rem;color:var(--txt3);line-height:1.72;margin-bottom:.1rem;max-height:130px;overflow-y:auto;padding-right:.2rem;"></div>
+      <div id="em-features" style="margin-bottom:.75rem;"></div>
       <div id="em-mentor-row" style="font-size:.82rem;color:var(--txt3);margin-bottom:.9rem;display:none;align-items:center;gap:.4rem;">
         <span>👨‍🏫</span><span id="em-mentor">—</span>
       </div>
@@ -842,6 +843,7 @@
 <script>
   // Use global supabase config — do NOT create a second instance
   let allCourses = [], filteredCourses = [], selectedCourse = null, selectedTotalAmount = 0;
+  let getCourseThumbInfo = null; // hoisted here so openCourseDetail can access it
 
   function _db() { return window.supabaseConfig?.client || null; }
 
@@ -932,9 +934,13 @@
       if (sort === 'popular')    return (b.enrollment_count || 0) - (a.enrollment_count || 0);
       if (sort === 'rating')     return (b.rating || 0) - (a.rating || 0);
       if (sort === 'newest')     return new Date(b.created_at) - new Date(a.created_at);
-      // default 'trending': trending courses first, then A-Z by title
+      // default: trending → beginner → intermediate → advanced → alphabetical
       const trendDiff = (b.is_trending ? 1 : 0) - (a.is_trending ? 1 : 0);
       if (trendDiff !== 0) return trendDiff;
+      const _lo = { beginner: 0, intermediate: 1, advanced: 2 };
+      const la = _lo[(a.level || '').toLowerCase()] ?? 3;
+      const lb = _lo[(b.level || '').toLowerCase()] ?? 3;
+      if (la !== lb) return la - lb;
       return (a.title || '').localeCompare(b.title || '');
     });
 
@@ -953,7 +959,7 @@
     }
 
     // 3D modern thumb icons — returns { svg, bg } based on category + title keywords
-    function getCourseThumbInfo(catName, courseTitle) {
+    getCourseThumbInfo = function(catName, courseTitle) {
       const s = ((catName || '') + ' ' + (courseTitle || '')).toLowerCase();
 
       // ── Icon definitions (self-contained SVGs with gradients + drop-shadow) ──
@@ -1211,7 +1217,7 @@
           <div class="course-category">${c._catName || 'Course'}</div>
           ${c.is_trending ? `<div class="trend-pill">🔥 Trending</div>` : ''}
           <div class="course-name">${c.title}</div>
-          <div class="course-desc">${c.short_description || (c.description || '').substring(0, 120)}</div>
+          <div class="course-desc">${c.short_description || (c.description || '').replace(/\n+/g, ' ').substring(0, 160)}</div>
           <div class="course-meta">
             ${durationMo ? `<span>⏱ ${durationMo} mo</span>` : c.duration_hours ? `<span>⏱ ${c.duration_hours} hrs</span>` : ''}
             ${c.total_live_classes ? `<span>📹 ${c.total_live_classes} sessions</span>` : ''}
@@ -1231,6 +1237,53 @@
     }).join('');
   }
 
+  // ===== DESCRIPTION FORMATTING HELPERS =====
+  function formatCourseText(text) {
+    if (!text) return '';
+    const lines = text.split(/\r?\n/);
+    let html = '', inList = false;
+    for (const raw of lines) {
+      const line = raw.trim();
+      if (!line) {
+        if (inList) { html += '</ul>'; inList = false; }
+        continue;
+      }
+      const isBullet = /^[-•*]\s+/.test(line) || /^\d+[.)]\s+/.test(line);
+      if (isBullet) {
+        if (!inList) { html += '<ul style="margin:.35rem 0 .35rem 1rem;padding:0;">'; inList = true; }
+        html += `<li style="margin-bottom:.2rem;">${line.replace(/^[-•*\d.)]\s*/, '').trim()}</li>`;
+      } else {
+        if (inList) { html += '</ul>'; inList = false; }
+        html += `<p style="margin:.25rem 0;">${line}</p>`;
+      }
+    }
+    if (inList) html += '</ul>';
+    return html || `<p>${text}</p>`;
+  }
+
+  function renderKeyFeatures(features) {
+    if (!features) return '';
+    let items = [];
+    if (Array.isArray(features)) {
+      items = features.filter(f => f && String(f).trim());
+    } else if (typeof features === 'string') {
+      items = features.split(/[\n|,]/).map(f => f.trim()).filter(Boolean);
+    }
+    if (!items.length) return '';
+    return `<div style="margin-top:.75rem;padding-top:.75rem;border-top:1px solid var(--border);">
+      <div style="font-size:.7rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--v1);margin-bottom:.5rem;display:flex;align-items:center;gap:.3rem;">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8"><polyline points="20 6 9 17 4 12"/></svg>
+        Key Features
+      </div>
+      <ul style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:.28rem;">
+        ${items.map(f => `<li style="display:flex;align-items:flex-start;gap:.38rem;font-size:.8rem;color:var(--txt3);line-height:1.5;">
+          <span style="color:#22c55e;font-weight:700;flex-shrink:0;margin-top:.05rem;">✓</span>
+          <span>${String(f).trim()}</span>
+        </li>`).join('')}
+      </ul>
+    </div>`;
+  }
+
   // ===== COURSE DETAIL MODAL =====
   async function openCourseDetail(courseId) {
     selectedCourse = allCourses.find(c => c.id === courseId);
@@ -1243,7 +1296,7 @@
     // Thumbnail — use 3D icon
     const thumbWrap = el('em-thumb-wrap');
     if (thumbWrap) {
-      const mThumb = getCourseThumbInfo(c._catName, c.title);
+      const mThumb = getCourseThumbInfo ? getCourseThumbInfo(c._catName, c.title) : { svg: '', bg: 'linear-gradient(145deg,#1a0533,#3b0764)' };
       if (c.thumbnail_url) {
         thumbWrap.style.background = '';
         thumbWrap.innerHTML = `<img src="${c.thumbnail_url}" alt="${c.title}" style="width:100%;height:100%;object-fit:cover;">`;
@@ -1261,7 +1314,8 @@
     if (el('em-duration'))    el('em-duration').textContent    = durationMo ? durationMo + ' mo' : c.duration_hours ? c.duration_hours + ' hrs' : '—';
     if (el('em-sessions'))    el('em-sessions').textContent    = c.total_live_classes || '—';
     if (el('em-level-val'))   el('em-level-val').textContent   = c.level || '—';
-    if (el('em-desc'))        el('em-desc').textContent        = c.description || c.short_description || '';
+    if (el('em-desc'))     el('em-desc').innerHTML     = formatCourseText(c.description || c.short_description || '');
+    if (el('em-features')) el('em-features').innerHTML = renderKeyFeatures(c.key_features);
 
     const mentorRow = el('em-mentor-row');
     if (mentorRow) {
@@ -1303,6 +1357,7 @@
 
     showDetailPanel();
     document.getElementById('enroll-overlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
   }
 
   function showDetailPanel() {
@@ -1342,8 +1397,9 @@
     if (el('em-total-fee')) el('em-total-fee').textContent = fmt(selectedTotalAmount);
 
     const payBtn = el('btn-pay');
-    if (payBtn) payBtn.textContent = selectedTotalAmount > 0
-      ? 'Pay ₹' + Number(selectedTotalAmount).toLocaleString('en-IN') + ' via Razorpay'
+    const _cardSvg = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:-2px;margin-right:.3rem;"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>`;
+    if (payBtn) payBtn.innerHTML = selectedTotalAmount > 0
+      ? _cardSvg + 'Pay ₹' + Number(selectedTotalAmount).toLocaleString('en-IN') + ' via Razorpay'
       : 'Contact Us to Enroll';
 
     const d = document.getElementById('em-panel-details');
@@ -1352,13 +1408,15 @@
     if (p) p.style.display = '';
   }
 
-  function closeEnrollModal() { document.getElementById('enroll-overlay').classList.remove('open'); }
+  function closeEnrollModal() {
+    document.getElementById('enroll-overlay').classList.remove('open');
+    document.body.style.overflow = '';
+  }
 
   // ── Open modal then immediately proceed to payment step ──
   async function quickEnroll(courseId) {
     await openCourseDetail(courseId);
-    // Small delay to let modal animation settle before switching panel
-    setTimeout(confirmEnrollment, 120);
+    confirmEnrollment();
   }
 
   // ===== ENROLL CONFIRMATION (PAY LATER) =====
@@ -1375,13 +1433,12 @@
   }
 
   async function enrollPayLater() {
-    let user = window.profileNav?.currentUser;
-    if (!user) {
-      try {
-        const { data: { session } } = await _db().auth.getSession();
-        user = session?.user || null;
-      } catch(_) {}
-    }
+    let user = null;
+    try {
+      const { data: { session } } = await _db().auth.getSession();
+      user = session?.user || null;
+    } catch(_) {}
+
     if (!user) {
       closeEnrollModal();
       watchForLogin(selectedCourse?.id);
@@ -1394,6 +1451,19 @@
     btn.disabled = true; btn.textContent = 'Processing…';
 
     try {
+      // Guard: already active/completed
+      const { data: existing } = await _db().from('enrollments')
+        .select('id, enrollment_status')
+        .eq('student_user_id', user.id)
+        .eq('course_id', selectedCourse.id)
+        .in('enrollment_status', ['active', 'completed'])
+        .maybeSingle();
+      if (existing) {
+        closeEnrollModal();
+        window.location.href = 'profile.html?tab=learning';
+        return;
+      }
+
       const activePricing = (selectedCourse.course_pricing || []).find(p => p.is_active) || selectedCourse.course_pricing?.[0];
       if (!activePricing?.id) {
         alert('No pricing available. Please contact support.');
@@ -1401,21 +1471,27 @@
         return;
       }
 
-      const totalAmount = selectedTotalAmount;
+      const listPrice  = selectedCourse._basePrice || selectedCourse._price || 0;
+      const salePrice  = selectedCourse._price || 0;
+      const discount   = Math.max(0, listPrice - salePrice);
+      const netAmount  = selectedTotalAmount;
+
       const { error: enrollErr } = await _db().from('enrollments').upsert({
-        student_user_id: user.id,
-        course_id: selectedCourse.id,
-        pricing_id: activePricing.id,
+        student_user_id:   user.id,
+        course_id:         selectedCourse.id,
+        pricing_id:        activePricing.id,
         enrollment_status: 'pending',
-        access_status: 'pending',
-        net_amount: totalAmount,
-        paid_amount: 0,
-        due_amount: totalAmount,
+        access_status:     'pending',
+        list_price:        listPrice,
+        discount_amount:   discount,
+        net_amount:        netAmount,
+        paid_amount:       0,
+        due_amount:        netAmount,
       }, { onConflict: 'student_user_id,course_id' });
       if (enrollErr) throw enrollErr;
 
       closeEnrollModal();
-      showEnrollConfirm(selectedCourse.title, totalAmount);
+      showEnrollConfirm(selectedCourse.title, netAmount);
     } catch(e) {
       console.error(e);
       btn.disabled = false; btn.textContent = 'Pay Later';
@@ -1446,7 +1522,7 @@
     let user = window.profileNav?.currentUser;
     if (!user) {
       try {
-        const { data: { session } } = await (window.supabaseConfig?.client || window.db?.client)?.auth?.getSession?.() || { data: {} };
+        const { data: { session } } = await _db().auth.getSession();
         user = session?.user || null;
       } catch(_) {}
     }
@@ -1464,24 +1540,25 @@
     }
 
     const btn = document.getElementById('btn-pay');
+    const _payBtnHtml = btn.innerHTML; // save original HTML (with SVG icon)
     btn.disabled = true; btn.textContent = 'Processing…';
 
     const totalAmount = selectedTotalAmount;
     if (!totalAmount || totalAmount <= 0) {
       alert('No pricing available for this course. Please contact support.');
-      btn.disabled = false; btn.textContent = 'Pay Now via Razorpay';
+      btn.disabled = false; btn.innerHTML = _payBtnHtml;
       return;
     }
 
     if (typeof window.Razorpay === 'undefined') {
       alert('Payment gateway failed to load. Please check your connection and refresh.');
-      btn.disabled = false; btn.textContent = 'Pay Now via Razorpay';
+      btn.disabled = false; btn.innerHTML = _payBtnHtml;
       return;
     }
 
     try {
       const activePricing = (selectedCourse.course_pricing || []).find(p => p.is_active) || selectedCourse.course_pricing?.[0];
-      if (!activePricing?.id) { alert('No pricing available. Please contact support.'); btn.disabled = false; btn.textContent = 'Pay Now'; return; }
+      if (!activePricing?.id) { alert('No pricing available. Please contact support.'); btn.disabled = false; btn.innerHTML = _payBtnHtml; return; }
 
       const { data: enroll, error: enrollErr } = await _db().from('enrollments').upsert({
         student_user_id: user.id, course_id: selectedCourse.id,
@@ -1536,7 +1613,7 @@
           notes: { error_code: response.error?.code, error_description: response.error?.description }
         }).catch(() => {});
         btn.disabled = false;
-        btn.textContent = 'Retry Payment';
+        btn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:-2px;margin-right:.3rem;"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>Retry Payment`;
         const errMsg = response.error?.description || response.error?.reason || 'Payment was declined.';
         const errEl = document.createElement('div');
         errEl.style.cssText = 'background:rgba(239,68,68,.12);border:1.5px solid rgba(239,68,68,.3);border-radius:10px;padding:.5rem .75rem;font-size:.8rem;color:#f87171;margin-top:.5rem;';
@@ -1548,7 +1625,7 @@
     } catch (e) {
       console.error(e);
       btn.disabled = false;
-      btn.textContent = 'Pay Now via Razorpay';
+      btn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:-2px;margin-right:.3rem;"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>Pay Now`;
       const errMsg = e.message?.includes('pricing') ? e.message : 'Unable to initiate payment. Please check your connection and try again.';
       alert(errMsg);
     }
@@ -1559,10 +1636,31 @@
   document.getElementById('category-filter').addEventListener('change', applyFilters);
   document.getElementById('level-filter').addEventListener('change', applyFilters);
   document.getElementById('sort-select').addEventListener('change', applyFilters);
-  document.getElementById('enroll-overlay').addEventListener('click', e => { if (e.target === document.getElementById('enroll-overlay')) closeEnrollModal(); });
+
+  // Close modal on backdrop click
+  document.getElementById('enroll-overlay').addEventListener('click', e => {
+    if (e.target === document.getElementById('enroll-overlay')) closeEnrollModal();
+  });
+  document.getElementById('enroll-confirm-overlay').addEventListener('click', e => {
+    if (e.target === document.getElementById('enroll-confirm-overlay')) closeEnrollConfirm();
+  });
+
+  // ESC key closes any open modal
+  document.addEventListener('keydown', e => {
+    if (e.key !== 'Escape') return;
+    if (document.getElementById('enroll-confirm-overlay').classList.contains('open')) {
+      closeEnrollConfirm();
+    } else if (document.getElementById('enroll-overlay').classList.contains('open')) {
+      closeEnrollModal();
+    }
+  });
 
   document.querySelectorAll('.filter-tag').forEach(t => {
-    t.addEventListener('click', () => { document.querySelectorAll('.filter-tag').forEach(x => x.classList.remove('active')); t.classList.add('active'); applyFilters(); });
+    t.addEventListener('click', () => {
+      document.querySelectorAll('.filter-tag').forEach(x => x.classList.remove('active'));
+      t.classList.add('active');
+      applyFilters();
+    });
   });
 
   function debounce(fn, delay) { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), delay); }; }

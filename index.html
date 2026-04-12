@@ -1372,12 +1372,179 @@
   <!-- Footer — rebuilt by profile-nav.js -->
   <footer></footer>
 
+  <!-- ── Home Courses: Card + Modal Styles ── -->
+  <style>
+    .hc-card {
+      background:var(--panel); border:1.5px solid var(--border);
+      border-radius:var(--r2); overflow:hidden; cursor:pointer;
+      display:flex; flex-direction:column;
+      transition:transform .32s cubic-bezier(.34,1.56,.64,1), box-shadow .3s, border-color .3s;
+      animation:fadeUp .45s both;
+    }
+    .hc-card:hover { transform:translateY(-6px); box-shadow:0 22px 52px rgba(124,92,252,.22); border-color:rgba(124,92,252,.45); }
+    :root[data-theme="dark"] .hc-card { background:rgba(255,255,255,.038); border-color:rgba(124,92,252,.16); }
+    :root[data-theme="dark"] .hc-card:hover { background:rgba(124,92,252,.07); border-color:rgba(124,92,252,.48); box-shadow:0 22px 52px rgba(124,92,252,.35); }
+    .hc-thumb { height:130px; position:relative; overflow:hidden; display:flex; align-items:center; justify-content:center; }
+    .hc-thumb img { width:100%; height:100%; object-fit:cover; transition:transform .4s; }
+    .hc-card:hover .hc-thumb img { transform:scale(1.06); }
+    .hc-thumb::after { content:''; position:absolute; inset:0; pointer-events:none; background:linear-gradient(to bottom,transparent 45%,rgba(0,0,0,.15) 100%); }
+    .hc-thumb-icon { display:flex; flex-direction:column; align-items:center; gap:.35rem; transition:transform .4s cubic-bezier(.34,1.56,.64,1); position:relative; z-index:1; }
+    .hc-thumb-icon svg { width:58px; height:58px; filter:drop-shadow(0 5px 14px rgba(0,0,0,.35)); }
+    .hc-thumb-icon .hc-cat-lbl { font-size:.58rem; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:rgba(255,255,255,.62); }
+    .hc-card:hover .hc-thumb-icon { transform:scale(1.1) translateY(-2px); }
+    .hc-level-badge { position:absolute; top:.6rem; left:.6rem; background:rgba(0,0,0,.5); backdrop-filter:blur(6px); color:#fff; padding:.18rem .6rem; border-radius:999px; font-size:.62rem; font-weight:700; letter-spacing:.04em; text-transform:uppercase; z-index:2; }
+    .hc-trend-badge { position:absolute; top:.6rem; right:.6rem; background:linear-gradient(135deg,#f97316,#ea580c); color:#fff; padding:.18rem .55rem; border-radius:999px; font-size:.62rem; font-weight:700; z-index:2; }
+    .hc-body { padding:.9rem 1rem 1rem; display:flex; flex-direction:column; gap:.4rem; flex:1; }
+    .hc-cat { font-size:.67rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--v1); }
+    .hc-name { font-size:.88rem; font-weight:700; color:var(--txt); line-height:1.38; }
+    .hc-meta { display:flex; gap:.5rem; font-size:.73rem; color:var(--txt3); flex-wrap:wrap; }
+    .hc-actions { display:flex; gap:.4rem; margin-top:auto; padding-top:.55rem; }
+    .hc-btn-details {
+      flex:1; background:transparent; border:1.5px solid rgba(124,92,252,.4); color:var(--v1);
+      border-radius:9px; padding:.44rem .4rem; font-size:.75rem; font-weight:700;
+      cursor:pointer; transition:all .22s; font-family:inherit; white-space:nowrap;
+    }
+    .hc-btn-details:hover { background:rgba(124,92,252,.08); border-color:var(--v1); }
+    .hc-btn-enroll {
+      flex:1.4; background:linear-gradient(135deg,var(--v1),#3d6bff); color:#fff;
+      border:none; border-radius:9px; padding:.44rem .4rem; font-size:.75rem; font-weight:700;
+      cursor:pointer; transition:all .25s; font-family:inherit; white-space:nowrap;
+      box-shadow:0 4px 12px rgba(124,92,252,.28);
+    }
+    .hc-btn-enroll:hover { opacity:.88; transform:translateY(-1px); }
+    .hc-btn-enrolled {
+      width:100%; background:linear-gradient(135deg,#4ade80,#22d3ee); color:#0a2a1a;
+      border:none; border-radius:9px; padding:.44rem .4rem; font-size:.75rem; font-weight:700;
+      cursor:pointer; font-family:inherit; box-shadow:0 4px 12px rgba(74,222,128,.28);
+    }
+    /* Enrollment Modal */
+    .hc-enroll-overlay {
+      position:fixed; inset:0; z-index:9000; background:rgba(0,0,0,.6); backdrop-filter:blur(8px);
+      display:flex; align-items:center; justify-content:center;
+      opacity:0; visibility:hidden; transition:all .3s ease;
+    }
+    .hc-enroll-overlay.open { opacity:1; visibility:visible; }
+    .hc-enroll-modal {
+      background:var(--bg); border:1.5px solid var(--border);
+      border-radius:24px; padding:2rem; max-width:520px; width:92vw; max-height:90vh;
+      overflow-y:auto; transform:scale(.95); transition:transform .3s ease; position:relative;
+    }
+    .hc-enroll-overlay.open .hc-enroll-modal { transform:scale(1); }
+    .hc-em-close {
+      position:absolute; top:1rem; right:1rem; background:var(--panel);
+      border:1.5px solid var(--border); border-radius:50%; width:32px; height:32px;
+      display:flex; align-items:center; justify-content:center;
+      cursor:pointer; font-size:1rem; color:var(--txt3); transition:all .2s;
+    }
+    .hc-em-close:hover { background:var(--v1); color:#fff; border-color:var(--v1); }
+    .hc-btn-pay {
+      width:100%; background:var(--grad); color:#fff; border:none;
+      border-radius:var(--r1); padding:.9rem; font-size:.95rem; font-weight:700;
+      cursor:pointer; transition:all .25s; font-family:inherit;
+    }
+    .hc-btn-pay:hover { opacity:.88; transform:scale(1.01); }
+    .hc-btn-pay:disabled { opacity:.5; cursor:not-allowed; transform:none; }
+    .hc-pay-actions { display:flex; gap:.65rem; margin-top:.25rem; }
+    .hc-btn-pay-now { flex:1.6; }
+    .hc-btn-pay-later { flex:1; background:transparent!important; color:var(--v1)!important; border:1.5px solid var(--v1)!important; box-shadow:none!important; }
+    /* Confirmation popup */
+    .hc-ec-overlay { display:none; position:fixed; inset:0; z-index:9100; background:rgba(6,3,18,.72); backdrop-filter:blur(18px); align-items:center; justify-content:center; padding:1rem; }
+    .hc-ec-overlay.open { display:flex; }
+    .hc-ec-box { background:var(--panel); border:1.5px solid rgba(124,92,252,.3); border-radius:24px; padding:2.4rem 2rem 2rem; max-width:420px; width:94vw; text-align:center; box-shadow:0 40px 80px rgba(60,20,160,.25); }
+    @media (max-width:480px) {
+      .hc-enroll-modal { padding:1.4rem; }
+      .hc-pay-actions { flex-direction:column; }
+      .hc-btn-pay-now, .hc-btn-pay-later { flex:unset; }
+    }
+  </style>
+
+  <!-- ── Home Courses: Enrollment Modal ── -->
+  <div class="hc-enroll-overlay" id="hc-enroll-overlay">
+    <div class="hc-enroll-modal">
+      <button class="hc-em-close" onclick="hcCloseEnrollModal()">✕</button>
+      <!-- Detail Panel -->
+      <div id="hc-panel-details">
+        <div id="hc-thumb-wrap" style="height:150px;border-radius:var(--r2);overflow:hidden;margin-bottom:1rem;background:var(--grad2);display:flex;align-items:center;justify-content:center;"></div>
+        <div style="display:flex;align-items:center;gap:.4rem;margin-bottom:.4rem;flex-wrap:wrap;">
+          <span id="hc-level-badge" style="background:var(--grad);color:#fff;padding:.18rem .6rem;border-radius:999px;font-size:.68rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;"></span>
+          <span id="hc-cat-badge" style="border:1px solid var(--border);color:var(--v1);padding:.18rem .6rem;border-radius:999px;font-size:.68rem;font-weight:600;"></span>
+        </div>
+        <div style="font-size:1.3rem;font-weight:800;margin-bottom:.25rem;" id="hc-title"></div>
+        <div style="font-size:.87rem;color:var(--txt3);margin-bottom:.85rem;" id="hc-subtitle"></div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin-bottom:.85rem;">
+          <div style="background:var(--panel);border:1px solid var(--border);border-radius:var(--r1);padding:.5rem .3rem;text-align:center;">
+            <div style="font-size:.63rem;color:var(--txt4);margin-bottom:.12rem;">Duration</div>
+            <div style="font-size:.82rem;font-weight:700;color:var(--txt);" id="hc-duration">—</div>
+          </div>
+          <div style="background:var(--panel);border:1px solid var(--border);border-radius:var(--r1);padding:.5rem .3rem;text-align:center;">
+            <div style="font-size:.63rem;color:var(--txt4);margin-bottom:.12rem;">Sessions</div>
+            <div style="font-size:.82rem;font-weight:700;color:var(--txt);" id="hc-sessions">—</div>
+          </div>
+          <div style="background:var(--panel);border:1px solid var(--border);border-radius:var(--r1);padding:.5rem .3rem;text-align:center;">
+            <div style="font-size:.63rem;color:var(--txt4);margin-bottom:.12rem;">Level</div>
+            <div style="font-size:.82rem;font-weight:700;color:var(--txt);" id="hc-level-val">—</div>
+          </div>
+        </div>
+        <div id="hc-desc" style="font-size:.83rem;color:var(--txt3);line-height:1.7;margin-bottom:.85rem;max-height:88px;overflow-y:auto;"></div>
+        <div id="hc-mentor-row" style="font-size:.82rem;color:var(--txt3);margin-bottom:.9rem;display:none;align-items:center;gap:.4rem;">
+          <span>👨‍🏫</span><span id="hc-mentor">—</span>
+        </div>
+        <button class="hc-btn-pay" id="hc-btn-enroll-detail" onclick="hcConfirmEnrollment()">Enroll Now</button>
+      </div>
+      <!-- Payment Panel -->
+      <div id="hc-panel-payment" style="display:none;">
+        <button onclick="hcShowDetailPanel()" style="background:none;border:none;color:var(--v1);font-size:.82rem;font-weight:600;cursor:pointer;font-family:inherit;margin-bottom:1rem;padding:0;display:flex;align-items:center;gap:.3rem;">← Back to Details</button>
+        <div style="font-size:1.05rem;font-weight:800;color:var(--txt);margin-bottom:.15rem;">Confirm Enrollment</div>
+        <div style="font-size:.82rem;color:var(--txt3);margin-bottom:1rem;" id="hc-pay-course-name"></div>
+        <div style="background:var(--panel);border:1.5px solid var(--border);border-radius:var(--r2);padding:1rem;margin-bottom:.9rem;">
+          <div style="display:flex;justify-content:space-between;padding:.2rem 0;font-size:.84rem;color:var(--txt3);"><span>Course Fee</span><span id="hc-base-fee">—</span></div>
+          <div style="display:flex;justify-content:space-between;padding:.2rem 0;font-size:.84rem;color:var(--txt3);"><span>SGST (9%)</span><span id="hc-sgst">—</span></div>
+          <div style="display:flex;justify-content:space-between;padding:.2rem 0;font-size:.84rem;color:var(--txt3);"><span>CGST (9%)</span><span id="hc-cgst">—</span></div>
+          <div style="display:flex;justify-content:space-between;padding:.3rem 0 .05rem;font-size:1rem;font-weight:800;color:var(--v1);border-top:1px solid var(--border);margin-top:.25rem;"><span>Total (incl. GST)</span><span id="hc-total-fee">—</span></div>
+        </div>
+        <div style="font-size:.78rem;color:var(--txt3);margin-bottom:.85rem;display:flex;align-items:center;gap:.35rem;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Secured by Razorpay · SSL Encrypted · PCI DSS Compliant
+        </div>
+        <div class="hc-pay-actions">
+          <button type="button" class="hc-btn-pay hc-btn-pay-now" id="hc-btn-pay" onclick="hcInitiatePayment()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:-2px;margin-right:.3rem;"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+            Pay Now
+          </button>
+          <button type="button" class="hc-btn-pay hc-btn-pay-later" id="hc-btn-pay-later" onclick="hcEnrollPayLater()">Pay Later</button>
+        </div>
+        <p style="text-align:center;font-size:.75rem;color:var(--txt4);margin-top:.6rem;">
+          By enrolling you agree to our <a href="#" style="color:var(--v1)">Terms</a> &amp; <a href="#" style="color:var(--v1)">Refund Policy</a>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Home Courses: Enrollment Confirmation Popup ── -->
+  <div id="hc-enroll-confirm-overlay" class="hc-ec-overlay">
+    <div class="hc-ec-box">
+      <div style="font-size:3.2rem;margin-bottom:.75rem;">🎉</div>
+      <div style="font-size:1.2rem;font-weight:800;color:var(--txt);margin-bottom:.4rem;">Successfully Enrolled!</div>
+      <div style="font-size:.9rem;font-weight:700;color:var(--v1);margin-bottom:.9rem;" id="hc-ec-course-name"></div>
+      <div style="background:rgba(124,92,252,.08);border:1px solid rgba(124,92,252,.18);border-radius:14px;padding:.9rem 1rem;margin-bottom:1.2rem;font-size:.83rem;color:var(--txt3);text-align:left;line-height:1.65;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:.3rem;"><span>Amount Due</span><span style="font-weight:700;color:var(--txt);" id="hc-ec-amount"></span></div>
+        <div style="display:flex;justify-content:space-between;"><span>Payment Status</span><span style="font-weight:700;color:#f59e0b;">⏳ Pending</span></div>
+      </div>
+      <p style="font-size:.8rem;color:var(--txt3);margin-bottom:1.25rem;">Complete your payment anytime from <strong>Profile → Payments</strong>.</p>
+      <div style="display:flex;gap:.65rem;">
+        <a href="pages/profile.html?tab=learning" style="flex:1;padding:.75rem;border-radius:var(--r1);background:var(--grad);color:#fff;font-size:.85rem;font-weight:700;text-decoration:none;display:flex;align-items:center;justify-content:center;">View My Courses</a>
+        <button onclick="hcCloseEnrollConfirm()" style="flex:1;padding:.75rem;border-radius:var(--r1);background:var(--panel);border:1.5px solid var(--border);color:var(--txt3);font-size:.85rem;font-weight:700;cursor:pointer;font-family:inherit;">Stay Here</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Scripts -->
   <script src="js/validations.js"></script>
   <script src="js/theme.js"></script>
   <script src="js/emi-calculator.js"></script>
   <script src="js/payment.js"></script>
   <script src="js/main.js"></script>
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
   <script>
     // ==================== LOGIN & REGISTRATION WITH DATABASE ====================
@@ -1951,13 +2118,286 @@
       });
     });
 
+    // ==================== HOME COURSES: STATE + THUMB FUNCTION ====================
+    let hcAllCourses = [], hcSelectedCourse = null, hcSelectedTotal = 0, hcCourseThumbFn = null;
+    function _hcDb() { return window.supabaseConfig?.client || null; }
+
+    function _hcThumbIcons() {
+      return {
+        devops:`<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="hcg-dv1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#fed7aa"/><stop offset="100%" stop-color="#fb923c"/></linearGradient><filter id="hcf-dv"><feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#9a3412" flood-opacity=".5"/></filter></defs><g filter="url(#hcf-dv)"><circle cx="32" cy="32" r="13" stroke="url(#hcg-dv1)" stroke-width="2.5" fill="rgba(251,146,60,.12)"/><circle cx="32" cy="32" r="5" fill="url(#hcg-dv1)"/><path d="M32 15v5M32 44v5M15 32h5M44 32h5M20.5 20.5l3.5 3.5M40 40l3.5 3.5M43.5 20.5L40 24M24 40l-3.5 3.5" stroke="url(#hcg-dv1)" stroke-width="2.5" stroke-linecap="round"/><path d="M26 18l3 7-7 3M38 46l-3-7 7-3" stroke="#fed7aa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></g><ellipse cx="26" cy="24" rx="3" ry="1.5" fill="rgba(255,255,255,.22)" transform="rotate(-40,26,24)"/></svg>`,
+        cloud:`<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="hcg-cl1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#bae6fd"/><stop offset="100%" stop-color="#38bdf8"/></linearGradient><linearGradient id="hcg-cl2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#7dd3fc"/><stop offset="100%" stop-color="#0284c7"/></linearGradient><filter id="hcf-cl"><feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#075985" flood-opacity=".55"/></filter></defs><g filter="url(#hcf-cl)"><path d="M44 38H20a10 10 0 110-20c.7 0 1.3.07 1.9.2A10 10 0 0142 20a9 9 0 012 18z" fill="url(#hcg-cl2)" stroke="url(#hcg-cl1)" stroke-width="1.5"/><path d="M32 44V32M28 36l4-4 4 4" stroke="url(#hcg-cl1)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></g><ellipse cx="26" cy="24" rx="6" ry="3" fill="rgba(255,255,255,.28)"/></svg>`,
+        ai:`<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="hcg-ai1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#e9d5ff"/><stop offset="100%" stop-color="#c084fc"/></linearGradient><linearGradient id="hcg-ai2" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#a855f7"/><stop offset="100%" stop-color="#7c3aed"/></linearGradient><filter id="hcf-ai"><feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#4c1d95" flood-opacity=".55"/></filter></defs><g filter="url(#hcf-ai)"><circle cx="32" cy="32" r="7" fill="url(#hcg-ai2)"/><circle cx="32" cy="15" r="3.5" fill="url(#hcg-ai1)"/><circle cx="32" cy="49" r="3.5" fill="url(#hcg-ai1)"/><circle cx="15" cy="32" r="3.5" fill="url(#hcg-ai1)"/><circle cx="49" cy="32" r="3.5" fill="url(#hcg-ai1)"/><circle cx="20" cy="20" r="3" fill="url(#hcg-ai1)"/><circle cx="44" cy="20" r="3" fill="url(#hcg-ai1)"/><circle cx="20" cy="44" r="3" fill="url(#hcg-ai1)"/><circle cx="44" cy="44" r="3" fill="url(#hcg-ai1)"/><path d="M32 22v3M32 39v3M22 32h3M39 32h3M24.1 24.1l2.1 2.1M37.8 37.8l2.1 2.1M39.9 24.1l-2.1 2.1M26.2 37.8l-2.1 2.1" stroke="url(#hcg-ai1)" stroke-width="1.8" stroke-linecap="round"/><circle cx="32" cy="32" r="3" fill="rgba(255,255,255,.9)"/></g></svg>`,
+        cyber:`<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="hcg-cy1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#fecaca"/><stop offset="100%" stop-color="#f87171"/></linearGradient><linearGradient id="hcg-cy2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#ef4444"/><stop offset="100%" stop-color="#b91c1c"/></linearGradient><filter id="hcf-cy"><feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#7f1d1d" flood-opacity=".55"/></filter></defs><g filter="url(#hcf-cy)"><path d="M32 10L12 18v14c0 10 7 19.5 20 22 13-2.5 20-12 20-22V18L32 10z" fill="url(#hcg-cy2)" stroke="url(#hcg-cy1)" stroke-width="1.5"/><rect x="26" y="28" width="12" height="10" rx="2" fill="rgba(255,255,255,.9)"/><path d="M28 28v-3a4 4 0 018 0v3" stroke="rgba(255,255,255,.9)" stroke-width="2" stroke-linecap="round"/><circle cx="32" cy="33" r="1.5" fill="#ef4444"/></g><ellipse cx="26" cy="18" rx="5" ry="2.5" fill="rgba(255,255,255,.2)" transform="rotate(-20,26,18)"/></svg>`,
+        data:`<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="hcg-da1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#6ee7b7"/><stop offset="100%" stop-color="#059669"/></linearGradient><linearGradient id="hcg-da2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#a7f3d0"/><stop offset="100%" stop-color="#34d399"/></linearGradient><filter id="hcf-da"><feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#064e3b" flood-opacity=".55"/></filter></defs><g filter="url(#hcf-da)"><rect x="10" y="36" width="10" height="16" rx="3" fill="url(#hcg-da1)"/><rect x="27" y="26" width="10" height="26" rx="3" fill="url(#hcg-da2)"/><rect x="44" y="14" width="10" height="38" rx="3" fill="url(#hcg-da1)"/><path d="M15 30l12-10 12 8 12-14" stroke="#a7f3d0" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="15" cy="30" r="2.5" fill="#6ee7b7"/><circle cx="27" cy="20" r="2.5" fill="#6ee7b7"/><circle cx="39" cy="28" r="2.5" fill="#6ee7b7"/><circle cx="51" cy="16" r="2.5" fill="#6ee7b7"/></g></svg>`,
+        testing:`<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="hcg-te1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#fed7aa"/><stop offset="100%" stop-color="#f97316"/></linearGradient><filter id="hcf-te"><feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#9a3412" flood-opacity=".5"/></filter></defs><g filter="url(#hcf-te)"><rect x="14" y="10" width="26" height="34" rx="4" fill="url(#hcg-te1)"/><path d="M22 22h10M22 29h10M22 36h6" stroke="rgba(255,255,255,.8)" stroke-width="2" stroke-linecap="round"/><circle cx="42" cy="42" r="10" fill="url(#hcg-te1)"/><path d="M37 42l3.5 3.5 6-6" stroke="#ea580c" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></g></svg>`,
+        it:`<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="hcg-it1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ddd6fe"/><stop offset="100%" stop-color="#a78bfa"/></linearGradient><linearGradient id="hcg-it2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#8b5cf6"/><stop offset="100%" stop-color="#6d28d9"/></linearGradient><filter id="hcf-it"><feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#4c1d95" flood-opacity=".55"/></filter></defs><g filter="url(#hcf-it)"><rect x="8" y="12" width="48" height="32" rx="5" fill="url(#hcg-it2)" stroke="url(#hcg-it1)" stroke-width="1.5"/><path d="M24 52h16M32 44v8" stroke="url(#hcg-it1)" stroke-width="2.5" stroke-linecap="round"/><path d="M20 24l5 4-5 4M29 32h10" stroke="rgba(255,255,255,.95)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></g></svg>`,
+        business:`<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="hcg-bu1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#bfdbfe"/><stop offset="100%" stop-color="#60a5fa"/></linearGradient><linearGradient id="hcg-bu2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#3b82f6"/><stop offset="100%" stop-color="#1d4ed8"/></linearGradient><filter id="hcf-bu"><feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#1e3a8a" flood-opacity=".55"/></filter></defs><g filter="url(#hcf-bu)"><rect x="10" y="24" width="44" height="28" rx="4" fill="url(#hcg-bu2)" stroke="url(#hcg-bu1)" stroke-width="1.5"/><path d="M22 24v-5a6 6 0 0112 0v5" stroke="url(#hcg-bu1)" stroke-width="2.5" stroke-linecap="round"/><path d="M10 36h44" stroke="rgba(255,255,255,.3)" stroke-width="1.5"/><rect x="28" y="32" width="8" height="8" rx="2" fill="rgba(255,255,255,.9)"/></g></svg>`,
+        default:`<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="hcg-df1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#e9d5ff"/><stop offset="100%" stop-color="#a78bfa"/></linearGradient><linearGradient id="hcg-df2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#7c3aed"/><stop offset="100%" stop-color="#5b21b6"/></linearGradient><filter id="hcf-df"><feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#4c1d95" flood-opacity=".5"/></filter></defs><g filter="url(#hcf-df)"><path d="M32 48V18M32 18C27 13 13 13 10 15v28c3-2.5 15-2.5 22 5M32 18c5-5 19-5 22-3v28c-7-7.5-17-7.5-22-5" fill="url(#hcg-df2)" stroke="url(#hcg-df1)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></g></svg>`
+      };
+    }
+
+    // ==================== HOME COURSES: MODAL LOGIC ====================
+    async function hcOpenCourseDetail(courseId) {
+      hcSelectedCourse = hcAllCourses.find(c => c.id === courseId);
+      if (!hcSelectedCourse) return;
+      const c = hcSelectedCourse;
+      const durationMo = c.duration_days ? Math.round(c.duration_days / 30) : null;
+      const el = id => document.getElementById(id);
+
+      // Thumbnail with 3D icon
+      const thumbWrap = el('hc-thumb-wrap');
+      if (thumbWrap) {
+        const mThumb = hcCourseThumbFn ? hcCourseThumbFn(c._catName || '', c.title || '') : { svg: '', bg: 'linear-gradient(145deg,#1a0533,#3b0764)' };
+        if (c.thumbnail_url) {
+          thumbWrap.style.background = '';
+          thumbWrap.innerHTML = `<img src="${c.thumbnail_url}" alt="${c.title}" style="width:100%;height:100%;object-fit:cover;">`;
+        } else {
+          thumbWrap.style.background = mThumb.bg;
+          thumbWrap.innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;gap:.4rem;">${mThumb.svg}<span style="font-size:.6rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.6);">${c._catName || 'Course'}</span></div>`;
+          const svgEl = thumbWrap.querySelector('svg');
+          if (svgEl) svgEl.style.cssText = 'width:64px;height:64px;filter:drop-shadow(0 6px 16px rgba(0,0,0,.4))';
+        }
+      }
+
+      if (el('hc-level-badge')) el('hc-level-badge').textContent = c.level || 'Course';
+      if (el('hc-cat-badge'))   el('hc-cat-badge').textContent   = c._catName || '';
+      if (el('hc-title'))       el('hc-title').textContent       = c.title;
+      if (el('hc-subtitle'))    el('hc-subtitle').textContent    = c._catName ? c._catName + (c.mentor_name ? ' · ' + c.mentor_name : '') : '';
+      if (el('hc-duration'))    el('hc-duration').textContent    = durationMo ? durationMo + ' mo' : c.duration_hours ? c.duration_hours + ' hrs' : '—';
+      if (el('hc-sessions'))    el('hc-sessions').textContent    = c.total_live_classes || '—';
+      if (el('hc-level-val'))   el('hc-level-val').textContent   = c.level || '—';
+      if (el('hc-desc'))        el('hc-desc').textContent        = c.description || c.short_description || '';
+
+      const mentorRow = el('hc-mentor-row');
+      if (mentorRow) {
+        if (c.mentor_name) { mentorRow.style.display = 'flex'; if (el('hc-mentor')) el('hc-mentor').textContent = c.mentor_name; }
+        else mentorRow.style.display = 'none';
+      }
+
+      // Auth + enrollment check
+      let isLoggedIn = !!window.profileNav?.currentUser;
+      let alreadyEnrolled = false;
+      try {
+        const { data: { session } } = await _hcDb().auth.getSession();
+        if (session?.user) {
+          isLoggedIn = true;
+          const { data: existing } = await _hcDb().from('enrollments')
+            .select('id').eq('student_user_id', session.user.id)
+            .eq('course_id', c.id).in('enrollment_status', ['active', 'completed']).maybeSingle();
+          if (existing) alreadyEnrolled = true;
+        }
+      } catch(_) {}
+
+      const enrollBtn = el('hc-btn-enroll-detail');
+      if (enrollBtn) {
+        if (alreadyEnrolled) {
+          enrollBtn.textContent = '✓ Already Enrolled — View Course';
+          enrollBtn.style.background = 'linear-gradient(135deg,#4ade80,#22d3ee)';
+          enrollBtn.style.color = '#0a2a1a';
+          enrollBtn.onclick = () => { window.location.href = 'pages/profile.html?tab=learning'; };
+        } else {
+          enrollBtn.style.cssText = '';
+          enrollBtn.textContent = isLoggedIn ? 'Enroll Now →' : 'Login to Enroll';
+          enrollBtn.onclick = hcConfirmEnrollment;
+        }
+      }
+
+      hcShowDetailPanel();
+      el('hc-enroll-overlay').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function hcShowDetailPanel() {
+      const d = document.getElementById('hc-panel-details');
+      const p = document.getElementById('hc-panel-payment');
+      if (d) d.style.display = '';
+      if (p) p.style.display = 'none';
+    }
+
+    async function hcConfirmEnrollment() {
+      let user = window.profileNav?.currentUser;
+      if (!user) {
+        try { const { data: { session } } = await _hcDb().auth.getSession(); user = session?.user || null; } catch(_) {}
+      }
+      if (!user) { hcCloseEnrollModal(); hcWatchForLogin(hcSelectedCourse?.id); window.profileNav?.openLoginModal?.(); return; }
+      if (!hcSelectedCourse) return;
+
+      const basePrice = hcSelectedCourse._price;
+      const sgst = Math.round(basePrice * 0.09);
+      const cgst = Math.round(basePrice * 0.09);
+      hcSelectedTotal = Math.round(basePrice * 1.18);
+      const fmt = n => n > 0 ? '₹' + Number(n).toLocaleString('en-IN') : 'Contact Us';
+      const el = id => document.getElementById(id);
+      if (el('hc-pay-course-name')) el('hc-pay-course-name').textContent = hcSelectedCourse.title;
+      if (el('hc-base-fee'))  el('hc-base-fee').textContent  = fmt(basePrice);
+      if (el('hc-sgst'))      el('hc-sgst').textContent      = basePrice > 0 ? '₹' + Number(sgst).toLocaleString('en-IN') : '—';
+      if (el('hc-cgst'))      el('hc-cgst').textContent      = basePrice > 0 ? '₹' + Number(cgst).toLocaleString('en-IN') : '—';
+      if (el('hc-total-fee')) el('hc-total-fee').textContent = fmt(hcSelectedTotal);
+
+      const payBtn = el('hc-btn-pay');
+      const _svg = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:-2px;margin-right:.3rem;"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>`;
+      if (payBtn) payBtn.innerHTML = hcSelectedTotal > 0
+        ? _svg + 'Pay ₹' + Number(hcSelectedTotal).toLocaleString('en-IN') + ' via Razorpay'
+        : 'Contact Us to Enroll';
+
+      const d = document.getElementById('hc-panel-details');
+      const p = document.getElementById('hc-panel-payment');
+      if (d) d.style.display = 'none';
+      if (p) p.style.display = '';
+    }
+
+    function hcCloseEnrollModal() {
+      document.getElementById('hc-enroll-overlay').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    async function hcQuickEnroll(courseId) {
+      await hcOpenCourseDetail(courseId);
+      hcConfirmEnrollment();
+    }
+
+    function hcShowEnrollConfirm(courseTitle, amount) {
+      document.getElementById('hc-ec-course-name').textContent = courseTitle;
+      document.getElementById('hc-ec-amount').textContent = amount > 0 ? '₹' + Number(amount).toLocaleString('en-IN') : 'Contact Us';
+      document.getElementById('hc-enroll-confirm-overlay').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function hcCloseEnrollConfirm() {
+      document.getElementById('hc-enroll-confirm-overlay').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    async function hcEnrollPayLater() {
+      let user = null;
+      try { const { data: { session } } = await _hcDb().auth.getSession(); user = session?.user || null; } catch(_) {}
+      if (!user) { hcCloseEnrollModal(); hcWatchForLogin(hcSelectedCourse?.id); window.profileNav?.openLoginModal?.(); return; }
+      if (!hcSelectedCourse) return;
+
+      const btn = document.getElementById('hc-btn-pay-later');
+      btn.disabled = true; btn.textContent = 'Processing…';
+      try {
+        const { data: existing } = await _hcDb().from('enrollments')
+          .select('id').eq('student_user_id', user.id).eq('course_id', hcSelectedCourse.id)
+          .in('enrollment_status', ['active', 'completed']).maybeSingle();
+        if (existing) { hcCloseEnrollModal(); window.location.href = 'pages/profile.html?tab=learning'; return; }
+
+        const activePricing = (hcSelectedCourse.course_pricing || []).find(p => p.is_active) || hcSelectedCourse.course_pricing?.[0];
+        if (!activePricing?.id) { alert('No pricing available. Please contact support.'); btn.disabled = false; btn.textContent = 'Pay Later'; return; }
+
+        const listPrice = hcSelectedCourse._basePrice || hcSelectedCourse._price || 0;
+        const salePrice = hcSelectedCourse._price || 0;
+        const { error: enrollErr } = await _hcDb().from('enrollments').upsert({
+          student_user_id: user.id, course_id: hcSelectedCourse.id, pricing_id: activePricing.id,
+          enrollment_status: 'pending', access_status: 'pending',
+          list_price: listPrice, discount_amount: Math.max(0, listPrice - salePrice),
+          net_amount: hcSelectedTotal, paid_amount: 0, due_amount: hcSelectedTotal,
+        }, { onConflict: 'student_user_id,course_id' });
+        if (enrollErr) throw enrollErr;
+
+        hcCloseEnrollModal();
+        hcShowEnrollConfirm(hcSelectedCourse.title, hcSelectedTotal);
+      } catch(e) {
+        console.error(e); btn.disabled = false; btn.textContent = 'Pay Later';
+        alert(e.message || 'Enrollment failed. Please try again.');
+      }
+    }
+
+    async function hcInitiatePayment() {
+      let user = window.profileNav?.currentUser;
+      if (!user) {
+        try { const { data: { session } } = await _hcDb().auth.getSession(); user = session?.user || null; } catch(_) {}
+      }
+      if (!user) { hcCloseEnrollModal(); hcWatchForLogin(hcSelectedCourse?.id); window.profileNav?.openLoginModal?.(); return; }
+      if (!hcSelectedCourse) return;
+
+      if (window.location.protocol === 'file:') { alert('Payment requires a hosted site (HTTPS).'); return; }
+
+      const btn = document.getElementById('hc-btn-pay');
+      const _payBtnHtml = btn.innerHTML;
+      btn.disabled = true; btn.textContent = 'Processing…';
+      const totalAmount = hcSelectedTotal;
+      if (!totalAmount || totalAmount <= 0) { alert('No pricing available. Please contact support.'); btn.disabled = false; btn.innerHTML = _payBtnHtml; return; }
+      if (typeof window.Razorpay === 'undefined') { alert('Payment gateway failed to load. Please refresh.'); btn.disabled = false; btn.innerHTML = _payBtnHtml; return; }
+
+      try {
+        const activePricing = (hcSelectedCourse.course_pricing || []).find(p => p.is_active) || hcSelectedCourse.course_pricing?.[0];
+        if (!activePricing?.id) { alert('No pricing available. Please contact support.'); btn.disabled = false; btn.innerHTML = _payBtnHtml; return; }
+
+        const { data: enroll, error: enrollErr } = await _hcDb().from('enrollments').upsert({
+          student_user_id: user.id, course_id: hcSelectedCourse.id, pricing_id: activePricing.id,
+          enrollment_status: 'pending', net_amount: totalAmount,
+        }, { onConflict: 'student_user_id,course_id' }).select().single();
+        if (enrollErr) throw enrollErr;
+
+        const rzp = new window.Razorpay({
+          key: 'rzp_live_ILgsSZCZoFMQjO', amount: totalAmount * 100, currency: 'INR',
+          name: 'SkillUpNow', description: hcSelectedCourse.title,
+          prefill: { name: user.user_metadata?.full_name || '', email: user.email },
+          theme: { color: '#7c6cff' },
+          handler: async (response) => {
+            const pi = {
+              student_user_id: user.id, enrollment_id: enroll.id, course_id: hcSelectedCourse.id,
+              amount: totalAmount, payment_method: 'gateway_link', payment_gateway: 'razorpay',
+              gateway_payment_id: response.razorpay_payment_id,
+              transaction_reference: response.razorpay_payment_id,
+              payment_status: 'completed', paid_at: new Date().toISOString(),
+            };
+            if (response.razorpay_order_id)  pi.gateway_order_id  = response.razorpay_order_id;
+            if (response.razorpay_signature) pi.gateway_signature = response.razorpay_signature;
+            await _hcDb().from('payments').insert(pi);
+            await _hcDb().from('enrollments').update({
+              enrollment_status: 'active', access_status: 'active',
+              paid_amount: totalAmount, due_amount: 0, activated_at: new Date().toISOString(),
+            }).eq('id', enroll.id);
+            hcCloseEnrollModal();
+            window.location.href = 'pages/profile.html?tab=learning&enrolled=' + encodeURIComponent(hcSelectedCourse.title);
+          },
+        });
+        rzp.on('payment.failed', (response) => {
+          _hcDb().from('payments').insert({
+            student_user_id: user.id, enrollment_id: enroll?.id, course_id: hcSelectedCourse.id,
+            amount: totalAmount, payment_method: 'gateway_link', payment_gateway: 'razorpay',
+            payment_status: 'failed', notes: { error_code: response.error?.code, error_description: response.error?.description }
+          }).catch(() => {});
+          btn.disabled = false;
+          btn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:-2px;margin-right:.3rem;"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>Retry Payment`;
+          const errEl = document.createElement('div');
+          errEl.style.cssText = 'background:rgba(239,68,68,.12);border:1.5px solid rgba(239,68,68,.3);border-radius:10px;padding:.5rem .75rem;font-size:.8rem;color:#f87171;margin-top:.5rem;';
+          errEl.textContent = response.error?.description || response.error?.reason || 'Payment was declined.';
+          btn.parentNode?.insertBefore(errEl, btn.nextSibling);
+          setTimeout(() => errEl.remove(), 7000);
+        });
+        rzp.open();
+      } catch(e) {
+        console.error(e); btn.disabled = false; btn.innerHTML = _payBtnHtml;
+        alert(e.message || 'Unable to initiate payment. Please check your connection.');
+      }
+    }
+
+    let _hcLoginWatcher = null;
+    function hcWatchForLogin(courseId) {
+      window._hcEnrollAfterLogin = courseId;
+      clearInterval(_hcLoginWatcher);
+      _hcLoginWatcher = setInterval(() => {
+        if (window.profileNav?.currentUser) {
+          clearInterval(_hcLoginWatcher);
+          const id = window._hcEnrollAfterLogin;
+          if (id) { window._hcEnrollAfterLogin = null; hcOpenCourseDetail(id); }
+        }
+      }, 600);
+    }
+    document.addEventListener('pn-login-success', () => {
+      const id = window._hcEnrollAfterLogin;
+      if (id) { window._hcEnrollAfterLogin = null; hcOpenCourseDetail(id); }
+    });
+
     // ==================== HOME: DYNAMIC COURSES GRID ====================
     async function loadHomeCoursesSection() {
       const grid = document.getElementById('home-courses-grid');
       if (!grid) return;
-      const MAX_SHOW = 5;
+      const MAX_SHOW = 6;
       try {
-        // Wait for Supabase client (up to 3s)
         let tries = 0;
         while (!window.supabaseConfig?.client && tries++ < 20) {
           await new Promise(r => setTimeout(r, 150));
@@ -1965,10 +2405,9 @@
         if (!window.supabaseConfig?.client) throw new Error('DB not ready');
         const client = window.supabaseConfig.client;
 
-        // Fetch one more than MAX_SHOW to detect if "Browse More" is needed
         const { data, error } = await client
           .from('courses')
-          .select('id, title, is_trending, course_categories(name), course_pricing(sale_price, list_price, is_active)')
+          .select('*, course_categories(name), course_pricing(id, sale_price, list_price, pricing_type, is_active)')
           .eq('course_status', 'published')
           .in('visibility', ['public', 'unlisted'])
           .order('is_trending', { ascending: false })
@@ -1979,31 +2418,100 @@
         if (!data || !data.length) throw new Error('No courses');
 
         const hasMore = data.length > MAX_SHOW;
-        const courses = data.slice(0, MAX_SHOW);
+        let courses = data.slice(0, MAX_SHOW);
 
-        const catIcons = {
-          'Cloud': '☁️', 'DevOps': '⚙️', 'AI': '🤖', 'Machine Learning': '🧠',
-          'Cybersecurity': '🔒', 'Data': '📊', 'Communication': '💬',
-          'Leadership': '🏆', 'Soft': '🌟', 'default': '📚'
+        // Normalize pricing
+        courses = courses.map(c => {
+          const ap = (c.course_pricing || []).find(p => p.is_active) || c.course_pricing?.[0] || {};
+          return { ...c, _price: ap.sale_price ?? ap.list_price ?? 0, _basePrice: ap.list_price ?? 0, _pricingType: ap.pricing_type || 'full_payment', _catName: c.course_categories?.name || '' };
+        });
+
+        // Check enrolled courses for logged-in user
+        try {
+          const { data: { session } } = await client.auth.getSession();
+          if (session?.user) {
+            const { data: enrollments } = await client.from('enrollments')
+              .select('course_id').eq('student_user_id', session.user.id)
+              .in('enrollment_status', ['active', 'completed']);
+            const enrolledIds = new Set((enrollments || []).map(e => e.course_id));
+            courses = courses.map(c => ({ ...c, _enrolled: enrolledIds.has(c.id) }));
+          }
+        } catch(_) {}
+
+        // Sort: trending → beginner → intermediate → advanced → alpha
+        const _lvlOrd = { beginner: 0, intermediate: 1, advanced: 2 };
+        courses.sort((a, b) => {
+          const td = (b.is_trending ? 1 : 0) - (a.is_trending ? 1 : 0);
+          if (td !== 0) return td;
+          const la = _lvlOrd[(a.level || '').toLowerCase()] ?? 3;
+          const lb = _lvlOrd[(b.level || '').toLowerCase()] ?? 3;
+          if (la !== lb) return la - lb;
+          return (a.title || '').localeCompare(b.title || '');
+        });
+
+        // Store globally for modal access
+        hcAllCourses = courses;
+
+        // Build thumb function (prefixed gradient IDs to avoid SVG conflicts)
+        const icons = _hcThumbIcons();
+        const bgs = {
+          devops:'linear-gradient(145deg,#431407,#9a3412,#c2410c)',
+          cloud:'linear-gradient(145deg,#0c4a6e,#075985,#0369a1)',
+          ai:'linear-gradient(145deg,#2e1065,#4c1d95,#6d28d9)',
+          cyber:'linear-gradient(145deg,#450a0a,#7f1d1d,#991b1b)',
+          data:'linear-gradient(145deg,#022c22,#064e3b,#065f46)',
+          testing:'linear-gradient(145deg,#431407,#9a3412,#c2410c)',
+          it:'linear-gradient(145deg,#1e1b4b,#3730a3,#4338ca)',
+          business:'linear-gradient(145deg,#1e3a8a,#1d4ed8,#2563eb)',
+          default:'linear-gradient(145deg,#1a0533,#3b0764,#4c1d95)',
         };
-        const getIcon = cat => {
-          const k = Object.keys(catIcons).find(k => (cat||'').toLowerCase().includes(k.toLowerCase()));
-          return k ? catIcons[k] : catIcons['default'];
+        hcCourseThumbFn = function(catName, courseTitle) {
+          const s = ((catName || '') + ' ' + (courseTitle || '')).toLowerCase();
+          let key = 'default';
+          if (/devops|docker|k8s|kubernetes|cicd|jenkins/.test(s))             key = 'devops';
+          else if (/cloud|aws|azure|gcp|terraform/.test(s))                    key = 'cloud';
+          else if (/gen\s*ai|generative|llm|gpt|machine\s*learn|ml\b|deep\s*learn|neural/.test(s)) key = 'ai';
+          else if (/ai\b|artificial\s*intel/.test(s))                          key = 'ai';
+          else if (/cyber|security|ethical\s*hack|pentest/.test(s))            key = 'cyber';
+          else if (/data|analytics|power\s*bi|tableau|sql/.test(s))            key = 'data';
+          else if (/test|qa|selenium|postman|automation/.test(s))              key = 'testing';
+          else if (/software|web|frontend|backend|fullstack|react|node|python/.test(s)) key = 'it';
+          else if (/business|finance|accounting|entrepreneur/.test(s))         key = 'business';
+          return { svg: icons[key] || icons.default, bg: bgs[key] || bgs.default };
         };
 
-        grid.style.gridTemplateColumns = 'repeat(auto-fill,minmax(210px,1fr))';
-        grid.style.gap = '1rem';
+        // Render cards
+        grid.style.gridTemplateColumns = 'repeat(auto-fill,minmax(260px,1fr))';
+        grid.style.gap = '1.25rem';
 
         const cards = courses.map((c, i) => {
-          const name = c.title || 'Course';
-          const cat = c.course_categories?.name || '';
-          const trendBadge = c.is_trending ? `<div style="font-size:.68rem;font-weight:700;color:#fff;background:linear-gradient(135deg,#f97316,#ea580c);padding:.15rem .55rem;border-radius:50px;">🔥 Trending</div>` : '';
-          return `<div style="position:relative;background:var(--panel);border:1.5px solid var(--border);border-radius:var(--r2);padding:1.25rem;display:flex;flex-direction:column;align-items:center;text-align:center;gap:.8rem;animation:fadeUp .45s ease ${i*.07}s both;transition:transform .25s,box-shadow .25s,border-color .25s;" onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 10px 28px rgba(124,92,252,.2)';this.style.borderColor='rgba(124,92,252,.4)'" onmouseout="this.style.transform='';this.style.boxShadow='';this.style.borderColor=''">
-            <div style="width:50px;height:50px;border-radius:14px;background:linear-gradient(135deg,var(--v1),var(--v2));display:flex;align-items:center;justify-content:center;font-size:1.4rem;box-shadow:0 4px 16px rgba(124,92,252,.3);">${getIcon(cat)}</div>
-            <div style="font-weight:700;color:var(--txt);font-size:.88rem;line-height:1.35;flex:1;">${name}</div>
-            ${trendBadge}
-            ${cat ? `<div style="font-size:.72rem;color:var(--v1);font-weight:600;background:rgba(124,92,252,.08);padding:.2rem .65rem;border-radius:50px;border:1px solid rgba(124,92,252,.2);">${cat}</div>` : ''}
-            <button onclick="window.location.href='pages/courses?id=${c.id}'" style="width:100%;padding:.55rem .75rem;background:linear-gradient(135deg,#7c5cfc,#3d6bff);color:#fff;border:none;border-radius:10px;font-size:.78rem;font-weight:700;cursor:pointer;font-family:inherit;transition:opacity .2s;box-shadow:0 4px 12px rgba(124,92,252,.3);" onmouseover="this.style.opacity='.88'" onmouseout="this.style.opacity='1'">View Details</button>
+          const thumb = hcCourseThumbFn(c._catName, c.title);
+          const durationMo = c.duration_days ? Math.round(c.duration_days / 30) : null;
+          const enrolled = !!c._enrolled;
+          return `<div class="hc-card" style="animation-delay:${i * .07}s" onclick="hcOpenCourseDetail('${c.id}')">
+            <div class="hc-thumb" style="${c.thumbnail_url ? '' : `background:${thumb.bg};`}">
+              ${c.thumbnail_url
+                ? `<img src="${c.thumbnail_url}" alt="${c.title}" loading="lazy">`
+                : `<div class="hc-thumb-icon">${thumb.svg}<span class="hc-cat-lbl">${c._catName || 'Course'}</span></div>`}
+              <div class="hc-level-badge">${c.level || 'Course'}</div>
+              ${c.is_trending ? `<div class="hc-trend-badge">🔥 Trending</div>` : ''}
+            </div>
+            <div class="hc-body">
+              ${c._catName ? `<div class="hc-cat">${c._catName}</div>` : ''}
+              <div class="hc-name">${c.title}</div>
+              <div class="hc-meta">
+                ${durationMo ? `<span>⏱ ${durationMo}mo</span>` : c.duration_hours ? `<span>⏱ ${c.duration_hours}h</span>` : ''}
+                ${c.total_live_classes ? `<span>📹 ${c.total_live_classes}</span>` : ''}
+                ${c.rating ? `<span>⭐ ${Number(c.rating).toFixed(1)}</span>` : ''}
+              </div>
+              <div class="hc-actions">
+                ${enrolled
+                  ? `<button class="hc-btn-enrolled" onclick="event.stopPropagation();window.location.href='pages/profile.html?tab=learning'">✓ View Course →</button>`
+                  : `<button class="hc-btn-details" onclick="event.stopPropagation();hcOpenCourseDetail('${c.id}')">Details</button>
+                     <button class="hc-btn-enroll" onclick="event.stopPropagation();hcQuickEnroll('${c.id}')">Enroll →</button>`
+                }
+              </div>
+            </div>
           </div>`;
         }).join('');
 
@@ -2017,7 +2525,22 @@
           : '';
 
         grid.innerHTML = cards + browseMore;
+
+        // Wire up modal backdrop + ESC (once)
+        const overlay = document.getElementById('hc-enroll-overlay');
+        const confirmOverlay = document.getElementById('hc-enroll-confirm-overlay');
+        if (overlay && !overlay._hcWired) {
+          overlay._hcWired = true;
+          overlay.addEventListener('click', e => { if (e.target === overlay) hcCloseEnrollModal(); });
+          confirmOverlay.addEventListener('click', e => { if (e.target === confirmOverlay) hcCloseEnrollConfirm(); });
+          document.addEventListener('keydown', e => {
+            if (e.key !== 'Escape') return;
+            if (confirmOverlay.classList.contains('open')) hcCloseEnrollConfirm();
+            else if (overlay.classList.contains('open')) hcCloseEnrollModal();
+          });
+        }
       } catch(e) {
+        console.error('loadHomeCoursesSection:', e);
         grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--txt4);font-size:.88rem;">
           Could not load courses — <a href="pages/courses" style="color:var(--v1);font-weight:600;">Browse all courses →</a>
         </div>`;
