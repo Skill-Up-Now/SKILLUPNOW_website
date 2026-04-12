@@ -144,7 +144,7 @@
       <div class="step-line" id="line2"></div>
       <div class="step-wrap"><div class="step-num" id="s3">3</div><div class="step-label">Documents</div></div>
       <div class="step-line" id="line3"></div>
-      <div class="step-wrap"><div class="step-num" id="s4">4</div><div class="step-label">Verify</div></div>
+      <div class="step-wrap"><div class="step-num" id="s4">4</div><div class="step-label">Done</div></div>
     </div>
 
     <div class="alert error" id="err-alert"></div>
@@ -287,28 +287,26 @@
 
         <div class="step-nav">
           <button class="btn-back" onclick="setStep(2)">← Back</button>
-          <button class="btn-next" onclick="goStep3()">Continue →</button>
+          <button class="btn-next" id="ms-submit-btn" onclick="goStep3()">Submit Application</button>
         </div>
       </div>
     </div>
 
-    <!-- STEP 4: SMS Verification -->
+    <!-- STEP 4: Application Submitted / Email Verification Sent -->
     <div class="form-section" id="step4">
-      <div class="form-card" style="text-align:center">
-        <h3>Verify Your Email</h3>
-        <p>We've sent a 6-digit OTP to <strong id="phone-display"></strong></p>
-        <div class="otp-inputs">
-          <input class="otp-digit" maxlength="1" id="otp1" oninput="otpNav(this,'','otp2')">
-          <input class="otp-digit" maxlength="1" id="otp2" oninput="otpNav(this,'otp1','otp3')">
-          <input class="otp-digit" maxlength="1" id="otp3" oninput="otpNav(this,'otp2','otp4')">
-          <input class="otp-digit" maxlength="1" id="otp4" oninput="otpNav(this,'otp3','otp5')">
-          <input class="otp-digit" maxlength="1" id="otp5" oninput="otpNav(this,'otp4','otp6')">
-          <input class="otp-digit" maxlength="1" id="otp6" oninput="otpNav(this,'otp5','')">
+      <div class="form-card success-card">
+        <div class="success-icon">📧</div>
+        <h2>Application Submitted!</h2>
+        <p>Your mentor application has been received. A verification email has been sent to <strong id="phone-display"></strong>. Please click the link in the email to verify your account.</p>
+        <div style="background:var(--bg);border:1.5px solid var(--border);border-radius:var(--r2);padding:1.25rem;text-align:left;margin:1.5rem 0">
+          <div style="font-size:0.85rem;color:var(--txt3);line-height:2">
+            ✅ Application submitted<br>
+            📧 Check inbox and click the verification link<br>
+            ⏳ Document review takes 2–3 business days<br>
+            🎓 Mentor dashboard access granted on approval
+          </div>
         </div>
-        <p style="font-size:0.82rem;color:var(--txt3)">Didn't receive? <button onclick="resendOtp()" style="background:none;border:none;color:var(--v1);cursor:pointer;font-weight:700;font-family:inherit">Resend OTP</button></p>
-        <div class="step-nav" style="justify-content:center;margin-top:1.5rem">
-          <button class="btn-next" onclick="submitApplication()">Submit Application</button>
-        </div>
+        <a href="../"><button class="btn-next">← Back to Home</button></a>
       </div>
     </div>
 
@@ -334,7 +332,6 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script src="../config/supabase-config.js"></script>
 <script src="../js/theme.js"></script>
 <script src="../js/profile-nav.js"></script>
@@ -346,39 +343,12 @@ const expertiseTags = [];
 let createdUserId = null;
 let existingUser = null;
 let _profilePhotoFile = null;
-const EMAILJS_SERVICE_ID  = 'service_skillupnow';
-const EMAILJS_TEMPLATE_ID = 'template_bjqerns';
-const EMAILJS_PUBLIC_KEY  = '6chiuXaZ_OqXbYyG1';
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PHONE_RE = /^[6-9]\d{9}$/;
 const USERNAME_RE = /^[a-zA-Z0-9._-]{3,30}$/;
 const PASSWORD_RE = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
 const PAN_RE = /^[A-Z]{5}[0-9]{4}[A-Z]$/;
 const AADHAAR_RE = /^[0-9]{12}$/;
-
-// ── Client-side OTP state (no RPC dependency) ──
-let _otpCode = null;
-let _otpExpiry = 0;
-let _otpAttempts = 0;
-const OTP_TTL_MS = 10 * 60 * 1000; // 10 minutes
-const OTP_MAX_ATTEMPTS = 5;
-
-function generateOtp() {
-  return String(Math.floor(100000 + Math.random() * 900000));
-}
-
-function otpIsValid(entered) {
-  if (!_otpCode) return false;
-  if (Date.now() > _otpExpiry) return false;
-  if (_otpAttempts >= OTP_MAX_ATTEMPTS) return false;
-  _otpAttempts++;
-  return entered === _otpCode;
-}
-
-if (typeof emailjs !== 'undefined') emailjs.init(EMAILJS_PUBLIC_KEY);
-else document.addEventListener('DOMContentLoaded', () => {
-  if (window.emailjs) window.emailjs.init(EMAILJS_PUBLIC_KEY);
-});
 
 document.addEventListener('DOMContentLoaded', async () => {
   try {
@@ -390,28 +360,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   } catch (_) {}
 });
 
-async function sendEmailOtp(email, name, otp) {
-  const ejs = window.emailjs;
-  if (!ejs) throw new Error('Email service not ready. Please refresh the page and try again.');
-  return ejs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
-    email,
-    to_email: email,
-    name,
-    to_name: name,
-    otp,
-    otp_code: otp,
-    message: `Your SkillUpNow mentor verification code is: ${otp}. Valid for 10 minutes.`
-  }, EMAILJS_PUBLIC_KEY);
-}
-
-async function sendAndStoreOtp(email, name) {
-  const otp = generateOtp();
-  _otpCode = otp;
-  _otpExpiry = Date.now() + OTP_TTL_MS;
-  _otpAttempts = 0;
-  await sendEmailOtp(email, name, otp);
-  return otp;
-}
 
 function setStep(n) {
   document.querySelectorAll('.form-section').forEach(s => s.classList.remove('active'));
@@ -489,19 +437,7 @@ async function goStep3() {
   if (!document.getElementById('agree-kyc').checked) return showErr('Please agree to the document authenticity declaration.');
   document.getElementById('m-pan').value = panNumber;
   document.getElementById('m-aadhaar').value = aadhaarNumber;
-  const email = document.getElementById('m-email').value.trim().toLowerCase();
-  document.getElementById('phone-display').textContent = email;
-  const sendBtn = document.querySelector('#step3 .btn-next');
-  if (sendBtn) { sendBtn.disabled = true; sendBtn.textContent = 'Sending OTP…'; }
-  try {
-    const name = document.getElementById('m-fullname').value.trim() || 'Mentor';
-    await sendAndStoreOtp(email, name);
-    setStep(4);
-  } catch (err) {
-    showErr(err.message || 'Unable to send verification email. Please try again. Check your internet connection.');
-  } finally {
-    if (sendBtn) { sendBtn.disabled = false; sendBtn.textContent = 'Continue →'; }
-  }
+  await submitApplication();
 }
 
 function otpNav(el, prevId, nextId) {
@@ -509,33 +445,11 @@ function otpNav(el, prevId, nextId) {
   if (!el.value && prevId) document.getElementById(prevId)?.focus();
 }
 
-async function resendOtp() {
-  const email = document.getElementById('m-email').value.trim().toLowerCase();
-  const name = document.getElementById('m-fullname').value.trim() || 'Mentor';
-  try {
-    await sendAndStoreOtp(email, name);
-    const el = document.getElementById('suc-alert');
-    el.textContent = 'OTP resent to ' + email; el.classList.add('show');
-    setTimeout(() => el.classList.remove('show'), 4000);
-  } catch (err) {
-    showErr(err.message || 'Unable to resend OTP right now. Check your internet connection.');
-  }
-}
-
 async function submitApplication() {
-  const otp = ['otp1','otp2','otp3','otp4','otp5','otp6'].map(id => document.getElementById(id).value).join('');
-  if (otp.length < 6) return showErr('Please enter the 6-digit OTP.');
-
-  const submitBtn = document.querySelector('#step4 .btn-next');
-  submitBtn.disabled = true;
-  submitBtn.textContent = 'Submitting...';
+  const submitBtn = document.getElementById('ms-submit-btn');
+  if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Submitting…'; }
   try {
     const email = document.getElementById('m-email').value.trim().toLowerCase();
-    // Client-side OTP verification (no RPC required)
-    if (!otpIsValid(otp)) {
-      const expired = Date.now() > _otpExpiry;
-      throw new Error(expired ? 'OTP has expired. Please click Resend OTP.' : 'Invalid OTP. Please check and try again.');
-    }
 
     let currentUser = existingUser;
     if (!currentUser) {
@@ -544,8 +458,7 @@ async function submitApplication() {
       const username = document.getElementById('m-username').value.trim();
       const phone = document.getElementById('m-phone').value.trim();
 
-      // Try RPC first, fall back to native signUp
-      let signedUpUser = null;
+      // Try RPC first (creates verified user — no email confirmation needed)
       const signupRes = await db.registerVerifiedUser({
         email, password, full_name: fullName, username, phone,
         role: 'user', metadata: { requested_role: 'mentor' }
@@ -553,65 +466,67 @@ async function submitApplication() {
       if (signupRes.success) {
         const loginRes = await db.signIn(email, password);
         if (!loginRes.success) throw new Error(loginRes.error || 'Account created but sign-in failed. Please sign in manually.');
-        signedUpUser = loginRes.data?.user || loginRes.user;
+        currentUser = loginRes.data?.user || loginRes.user;
       } else {
-        // Fallback: native Supabase signUp
+        // Fallback: Supabase native signUp — sends email verification link
         const { data: sbData, error: sbErr } = await db.client.auth.signUp({
           email, password,
-          options: { data: { full_name: fullName, username, phone, role: 'user', requested_role: 'mentor' } }
+          options: {
+            data: { full_name: fullName, username, phone, role: 'user', requested_role: 'mentor' },
+            emailRedirectTo: window.location.origin + '/pages/mentor-signup.html'
+          }
         });
         if (sbErr) throw new Error(sbErr.message || 'Unable to create mentor account.');
-        // If email confirmation enabled, sign in immediately
-        const { data: loginData, error: loginErr } = await db.client.auth.signInWithPassword({ email, password });
-        if (loginErr) throw new Error('Account created. Please verify your email then sign in to complete your mentor profile.');
-        signedUpUser = loginData?.user;
+        // Try immediate sign-in (works when email confirmation is disabled)
+        const { data: loginData } = await db.client.auth.signInWithPassword({ email, password });
+        currentUser = loginData?.user || null;
       }
-      currentUser = signedUpUser;
       existingUser = currentUser;
     }
 
-    const profileSync = await db.syncUserProfile(currentUser.id, {
-      full_name: document.getElementById('m-fullname').value.trim(),
-      username: document.getElementById('m-username').value.trim(),
-      email,
-      phone: document.getElementById('m-phone').value.trim(),
-      role: 'mentor',
-      is_email_verified: true
-    });
-    if (!profileSync.success) {
-      throw new Error(profileSync.error || 'Unable to save mentor profile details.');
+    // Only upload and sync profile if we have a valid session
+    if (currentUser?.id) {
+      await db.syncUserProfile(currentUser.id, {
+        full_name: document.getElementById('m-fullname').value.trim(),
+        username: document.getElementById('m-username').value.trim(),
+        email,
+        phone: document.getElementById('m-phone').value.trim(),
+        role: 'mentor',
+        is_email_verified: false
+      }).catch(() => {});
+
+      createdUserId = currentUser.id;
+      const mentorRes = await db.applyAsMentor(createdUserId, {
+        full_name: document.getElementById('m-fullname').value.trim(),
+        username: document.getElementById('m-username').value.trim(),
+        email,
+        phone: document.getElementById('m-phone').value.trim(),
+        designation: document.getElementById('m-designation').value.trim(),
+        qualifications: document.getElementById('m-qualifications').value.trim(),
+        expertise_areas: expertiseTags,
+        years_experience: document.getElementById('m-exp').value,
+        bio: document.getElementById('m-bio').value.trim(),
+        linkedin_url: document.getElementById('m-linkedin').value.trim() || null,
+        pan_number: document.getElementById('m-pan').value.trim().toUpperCase(),
+        aadhaar_number: document.getElementById('m-aadhaar').value.trim(),
+        salary_type: document.getElementById('m-salary-type').value
+      }, {
+        photo: _profilePhotoFile || document.getElementById('m-photo').files[0],
+        pan: document.getElementById('m-pan-doc').files[0],
+        aadhaar: document.getElementById('m-aadhaar-doc').files[0],
+        address_proof: document.getElementById('m-addr-doc').files[0] || null,
+        certificates: Array.from(document.getElementById('m-certs').files || [])
+      });
+      if (!mentorRes.success) throw new Error(mentorRes.error || 'Mentor application submission failed.');
     }
 
-    createdUserId = currentUser.id;
-    const mentorRes = await db.applyAsMentor(createdUserId, {
-      full_name: document.getElementById('m-fullname').value.trim(),
-      username: document.getElementById('m-username').value.trim(),
-      email,
-      phone: document.getElementById('m-phone').value.trim(),
-      designation: document.getElementById('m-designation').value.trim(),
-      qualifications: document.getElementById('m-qualifications').value.trim(),
-      expertise_areas: expertiseTags,
-      years_experience: document.getElementById('m-exp').value,
-      bio: document.getElementById('m-bio').value.trim(),
-      linkedin_url: document.getElementById('m-linkedin').value.trim() || null,
-      pan_number: document.getElementById('m-pan').value.trim().toUpperCase(),
-      aadhaar_number: document.getElementById('m-aadhaar').value.trim(),
-      salary_type: document.getElementById('m-salary-type').value
-    }, {
-      photo: _profilePhotoFile || document.getElementById('m-photo').files[0],
-      pan: document.getElementById('m-pan-doc').files[0],
-      aadhaar: document.getElementById('m-aadhaar-doc').files[0],
-      address_proof: document.getElementById('m-addr-doc').files[0] || null,
-      certificates: Array.from(document.getElementById('m-certs').files || [])
-    });
-
-    if (!mentorRes.success) throw new Error(mentorRes.error || 'Mentor application submission failed.');
-    window.location.href = 'signup-success.html?type=mentor';
+    // Show success/email-sent screen
+    document.getElementById('phone-display').textContent = email;
+    setStep(4);
   } catch (err) {
-    showErr(err.message || 'Signup failed. Please try again.');
+    showErr(err.message || 'Submission failed. Please try again.');
   } finally {
-    submitBtn.disabled = false;
-    submitBtn.textContent = 'Submit Application';
+    if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Submit Application'; }
   }
 }
 

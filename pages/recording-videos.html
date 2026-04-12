@@ -13,9 +13,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Cormorant+Garamond:ital,wght@0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
   <style>
-    /* ── Page hero ── */
+    /* ── Hero ── */
     .rv-hero {
-      padding: 8rem 5vw 4rem;
+      padding: 7rem 5vw 2.5rem;
       text-align: center;
       position: relative;
       overflow: hidden;
@@ -61,352 +61,18 @@
       animation: fadeUp .6s .2s ease both;
     }
 
-    /* ── Filters ── */
-    .rv-filters {
-      display: flex;
-      gap: .65rem;
-      flex-wrap: wrap;
-      justify-content: center;
-      margin-bottom: 3rem;
-    }
-    .rv-filter-btn {
-      padding: .5rem 1.2rem;
-      border-radius: 50px;
-      font-size: .8rem;
-      font-weight: 600;
-      border: 1.5px solid var(--border);
-      background: transparent;
-      color: var(--txt3);
-      cursor: pointer;
-      font-family: inherit;
-      transition: all .22s cubic-bezier(.4,0,.2,1);
-    }
-    .rv-filter-btn:hover, .rv-filter-btn.active {
-      background: rgba(124,92,252,0.12);
-      border-color: rgba(124,92,252,0.5);
-      color: var(--v1);
-    }
-    .rv-filter-btn.active {
-      background: rgba(124,92,252,0.18);
-      border-color: var(--v1);
-    }
-
-    /* ── Search ── */
-    .rv-search-wrap {
-      position: relative;
-      max-width: 440px;
-      margin: 0 auto 2.5rem;
-    }
-    .rv-search-wrap svg {
-      position: absolute;
-      left: 1rem;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--txt4);
-      pointer-events: none;
-    }
-    .rv-search {
-      width: 100%;
-      padding: .82rem 1rem .82rem 2.85rem;
-      background: rgba(255,255,255,0.05);
-      border: 1.5px solid var(--border);
-      border-radius: 50px;
-      color: var(--txt);
-      font-size: .9rem;
-      font-family: inherit;
-      outline: none;
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      transition: border-color .22s, box-shadow .22s;
-    }
-    .rv-search:focus { border-color: var(--v1); box-shadow: 0 0 0 3px rgba(124,92,252,0.12); }
-    .rv-search::placeholder { color: var(--txt4); }
-    :root[data-theme="light"] .rv-search { background: rgba(255,255,255,0.82); }
-
-    /* ── Video Grid ── */
-    .rv-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-      gap: 1.8rem;
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 0 5vw 5rem;
-    }
-
-    /* ── Video Card ── */
-    .rv-card {
-      background: rgba(255,255,255,0.05);
-      backdrop-filter: blur(16px) saturate(1.8);
-      -webkit-backdrop-filter: blur(16px) saturate(1.8);
-      border: 1px solid rgba(124,92,252,0.16);
-      border-radius: 24px;
-      overflow: hidden;
-      transition: transform .38s cubic-bezier(.34,1.56,.64,1), box-shadow .38s ease, border-color .38s ease;
-      box-shadow: 0 4px 24px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.06);
-      cursor: pointer;
-      position: relative;
-    }
-    .rv-card::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0; height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-    }
-    .rv-card:hover {
-      transform: translateY(-8px) scale(1.02);
-      border-color: rgba(124,92,252,0.5);
-      box-shadow: 0 24px 64px rgba(124,92,252,0.3), 0 4px 16px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.1);
-    }
-    :root[data-theme="light"] .rv-card {
-      background: rgba(255,255,255,0.88);
-      border-color: rgba(124,92,252,0.12);
-      box-shadow: 0 2px 16px rgba(124,92,252,0.08), inset 0 1px 0 rgba(255,255,255,0.9);
-    }
-    :root[data-theme="light"] .rv-card:hover {
-      box-shadow: 0 16px 48px rgba(124,92,252,0.22), 0 4px 12px rgba(0,0,0,0.08);
-    }
-
-    /* ── Thumbnail ── */
-    .rv-thumb {
-      position: relative;
-      aspect-ratio: 16/9;
-      background: linear-gradient(135deg, #0d0b1a, #1d1a3e);
-      overflow: hidden;
-    }
-    .rv-thumb-bg {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 4rem;
-      opacity: 0.3;
-      transition: opacity .3s, transform .4s cubic-bezier(.34,1.56,.64,1);
-    }
-    .rv-card:hover .rv-thumb-bg { opacity: 0.45; transform: scale(1.12); }
-    .rv-thumb-gradient {
-      position: absolute;
-      inset: 0;
-      opacity: 0.7;
-    }
-    .rv-play-btn {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: transform .38s cubic-bezier(.34,1.56,.64,1);
-    }
-    .rv-card:hover .rv-play-btn { transform: scale(1.12); }
-    .rv-play-circle {
-      width: 58px;
-      height: 58px;
-      background: rgba(255,255,255,0.16);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 2px solid rgba(255,255,255,0.35);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 8px 28px rgba(0,0,0,0.4);
-      transition: background .3s, box-shadow .3s;
-    }
-    .rv-card:hover .rv-play-circle {
-      background: rgba(124,92,252,0.7);
-      border-color: rgba(255,255,255,0.5);
-      box-shadow: 0 12px 40px rgba(124,92,252,0.5);
-    }
-    .rv-duration {
-      position: absolute;
-      bottom: .6rem;
-      right: .75rem;
-      background: rgba(0,0,0,0.75);
-      border-radius: 6px;
-      padding: .18rem .55rem;
-      font-size: .72rem;
-      font-weight: 700;
-      color: #fff;
-      backdrop-filter: blur(6px);
-      -webkit-backdrop-filter: blur(6px);
-    }
-    .rv-new-badge {
-      position: absolute;
-      top: .7rem;
-      left: .7rem;
-      background: linear-gradient(135deg, #7c5cfc, #3d6bff);
-      border-radius: 6px;
-      padding: .2rem .6rem;
-      font-size: .62rem;
-      font-weight: 800;
-      color: #fff;
-      letter-spacing: .04em;
-      text-transform: uppercase;
-    }
-
-    /* ── Card body ── */
-    .rv-card-body { padding: 1.4rem 1.5rem 1.6rem; }
-    .rv-card-tags { display: flex; gap: .45rem; flex-wrap: wrap; margin-bottom: .75rem; }
-    .rv-tag {
-      padding: .2rem .65rem;
-      background: rgba(124,92,252,0.1);
-      border: 1px solid rgba(124,92,252,0.22);
-      border-radius: 50px;
-      font-size: .66rem;
-      font-weight: 700;
-      color: var(--v1);
-      letter-spacing: .04em;
-    }
-    .rv-card-title {
-      font-size: 1.04rem;
-      font-weight: 700;
-      color: var(--txt);
-      line-height: 1.35;
-      margin-bottom: .5rem;
-    }
-    .rv-card-meta {
-      display: flex;
-      align-items: center;
-      gap: .85rem;
-      font-size: .75rem;
-      color: var(--txt4);
-    }
-    .rv-card-mentor { display: flex; align-items: center; gap: .4rem; }
-    .rv-mentor-dot {
-      width: 22px;
-      height: 22px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, var(--v1), var(--b1));
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: .6rem;
-      font-weight: 800;
-      color: #fff;
-      flex-shrink: 0;
-    }
-
-    /* ── Video Modal ── */
-    #rv-modal {
-      position: fixed;
-      inset: 0;
-      z-index: 99999;
-      background: rgba(0,0,0,0.88);
-      backdrop-filter: blur(20px) saturate(1.8);
-      -webkit-backdrop-filter: blur(20px) saturate(1.8);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 1rem;
-      opacity: 0;
-      visibility: hidden;
-      pointer-events: none;
-      transition: opacity .3s ease, visibility .3s ease;
-    }
-    #rv-modal.open { opacity: 1; visibility: visible; pointer-events: all; }
-    .rv-modal-box {
-      width: 100%;
-      max-width: 880px;
-      background: rgba(13,11,26,0.95);
-      border: 1px solid rgba(124,92,252,0.3);
-      border-radius: 24px;
-      overflow: hidden;
-      box-shadow: 0 32px 96px rgba(0,0,0,0.6), 0 4px 16px rgba(124,92,252,0.2);
-      transform: scale(0.93) translateY(24px);
-      transition: transform .35s cubic-bezier(.23,1,.32,1);
-    }
-    #rv-modal.open .rv-modal-box { transform: scale(1) translateY(0); }
-    :root[data-theme="light"] .rv-modal-box { background: rgba(255,255,255,0.97); border-color: rgba(124,92,252,0.2); }
-
-    .rv-modal-video {
-      aspect-ratio: 16/9;
-      background: #000;
-      position: relative;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .rv-modal-video iframe, .rv-modal-video video {
-      width: 100%;
-      height: 100%;
-      border: none;
-      pointer-events: auto;
-    }
-    /* Native video — strip download, PiP, and remote-playback browser controls */
-    .rv-modal-video video::-webkit-media-controls-download-button { display: none !important; }
-    .rv-modal-video video::-webkit-media-controls-picture-in-picture-button { display: none !important; }
-    .rv-modal-video video::-webkit-media-controls-fullscreen-button { }
-    /* Prevent drag / selection of content */
-    .rv-grid, .rv-modal-box {
+    /* ── Prevent drag / selection of content while player is active ── */
+    #rv-player iframe,
+    #rv-player video {
+      -webkit-user-drag: none;
       -webkit-user-select: none;
       user-select: none;
     }
-    /* Prevent drag-and-drop of iframe/video out of the modal */
-    .rv-modal-video iframe,
-    .rv-modal-video video {
-      -webkit-user-drag: none;   /* Chrome/Safari */
-      -webkit-user-select: none; /* Safari */
-      user-select: none;
-    }
-    .rv-modal-placeholder {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 1rem;
-      color: rgba(255,255,255,0.5);
-      font-size: .95rem;
-    }
-    .rv-modal-placeholder .big-icon { font-size: 3.5rem; }
+    #rv-player { -webkit-user-select: none; user-select: none; }
 
-    .rv-modal-info { padding: 1.5rem 1.8rem; }
-    .rv-modal-title { font-size: 1.3rem; font-weight: 800; color: var(--txt); margin-bottom: .4rem; }
-    .rv-modal-meta { font-size: .82rem; color: var(--txt4); display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
-    .rv-modal-close {
-      position: absolute;
-      top: 1rem;
-      right: 1rem;
-      width: 36px;
-      height: 36px;
-      background: rgba(255,255,255,0.1);
-      border: 1px solid rgba(255,255,255,0.2);
-      border-radius: 50%;
-      color: #fff;
-      font-size: .85rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      font-family: inherit;
-      transition: background .2s, transform .2s;
-      z-index: 2;
-    }
-    .rv-modal-close:hover { background: rgba(255,255,255,0.2); transform: rotate(90deg) scale(1.1); }
-
-    /* ── Empty state ── */
-    .rv-empty {
-      grid-column: 1 / -1;
-      text-align: center;
-      padding: 4rem 2rem;
-      color: var(--txt4);
-    }
-    .rv-empty .rv-empty-icon { font-size: 3.5rem; margin-bottom: 1rem; opacity: .6; }
-
-    /* ── Animations ── */
     @keyframes fadeUp {
       from { opacity: 0; transform: translateY(20px); }
       to   { opacity: 1; transform: translateY(0); }
-    }
-    .rv-card { animation: fadeUp .55s ease both; }
-    .rv-card:nth-child(2) { animation-delay: .05s; }
-    .rv-card:nth-child(3) { animation-delay: .1s; }
-    .rv-card:nth-child(4) { animation-delay: .15s; }
-    .rv-card:nth-child(5) { animation-delay: .2s; }
-    .rv-card:nth-child(6) { animation-delay: .25s; }
-
-    @media (max-width: 640px) {
-      .rv-grid { grid-template-columns: 1fr; gap: 1.2rem; }
-      .rv-hero h1 { font-size: 2.2rem; }
     }
 
     /* ── Access-checking spinner ── */
@@ -437,6 +103,288 @@
       animation: rvSpin .65s linear infinite;
       flex-shrink: 0;
     }
+
+    /* ── Two-panel layout ── */
+    .rv-layout {
+      display: grid;
+      grid-template-columns: 1fr 360px;
+      gap: 0;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 5vw 5rem;
+      align-items: start;
+    }
+
+    /* ── Main panel (player) ── */
+    .rv-main {
+      padding-right: 1.5rem;
+      min-width: 0;
+    }
+    .rv-player-wrap {
+      background: #0d0b1a;
+      border: 1.5px solid rgba(124,92,252,.22);
+      border-radius: 20px;
+      overflow: hidden;
+      aspect-ratio: 16/9;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    :root[data-theme="light"] .rv-player-wrap { background: rgba(255,255,255,.9); border-color: rgba(124,92,252,.14); }
+    .rv-player-wrap iframe, .rv-player-wrap video {
+      width: 100%; height: 100%; border: none; pointer-events: auto;
+    }
+    .rv-player-wrap video::-webkit-media-controls-download-button { display: none !important; }
+    .rv-player-wrap video::-webkit-media-controls-picture-in-picture-button { display: none !important; }
+    .rv-player-placeholder {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 1rem; color: var(--txt4); text-align: center; padding: 2rem;
+      width: 100%;
+    }
+    .rv-player-placeholder .ph-icon { font-size: 3.5rem; opacity: .5; }
+    .rv-player-placeholder p { font-size: .9rem; line-height: 1.6; }
+
+    /* ── Video details panel (shown before playing) ── */
+    #rv-details-view {
+      display: none;
+      width: 100%; height: 100%;
+      padding: 2rem 2.5rem;
+      box-sizing: border-box;
+      overflow-y: auto;
+      flex-direction: column;
+      justify-content: center;
+      gap: 1rem;
+      background: linear-gradient(160deg, rgba(124,92,252,.06) 0%, rgba(61,107,255,.04) 100%);
+    }
+    #rv-details-view.active { display: flex; }
+    .rv-dv-course-tag {
+      display: inline-flex; align-items: center; gap: .4rem;
+      background: rgba(124,92,252,.12); border: 1px solid rgba(124,92,252,.28);
+      border-radius: 50px; padding: .25rem .8rem;
+      font-size: .72rem; font-weight: 700; color: var(--v1);
+      width: fit-content;
+    }
+    .rv-dv-title {
+      font-size: 1.35rem; font-weight: 800; color: var(--txt);
+      line-height: 1.3; margin: 0;
+    }
+    .rv-dv-meta {
+      display: flex; flex-wrap: wrap; gap: .5rem .9rem;
+      font-size: .78rem; color: var(--txt4);
+    }
+    .rv-dv-meta span { display: inline-flex; align-items: center; gap: .3rem; }
+    .rv-dv-price-row {
+      display: flex; align-items: center; gap: .75rem; flex-wrap: wrap;
+    }
+    .rv-dv-price {
+      font-size: 1.1rem; font-weight: 800; color: var(--txt);
+    }
+    .rv-dv-badge-free {
+      display: inline-flex; align-items: center; gap: .3rem;
+      background: rgba(34,197,94,.1); border: 1px solid rgba(34,197,94,.3);
+      border-radius: 50px; padding: .2rem .7rem;
+      font-size: .72rem; font-weight: 700; color: #4ade80;
+    }
+    .rv-dv-badge-paid {
+      display: inline-flex; align-items: center; gap: .3rem;
+      background: rgba(249,115,22,.08); border: 1px solid rgba(249,115,22,.25);
+      border-radius: 50px; padding: .2rem .7rem;
+      font-size: .72rem; font-weight: 700; color: #fb923c;
+    }
+    .rv-dv-play-btn {
+      display: inline-flex; align-items: center; gap: .55rem;
+      background: linear-gradient(135deg, #7c5cfc, #3d6bff);
+      color: #fff; border: none; border-radius: 50px;
+      padding: .75rem 2rem; font-size: .95rem; font-weight: 700;
+      cursor: pointer; font-family: inherit;
+      box-shadow: 0 8px 24px rgba(124,92,252,.4);
+      transition: transform .18s, box-shadow .18s;
+      margin-top: .25rem;
+      width: fit-content;
+    }
+    .rv-dv-play-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 32px rgba(124,92,252,.55);
+    }
+    .rv-dv-play-btn svg { flex-shrink: 0; }
+    .rv-now-playing {
+      padding: 1.25rem .25rem .75rem;
+    }
+    .rv-np-title {
+      font-size: 1.18rem; font-weight: 800; color: var(--txt); line-height: 1.35; margin-bottom: .5rem;
+    }
+    .rv-np-meta {
+      display: flex; flex-wrap: wrap; align-items: center; gap: .6rem 1.2rem;
+      font-size: .78rem; color: var(--txt4);
+    }
+    .rv-np-badge {
+      display: inline-flex; align-items: center; gap: .3rem;
+      background: rgba(124,92,252,.1); border: 1px solid rgba(124,92,252,.22);
+      border-radius: 50px; padding: .2rem .65rem;
+      font-size: .7rem; font-weight: 700; color: var(--v1);
+    }
+
+    /* ── Sidebar (playlist) ── */
+    .rv-sidebar {
+      position: sticky;
+      top: 90px;
+      background: var(--panel);
+      border: 1.5px solid var(--border);
+      border-radius: 20px;
+      overflow: hidden;
+      max-height: calc(100vh - 110px);
+      display: flex;
+      flex-direction: column;
+    }
+    .rv-sidebar-header {
+      padding: 1.1rem 1.25rem .85rem;
+      border-bottom: 1.5px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+    .rv-sidebar-header h3 {
+      font-size: .92rem; font-weight: 800; color: var(--txt); margin: 0;
+    }
+    .rv-sidebar-count {
+      font-size: .72rem; color: var(--txt4); font-weight: 600;
+      background: rgba(124,92,252,.08); border: 1px solid rgba(124,92,252,.18);
+      border-radius: 50px; padding: .15rem .6rem;
+    }
+    .rv-sidebar-search {
+      padding: .75rem 1rem;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+      position: relative;
+    }
+    .rv-sidebar-search svg {
+      position: absolute; left: 1.6rem; top: 50%; transform: translateY(-50%);
+      color: var(--txt4); pointer-events: none;
+    }
+    .rv-sidebar-search input {
+      width: 100%; padding: .55rem .75rem .55rem 2.4rem;
+      background: var(--bg); border: 1.5px solid var(--border);
+      border-radius: 50px; color: var(--txt); font-size: .82rem;
+      font-family: inherit; outline: none;
+      transition: border-color .2s;
+      box-sizing: border-box;
+    }
+    .rv-sidebar-search input:focus { border-color: var(--v1); }
+    .rv-playlist {
+      overflow-y: auto;
+      flex: 1;
+    }
+    .rv-playlist::-webkit-scrollbar { width: 4px; }
+    .rv-playlist::-webkit-scrollbar-track { background: transparent; }
+    .rv-playlist::-webkit-scrollbar-thumb { background: rgba(124,92,252,.25); border-radius: 2px; }
+
+    /* Course group */
+    .rv-course-group { border-bottom: 1px solid var(--border); }
+    .rv-course-header {
+      display: flex; align-items: center; gap: .6rem;
+      padding: .85rem 1.1rem; cursor: pointer;
+      transition: background .18s;
+    }
+    .rv-course-header:hover { background: rgba(124,92,252,.06); }
+    .rv-ch-icon {
+      width: 32px; height: 32px; border-radius: 10px;
+      background: linear-gradient(135deg,var(--v1),var(--v2));
+      display: flex; align-items: center; justify-content: center;
+      font-size: .9rem; flex-shrink: 0;
+    }
+    .rv-ch-info { flex: 1; min-width: 0; }
+    .rv-ch-name {
+      font-size: .82rem; font-weight: 700; color: var(--txt);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .rv-ch-count { font-size: .69rem; color: var(--txt4); margin-top: .08rem; }
+    .rv-ch-chevron {
+      flex-shrink: 0; color: var(--txt4);
+      transition: transform .22s;
+    }
+    .rv-course-group.open .rv-ch-chevron { transform: rotate(180deg); }
+    .rv-course-videos { display: none; }
+    .rv-course-group.open .rv-course-videos { display: block; }
+
+    /* Playlist item */
+    .rv-pi {
+      display: flex; align-items: center; gap: .7rem;
+      padding: .62rem 1.1rem .62rem 1.6rem;
+      cursor: pointer; transition: background .18s;
+      border-left: 3px solid transparent;
+    }
+    .rv-pi:hover { background: rgba(124,92,252,.07); border-left-color: rgba(124,92,252,.25); }
+    .rv-pi.active { background: rgba(124,92,252,.1); border-left-color: var(--v1); }
+    .rv-pi-num {
+      width: 20px; font-size: .72rem; color: var(--txt4); font-weight: 600;
+      text-align: right; flex-shrink: 0;
+    }
+    .rv-pi-thumb {
+      width: 48px; height: 32px; border-radius: 6px;
+      background: linear-gradient(135deg,var(--v1),var(--v2));
+      display: flex; align-items: center; justify-content: center;
+      font-size: .85rem; flex-shrink: 0; position: relative; overflow: hidden;
+    }
+    .rv-pi-thumb img { width:100%; height:100%; object-fit:cover; border-radius:inherit; }
+    .rv-pi-body { flex: 1; min-width: 0; }
+    .rv-pi-title {
+      font-size: .78rem; font-weight: 700; color: var(--txt);
+      line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .rv-pi-meta { font-size: .66rem; color: var(--txt4); margin-top: .15rem; }
+    .rv-pi-lock {
+      flex-shrink: 0; width: 20px; height: 20px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .7rem; color: var(--txt4);
+    }
+    .rv-pi-lock.unlocked { color: #4ade80; }
+
+    /* Skeleton for playlist */
+    .rv-pl-skeleton { padding: .6rem 1.1rem; display: flex; gap: .7rem; align-items: center; }
+    .rv-skel-thumb { width: 48px; height: 32px; border-radius: 6px; background: var(--panel2); flex-shrink: 0; }
+    .rv-skel-body { flex: 1; display: flex; flex-direction: column; gap: .35rem; }
+    .rv-skel-line { height: 10px; background: var(--panel2); border-radius: 4px; }
+
+    @keyframes shimmer {
+      from { background-position: 200% 0; }
+      to   { background-position: -200% 0; }
+    }
+    .rv-skel-thumb, .rv-skel-line {
+      background-image: linear-gradient(90deg,var(--panel2) 25%,rgba(124,92,252,.07) 50%,var(--panel2) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.4s infinite;
+    }
+
+    /* Player placeholder pulse */
+    .rv-ph-pulse {
+      width: 80px; height: 80px; border-radius: 50%;
+      background: rgba(124,92,252,.12);
+      display: flex; align-items: center; justify-content: center;
+      animation: phPulse 2s ease-in-out infinite;
+    }
+    @keyframes phPulse { 0%,100%{transform:scale(1);opacity:.7;} 50%{transform:scale(1.08);opacity:1;} }
+
+    /* Empty / error state */
+    .rv-empty {
+      padding: 3rem 1.5rem; text-align: center; color: var(--txt4);
+    }
+    .rv-empty-icon { font-size: 2.5rem; margin-bottom: .75rem; opacity: .6; }
+
+    /* ── Responsive ── */
+    @media (max-width: 900px) {
+      .rv-layout { grid-template-columns: 1fr; padding: 0 4vw 4rem; }
+      .rv-main { padding-right: 0; }
+      .rv-sidebar {
+        position: static; max-height: 60vh;
+        margin-top: 1.5rem;
+      }
+    }
+    @media (max-width: 640px) {
+      .rv-hero h1 { font-size: 2rem; }
+      .rv-sidebar { max-height: 55vh; }
+    }
   </style>
 </head>
 <body>
@@ -453,47 +401,58 @@
       Recorded Sessions
     </div>
     <h1>Watch. Learn. <span style="background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Grow.</span></h1>
-    <p>Every live session recorded for you. Watch premium soft-skills coaching at your own pace, whenever it suits you.</p>
-
-    <!-- Search -->
-    <div class="rv-search-wrap">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-      <input class="rv-search" type="text" id="rv-search-input" placeholder="Search sessions, topics, mentors…" oninput="filterVideos()">
-    </div>
-
-    <!-- Filters — populated dynamically from DB -->
-    <div class="rv-filters" id="rv-filters">
-      <button class="rv-filter-btn active" data-filter="all" onclick="setFilter('all',this)">All Sessions</button>
-    </div>
+    <p>Every live session, recorded for you. Premium coaching at your own pace.</p>
   </section>
 
-  <!-- Video Grid -->
-  <div class="rv-grid" id="rv-grid">
-    <!-- populated by JS -->
-  </div>
+  <!-- Two-panel layout -->
+  <div class="rv-layout">
 
-  <!-- Video Modal -->
-  <div id="rv-modal" onclick="if(event.target===this)closeModal()">
-    <div class="rv-modal-box" style="position:relative;">
-      <button class="rv-modal-close" onclick="closeModal()">✕</button>
-      <div class="rv-modal-video" id="rv-modal-video">
-        <div class="rv-modal-placeholder">
-          <div class="big-icon">🎬</div>
-          <div>Loading video…</div>
+    <!-- Main: Player + Now Playing -->
+    <div class="rv-main">
+      <div class="rv-player-wrap" id="rv-player-wrap">
+        <div class="rv-player-placeholder" id="rv-player-placeholder">
+          <div class="rv-ph-pulse">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="rgba(124,92,252,.7)" stroke-width="1.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          </div>
+          <p>Select a session from the playlist to start watching</p>
         </div>
+        <!-- Details panel: shown after clicking playlist item, before play -->
+        <div id="rv-details-view">
+          <div class="rv-dv-course-tag" id="rv-dv-course-tag"></div>
+          <h2 class="rv-dv-title" id="rv-dv-title"></h2>
+          <div class="rv-dv-meta" id="rv-dv-meta"></div>
+          <div class="rv-dv-price-row" id="rv-dv-price-row"></div>
+          <button type="button" class="rv-dv-play-btn" id="rv-dv-play-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            Play Video
+          </button>
+        </div>
+        <div id="rv-player" style="display:none;width:100%;height:100%;"></div>
       </div>
-      <div class="rv-modal-info">
-        <div class="rv-modal-title" id="rv-modal-title">Session Title</div>
-        <div class="rv-modal-meta">
-          <span id="rv-modal-mentor">👤 Mentor</span>
-          <span id="rv-modal-dur">⏱ Duration</span>
-          <span id="rv-modal-cat">📚 Category</span>
-        </div>
+      <div class="rv-now-playing" id="rv-now-playing" style="display:none;">
+        <div class="rv-np-title" id="rv-np-title">Session Title</div>
+        <div class="rv-np-meta" id="rv-np-meta"></div>
       </div>
     </div>
+
+    <!-- Sidebar: Playlist -->
+    <div class="rv-sidebar">
+      <div class="rv-sidebar-header">
+        <h3>Course Playlist</h3>
+        <span class="rv-sidebar-count" id="rv-total-count">Loading…</span>
+      </div>
+      <div class="rv-sidebar-search">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" id="rv-search-input" placeholder="Search sessions…" oninput="filterPlaylist()">
+      </div>
+      <div class="rv-playlist" id="rv-playlist">
+        <!-- populated by JS -->
+      </div>
+    </div>
+
   </div>
 
-  <!-- Access-checking overlay (shown while DB lookup is in flight) -->
+  <!-- Access-checking overlay -->
   <div id="rv-access-checking">
     <div class="rv-spin"></div>
     Checking access…
@@ -509,40 +468,30 @@
 
   <script>
   /* ══════════════════════════════════════════════════════════════
-     Recording Videos — public listing, per-video access control
+     Recording Videos — playlist layout, per-video access control
      • List is visible to everyone (no login needed)
-     • Clicking Watch → checks login → checks payment
+     • Clicking a video → checks login → checks payment → plays in main panel
      • Paid users: play video with security restrictions
      • Unpaid users: show Razorpay payment prompt
      ══════════════════════════════════════════════════════════════ */
 
-  // Block screenshot shortcuts only inside the video modal (not page-level)
+  // Block screenshot shortcuts while a video is playing in the main panel
   function blockScreenCapture() {
-    const modalOpen = () => document.getElementById('rv-modal')?.classList.contains('open');
-
-    // Block right-click inside modal (prevents "Save video as…" on native video + iframe)
-    document.addEventListener('contextmenu', e => {
-      if (modalOpen()) e.preventDefault();
-    });
-
-    // Block screenshot / devtools / print shortcuts while video is playing
+    const playerActive = () => document.getElementById('rv-player')?.style.display !== 'none';
+    document.addEventListener('contextmenu', e => { if (playerActive()) e.preventDefault(); });
     document.addEventListener('keydown', e => {
-      if (!modalOpen()) return;
+      if (!playerActive()) return;
       if (e.key === 'PrintScreen') { navigator.clipboard?.writeText(''); e.preventDefault(); }
       if (e.key === 'F12') e.preventDefault();
       if ((e.ctrlKey || e.metaKey) && ['p','s','u'].includes(e.key.toLowerCase())) e.preventDefault();
       if ((e.ctrlKey || e.metaKey) && e.shiftKey && ['i','c','j'].includes(e.key.toLowerCase())) e.preventDefault();
     });
-
-    // Block print-to-PDF while modal is open
-    window.addEventListener('beforeprint', e => {
-      if (modalOpen()) e.preventDefault();
-    });
+    window.addEventListener('beforeprint', e => { if (playerActive()) e.preventDefault(); });
   }
   blockScreenCapture();
 
-  let currentFilter = 'all';
   let allVideos = [];
+  let _activeVideoId = null;
 
   // ── Provider → gradient + icon ──
   function videoMeta(provider) {
@@ -552,107 +501,118 @@
     return { icon: '🎥', gradient: 'linear-gradient(135deg,#7c5cfc,#3d6bff)' };
   }
 
-  // ── Skeleton placeholders while loading ──
+  // ── Skeleton while loading ──
   function showSkeleton() {
-    const grid = document.getElementById('rv-grid');
-    if (!grid) return;
-    grid.innerHTML = Array.from({length: 6}, () => `
-      <div class="rv-card" style="pointer-events:none;">
-        <div class="rv-thumb" style="background:var(--panel2);border-radius:var(--r2) var(--r2) 0 0;">
-          <div style="position:absolute;inset:0;background:linear-gradient(90deg,var(--panel2) 25%,rgba(124,92,252,.08) 50%,var(--panel2) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:inherit;"></div>
-        </div>
-        <div class="rv-card-body" style="display:flex;flex-direction:column;gap:.65rem;">
-          <div style="height:12px;width:60%;background:var(--panel2);border-radius:6px;animation:shimmer 1.4s .1s infinite;background-size:200% 100%;background-image:linear-gradient(90deg,var(--panel2) 25%,rgba(124,92,252,.08) 50%,var(--panel2) 75%);"></div>
-          <div style="height:16px;width:90%;background:var(--panel2);border-radius:6px;animation:shimmer 1.4s .2s infinite;background-size:200% 100%;background-image:linear-gradient(90deg,var(--panel2) 25%,rgba(124,92,252,.08) 50%,var(--panel2) 75%);"></div>
-          <div style="height:12px;width:50%;background:var(--panel2);border-radius:6px;animation:shimmer 1.4s .3s infinite;background-size:200% 100%;background-image:linear-gradient(90deg,var(--panel2) 25%,rgba(124,92,252,.08) 50%,var(--panel2) 75%);"></div>
+    const pl = document.getElementById('rv-playlist');
+    if (!pl) return;
+    pl.innerHTML = Array.from({length: 8}, () => `
+      <div class="rv-pl-skeleton">
+        <div class="rv-skel-thumb"></div>
+        <div class="rv-skel-body">
+          <div class="rv-skel-line" style="width:80%"></div>
+          <div class="rv-skel-line" style="width:50%"></div>
         </div>
       </div>`).join('');
   }
 
-  // ── Per-card access badge (set by checkUserAccess after login) ──
-  // 'full'  → admin-granted OR paid → green "Access Granted"
-  // anything else → purple lock "Members Only" (click to pay)
-  function rvAccessBadge(v) {
-    if (v._access === 'full') {
-      return `<div style="position:absolute;top:.55rem;right:.55rem;background:rgba(34,197,94,.2);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border-radius:50px;padding:.25rem .6rem;display:flex;align-items:center;gap:.3rem;font-size:.72rem;font-weight:700;color:#4ade80;border:1px solid rgba(34,197,94,.4);">
-        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-        Access Granted
-      </div>`;
-    }
-    return `<div style="position:absolute;top:.55rem;right:.55rem;background:rgba(0,0,0,.65);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border-radius:50px;padding:.25rem .6rem;display:flex;align-items:center;gap:.3rem;font-size:.72rem;font-weight:700;color:#e9d5ff;border:1px solid rgba(168,85,247,.35);">
-      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-      Members Only
-    </div>`;
+  // ── Category icons ──
+  function courseIcon(name) {
+    const n = (name||'').toLowerCase();
+    if (n.includes('cloud') || n.includes('aws') || n.includes('azure')) return '☁️';
+    if (n.includes('ai') || n.includes('machine') || n.includes('ml')) return '🤖';
+    if (n.includes('cyber') || n.includes('security')) return '🔒';
+    if (n.includes('devops') || n.includes('docker') || n.includes('k8s')) return '⚙️';
+    if (n.includes('data') || n.includes('analytics')) return '📊';
+    if (n.includes('communication') || n.includes('soft')) return '💬';
+    if (n.includes('leadership') || n.includes('management')) return '🏆';
+    if (n.includes('interview')) return '🎤';
+    if (n.includes('business')) return '💼';
+    return '📚';
   }
 
-  // ── Render video grid ──
-  function renderVideos() {
-    const q = document.getElementById('rv-search-input')?.value?.toLowerCase() || '';
-    const filtered = allVideos.filter(v => {
-      const matchCat = currentFilter === 'all' || v.filterKey === currentFilter;
-      const matchQ = !q || v.title.toLowerCase().includes(q) || v.courseTitle.toLowerCase().includes(q) || (v.tags||[]).some(t => t.toLowerCase().includes(q));
-      return matchCat && matchQ;
-    });
-    const grid = document.getElementById('rv-grid');
-    if (!grid) return;
+  // ── Render sidebar playlist grouped by course, sorted alphabetically ──
+  function renderPlaylist() {
+    const pl = document.getElementById('rv-playlist');
+    const countEl = document.getElementById('rv-total-count');
+    if (!pl) return;
+
+    const q = (document.getElementById('rv-search-input')?.value || '').toLowerCase().trim();
+
+    // Filter by search
+    const filtered = q
+      ? allVideos.filter(v =>
+          v.title.toLowerCase().includes(q) ||
+          (v.courseTitle||'').toLowerCase().includes(q))
+      : allVideos;
+
+    if (countEl) countEl.textContent = filtered.length + ' session' + (filtered.length !== 1 ? 's' : '');
+
     if (!filtered.length) {
-      grid.innerHTML = `<div class="rv-empty"><div class="rv-empty-icon">🎬</div><p style="font-size:1.05rem;font-weight:600;color:var(--txt3);margin-bottom:.5rem;">No sessions found</p><p style="font-size:.88rem;">Try adjusting your search or filter.</p></div>`;
+      pl.innerHTML = `<div class="rv-empty"><div class="rv-empty-icon">🎬</div><p>No sessions found</p></div>`;
       return;
     }
-    grid.innerHTML = filtered.map((v, i) => `
-      <div class="rv-card" style="animation-delay:${i*0.05}s" onclick="handleWatchClick('${v.id}')">
-        <div class="rv-thumb">
-          ${v.thumbnail
-            ? `<img src="${v.thumbnail}" alt="${v.title}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" loading="lazy" onerror="this.style.display='none'">`
-            : `<div class="rv-thumb-bg">${v.icon}</div><div class="rv-thumb-gradient" style="background:${v.gradient};opacity:.55;"></div>`
-          }
-          <div class="rv-play-btn">
-            <div class="rv-play-circle">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="#fff" style="margin-left:3px"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-            </div>
-          </div>
-          ${v.duration !== '—' ? `<div class="rv-duration">⏱ ${v.duration}</div>` : ''}
-          ${v.isNew ? '<div class="rv-new-badge">New</div>' : ''}
-          ${rvAccessBadge(v)}
-        </div>
-        <div class="rv-card-body">
-          <div class="rv-card-tags">${(v.tags||[]).map(t=>`<span class="rv-tag">${t}</span>`).join('')}</div>
-          <div class="rv-card-title">${v.title}</div>
-          ${v.totalPrice != null ? `<div style="display:flex;align-items:center;gap:.5rem;margin:.45rem 0;">
-            <span style="background:linear-gradient(135deg,#7c5cfc,#3d6bff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:800;font-size:1.02rem;">₹${Number(v.totalPrice).toLocaleString('en-IN')}</span>
-            <span style="font-size:.65rem;color:var(--txt4);font-weight:600;background:rgba(124,92,252,.1);border:1px solid rgba(124,92,252,.2);padding:.1rem .42rem;border-radius:50px;">incl. GST</span>
-          </div>` : ''}
-          <div class="rv-card-meta">
-            <div class="rv-card-mentor">
-              <div class="rv-mentor-dot">${(v.courseTitle||'S').charAt(0).toUpperCase()}</div>
-              <span>${v.courseTitle || 'SkillUpNow'}</span>
-            </div>
-            <span style="margin-left:auto;background:linear-gradient(135deg,#7c5cfc,#3d6bff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:700;font-size:.82rem;">▶ Watch</span>
-          </div>
-        </div>
-      </div>`).join('');
-  }
 
-  // ── Build dynamic filter buttons from loaded courses ──
-  function buildFilterButtons() {
-    const filtersEl = document.getElementById('rv-filters');
-    if (!filtersEl) return;
-    const uniqueCourses = [...new Map(allVideos.filter(v => v.courseTitle).map(v => [v.filterKey, v.courseTitle])).entries()];
-    let html = `<button class="rv-filter-btn active" data-filter="all" onclick="setFilter('all',this)">All Sessions</button>`;
-    uniqueCourses.forEach(([key, name]) => {
-      html += `<button class="rv-filter-btn" data-filter="${key}" onclick="setFilter('${key}',this)">${name}</button>`;
+    // Group by course, sort courses alphabetically
+    const groups = {};
+    filtered.forEach(v => {
+      const key = v.filterKey || 'uncategorized';
+      const name = v.courseTitle || 'Uncategorized';
+      if (!groups[key]) groups[key] = { name, key, videos: [] };
+      groups[key].videos.push(v);
     });
-    filtersEl.innerHTML = html;
+
+    // Sort videos within each group alphabetically
+    Object.values(groups).forEach(g => {
+      g.videos.sort((a, b) => a.title.localeCompare(b.title));
+    });
+
+    // Sort course groups alphabetically
+    const sortedGroups = Object.values(groups).sort((a, b) => a.name.localeCompare(b.name));
+
+    pl.innerHTML = sortedGroups.map((g, gi) => {
+      const open = gi === 0 || sortedGroups.length === 1; // open first group by default
+      const icon = courseIcon(g.name);
+      const items = g.videos.map((v, i) => {
+        const isActive = v.id === _activeVideoId;
+        const isUnlocked = v._access === 'full';
+        const lockIcon = isUnlocked
+          ? `<div class="rv-pi-lock unlocked"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>`
+          : `<div class="rv-pi-lock"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>`;
+        const thumb = v.thumbnail
+          ? `<img src="${v.thumbnail}" alt="" onerror="this.style.display='none'">`
+          : v.icon;
+        return `<div class="rv-pi${isActive ? ' active' : ''}" id="pi-${v.id}" onclick="showVideoDetails('${v.id}')">
+          <div class="rv-pi-num">${i + 1}</div>
+          <div class="rv-pi-thumb">${thumb}</div>
+          <div class="rv-pi-body">
+            <div class="rv-pi-title">${v.title}</div>
+            <div class="rv-pi-meta">${v.duration !== '—' ? '⏱ ' + v.duration + ' · ' : ''}${isUnlocked ? 'Unlocked' : v.totalPrice != null ? '₹' + Number(v.totalPrice).toLocaleString('en-IN') : 'Members only'}</div>
+          </div>
+          ${lockIcon}
+        </div>`;
+      }).join('');
+
+      return `<div class="rv-course-group${open ? ' open' : ''}" id="cg-${g.key}">
+        <div class="rv-course-header" onclick="toggleGroup('cg-${g.key}')">
+          <div class="rv-ch-icon">${icon}</div>
+          <div class="rv-ch-info">
+            <div class="rv-ch-name">${g.name}</div>
+            <div class="rv-ch-count">${g.videos.length} session${g.videos.length !== 1 ? 's' : ''}</div>
+          </div>
+          <svg class="rv-ch-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="rv-course-videos">${items}</div>
+      </div>`;
+    }).join('');
   }
 
-  function setFilter(filter, btn) {
-    currentFilter = filter;
-    document.querySelectorAll('.rv-filter-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    renderVideos();
+  function toggleGroup(id) {
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle('open');
   }
 
-  function filterVideos() { renderVideos(); }
+  function filterPlaylist() { renderPlaylist(); }
+
 
   // ── Access check: login → payment/access → fetch URL → play ──
   async function handleWatchClick(id) {
@@ -887,7 +847,7 @@
         const next = v.courseId ? (courseAccess[v.courseId] || 'locked') : 'locked';
         if (v._access !== next) { v._access = next; changed = true; }
       });
-      if (changed) renderVideos();
+      if (changed) renderPlaylist();
     } catch(e) { console.warn('checkUserAccess:', e); }
   }
 
@@ -1041,7 +1001,7 @@
           // Update card badge immediately
           if (_gateVideo?.courseId) {
             const vid = allVideos.find(x => x.id === _gateVideo.id);
-            if (vid) { vid._access = 'full'; renderVideos(); }
+            if (vid) { vid._access = 'full'; renderPlaylist(); }
           }
           document.getElementById('rv-access-gate')?.remove();
           // Fetch video URL now that payment is confirmed, then play
@@ -1084,74 +1044,128 @@
     setTimeout(() => err?.remove(), 8000);
   }
 
-  // ── Play video in modal (paid users only) ──
+  // ── Show video details in main panel before playing ──
+  function showVideoDetails(id) {
+    const v = allVideos.find(x => x.id === id);
+    if (!v) return;
+
+    // Populate details panel
+    const courseTag = document.getElementById('rv-dv-course-tag');
+    const titleEl   = document.getElementById('rv-dv-title');
+    const metaEl    = document.getElementById('rv-dv-meta');
+    const priceRow  = document.getElementById('rv-dv-price-row');
+    const playBtn   = document.getElementById('rv-dv-play-btn');
+
+    if (courseTag) courseTag.innerHTML = `${courseIcon(v.courseTitle)} ${v.courseTitle || 'Session'}`;
+    if (titleEl)   titleEl.textContent = v.title;
+
+    // Meta row: duration + session number in group
+    const metaParts = [];
+    if (v.duration && v.duration !== '—') metaParts.push(`<span>⏱ ${v.duration}</span>`);
+    if (v.isNew) metaParts.push(`<span style="color:var(--v1);font-weight:700;">✨ New</span>`);
+    if (metaEl) metaEl.innerHTML = metaParts.join('');
+
+    // Price / access badge
+    if (priceRow) {
+      const isUnlocked = v._access === 'full';
+      if (isUnlocked) {
+        priceRow.innerHTML = `<span class="rv-dv-badge-free"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Unlocked</span>`;
+      } else if (v.totalPrice != null) {
+        priceRow.innerHTML = `<span class="rv-dv-price">₹${Number(v.totalPrice).toLocaleString('en-IN')}</span><span class="rv-dv-badge-paid">Purchase required</span>`;
+      } else {
+        priceRow.innerHTML = `<span class="rv-dv-badge-paid">Members only</span>`;
+      }
+    }
+
+    // Wire play button
+    if (playBtn) {
+      playBtn.onclick = () => handleWatchClick(id);
+      playBtn.disabled = false;
+      playBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg> Play Video`;
+    }
+
+    // Show details, hide placeholder + player
+    const placeholder = document.getElementById('rv-player-placeholder');
+    const playerEl    = document.getElementById('rv-player');
+    const detailsView = document.getElementById('rv-details-view');
+    const nowPlaying  = document.getElementById('rv-now-playing');
+
+    if (placeholder) placeholder.style.display = 'none';
+    if (playerEl)    { playerEl.style.display = 'none'; playerEl.innerHTML = ''; }
+    if (detailsView) detailsView.classList.add('active');
+    if (nowPlaying)  nowPlaying.style.display = 'none';
+
+    // Highlight playlist item
+    _activeVideoId = v.id;
+    document.querySelectorAll('.rv-pi').forEach(el => el.classList.remove('active'));
+    const piEl = document.getElementById('pi-' + v.id);
+    if (piEl) {
+      piEl.classList.add('active');
+      piEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    // Scroll to top of main panel on mobile
+    document.getElementById('rv-player-wrap')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  // ── Play video in main panel (paid users only) ──
   function playVideo(v) {
-    const modal = document.getElementById('rv-modal');
-    const videoArea = document.getElementById('rv-modal-video');
-    document.getElementById('rv-modal-title').textContent = v.title;
-    document.getElementById('rv-modal-mentor').textContent = '📚 ' + (v.courseTitle || 'SkillUpNow');
-    document.getElementById('rv-modal-dur').textContent = v.duration !== '—' ? '⏱ ' + v.duration : '';
-    document.getElementById('rv-modal-cat').textContent = v.tags?.[0] ? '🏷 ' + v.tags[0] : '';
+    const playerEl    = document.getElementById('rv-player');
+    const placeholder = document.getElementById('rv-player-placeholder');
+    const nowPlaying  = document.getElementById('rv-now-playing');
+    const detailsView = document.getElementById('rv-details-view');
+
+    // Hide details panel when actual video starts playing
+    if (detailsView) detailsView.classList.remove('active');
+
+    let embed = '';
     if (v.videoUrl && v.videoUrl.startsWith('http')) {
       const isYT   = v.videoUrl.includes('youtube') || v.videoUrl.includes('youtu.be');
       const isDrive = v.videoUrl.includes('drive.google.com');
       if (isYT) {
-        // YouTube embed: disable related videos, branding, and download button
         const ytId = v.videoUrl.match(/(?:v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/)?.[1];
-        videoArea.innerHTML = `<iframe
-          src="https://www.youtube.com/embed/${ytId}?autoplay=1&rel=0&modestbranding=1&disablekb=0&fs=1"
-          allow="autoplay; fullscreen"
-          allowfullscreen
-          style="width:100%;height:100%;border:none;pointer-events:auto;">
-        </iframe>`;
+        embed = `<iframe src="https://www.youtube.com/embed/${ytId}?autoplay=1&rel=0&modestbranding=1&fs=1"
+          allow="autoplay; fullscreen" allowfullscreen style="width:100%;height:100%;border:none;pointer-events:auto;"></iframe>`;
       } else if (isDrive) {
-        // Google Drive embed: preview mode hides download button in the Drive UI
         const driveId = v.videoUrl.match(/\/d\/([a-zA-Z0-9_-]+)/)?.[1];
-        const embedSrc = driveId
-          ? `https://drive.google.com/file/d/${driveId}/preview`
-          : v.videoUrl;
-        videoArea.innerHTML = `<iframe
-          src="${embedSrc}"
-          allow="autoplay; fullscreen"
-          allowfullscreen
-          style="width:100%;height:100%;border:none;pointer-events:auto;">
-        </iframe>`;
+        const src = driveId ? `https://drive.google.com/file/d/${driveId}/preview` : v.videoUrl;
+        embed = `<iframe src="${src}" allow="autoplay; fullscreen" allowfullscreen style="width:100%;height:100%;border:none;pointer-events:auto;"></iframe>`;
       } else {
-        // Native video: strip all download/remote controls
-        videoArea.innerHTML = `<video
-          controls autoplay playsinline
-          src="${v.videoUrl}"
-          controlslist="nodownload noremoteplayback"
-          disablepictureinpicture
-          disableremoteplayback
-          style="width:100%;height:100%;"
-          oncontextmenu="return false;">
-        </video>`;
+        embed = `<video controls autoplay playsinline src="${v.videoUrl}"
+          controlslist="nodownload noremoteplayback" disablepictureinpicture disableremoteplayback
+          style="width:100%;height:100%;" oncontextmenu="return false;"></video>`;
       }
     } else {
-      videoArea.innerHTML = `
-        <div class="rv-modal-placeholder">
-          <div class="big-icon">${v.icon}</div>
-          <div style="font-size:1rem;font-weight:700;color:rgba(255,255,255,.7);">${v.title}</div>
-          <div style="font-size:.82rem;color:rgba(255,255,255,.4);max-width:300px;text-align:center;line-height:1.6;">
-            Recording not yet available for this session. Check back soon.
-          </div>
-        </div>`;
+      embed = `<div class="rv-player-placeholder"><div class="rv-ph-pulse" style="margin-bottom:.5rem;">${v.icon || '🎬'}</div><p>Recording not yet available. Check back soon.</p></div>`;
     }
-    modal.classList.add('open');
-    document.body.style.overflow = 'hidden';
+
+    if (playerEl) { playerEl.innerHTML = embed; playerEl.style.display = ''; }
+    if (placeholder) placeholder.style.display = 'none';
+
+    // Update "Now Playing" info
+    if (nowPlaying) {
+      document.getElementById('rv-np-title').textContent = v.title;
+      const meta = document.getElementById('rv-np-meta');
+      const parts = [];
+      if (v.courseTitle) parts.push(`<span class="rv-np-badge">📚 ${v.courseTitle}</span>`);
+      if (v.duration !== '—') parts.push(`<span>⏱ ${v.duration}</span>`);
+      if (v.isNew) parts.push(`<span class="rv-np-badge" style="background:linear-gradient(135deg,#7c5cfc,#3d6bff);color:#fff;border:none;">New</span>`);
+      meta.innerHTML = parts.join('');
+      nowPlaying.style.display = '';
+    }
+
+    // Highlight active item in playlist
+    _activeVideoId = v.id;
+    document.querySelectorAll('.rv-pi').forEach(el => el.classList.remove('active'));
+    const activeItem = document.getElementById('pi-' + v.id);
+    if (activeItem) {
+      activeItem.classList.add('active');
+      activeItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    // Scroll main panel into view on mobile
+    document.getElementById('rv-player-wrap')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
-
-  function openModal(id) { handleWatchClick(id); }
-
-  function closeModal() {
-    const modal = document.getElementById('rv-modal');
-    modal.classList.remove('open');
-    document.body.style.overflow = '';
-    document.getElementById('rv-modal-video').innerHTML = '<div class="rv-modal-placeholder"><div class="big-icon">🎬</div><div>Loading…</div></div>';
-  }
-
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
   // ── Load recordings from live_recordings table (DB only) ──
   async function loadVideos() {
@@ -1175,12 +1189,10 @@
       if (error) throw error;
 
       if (!data || !data.length) {
-        document.getElementById('rv-grid').innerHTML = `
-          <div class="rv-empty">
-            <div class="rv-empty-icon">🎬</div>
-            <p style="font-size:1.05rem;font-weight:600;color:var(--txt3);margin-bottom:.5rem;">No recordings yet</p>
-            <p style="font-size:.88rem;">Recorded sessions will appear here after live classes.</p>
-          </div>`;
+        const pl = document.getElementById('rv-playlist');
+        const countEl = document.getElementById('rv-total-count');
+        if (countEl) countEl.textContent = '0 sessions';
+        if (pl) pl.innerHTML = `<div class="rv-empty"><div class="rv-empty-icon">🎬</div><p>No recordings yet</p><p style="font-size:.82rem;">Sessions will appear here after live classes.</p></div>`;
         return;
       }
 
@@ -1212,17 +1224,14 @@
         };
       });
 
-      buildFilterButtons();
-      renderVideos();
-      checkUserAccess(); // async: enriches badges for logged-in users
+      renderPlaylist();
+      checkUserAccess(); // async: enriches access badges for logged-in users
     } catch(e) {
       console.error('loadVideos error:', e);
-      document.getElementById('rv-grid').innerHTML = `
-        <div class="rv-empty">
-          <div class="rv-empty-icon">⚠️</div>
-          <p style="font-size:1.05rem;font-weight:600;color:var(--txt3);margin-bottom:.5rem;">Could not load recordings</p>
-          <p style="font-size:.88rem;">Check your connection and <a href="" style="color:var(--v1);">refresh</a>.</p>
-        </div>`;
+      const pl = document.getElementById('rv-playlist');
+      const countEl = document.getElementById('rv-total-count');
+      if (countEl) countEl.textContent = 'Error';
+      if (pl) pl.innerHTML = `<div class="rv-empty"><div class="rv-empty-icon">⚠️</div><p>Could not load recordings</p><p style="font-size:.8rem;"><a href="" style="color:var(--v1);">Refresh</a> to try again.</p></div>`;
     }
   }
 

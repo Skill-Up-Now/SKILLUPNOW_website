@@ -471,7 +471,7 @@
           <h3>Course Management</h3>
           <div class="table-actions">
             <input class="tbl-search" placeholder="Search courses…" oninput="filterTable('course-tbody', this.value, [0,1])">
-            <button class="btn-primary" onclick="document.getElementById('course-id').value='';document.getElementById('course-modal-title').textContent='Add New Course';initDropdowns();openModal('course-modal')">+ Add Course</button>
+            <button class="btn-primary" onclick="openCourseForNew()">+ Add Course</button>
           </div>
         </div>
         <div class="table-scroll"><table class="data-table">
@@ -487,7 +487,7 @@
         <div class="table-header">
           <h3>Course Categories</h3>
           <div class="table-actions">
-            <button class="btn-primary" onclick="document.getElementById('cat-id').value='';document.getElementById('category-modal').querySelector('.modal-title').textContent='Add Category';openModal('category-modal')">+ Add Category</button>
+            <button class="btn-primary" onclick="openCategoryForNew()">+ Add Category</button>
           </div>
         </div>
         <div class="table-scroll"><table class="data-table">
@@ -569,7 +569,7 @@
             <select id="batch-course-filter" onchange="loadBatches()" style="min-width:160px;">
               <option value="">All Courses / Skills</option>
             </select>
-            <button class="btn-primary" onclick="document.getElementById('batch-id').value='';document.getElementById('batch-modal').querySelector('.modal-title').textContent='Create Batch';document.querySelector('#batch-modal .btn-primary').textContent='Create Batch';initDropdowns();openModal('batch-modal')">+ New Batch</button>
+            <button class="btn-primary" onclick="openBatchForNew()">+ New Batch</button>
           </div>
         </div>
         <div class="table-scroll"><table class="data-table">
@@ -646,7 +646,7 @@
         <div class="table-header">
           <h3>Discount Campaigns</h3>
           <div class="table-actions">
-            <button class="btn-primary" onclick="openModal('discount-modal');document.getElementById('disc-id').value=''">+ New Discount</button>
+            <button class="btn-primary" onclick="openDiscountForNew()">+ New Discount</button>
           </div>
         </div>
         <div class="table-scroll"><table class="data-table">
@@ -890,7 +890,7 @@
         <div class="table-header">
           <h3>Class Schedules</h3>
           <div class="table-actions">
-            <button class="btn-primary" onclick="initDropdowns();openModal('schedule-modal')">+ Schedule Class</button>
+            <button class="btn-primary" onclick="openScheduleForNew()">+ Schedule Class</button>
           </div>
         </div>
         <div class="table-scroll"><table class="data-table">
@@ -1335,7 +1335,10 @@
     </div>
     <div class="form-row">
       <div class="f-group"><label>Is Featured</label><select id="c-featured"><option value="false">No</option><option value="true">Yes</option></select></div>
-      <div class="f-group"><label>Published</label><select id="c-published"><option value="true">Published</option><option value="false">Draft</option></select></div>
+      <div class="f-group"><label>Status</label><select id="c-published"><option value="true">Published</option><option value="false">Draft</option></select></div>
+    </div>
+    <div class="form-row">
+      <div class="f-group"><label>Visibility</label><select id="c-visibility"><option value="public">Public — appears on website</option><option value="unlisted">Unlisted — direct link only</option><option value="private">Private — admin only</option></select></div>
     </div>
     <div class="modal-actions">
       <button class="btn-secondary" onclick="closeModal('course-modal')">Cancel</button>
@@ -1713,6 +1716,62 @@ function navTo(sec) {
 // ===== MODAL HELPERS =====
 function openModal(id) { document.getElementById(id).classList.add('open'); }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+// ── Reset every input/textarea to '' and every select to index 0 in a modal,
+//    then apply defaults map { fieldId: value } ──
+function _resetModal(modalId, defaults) {
+  const modal = document.getElementById(modalId);
+  if (!modal) return;
+  modal.querySelectorAll('input:not([type="hidden"]), textarea').forEach(el => { el.value = ''; });
+  modal.querySelectorAll('select').forEach(el => { el.selectedIndex = 0; });
+  if (defaults) Object.entries(defaults).forEach(([id, val]) => {
+    const el = document.getElementById(id);
+    if (el) el.value = val;
+  });
+}
+
+// ── Open-for-new wrappers (reset fields, set sane defaults, then open) ──
+function openCourseForNew() {
+  document.getElementById('course-id').value = '';
+  document.getElementById('course-modal-title').textContent = 'Add New Course';
+  _resetModal('course-modal', {
+    'c-level': 'beginner', 'c-emi': 'false', 'c-emi-months': '12',
+    'c-featured': 'false', 'c-published': 'true', 'c-visibility': 'public',
+  });
+  initDropdowns();
+  openModal('course-modal');
+}
+
+function openCategoryForNew() {
+  document.getElementById('cat-id').value = '';
+  const t = document.getElementById('category-modal')?.querySelector('.modal-title');
+  if (t) t.textContent = 'Add Category';
+  _resetModal('category-modal', { 'cat-active': 'true' });
+  openModal('category-modal');
+}
+
+function openBatchForNew() {
+  document.getElementById('batch-id').value = '';
+  const t = document.getElementById('batch-modal')?.querySelector('.modal-title');
+  if (t) t.textContent = 'Create Batch';
+  const btn = document.querySelector('#batch-modal .btn-primary');
+  if (btn) btn.textContent = 'Create Batch';
+  _resetModal('batch-modal', { 'b-max': '30' });
+  initDropdowns();
+  openModal('batch-modal');
+}
+
+function openDiscountForNew() {
+  document.getElementById('disc-id').value = '';
+  _resetModal('discount-modal', { 'disc-type': 'percentage', 'disc-peruser': '1' });
+  openModal('discount-modal');
+}
+
+function openScheduleForNew() {
+  _resetModal('schedule-modal', { 'sch-duration': '60' });
+  initDropdowns();
+  openModal('schedule-modal');
+}
 document.querySelectorAll('.modal-overlay').forEach(m => {
   m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); });
 });
@@ -1854,6 +1913,13 @@ async function loadCourses() {
     .select('*, course_categories(name), course_pricing(id,list_price, sale_price, is_active)')
     .order('created_at', { ascending: false });
   if (error) { console.error('loadCourses:', error.message); return; }
+
+  // Auto-fix: published courses that still have visibility='private' → set to 'public'
+  const privatePub = (data||[]).filter(c => c.course_status === 'published' && c.visibility === 'private');
+  if (privatePub.length) {
+    await db.client.from('courses').update({ visibility: 'public' }).in('id', privatePub.map(c => c.id));
+    privatePub.forEach(c => { c.visibility = 'public'; }); // update in-memory for render
+  }
   document.getElementById('course-tbody').innerHTML = (data||[]).map(c => {
     const pricing = (c.course_pricing||[]).find(p => p.is_active) || (c.course_pricing||[])[0];
     const salePrice = pricing?.sale_price ?? pricing?.list_price ?? 0;
@@ -2601,13 +2667,12 @@ function openRecordingModal() {
   document.getElementById('rec-id').value = '';
   document.getElementById('rec-modal-title').textContent = 'Add Recording';
   document.getElementById('rec-save-btn').textContent = 'Save Recording';
-  document.getElementById('rec-title').value = '';
-  document.getElementById('rec-url').value = '';
-  document.getElementById('rec-date').value = '';
-  document.getElementById('rec-base-amount').value = '';
-  document.getElementById('rec-gst-pct').value = '18';
-  document.getElementById('rec-total-display').textContent = '—';
-  document.getElementById('rec-provider').value = 'google_drive';
+  _resetModal('recording-modal', {
+    'rec-provider': 'google_drive',
+    'rec-gst-pct': '18',
+  });
+  const disp = document.getElementById('rec-total-display');
+  if (disp) disp.textContent = '—';
   initDropdowns();
   openModal('recording-modal');
 }
@@ -2819,7 +2884,10 @@ async function deleteReview(id) {
 async function toggleCoursePublish(id, currentStatus) {
   const newStatus = currentStatus === 'published' ? 'draft' : 'published';
   const payload = { course_status: newStatus };
-  if (newStatus === 'published') payload.published_at = new Date().toISOString();
+  if (newStatus === 'published') {
+    payload.published_at = new Date().toISOString();
+    payload.visibility = 'public'; // ensure published courses are visible on frontend
+  }
   await db.client.from('courses').update(payload).eq('id', id);
   loadCourses();
 }
@@ -2839,6 +2907,7 @@ async function saveCourse() {
   if (!adminUser?.id) { alert('Admin session not found. Please log in again.'); return; }
   const months = parseInt(document.getElementById('c-months').value) || null;
   const isPublished = document.getElementById('c-published').value === 'true';
+  const visibilityVal = document.getElementById('c-visibility')?.value || 'public';
   const payload = {
     title: titleVal,
     category_id: categoryId,
@@ -2847,12 +2916,22 @@ async function saveCourse() {
     description: document.getElementById('c-desc').value,
     is_featured: document.getElementById('c-featured').value === 'true',
     course_status: isPublished ? 'published' : 'draft',
+    visibility: visibilityVal,
     duration_days: months ? months * 30 : null,
     total_live_classes: parseInt(document.getElementById('c-sessions').value) || 0,
     slug: titleVal.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''),
   };
   if (isPublished) payload.published_at = new Date().toISOString();
   if (!id) payload.owner_admin_id = adminUser.id;
+  // Duplicate title check (insert only)
+  if (!id) {
+    const { data: existing } = await db.client.from('courses')
+      .select('id').ilike('title', titleVal).limit(1);
+    if (existing?.length) {
+      alert(`A course named "${titleVal}" already exists. Please use a different name.`);
+      return;
+    }
+  }
   const { data: saved, error } = id
     ? await db.client.from('courses').update(payload).eq('id', id).select('id').single()
     : await db.client.from('courses').insert(payload).select('id').single();
@@ -2905,6 +2984,15 @@ async function saveCategory() {
   if (!id) {
     payload.sort_order = 999;
     payload.created_by_admin_id = adminUser.id;
+  }
+  // Duplicate name check (insert only)
+  if (!id) {
+    const { data: existing } = await db.client.from('course_categories')
+      .select('id').ilike('name', nameVal).limit(1);
+    if (existing?.length) {
+      alert(`A category named "${nameVal}" already exists.`);
+      return;
+    }
   }
   const { error } = id
     ? await db.client.from('course_categories').update(payload).eq('id', id)
@@ -3002,6 +3090,17 @@ async function saveRecording() {
   if (recId) {
     ({ error } = await db.client.from('live_recordings').update(payload).eq('id', recId));
   } else {
+    // Duplicate check: same title in same course
+    const { data: dupCheck } = await db.client.from('live_recordings')
+      .select('id').ilike('title', title)
+      .eq('course_id', courseId || '00000000-0000-0000-0000-000000000000').limit(1);
+    // Also check title-only duplicates for uncategorized
+    const { data: dupCheck2 } = courseId ? { data: null } : await db.client.from('live_recordings')
+      .select('id').ilike('title', title).is('course_id', null).limit(1);
+    if (dupCheck?.length || dupCheck2?.length) {
+      _showAdminToast(`A recording titled "${title}" already exists for this course.`, 'error');
+      return;
+    }
     payload.published_at = new Date().toISOString();
     ({ error } = await db.client.from('live_recordings').insert(payload));
   }
@@ -3482,6 +3581,8 @@ async function editCourse(id) {
   document.getElementById('c-sessions').value = c.total_live_classes || '';
   document.getElementById('c-published').value = c.course_status === 'published' ? 'true' : 'false';
   document.getElementById('c-featured').value = c.is_featured ? 'true' : 'false';
+  const visEl = document.getElementById('c-visibility');
+  if (visEl) visEl.value = c.visibility || 'public';
   // Set category (the modal uses UUID)
   document.getElementById('c-category').value = c.category_id || '';
   if (pricing) {
@@ -3843,6 +3944,15 @@ async function saveDiscount() {
     course_id: document.getElementById('disc-course').value || null,
     is_active: true,
   };
+  // Duplicate coupon code check (insert only)
+  if (!id) {
+    const { data: existing } = await db.client.from('discount_campaigns')
+      .select('id').eq('coupon_code', code).limit(1);
+    if (existing?.length) {
+      alert(`Coupon code "${code}" already exists. Please use a unique code.`);
+      return;
+    }
+  }
   const { error } = id
     ? await db.client.from('discount_campaigns').update(payload).eq('id', id)
     : await db.client.from('discount_campaigns').insert(payload);
@@ -4214,15 +4324,6 @@ async function initDropdowns() {
 }
 
 // ===== RECORDING FORM RESET =====
-function openRecordingModal() {
-  document.getElementById('rec-title').value = '';
-  document.getElementById('rec-url').value = '';
-  document.getElementById('rec-provider').value = 'google_drive';
-  document.getElementById('rec-date').value = '';
-  initDropdowns();
-  openModal('recording-modal');
-}
-
 // ===== REALTIME SUBSCRIPTIONS =====
 function initRealtime() {
   const sectionRefresh = {
