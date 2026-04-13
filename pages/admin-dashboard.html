@@ -2121,7 +2121,7 @@ async function adminEnrollUser() {
       course_id: courseId,
       amount: amount,
       payment_method: payMode,
-      payment_gateway: 'offline',
+      payment_gateway: 'manual',
       payment_status: isFree ? 'completed' : 'pending',
       paid_at: isFree ? now : null,
       notes: { admin_note: notes || 'Admin-granted enrollment', source: 'admin_panel' },
@@ -2273,6 +2273,7 @@ async function loadEnrollments() {
         <button class="action-btn" onclick="editEnrollmentById('${safe}')">Edit</button>
         ${e.due_amount > 0 ? `<button class="action-btn" style="background:rgba(124,92,252,.15);color:#a78bfa;border-color:rgba(124,92,252,.3);font-size:.72rem" onclick="recordPartialPayment('${e.id}',${e.due_amount})">+ Pay</button>` : ''}
         ${!hasAccess(e.access_status) ? `<button class="action-btn" style="background:rgba(74,222,128,.15);color:#4ade80;border-color:rgba(74,222,128,.3);" onclick="grantAccess('${e.id}')">Grant</button>` : ''}
+        ${hasAccess(e.access_status) ? `<button class="action-btn danger" style="font-size:.72rem;padding:.25rem .55rem;" onclick="revokeAccess('${e.id}')">Revoke</button>` : ''}
       </div></td>
     </tr>`;
   }).join('');
@@ -2316,7 +2317,7 @@ async function recordPartialPayment(enrollId, dueAmount) {
   if (updErr) { _showAdminToast('Update failed: ' + updErr.message, 'error'); return; }
 
   // Record payment entry
-  await db.client.from('payments').insert({
+  const { error: payInsertErr } = await db.client.from('payments').insert({
     student_user_id: enr.student_user_id,
     enrollment_id: enrollId,
     course_id: enr.course_id,
@@ -2327,9 +2328,16 @@ async function recordPartialPayment(enrollId, dueAmount) {
     paid_at: new Date().toISOString(),
     transaction_reference: 'ADMIN-PARTIAL-' + Date.now(),
   });
+  if (payInsertErr) {
+    _showAdminToast('Enrollment updated but payment record failed: ' + payInsertErr.message, 'error');
+    loadEnrollments(); loadPayments(); loadDashboard();
+    return;
+  }
 
   _showAdminToast(`✓ Payment of ₹${Number(amt).toLocaleString('en-IN')} recorded. Balance: ₹${Number(newDue).toLocaleString('en-IN')}`, 'success');
   loadEnrollments();
+  loadPayments();
+  loadDashboard(); // refresh dashboard stats in real time
 }
 
 function editEnrollmentById(safeEncoded) {
@@ -2399,11 +2407,12 @@ async function loadBatches() {
 async function loadPayments() {
   const statusFilter = document.getElementById('pay-status-filter').value;
   let q = db.client.from('payments')
-    .select('*, invoice_number, student_profiles(user_profiles(full_name, email, phone)), enrollments(courses(title))');
+    .select('*, invoices(invoice_number), student_profiles(user_profiles(full_name, email, phone)), enrollments(courses(title))');
   if (statusFilter) q = q.eq('payment_status', statusFilter);
-  const { data } = await q.order('paid_at', { ascending: false }).limit(100);
+  const { data, error: loadErr } = await q.order('paid_at', { ascending: false }).limit(100);
+  if (loadErr) { console.error('loadPayments error:', loadErr); }
   document.getElementById('payment-tbody').innerHTML = (data||[]).map(p => {
-    const invNum = p.invoice_number || p.invoice_id || null;
+    const invNum = p.invoices?.invoice_number || p.invoice_id || null;
     const invCell = invNum
       ? `<code style="background:rgba(124,92,252,.1);padding:.15rem .4rem;border-radius:4px;font-size:.72rem;color:#b5adff;">${invNum}</code>`
       : `<button class="action-btn" style="font-size:.68rem;padding:.15rem .5rem" onclick="generateInvoice('${p.id}')">Generate</button>`;
@@ -2424,6 +2433,7 @@ async function loadPayments() {
         <button class="action-btn" onclick="printInvoice(${JSON.stringify(p).replace(/"/g,'&quot;')})">🖨 Invoice</button>
         ${p.payment_status !== 'completed' ? `<button class="action-btn" style="background:rgba(74,222,128,.15);color:#4ade80;border-color:rgba(74,222,128,.3);" onclick="confirmPayment('${p.id}')">Confirm</button>` : ''}
         ${p.payment_status === 'completed' ? `<button class="action-btn danger" onclick="refundPayment('${p.id}')">Refund</button>` : ''}
+        <button class="action-btn danger" style="font-size:.72rem;padding:.25rem .55rem;" data-pid="${p.id}" data-eid="${p.enrollment_id||''}" data-amt="${Number(p.amount||0)}" onclick="deletePaymentRecord(this.dataset.pid,this.dataset.eid,parseFloat(this.dataset.amt))">🗑 Delete</button>
       </div></td>
     </tr>`;
   }).join('') || '<tr><td colspan="9" class="table-empty">No payments</td></tr>';
@@ -3710,6 +3720,67 @@ async function refundPayment(id) {
   if (!confirm('Mark this payment as refunded? This cannot be undone.')) return;
   await db.client.from('payments').update({ payment_status: 'refunded' }).eq('id', id);
   loadPayments();
+}
+
+// ===== DELETE PAYMENT RECORD (reverses enrollment balance) =====
+async function deletePaymentRecord(paymentId, enrollmentId, amount) {
+  if (!paymentId) { _showAdminToast('Invalid payment ID', 'error'); return; }
+  if (!confirm(`Delete this payment record (₹${Number(amount).toLocaleString('en-IN')})?\n\nThis permanently removes the payment and reverses the enrollment balance.`)) return;
+
+  try {
+    // 1. Delete the payment row
+    const { error: delErr } = await db.client.from('payments').delete().eq('id', paymentId);
+
+    if (delErr) {
+      // RLS may block direct delete — try via admin_delete_payment RPC if it exists
+      const { error: rpcErr } = await db.client.rpc('admin_delete_payment', { target_payment_id: paymentId }).catch(() => ({ error: delErr }));
+      if (rpcErr) {
+        if (delErr.message?.toLowerCase().includes('permission') || delErr.code === '42501') {
+          throw new Error('Permission denied. Add RLS policy: enable delete on payments for admin_users. (See db/v9-admin-rls-fix.sql)');
+        }
+        throw delErr;
+      }
+    }
+
+    // 2. If linked to an enrollment, reverse the paid_amount
+    if (enrollmentId && enrollmentId !== 'null' && enrollmentId !== '') {
+      const { data: enr } = await db.client.from('enrollments')
+        .select('paid_amount, net_amount').eq('id', enrollmentId).maybeSingle();
+      if (enr) {
+        const newPaid = Math.max(0, Number(enr.paid_amount) - Number(amount));
+        const newDue  = Math.max(0, Number(enr.net_amount) - newPaid);
+        const newAccess = newPaid >= Number(enr.net_amount) ? 'active'
+                        : newPaid > 0 ? 'restricted' : 'pending';
+        await db.client.from('enrollments').update({
+          paid_amount: newPaid,
+          due_amount: newDue,
+          access_status: newAccess,
+          updated_at: new Date().toISOString(),
+        }).eq('id', enrollmentId);
+      }
+    }
+
+    _showAdminToast('✓ Payment deleted & enrollment balance updated', 'success');
+    loadPayments();
+    loadEnrollments();
+    loadDashboard();
+  } catch(e) {
+    console.error('deletePaymentRecord error:', e);
+    _showAdminToast('Delete failed: ' + (e.message || String(e)), 'error');
+  }
+}
+
+// ===== REVOKE ACCESS =====
+async function revokeAccess(enrollId) {
+  if (!confirm('Revoke course access for this student? They will no longer be able to view course content.')) return;
+  const { error } = await db.client.from('enrollments').update({
+    access_status: 'revoked',
+    enrollment_status: 'blocked',
+    updated_at: new Date().toISOString(),
+  }).eq('id', enrollId);
+  if (error) { _showAdminToast('Revoke failed: ' + error.message, 'error'); return; }
+  _showAdminToast('✓ Access revoked', 'success');
+  loadEnrollments();
 }
 
 // ===== DELETE RECORDING =====

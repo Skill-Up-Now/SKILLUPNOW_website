@@ -1636,14 +1636,44 @@
       }
       if (!window.supabaseConfig?.client) throw new Error('Database not ready');
 
-      // Select ALL published recordings for public listing.
-      // external_url is intentionally excluded here — it is fetched
-      // separately by handleWatchClick ONLY after access is verified,
-      // so the video URL is never sent to users who haven't paid.
-      const { data, error } = await window.supabaseConfig.client
+      // Fetch recordings — prefer Gen AI category if it exists in DB,
+      // otherwise fall back to ALL recordings so the page is never empty.
+      // external_url excluded — fetched after access verification only.
+
+      // Step 1: try to resolve a Gen AI category ID (broad search)
+      let genAiCourseIds = [];
+      let genAiFiltered  = false;
+      try {
+        const { data: catRows } = await window.supabaseConfig.client
+          .from('course_categories')
+          .select('id')
+          .or('name.ilike.%gen ai%,name.ilike.%generative%,name.ilike.%genai%');
+
+        const catIds = (catRows || []).map(r => r.id).filter(Boolean);
+
+        if (catIds.length > 0) {
+          // Step 2: find all courses under those categories
+          const { data: courseData } = await window.supabaseConfig.client
+            .from('courses')
+            .select('id')
+            .in('category_id', catIds);
+          genAiCourseIds = (courseData || []).map(c => c.id).filter(Boolean);
+          if (genAiCourseIds.length > 0) genAiFiltered = true;
+        }
+      } catch(_) { /* ignore — fall through to unfiltered query */ }
+
+      // Step 3: build query — filter by Gen AI courses if found, else show all
+      let recQuery = window.supabaseConfig.client
         .from('live_recordings')
         .select('id,title,provider_name,course_id,created_at,base_amount,gst_percentage,total_amount,courses(title,course_categories(name),course_pricing(sale_price,list_price,is_active))')
         .order('created_at', { ascending: false });
+
+      if (genAiFiltered) {
+        recQuery = recQuery.in('course_id', genAiCourseIds);
+      }
+      // else: no filter → returns all recordings
+
+      const { data, error } = await recQuery;
 
       if (error) throw error;
 

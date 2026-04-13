@@ -205,6 +205,7 @@
     <div class="toolbar-right">
       <div id="cat-pills" style="display:flex;gap:0.6rem;flex-wrap:wrap;"></div>
       <button class="btn-print" onclick="window.print()">🖨️ Print</button>
+      <button class="btn-print" id="btn-qr-dl" onclick="downloadPageQR()" style="background:linear-gradient(135deg,#22c55e,#16a34a);" title="Download QR code for this page as PNG">⬇ QR Code</button>
     </div>
   </div>
 
@@ -429,6 +430,69 @@ async function loadMentors() {
 }
 
 init();
+
+// ── QR Download: generates QR for this page and downloads as PNG ──
+function downloadPageQR() {
+  const btn = document.getElementById('btn-qr-dl');
+  if (btn) { btn.disabled = true; btn.textContent = 'Generating…'; }
+
+  function restore() {
+    if (btn) { btn.disabled = false; btn.textContent = '⬇ QR Code'; }
+  }
+
+  const url = window.location.href.replace(/\.html($|\?)/, (_, s) => s === '?' ? '?' : '');
+
+  // Load QRCode library if not already present
+  function loadLib(cb) {
+    if (window.QRCode) { cb(); return; }
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';
+    s.onload = cb;
+    s.onerror = () => { alert('Could not load QR library. Check internet.'); restore(); };
+    document.head.appendChild(s);
+  }
+
+  loadLib(() => {
+    try {
+      const wrap = document.createElement('div');
+      wrap.style.cssText = 'position:fixed;left:-9999px;top:-9999px;';
+      document.body.appendChild(wrap);
+
+      const qr = new QRCode(wrap, {
+        text: url, width: 300, height: 300,
+        colorDark: '#1a0a3e', colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.H
+      });
+
+      // QRCode renders async via img or canvas — wait a tick
+      setTimeout(() => {
+        const canvas = wrap.querySelector('canvas');
+        const img    = wrap.querySelector('img');
+        let dataUrl;
+
+        if (canvas) {
+          dataUrl = canvas.toDataURL('image/png');
+        } else if (img && img.src) {
+          dataUrl = img.src; // base64 src from QRCode lib
+        }
+
+        document.body.removeChild(wrap);
+
+        if (!dataUrl) { alert('QR generation failed. Try again.'); restore(); return; }
+
+        const a = document.createElement('a');
+        a.href = dataUrl;
+        a.download = 'SkillUpNow-QR.png';
+        a.click();
+        restore();
+      }, 350);
+    } catch(e) {
+      console.error('QR download error:', e);
+      alert('QR generation error: ' + e.message);
+      restore();
+    }
+  });
+}
 </script>
 <footer></footer>
 </body>

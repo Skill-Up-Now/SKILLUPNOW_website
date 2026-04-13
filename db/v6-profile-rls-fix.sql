@@ -44,6 +44,7 @@ INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_typ
 
 -- Storage RLS for avatars bucket
 DROP POLICY IF EXISTS avatars_upload_own   ON storage.objects;
+DROP POLICY IF EXISTS avatars_update_own   ON storage.objects;
 DROP POLICY IF EXISTS avatars_read_public  ON storage.objects;
 DROP POLICY IF EXISTS avatars_delete_own   ON storage.objects;
 

@@ -382,8 +382,7 @@ class ProfileNavigationManager {
       <ul class="nav-links" id="nav-links-list" role="navigation" aria-label="Main navigation">
         <li><a href="${r || '/'}"                        class="nav-link-item ${isHome    ? 'active' : ''}">Home</a></li>
         <li><a href="${p}courses"                        class="nav-link-item ${isCourses ? 'active' : ''}">Courses</a></li>
-        <li><a href="${p}recording-videos"               class="nav-link-item ${isVideos  ? 'active' : ''}">
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="margin-right:.25rem;vertical-align:-1px"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>Videos</a></li>
+        <li><a href="${p}recording-videos"               class="nav-link-item ${isVideos  ? 'active' : ''}">Videos</a></li>
         <li><a href="${p}forms" class="nav-link-item ${isForms ? 'active' : ''}">Forms</a></li>
         <li><a href="${p}contact-enquiry"                class="nav-link-item ${isEnquiry ? 'active' : ''}">Enquiry</a></li>
       </ul>
@@ -468,6 +467,25 @@ class ProfileNavigationManager {
         .pn-f-platform { flex: 1; min-width: 0; }
         .pn-f-company  { flex: 1; min-width: 0; }
         .pn-footer-phone { color:#4ade80; }
+        /* 3D compact professional icons */
+        .pn-f-3d-icon {
+          display:inline-flex; align-items:center; justify-content:center;
+          width:20px; height:20px; border-radius:5px; flex-shrink:0;
+          background: linear-gradient(150deg,#34d399,#059669);
+          color:#fff;
+          box-shadow: 0 2px 0 #065f46, 0 3px 8px rgba(16,185,129,.32), inset 0 1px 0 rgba(255,255,255,.22);
+          transition: transform .16s, box-shadow .16s;
+        }
+        .pn-f-3d-link:hover .pn-f-3d-icon {
+          transform: translateY(-1px) scale(1.05);
+          box-shadow: 0 3px 0 #065f46, 0 5px 12px rgba(16,185,129,.42), inset 0 1px 0 rgba(255,255,255,.3);
+        }
+        .pn-f-email-icon { background: linear-gradient(150deg,#818cf8,#4f46e5); box-shadow: 0 2px 0 #312e81, 0 3px 8px rgba(99,102,241,.32), inset 0 1px 0 rgba(255,255,255,.18); }
+        .pn-f-3d-link:hover .pn-f-email-icon { box-shadow: 0 3px 0 #312e81, 0 5px 12px rgba(99,102,241,.42), inset 0 1px 0 rgba(255,255,255,.25); }
+        .pn-f-loc-icon  { background: linear-gradient(150deg,#fb923c,#ea580c); box-shadow: 0 2px 0 #9a3412, 0 3px 8px rgba(234,88,12,.32), inset 0 1px 0 rgba(255,255,255,.18); }
+        .pn-f-3d-link:hover .pn-f-loc-icon { box-shadow: 0 3px 0 #9a3412, 0 5px 12px rgba(234,88,12,.42), inset 0 1px 0 rgba(255,255,255,.25); }
+        .pn-f-3d-link { color:var(--txt3); text-decoration:none; transition:color .18s; }
+        .pn-f-3d-link:hover { color:var(--txt); }
         @media(max-width:900px){
           .footer-inner { flex-wrap:wrap; gap:1.5rem 2rem; }
           .pn-f-logo { flex: 0 0 auto; }
@@ -490,22 +508,40 @@ class ProfileNavigationManager {
 
         <!-- Contact -->
         <div class="pn-f-contact">
-          <h5 class="footer-col-title" style="margin-bottom:.2rem;">Contact</h5>
-          <div class="pn-f-contact-row">
-            <a href="mailto:skillupnowoff@gmail.com" class="footer-contact-link" style="font-size:.79rem;white-space:nowrap;">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#7c5cfc" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+          <h5 class="footer-col-title" style="margin-bottom:.4rem;">Contact</h5>
+          <div class="pn-f-contact-row" style="margin-bottom:.35rem;">
+            <a href="mailto:skillupnowoff@gmail.com" class="footer-contact-link pn-f-3d-link" style="font-size:.79rem;white-space:nowrap;display:flex;align-items:center;gap:.45rem;">
+              <span class="pn-f-3d-icon pn-f-email-icon" aria-hidden="true">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7 10-7"/></svg>
+              </span>
               skillupnowoff@gmail.com
             </a>
           </div>
-          <div class="pn-f-contact-row">
-            <a href="tel:+916383633054" class="footer-contact-link pn-footer-phone" style="font-size:.79rem;white-space:nowrap;">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.17 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.08 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.09 8.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21 16z"/></svg>
+          <div class="pn-f-contact-row" style="flex-direction:column;gap:.25rem;align-items:flex-start;">
+            <a href="tel:+916383633054" class="footer-contact-link pn-f-3d-link" style="font-size:.79rem;white-space:nowrap;display:flex;align-items:center;gap:.45rem;">
+              <span class="pn-f-3d-icon pn-f-phone-icon" aria-hidden="true">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.27-.27.67-.36 1-.24 1.1.36 2.3.56 3.56.56.55 0 1 .45 1 1V20c0 .55-.45 1-1 1C10.29 21 3 13.71 3 4.5c0-.55.45-1 1-1H7.5c.55 0 1 .45 1 1 0 1.25.2 2.45.56 3.56.12.35.03.74-.22 1L6.6 10.8z"/></svg>
+              </span>
               +91 63836 33054
             </a>
-            <a href="tel:+916381721061" class="footer-contact-link pn-footer-phone" style="font-size:.79rem;white-space:nowrap;">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.17 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.08 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.09 8.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21 16z"/></svg>
+            <a href="tel:+916381721061" class="footer-contact-link pn-f-3d-link" style="font-size:.79rem;white-space:nowrap;display:flex;align-items:center;gap:.45rem;">
+              <span class="pn-f-3d-icon pn-f-phone-icon" aria-hidden="true">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.27-.27.67-.36 1-.24 1.1.36 2.3.56 3.56.56.55 0 1 .45 1 1V20c0 .55-.45 1-1 1C10.29 21 3 13.71 3 4.5c0-.55.45-1 1-1H7.5c.55 0 1 .45 1 1 0 1.25.2 2.45.56 3.56.12.35.03.74-.22 1L6.6 10.8z"/></svg>
+              </span>
               +91 63817 21061
             </a>
+            <a href="tel:+918754470742" class="footer-contact-link pn-f-3d-link" style="font-size:.79rem;white-space:nowrap;display:flex;align-items:center;gap:.45rem;">
+              <span class="pn-f-3d-icon pn-f-phone-icon" aria-hidden="true">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.27-.27.67-.36 1-.24 1.1.36 2.3.56 3.56.56.55 0 1 .45 1 1V20c0 .55-.45 1-1 1C10.29 21 3 13.71 3 4.5c0-.55.45-1 1-1H7.5c.55 0 1 .45 1 1 0 1.25.2 2.45.56 3.56.12.35.03.74-.22 1L6.6 10.8z"/></svg>
+              </span>
+              +91 87544 70742
+            </a>
+            <span class="footer-contact-link pn-f-3d-link" style="font-size:.79rem;display:flex;align-items:center;gap:.45rem;cursor:default;">
+              <span class="pn-f-3d-icon pn-f-loc-icon" aria-hidden="true">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7z"/><circle cx="12" cy="9" r="2"/></svg>
+              </span>
+              Chennai, Tamil Nadu, India
+            </span>
           </div>
         </div>
 
@@ -1209,7 +1245,7 @@ class ProfileNavigationManager {
               <button class="pn-pw-toggle" type="button" onclick="window._pnTogglePw('pn-sl-pw',this)" title="Show/hide password" aria-label="Toggle password visibility"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
             </div>
           </div>
-          <div class="pn-forgot"><a onclick="window._pnForgotPw()">Forgot password?</a></div>
+          <div class="pn-forgot"><a onclick="window._pnView('forgot-pw')">Forgot password?</a></div>
           <button class="pn-btn" id="pn-sl-btn" onclick="window._pnStudentLogin()">Sign In to Dashboard</button>
           <div class="pn-switch">No account? <a onclick="window._pnView('signup-student')">Sign up free →</a></div>
         </div>
@@ -1229,9 +1265,21 @@ class ProfileNavigationManager {
               <button class="pn-pw-toggle" type="button" onclick="window._pnTogglePw('pn-ml-pw',this)" title="Show/hide password" aria-label="Toggle password visibility"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
             </div>
           </div>
-          <div class="pn-forgot"><a onclick="window._pnForgotPw()">Forgot password?</a></div>
+          <div class="pn-forgot"><a onclick="window._pnView('forgot-pw')">Forgot password?</a></div>
           <button class="pn-btn" id="pn-ml-btn" onclick="window._pnMentorLogin()">Sign In to Portal</button>
           <div class="pn-switch">Not a mentor yet? <a href="javascript:void(0)" onclick="window._pnClose();window.location.href=window.profileNav?.pagesPfx+'mentor-signup'">Apply to become one →</a></div>
+        </div>
+
+        <!-- ═══════════ FORGOT PASSWORD ═══════════ -->
+        <div id="pn-v-forgot-pw" style="display:none">
+          <button class="pn-back" onclick="window._pnView('welcome')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg> Back</button>
+          <div class="pn-title">Reset <span>Password</span></div>
+          <div class="pn-sub">Enter your email and we'll send you a secure reset link</div>
+          <div class="pn-err" id="pn-fp-err"></div>
+          <div class="pn-ok"  id="pn-fp-ok" style="display:none;background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.25);border-radius:10px;padding:.75rem 1rem;font-size:.84rem;color:#4ade80;margin-bottom:1rem;"></div>
+          <div class="pn-field"><label>Email Address</label><input type="email" id="pn-fp-email" placeholder="you@example.com" autocomplete="email"></div>
+          <button class="pn-btn" id="pn-fp-btn" onclick="window._pnSendReset()">Send Reset Link</button>
+          <div class="pn-switch">Remember your password? <a onclick="window._pnView('welcome')">Back to sign in →</a></div>
         </div>
 
         <!-- ═══════════ SIGNUP ROLE SELECT ═══════════ -->
@@ -1472,6 +1520,7 @@ class ProfileNavigationManager {
     let _pnRefData  = null;  // row from referral_codes table if valid
 
     const ALL_VIEWS = ['pn-v-welcome','pn-v-student-login','pn-v-mentor-login',
+                       'pn-v-forgot-pw',
                        'pn-v-signup-role','pn-v-signup-student','pn-v-signup-mentor',
                        'pn-v-email-sent','pn-v-success'];
 
@@ -1523,19 +1572,34 @@ class ProfileNavigationManager {
       btn.style.color = isText ? '' : 'var(--v1, #7c5cfc)';
     };
 
-    window._pnForgotPw = async () => {
+    /* ── Forgot password — pre-fill email from whichever login was active ── */
+    window._pnForgotPw = () => {
       const emailEl = document.getElementById('pn-sl-email') || document.getElementById('pn-ml-email');
-      const email = emailEl?.value?.trim() || prompt('Enter your email address to reset password:');
-      if (!email) return;
-      if (!window.supabaseConfig) return;
+      const fp = document.getElementById('pn-fp-email');
+      if (fp && emailEl?.value) fp.value = emailEl.value;
+      window._pnView('forgot-pw');
+    };
+
+    window._pnSendReset = async () => {
+      const email = document.getElementById('pn-fp-email')?.value?.trim();
+      const err   = document.getElementById('pn-fp-err');
+      const ok    = document.getElementById('pn-fp-ok');
+      const btn   = document.getElementById('pn-fp-btn');
+      if (!email) { return _pnErr(err, 'Please enter your email address.'); }
+      if (!window.supabaseConfig) { return _pnErr(err, 'Auth service not ready. Please refresh.'); }
+      btn.disabled = true; btn.textContent = 'Sending…';
+      err.style.display = 'none';
       try {
         const { error } = await window.supabaseConfig.client.auth.resetPasswordForEmail(email, {
           redirectTo: window.location.origin + '/'
         });
         if (error) throw error;
-        alert('Password reset link sent to ' + email + '. Check your inbox.');
+        ok.textContent = '✓ Reset link sent to ' + email + '. Check your inbox (and spam folder).';
+        ok.style.display = 'block';
+        btn.textContent = 'Link Sent ✓';
       } catch (e) {
-        alert('Error: ' + e.message);
+        btn.disabled = false; btn.textContent = 'Send Reset Link';
+        _pnErr(err, e.message || 'Could not send reset email. Try again.');
       }
     };
 

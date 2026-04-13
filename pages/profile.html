@@ -1354,8 +1354,8 @@ async function uploadAvatar(input) {
 
     if (dbErr) {
       // Image IS uploaded and showing — just the DB save failed (RLS issue)
-      if (dbErr.message?.includes('permission denied')) {
-        showMsg('err', 'Photo displayed but not saved — run v6 SQL migration to fix permissions.');
+      if (dbErr.message?.includes('permission denied') || dbErr.code === '42501') {
+        showMsg('err', 'Photo uploaded but profile save failed (RLS). Ask your admin to run db/v6-profile-rls-fix.sql in Supabase SQL Editor.');
       } else {
         showMsg('err', 'Photo shown but save failed: ' + dbErr.message);
       }

@@ -386,11 +386,34 @@ function copyQrUrl() {
 }
 
 function downloadQR() {
-  const canvas = document.getElementById('qr-canvas');
-  const link = document.createElement('a');
-  link.download = 'qr-code.png';
-  link.href = canvas.toDataURL('image/png');
-  link.click();
+  const el = document.getElementById('qr-canvas');
+  if (!el) return;
+
+  function triggerDownload(dataUrl) {
+    const name = (_activeQrTitle || 'SkillUpNow-Form').replace(/[^a-z0-9\-]/gi, '-') + '-QR.png';
+    const a = document.createElement('a');
+    a.href = dataUrl; a.download = name;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  }
+
+  if (el.tagName === 'CANVAS') {
+    // Canvas — direct export
+    triggerDownload(el.toDataURL('image/png'));
+  } else if (el.tagName === 'IMG') {
+    // QRCode.js rendered an <img> — draw onto a temp canvas first
+    const cv = document.createElement('canvas');
+    cv.width  = el.naturalWidth  || 200;
+    cv.height = el.naturalHeight || 200;
+    const ctx = cv.getContext('2d');
+    ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, cv.width, cv.height);
+    try {
+      ctx.drawImage(el, 0, 0);
+      triggerDownload(cv.toDataURL('image/png'));
+    } catch (_) {
+      // If cross-origin blocked, fall back to the img src directly
+      triggerDownload(el.src);
+    }
+  }
 }
 
 /* ─── QR Code renderer using qrcode-generator ─── */
