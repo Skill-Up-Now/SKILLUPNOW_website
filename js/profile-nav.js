@@ -22,7 +22,7 @@ class ProfileNavigationManager {
     if (window.location.protocol !== 'file:') {
       const _p = window.location.pathname;
       if (_p.endsWith('.html')) {
-        history.replaceState(null, '', _p.replace(/\.html$/, '').replace(/\/index$/, '/'));
+        history.replaceState(null, '', _p.replace(/\.html$/, '').replace(/\/index$/, '/') + window.location.search + window.location.hash);
       }
     }
     this.injectFavicon();
@@ -1522,10 +1522,13 @@ class ProfileNavigationManager {
         if (el) el.style.display = (id === 'pn-v-' + view) ? '' : 'none';
       });
       // Clear alerts when switching
-      ['pn-sl-err','pn-ml-err','pn-ss-err','pn-ss-ok','pn-sm-err','pn-sm-ok','pn-otp-err'].forEach(id => {
+      ['pn-sl-err','pn-ml-err','pn-fp-err','pn-fp-ok','pn-ss-err','pn-ss-ok','pn-sm-err','pn-sm-ok','pn-otp-err'].forEach(id => {
         const el = document.getElementById(id);
         if (el) { el.style.display = 'none'; el.textContent = ''; }
       });
+      // Reset forgot-pw button if re-entering the view
+      const fpBtn = document.getElementById('pn-fp-btn');
+      if (fpBtn) { fpBtn.disabled = false; fpBtn.textContent = 'Send Reset Link'; }
       // Reset referral code state and clear hint/input on every view change
       _pnRefState = null; _pnRefData = null;
       const refInp  = document.getElementById('pn-ss-ref');
@@ -1573,25 +1576,57 @@ class ProfileNavigationManager {
     };
 
     window._pnSendReset = async () => {
-      const email = document.getElementById('pn-fp-email')?.value?.trim();
-      const err   = document.getElementById('pn-fp-err');
-      const ok    = document.getElementById('pn-fp-ok');
+      const email = (document.getElementById('pn-fp-email')?.value || '').trim();
+      const errEl = document.getElementById('pn-fp-err');
+      const okEl  = document.getElementById('pn-fp-ok');
       const btn   = document.getElementById('pn-fp-btn');
-      if (!email) { return _pnErr(err, 'Please enter your email address.'); }
-      if (!window.supabaseConfig) { return _pnErr(err, 'Auth service not ready. Please refresh.'); }
-      btn.disabled = true; btn.textContent = 'Sending…';
-      err.style.display = 'none';
+
+      /* Clear previous messages */
+      _pnClearMsg(errEl);
+      _pnClearMsg(okEl);
+
+      /* Basic validation */
+      if (!email) {
+        return _pnErr(errEl, 'Please enter your email address.');
+      }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        return _pnErr(errEl, 'Please enter a valid email address (e.g. you@gmail.com).');
+      }
+
+      /* Supabase availability check */
+      const client = window.supabaseConfig?.client;
+      if (!client) {
+        return _pnErr(errEl, 'Auth service not ready. Please refresh the page.');
+      }
+
+      /* Disable button and show loading state */
+      btn.disabled = true;
+      btn.textContent = 'Sending…';
+
       try {
-        const { error } = await window.supabaseConfig.client.auth.resetPasswordForEmail(email, {
-          redirectTo: window.location.origin + '/pages/reset-password.html'
+        const { error } = await client.auth.resetPasswordForEmail(email, {
+          redirectTo: 'https://skillupnowadmin.org/pages/reset-password.html'
         });
-        if (error) throw error;
-        ok.textContent = '✓ Reset link sent to ' + email + '. Check your inbox (and spam folder).';
-        ok.style.display = 'block';
+
+        if (error) {
+          /* Map common Supabase error messages to friendly text */
+          const msg = error.message || '';
+          if (msg.includes('60 seconds') || msg.includes('rate') || msg.includes('too many')) {
+            throw new Error('Too many requests. Please wait 60 seconds before trying again.');
+          }
+          throw error;
+        }
+
+        /* Success */
+        okEl.textContent = '✓ Reset link sent to ' + email + '. Check your inbox and spam folder.';
+        okEl.style.display = 'block';
         btn.textContent = 'Link Sent ✓';
+        btn.disabled = true; /* Keep disabled to prevent double-send */
+
       } catch (e) {
-        btn.disabled = false; btn.textContent = 'Send Reset Link';
-        _pnErr(err, e.message || 'Could not send reset email. Try again.');
+        btn.disabled = false;
+        btn.textContent = 'Send Reset Link';
+        _pnErr(errEl, e.message || 'Could not send reset email. Please try again.');
       }
     };
 
@@ -2076,7 +2111,10 @@ class ProfileNavigationManager {
 
     /* ── Helpers ── */
     function _pnErr(el, msg) {
-      if (el) { el.textContent = msg; el.style.display = ''; }
+      if (el) { el.textContent = msg; el.style.display = 'block'; }
+    }
+    function _pnClearMsg(el) {
+      if (el) { el.textContent = ''; el.style.display = 'none'; }
     }
     function _pnShowSuccess(icon, title, msg, cb) {
       document.getElementById('pn-success-icon').textContent = icon;
