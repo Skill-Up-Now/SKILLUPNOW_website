@@ -467,23 +467,15 @@ class ProfileNavigationManager {
         .pn-f-platform { flex: 1; min-width: 0; }
         .pn-f-company  { flex: 1; min-width: 0; }
         .pn-footer-phone { color:#4ade80; }
-        /* 3D compact professional icons */
+        /* Icon-only — no background */
         .pn-f-3d-icon {
           display:inline-flex; align-items:center; justify-content:center;
-          width:20px; height:20px; border-radius:5px; flex-shrink:0;
-          background: linear-gradient(150deg,#34d399,#059669);
-          color:#fff;
-          box-shadow: 0 2px 0 #065f46, 0 3px 8px rgba(16,185,129,.32), inset 0 1px 0 rgba(255,255,255,.22);
-          transition: transform .16s, box-shadow .16s;
+          flex-shrink:0; transition: opacity .16s;
         }
-        .pn-f-3d-link:hover .pn-f-3d-icon {
-          transform: translateY(-1px) scale(1.05);
-          box-shadow: 0 3px 0 #065f46, 0 5px 12px rgba(16,185,129,.42), inset 0 1px 0 rgba(255,255,255,.3);
-        }
-        .pn-f-email-icon { background: linear-gradient(150deg,#818cf8,#4f46e5); box-shadow: 0 2px 0 #312e81, 0 3px 8px rgba(99,102,241,.32), inset 0 1px 0 rgba(255,255,255,.18); }
-        .pn-f-3d-link:hover .pn-f-email-icon { box-shadow: 0 3px 0 #312e81, 0 5px 12px rgba(99,102,241,.42), inset 0 1px 0 rgba(255,255,255,.25); }
-        .pn-f-loc-icon  { background: linear-gradient(150deg,#fb923c,#ea580c); box-shadow: 0 2px 0 #9a3412, 0 3px 8px rgba(234,88,12,.32), inset 0 1px 0 rgba(255,255,255,.18); }
-        .pn-f-3d-link:hover .pn-f-loc-icon { box-shadow: 0 3px 0 #9a3412, 0 5px 12px rgba(234,88,12,.42), inset 0 1px 0 rgba(255,255,255,.25); }
+        .pn-f-3d-link:hover .pn-f-3d-icon { opacity:.65; }
+        .pn-f-phone-icon { color:#16a34a; }
+        .pn-f-email-icon { color:#4f46e5; }
+        .pn-f-loc-icon   { color:#ea580c; }
         .pn-f-3d-link { color:var(--txt3); text-decoration:none; transition:color .18s; }
         .pn-f-3d-link:hover { color:var(--txt); }
         @media(max-width:900px){
@@ -512,7 +504,7 @@ class ProfileNavigationManager {
           <div class="pn-f-contact-row" style="margin-bottom:.35rem;">
             <a href="mailto:skillupnowoff@gmail.com" class="footer-contact-link pn-f-3d-link" style="font-size:.79rem;white-space:nowrap;display:flex;align-items:center;gap:.45rem;">
               <span class="pn-f-3d-icon pn-f-email-icon" aria-hidden="true">
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7 10-7"/></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7 10-7"/></svg>
               </span>
               skillupnowoff@gmail.com
             </a>
@@ -520,25 +512,25 @@ class ProfileNavigationManager {
           <div class="pn-f-contact-row" style="flex-direction:column;gap:.25rem;align-items:flex-start;">
             <a href="tel:+916383633054" class="footer-contact-link pn-f-3d-link" style="font-size:.79rem;white-space:nowrap;display:flex;align-items:center;gap:.45rem;">
               <span class="pn-f-3d-icon pn-f-phone-icon" aria-hidden="true">
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.27-.27.67-.36 1-.24 1.1.36 2.3.56 3.56.56.55 0 1 .45 1 1V20c0 .55-.45 1-1 1C10.29 21 3 13.71 3 4.5c0-.55.45-1 1-1H7.5c.55 0 1 .45 1 1 0 1.25.2 2.45.56 3.56.12.35.03.74-.22 1L6.6 10.8z"/></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.27-.27.67-.36 1-.24 1.1.36 2.3.56 3.56.56.55 0 1 .45 1 1V20c0 .55-.45 1-1 1C10.29 21 3 13.71 3 4.5c0-.55.45-1 1-1H7.5c.55 0 1 .45 1 1 0 1.25.2 2.45.56 3.56.12.35.03.74-.22 1L6.6 10.8z"/></svg>
               </span>
               +91 63836 33054
             </a>
             <a href="tel:+916381721061" class="footer-contact-link pn-f-3d-link" style="font-size:.79rem;white-space:nowrap;display:flex;align-items:center;gap:.45rem;">
               <span class="pn-f-3d-icon pn-f-phone-icon" aria-hidden="true">
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.27-.27.67-.36 1-.24 1.1.36 2.3.56 3.56.56.55 0 1 .45 1 1V20c0 .55-.45 1-1 1C10.29 21 3 13.71 3 4.5c0-.55.45-1 1-1H7.5c.55 0 1 .45 1 1 0 1.25.2 2.45.56 3.56.12.35.03.74-.22 1L6.6 10.8z"/></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.27-.27.67-.36 1-.24 1.1.36 2.3.56 3.56.56.55 0 1 .45 1 1V20c0 .55-.45 1-1 1C10.29 21 3 13.71 3 4.5c0-.55.45-1 1-1H7.5c.55 0 1 .45 1 1 0 1.25.2 2.45.56 3.56.12.35.03.74-.22 1L6.6 10.8z"/></svg>
               </span>
               +91 63817 21061
             </a>
             <a href="tel:+918754470742" class="footer-contact-link pn-f-3d-link" style="font-size:.79rem;white-space:nowrap;display:flex;align-items:center;gap:.45rem;">
               <span class="pn-f-3d-icon pn-f-phone-icon" aria-hidden="true">
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.27-.27.67-.36 1-.24 1.1.36 2.3.56 3.56.56.55 0 1 .45 1 1V20c0 .55-.45 1-1 1C10.29 21 3 13.71 3 4.5c0-.55.45-1 1-1H7.5c.55 0 1 .45 1 1 0 1.25.2 2.45.56 3.56.12.35.03.74-.22 1L6.6 10.8z"/></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.27-.27.67-.36 1-.24 1.1.36 2.3.56 3.56.56.55 0 1 .45 1 1V20c0 .55-.45 1-1 1C10.29 21 3 13.71 3 4.5c0-.55.45-1 1-1H7.5c.55 0 1 .45 1 1 0 1.25.2 2.45.56 3.56.12.35.03.74-.22 1L6.6 10.8z"/></svg>
               </span>
               +91 87544 70742
             </a>
             <span class="footer-contact-link pn-f-3d-link" style="font-size:.79rem;display:flex;align-items:center;gap:.45rem;cursor:default;">
               <span class="pn-f-3d-icon pn-f-loc-icon" aria-hidden="true">
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7z"/><circle cx="12" cy="9" r="2"/></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7z"/><circle cx="12" cy="9" r="2"/></svg>
               </span>
               Chennai, Tamil Nadu, India
             </span>
@@ -1591,7 +1583,7 @@ class ProfileNavigationManager {
       err.style.display = 'none';
       try {
         const { error } = await window.supabaseConfig.client.auth.resetPasswordForEmail(email, {
-          redirectTo: window.location.origin + '/'
+          redirectTo: window.location.origin + '/pages/reset-password.html'
         });
         if (error) throw error;
         ok.textContent = '✓ Reset link sent to ' + email + '. Check your inbox (and spam folder).';
@@ -1788,7 +1780,7 @@ class ProfileNavigationManager {
       err.style.display = 'none';
 
       const fullName = fname + ' ' + lname;
-      const redirectTo = window.location.origin + '/';
+      const redirectTo = window.location.origin + '/pages/email-verified.html';
 
       try {
         if (!window.supabaseConfig) throw new Error('Auth service not ready. Please refresh and try again.');
@@ -1875,8 +1867,7 @@ class ProfileNavigationManager {
       err.style.display = 'none';
 
       const fullName = fname + ' ' + lname;
-      const mentorSignupUrl = (self.pagesPfx || 'pages/') + 'mentor-signup';
-      const redirectTo = window.location.origin + '/' + mentorSignupUrl;
+      const redirectTo = window.location.origin + '/pages/email-verified.html';
 
       try {
         if (!window.supabaseConfig) throw new Error('Auth service not ready. Please refresh and try again.');

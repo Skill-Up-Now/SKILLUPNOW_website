@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Account Verified — SkillUpNow</title>
+  <link rel="stylesheet" href="../css/variables.css">
+  <link rel="stylesheet" href="../css/main.css">
+  <style>
+    body { min-height:100vh; margin:0; display:flex; flex-direction:column; }
+    .ev-wrap {
+      flex:1; display:flex; align-items:center; justify-content:center;
+      padding: 7rem 1.25rem 3rem;
+    }
+    .ev-card {
+      width: min(92vw, 480px);
+      background: var(--panel);
+      border: 1.5px solid var(--border);
+      border-radius: 24px;
+      padding: 2.75rem 2rem 2.25rem;
+      box-shadow: 0 24px 60px rgba(0,0,0,.08);
+      text-align: center;
+    }
+
+    /* States */
+    #ev-state-loading,
+    #ev-state-success,
+    #ev-state-error { display:none; }
+    #ev-state-loading.show,
+    #ev-state-success.show,
+    #ev-state-error.show { display:block; }
+
+    /* Loading */
+    .ev-spinner {
+      width:44px; height:44px; margin:0 auto 1.25rem;
+      border:3px solid var(--border);
+      border-top-color: var(--v1);
+      border-radius:50%;
+      animation: ev-spin .7s linear infinite;
+    }
+    @keyframes ev-spin { to { transform:rotate(360deg); } }
+    .ev-loading-text { font-size:.9rem; color:var(--txt3); }
+
+    /* Success icon */
+    .ev-icon-ring {
+      width:80px; height:80px; border-radius:50%;
+      background:rgba(34,197,94,.1);
+      border:2.5px solid rgba(34,197,94,.3);
+      display:flex; align-items:center; justify-content:center;
+      margin:0 auto 1.5rem;
+      animation: ev-pop .5s cubic-bezier(.175,.885,.32,1.275) both;
+    }
+    @keyframes ev-pop {
+      from { transform:scale(.5); opacity:0; }
+      to   { transform:scale(1);  opacity:1; }
+    }
+    .ev-icon-ring svg { color:#22c55e; }
+
+    .ev-kicker {
+      display:inline-flex; align-items:center; gap:.4rem;
+      padding:.35rem .9rem; border-radius:999px;
+      background:#e8f7ee; color:#1c7c47;
+      font-size:.75rem; font-weight:700; letter-spacing:.04em;
+      margin-bottom:.85rem;
+    }
+    .ev-title {
+      font-size:1.75rem; font-weight:900;
+      color:var(--txt); margin-bottom:.6rem; line-height:1.2;
+    }
+    .ev-sub {
+      font-size:.88rem; color:var(--txt3); line-height:1.65;
+      max-width:360px; margin:0 auto 1.75rem;
+    }
+    .ev-name {
+      font-weight:700; color:var(--txt2);
+    }
+
+    /* Action buttons */
+    .ev-actions { display:flex; flex-direction:column; gap:.65rem; }
+    .ev-btn {
+      display:flex; align-items:center; justify-content:center; gap:.55rem;
+      padding:.85rem 1.25rem; border:none; border-radius:12px;
+      font-size:.92rem; font-weight:700; font-family:inherit;
+      cursor:pointer; text-decoration:none;
+      transition:opacity .2s, transform .15s;
+    }
+    .ev-btn:hover { opacity:.87; transform:translateY(-1px); }
+    .ev-btn.primary { background:linear-gradient(135deg,var(--v1),#3d6bff); color:#fff; }
+    .ev-btn.secondary {
+      background:var(--bg); color:var(--txt2);
+      border:1.5px solid var(--border);
+    }
+
+    /* Error icon */
+    .ev-err-ring {
+      width:72px; height:72px; border-radius:50%;
+      background:rgba(239,68,68,.08);
+      border:2px solid rgba(239,68,68,.2);
+      display:flex; align-items:center; justify-content:center;
+      margin:0 auto 1.25rem;
+    }
+    .ev-err-ring svg { color:#ef4444; }
+    .ev-err-title { font-size:1.2rem; font-weight:800; margin-bottom:.5rem; }
+    .ev-err-msg   { font-size:.85rem; color:var(--txt3); line-height:1.6; margin-bottom:1.5rem; }
+  </style>
+</head>
+<body>
+<nav></nav>
+
+<div class="ev-wrap">
+  <div class="ev-card">
+
+    <!-- LOADING -->
+    <div id="ev-state-loading" class="show">
+      <div class="ev-spinner"></div>
+      <p class="ev-loading-text">Verifying your account…</p>
+    </div>
+
+    <!-- SUCCESS -->
+    <div id="ev-state-success">
+      <div class="ev-icon-ring">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+      </div>
+      <div class="ev-kicker">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        Email Confirmed
+      </div>
+      <h1 class="ev-title">Account Verified</h1>
+      <p class="ev-sub" id="ev-success-msg">
+        Welcome to SkillUpNow! Your email has been confirmed and your account is now active.
+      </p>
+      <div class="ev-actions">
+        <a href="../index.html" class="ev-btn primary" id="ev-login-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+          Sign In to Your Account
+        </a>
+        <a href="../index.html" class="ev-btn secondary" id="ev-home-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          Go to Homepage
+        </a>
+      </div>
+    </div>
+
+    <!-- ERROR -->
+    <div id="ev-state-error">
+      <div class="ev-err-ring">
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+      </div>
+      <div class="ev-err-title">Verification Failed</div>
+      <p class="ev-err-msg" id="ev-err-msg">
+        This verification link may have expired or already been used. Please sign up again or contact support.
+      </p>
+      <div class="ev-actions">
+        <a href="../index.html" class="ev-btn primary">Back to Homepage</a>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<footer></footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../config/supabase-config.js"></script>
+<script src="../js/theme.js"></script>
+<script src="../js/profile-nav.js"></script>
+<script>
+  function evShow(state) {
+    ['loading','success','error'].forEach(s => {
+      const el = document.getElementById('ev-state-' + s);
+      if (el) el.classList.toggle('show', s === state);
+    });
+  }
+
+  (async function evInit() {
+    const search = window.location.search;
+    const hash   = window.location.hash;
+
+    const codeMatch  = search.match(/[?&]code=([^&]+)/);
+    const tokenMatch = hash.match(/access_token=([^&]+)/);
+
+    if (!codeMatch && !tokenMatch) {
+      document.getElementById('ev-err-msg').textContent =
+        'No verification token found. Please use the link from your confirmation email.';
+      evShow('error');
+      return;
+    }
+
+    try {
+      const client = window.supabaseConfig?.client;
+      if (!client) throw new Error('Auth service not ready.');
+
+      let userId = null;
+
+      if (codeMatch) {
+        const { data, error } = await client.auth.exchangeCodeForSession(
+          decodeURIComponent(codeMatch[1])
+        );
+        if (error) throw error;
+        userId = data?.user?.id;
+      } else {
+        const refreshMatch = hash.match(/refresh_token=([^&]+)/);
+        const { data, error } = await client.auth.setSession({
+          access_token:  decodeURIComponent(tokenMatch[1]),
+          refresh_token: refreshMatch ? decodeURIComponent(refreshMatch[1]) : ''
+        });
+        if (error) throw error;
+        userId = data?.user?.id;
+      }
+
+      // Mark email as verified in user_profiles
+      if (userId) {
+        await client.from('user_profiles')
+          .update({ is_email_verified: true, updated_at: new Date().toISOString() })
+          .eq('user_id', userId)
+          .catch(() => {});
+
+        // Fetch user's name for personalised message
+        const { data: profile } = await client.from('user_profiles')
+          .select('full_name, role')
+          .eq('user_id', userId)
+          .single()
+          .catch(() => ({ data: null }));
+
+        if (profile?.full_name) {
+          const firstName = profile.full_name.split(' ')[0];
+          const isMentor  = profile.role === 'mentor' || profile.role === 'pending_mentor';
+          document.getElementById('ev-success-msg').innerHTML =
+            'Welcome, <span class="ev-name">' + firstName + '</span>! ' +
+            'Your email has been confirmed and your account is active. ' +
+            (isMentor
+              ? 'You can now complete your mentor application.'
+              : 'You can now sign in and start learning.');
+
+          if (isMentor) {
+            document.getElementById('ev-login-btn').href = './mentor-signup.html';
+            document.getElementById('ev-login-btn').innerHTML =
+              '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg> Complete Mentor Application';
+          }
+        }
+      }
+
+      // Sign out — they should log in fresh
+      await client.auth.signOut();
+
+      // Clean URL
+      history.replaceState({}, document.title, window.location.pathname);
+      evShow('success');
+
+    } catch (e) {
+      document.getElementById('ev-err-msg').textContent =
+        e.message || 'Verification failed. The link may be expired or invalid.';
+      evShow('error');
+    }
+  })();
+</script>
+</body>
+</html>
