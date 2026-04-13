@@ -216,17 +216,21 @@
 
       // Mark email as verified in user_profiles
       if (userId) {
-        await client.from('user_profiles')
-          .update({ is_email_verified: true, updated_at: new Date().toISOString() })
-          .eq('user_id', userId)
-          .catch(() => {});
+        try {
+          await client.from('user_profiles')
+            .update({ is_email_verified: true, updated_at: new Date().toISOString() })
+            .eq('user_id', userId);
+        } catch(_) { /* best-effort, non-critical */ }
 
         // Fetch user's name for personalised message
-        const { data: profile } = await client.from('user_profiles')
-          .select('full_name, role')
-          .eq('user_id', userId)
-          .single()
-          .catch(() => ({ data: null }));
+        let profile = null;
+        try {
+          const { data } = await client.from('user_profiles')
+            .select('full_name, role')
+            .eq('user_id', userId)
+            .single();
+          profile = data;
+        } catch(_) { /* non-critical */ }
 
         if (profile?.full_name) {
           const firstName = profile.full_name.split(' ')[0];
