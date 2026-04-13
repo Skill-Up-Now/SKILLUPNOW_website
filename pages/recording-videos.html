@@ -731,12 +731,12 @@
       return;
     }
 
-    // Group by course / category, skip videos with no group label
+    // Group by course / category; recordings with no course go into 'Other'
     const groups = {};
     filtered.forEach(v => {
-      if (!v.groupLabel) return; // skip videos with no course or category
-      const key = v.filterKey;
-      if (!groups[key]) groups[key] = { name: v.groupLabel, key, videos: [] };
+      const label = v.groupLabel || 'Other';
+      const key   = v.filterKey  || 'other';
+      if (!groups[key]) groups[key] = { name: label, key, videos: [] };
       groups[key].videos.push(v);
     });
 
@@ -750,14 +750,17 @@
       .sort((a, b) => a.name.localeCompare(b.name));
 
     pl.innerHTML = sortedGroups.map((g, gi) => {
-      const open = gi === 0 || sortedGroups.length === 1; // open first group by default
+      const open = true; // all groups open by default
       const icon = courseIcon(g.name);
       const items = g.videos.map((v, i) => {
-        const isActive = v.id === _activeVideoId;
+        const isActive   = v.id === _activeVideoId;
         const isUnlocked = v._access === 'full';
         const lockIcon = isUnlocked
           ? `<div class="rv-pi-lock unlocked"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>`
           : `<div class="rv-pi-lock"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>`;
+        const metaText = isUnlocked
+          ? 'Unlocked'
+          : v.totalPrice != null ? '₹' + Number(v.totalPrice).toLocaleString('en-IN') : 'Members only';
         const thumb = v.thumbnail
           ? `<img src="${v.thumbnail}" alt="" onerror="this.style.display='none'">`
           : v.icon;
@@ -766,7 +769,7 @@
           <div class="rv-pi-thumb">${thumb}</div>
           <div class="rv-pi-body">
             <div class="rv-pi-title">${v.title}</div>
-            <div class="rv-pi-meta">${v.duration !== '—' ? '⏱ ' + v.duration + ' · ' : ''}${isUnlocked ? 'Unlocked' : v.totalPrice != null ? '₹' + Number(v.totalPrice).toLocaleString('en-IN') : 'Members only'}</div>
+            <div class="rv-pi-meta">${v.duration !== '—' ? '⏱ ' + v.duration + ' · ' : ''}${metaText}</div>
           </div>
           ${lockIcon}
         </div>`;
@@ -794,7 +797,7 @@
   function filterPlaylist() { renderPlaylist(); }
 
 
-  // ── Access check: login → payment/access → fetch URL → play ──
+  // ── Access check: login → fetch URL → play (gen access: no payment required) ──
   async function handleWatchClick(id) {
     const v = allVideos.find(x => x.id === id);
     if (!v) return;
@@ -812,62 +815,15 @@
         return;
       }
 
-      // Logged in — check course-specific enrollment / payment
-      const userId = session.user.id;
-      let hasAccess = false;
-
-      // ── ACCESS RULES ─────────────────────────────────────────────
-      // 1. Admin-granted enrollment: enrollment for THIS course where
-      //    enrollment_status='active' AND access_status='active'.
-      //    → User is enrolled AND admin has explicitly granted access.
-      //    → Can watch for FREE (no payment needed).
-      //
-      // 2. Completed payment for THIS course (via Razorpay or manual).
-      //    → Can watch immediately.
-      //
-      // 3. Everything else (enrolled but access_status != 'active',
-      //    not enrolled, or different course) → payment gate.
-      // ─────────────────────────────────────────────────────────────
-      if (v.courseId) {
-        // Check 1 — admin-granted access for this exact course
-        const { data: enr } = await client.from('enrollments')
-          .select('id')
-          .eq('student_user_id', userId)
-          .eq('course_id', v.courseId)
-          .eq('enrollment_status', 'active')
-          .eq('access_status', 'active')
-          .limit(1);
-        if (enr?.length) hasAccess = true;
-
-        // Check 2 — completed payment for this exact course
-        if (!hasAccess) {
-          const { data: pay } = await client.from('payments')
-            .select('id')
-            .eq('student_user_id', userId)
-            .eq('course_id', v.courseId)
-            .in('payment_status', ['success', 'completed'])
-            .limit(1);
-          if (pay?.length) hasAccess = true;
-        }
-      }
-      // Note: recordings without a courseId require payment to access
-      // (no free fallback for uncategorized recordings)
-
-      if (hasAccess) {
-        // ── Fetch video URL now that access is confirmed ──
-        // external_url is not loaded during listing to prevent leakage.
-        const { data: rec } = await client.from('live_recordings')
-          .select('external_url')
-          .eq('id', id)
-          .single();
-        if (rec?.external_url) v.videoUrl = rec.external_url;
-        playVideo(v);
-      } else {
-        showVideoGate(v, 'payment');
-      }
+      // Gen access: all logged-in users can watch — fetch URL and play directly
+      const { data: rec } = await client.from('live_recordings')
+        .select('external_url')
+        .eq('id', id)
+        .single();
+      if (rec?.external_url) v.videoUrl = rec.external_url;
+      playVideo(v);
     } catch(e) {
       console.error('handleWatchClick error:', e);
-      showVideoGate(v, 'payment');
     } finally {
       spinner?.classList.remove('active');
     }
@@ -988,44 +944,17 @@
     }, 3500);
   }
 
-  // ── Fetch per-user access state and re-render badges ──
+  // ── Confirm gen access for logged-in users and re-render badges ──
   async function checkUserAccess() {
     const client = window.supabaseConfig?.client;
     if (!client) return;
     try {
       const { data: { session } } = await client.auth.getSession();
       if (!session?.user) return;
-      const userId = session.user.id;
-
-      // Fetch enrollments — only active enrollment_status matters for access
-      const { data: enrollments } = await client.from('enrollments')
-        .select('course_id, access_status, enrollment_status')
-        .eq('student_user_id', userId)
-        .eq('enrollment_status', 'active');
-
-      const courseAccess = {};
-      (enrollments || []).forEach(e => {
-        if (e.access_status === 'active') {
-          // Admin explicitly granted access — enrolled AND access granted → free to play
-          courseAccess[e.course_id] = 'full';
-        }
-        // Enrolled but access_status != 'active' means admin hasn't granted
-        // free access yet — user must pay. No special badge for this state.
-      });
-
-      // Completed payments also grant full access
-      const { data: payments } = await client.from('payments')
-        .select('course_id')
-        .eq('student_user_id', userId)
-        .in('payment_status', ['success', 'completed']);
-      (payments || []).forEach(p => { if (p.course_id) courseAccess[p.course_id] = 'full'; });
-
-      // Update _access on each video and re-render if anything changed
-      // Only 'full' unlocks the play button; everything else shows payment gate
+      // Gen access: all logged-in users have full access to all videos
       let changed = false;
       allVideos.forEach(v => {
-        const next = v.courseId ? (courseAccess[v.courseId] || 'locked') : 'locked';
-        if (v._access !== next) { v._access = next; changed = true; }
+        if (v._access !== 'full') { v._access = 'full'; changed = true; }
       });
       if (changed) renderPlaylist();
     } catch(e) { console.warn('checkUserAccess:', e); }
@@ -1636,44 +1565,14 @@
       }
       if (!window.supabaseConfig?.client) throw new Error('Database not ready');
 
-      // Fetch recordings — prefer Gen AI category if it exists in DB,
-      // otherwise fall back to ALL recordings so the page is never empty.
-      // external_url excluded — fetched after access verification only.
+      const client = window.supabaseConfig.client;
 
-      // Step 1: try to resolve a Gen AI category ID (broad search)
-      let genAiCourseIds = [];
-      let genAiFiltered  = false;
-      try {
-        const { data: catRows } = await window.supabaseConfig.client
-          .from('course_categories')
-          .select('id')
-          .or('name.ilike.%gen ai%,name.ilike.%generative%,name.ilike.%genai%');
-
-        const catIds = (catRows || []).map(r => r.id).filter(Boolean);
-
-        if (catIds.length > 0) {
-          // Step 2: find all courses under those categories
-          const { data: courseData } = await window.supabaseConfig.client
-            .from('courses')
-            .select('id')
-            .in('category_id', catIds);
-          genAiCourseIds = (courseData || []).map(c => c.id).filter(Boolean);
-          if (genAiCourseIds.length > 0) genAiFiltered = true;
-        }
-      } catch(_) { /* ignore — fall through to unfiltered query */ }
-
-      // Step 3: build query — filter by Gen AI courses if found, else show all
-      let recQuery = window.supabaseConfig.client
+      // Step 1: Fetch all published recordings (external_url excluded — fetched after access check only)
+      const { data, error } = await client
         .from('live_recordings')
-        .select('id,title,provider_name,course_id,created_at,base_amount,gst_percentage,total_amount,courses(title,course_categories(name),course_pricing(sale_price,list_price,is_active))')
+        .select('id,title,provider_name,access_level,course_id,created_at,base_amount,gst_percentage,total_amount')
+        .eq('is_published', true)
         .order('created_at', { ascending: false });
-
-      if (genAiFiltered) {
-        recQuery = recQuery.in('course_id', genAiCourseIds);
-      }
-      // else: no filter → returns all recordings
-
-      const { data, error } = await recQuery;
 
       if (error) throw error;
 
@@ -1685,15 +1584,27 @@
         return;
       }
 
+      // Step 2: Fetch all referenced courses by their IDs directly (avoids RLS filtering on JOIN)
+      const courseIds = [...new Set(data.filter(r => r.course_id).map(r => r.course_id))];
+      let courseMap = {};
+      if (courseIds.length) {
+        const { data: coursesData } = await client
+          .from('courses')
+          .select('id,title,course_categories(name),course_pricing(sale_price,list_price,is_active)')
+          .in('id', courseIds);
+        (coursesData || []).forEach(c => { courseMap[c.id] = c; });
+      }
+
       allVideos = data.map(r => {
+        const course = courseMap[r.course_id] || null;
         const { icon, gradient } = videoMeta(r.provider_name);
-        const courseTitle  = r.courses?.title || '';
-        const categoryName = r.courses?.course_categories?.name || '';
+        const courseTitle  = course?.title || '';
+        const categoryName = course?.course_categories?.name || '';
         // Group label: prefer course title, fall back to category name
         const groupLabel   = courseTitle || categoryName;
         const filterKey    = groupLabel.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'other';
         // Resolve price: recording-level base_amount → course pricing → null
-        const activePricing = (r.courses?.course_pricing || []).find(p => p.is_active);
+        const activePricing = (course?.course_pricing || []).find(p => p.is_active);
         const basePrice = r.base_amount ?? activePricing?.sale_price ?? activePricing?.list_price ?? null;
         const gstPct = r.gst_percentage ?? 18;
         const totalPrice = r.total_amount ?? (basePrice != null ? Math.round(basePrice * (1 + gstPct / 100)) : null);
@@ -1712,6 +1623,8 @@
           videoUrl: null, // fetched after access verification, not during listing
           courseId: r.course_id || null,
           thumbnail: r.thumbnail_url || null,
+          accessLevel: r.access_level || 'paid',
+          _access: 'full', // gen access: all logged-in users can watch
           basePrice,
           gstPct,
           totalPrice,
@@ -1719,7 +1632,7 @@
       });
 
       renderPlaylist();
-      checkUserAccess(); // async: enriches access badges for logged-in users
+      checkUserAccess(); // async: confirms access badges for logged-in users
     } catch(e) {
       console.error('loadVideos error:', e);
       const pl = document.getElementById('rv-playlist');
