@@ -191,6 +191,19 @@ class SupabaseConfig {
         throw new Error('Your email is not verified yet. Check your inbox for the verification link and click it before signing in.');
       }
 
+      // Block login if the user profile was deleted (auth.users may still exist
+      // briefly after deletion — this ensures they can't log in during cleanup)
+      const { data: profile } = await this.client
+        .from('user_profiles')
+        .select('user_id')
+        .eq('user_id', data.user.id)
+        .maybeSingle();
+
+      if (!profile) {
+        await this.client.auth.signOut();
+        throw new Error('This account no longer exists. Please register again or contact support.');
+      }
+
       // Log the login in audit trail
       await this.logAuditEvent(data.user.id, 'login', 'user', data.user.id);
 
@@ -1516,15 +1529,25 @@ class SupabaseConfig {
   async applyAsMentor(userId, mentorData, files = {}) {
     try {
       // Upload documents to Supabase Storage
+      // Non-fatal: if the bucket doesn't exist yet, profile is still saved without URLs.
+      // Admin can re-collect documents after bucket is created.
       const uploads = {};
       const bucket = 'mentor-docs';
       const uploadFile = async (key, file) => {
         if (!file) return null;
-        const ext = file.name.split('.').pop();
-        const path = `${userId}/${key}.${ext}`;
-        const { error } = await this.client.storage.from(bucket).upload(path, file, { upsert: true });
-        if (error) throw error;
-        return this.client.storage.from(bucket).getPublicUrl(path).data.publicUrl;
+        try {
+          const ext = (file.name.split('.').pop() || 'bin').toLowerCase();
+          const path = `${userId}/${key}.${ext}`;
+          const { error } = await this.client.storage.from(bucket).upload(path, file, { upsert: true });
+          if (error) {
+            console.warn(`[mentor-docs] Upload skipped for "${key}":`, error.message);
+            return null;
+          }
+          return this.client.storage.from(bucket).getPublicUrl(path).data.publicUrl;
+        } catch (uploadErr) {
+          console.warn(`[mentor-docs] Upload failed for "${key}":`, uploadErr.message);
+          return null;
+        }
       };
 
       uploads.photo_url         = await uploadFile('photo', files.photo);

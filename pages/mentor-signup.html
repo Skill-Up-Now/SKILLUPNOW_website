@@ -473,7 +473,7 @@ async function submitApplication() {
           email, password,
           options: {
             data: { full_name: fullName, username, phone, role: 'user', requested_role: 'mentor' },
-            emailRedirectTo: window.location.origin + '/pages/mentor-signup.html'
+            emailRedirectTo: 'https://skillupnowadmin.org/pages/email-verified.html'
           }
         });
         if (sbErr) throw new Error(sbErr.message || 'Unable to create mentor account.');

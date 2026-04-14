@@ -1544,6 +1544,39 @@ class ProfileNavigationManager {
         const el = document.getElementById(id);
         if (el) { el.textContent = ''; el.className = 'pn-field-hint'; }
       });
+      // Clear all form input values and reset invalid/valid styles on every view switch
+      const viewInputIds = [
+        'pn-sl-email','pn-sl-pw',
+        'pn-ml-email','pn-ml-pw',
+        'pn-fp-email',
+        'pn-ss-fname','pn-ss-lname','pn-ss-email','pn-ss-phone','pn-ss-pw','pn-ss-cpw',
+        'pn-sm-fname','pn-sm-lname','pn-sm-email','pn-sm-phone','pn-sm-pw','pn-sm-cpw'
+      ];
+      viewInputIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) { el.value = ''; el.classList.remove('invalid','valid'); }
+      });
+      // Reset checkboxes
+      ['pn-ss-terms','pn-sm-terms'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.checked = false;
+      });
+      // Reset select dropdowns
+      ['pn-sm-expertise'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.selectedIndex = 0;
+      });
+      // Reset submit buttons to their default states
+      const btnMap = {
+        'pn-sl-btn':  ['Sign In', false],
+        'pn-ml-btn':  ['Sign In to Portal', false],
+        'pn-ss-btn':  ['Create Student Account', false],
+        'pn-sm-btn':  ['Create & Continue to Application →', false]
+      };
+      Object.entries(btnMap).forEach(([id, [txt, dis]]) => {
+        const el = document.getElementById(id);
+        if (el) { el.textContent = txt; el.disabled = dis; }
+      });
     };
 
     window._pnClose = () => {
@@ -1605,7 +1638,7 @@ class ProfileNavigationManager {
 
       try {
         const { error } = await client.auth.resetPasswordForEmail(email, {
-          redirectTo: 'https://skillupnowadmin.org/pages/reset-password.html'
+          redirectTo: window.location.origin + '/pages/reset-password.html'
         });
 
         if (error) {
@@ -1758,13 +1791,17 @@ class ProfileNavigationManager {
         if (mentor?.status === 'approved') {
           window.location.href = self.pagesPfx + 'mentor-dashboard';
         } else if (mentor) {
-          alert('Your mentor application is ' + (mentor.status || 'under review') + '. You will be notified once approved.');
-          window.location.reload();
+          // Application pending/rejected — show friendly inline message
+          window._pnOpen('mentor-login');
+          const statusLabel = mentor.status === 'rejected' ? 'rejected' : (mentor.status || 'under review');
+          const msg = mentor.status === 'rejected'
+            ? 'Your mentor application was not approved. Please contact support.'
+            : 'Your application is ' + statusLabel + '. You\'ll be notified by email once approved.';
+          _pnErr(document.getElementById('pn-ml-err'), msg);
+          btn.disabled = false; btn.textContent = 'Sign In to Portal';
         } else {
-          // Has account but no mentor record — prompt to apply
-          if (confirm('No mentor application found. Would you like to apply as a mentor?')) {
-            window.location.href = self.pagesPfx + 'mentor-signup';
-          } else { window.location.reload(); }
+          // No mentor record — redirect to application form
+          window.location.href = self.pagesPfx + 'mentor-signup';
         }
       } catch(e) { _pnErr(err, e.message); btn.disabled = false; btn.textContent = 'Sign In to Portal'; }
     };
@@ -1815,7 +1852,7 @@ class ProfileNavigationManager {
       err.style.display = 'none';
 
       const fullName = fname + ' ' + lname;
-      const redirectTo = window.location.origin + '/pages/email-verified.html';
+      const redirectTo = 'https://skillupnowadmin.org/pages/email-verified.html';
 
       try {
         if (!window.supabaseConfig) throw new Error('Auth service not ready. Please refresh and try again.');
@@ -1902,7 +1939,7 @@ class ProfileNavigationManager {
       err.style.display = 'none';
 
       const fullName = fname + ' ' + lname;
-      const redirectTo = window.location.origin + '/pages/email-verified.html';
+      const redirectTo = 'https://skillupnowadmin.org/pages/email-verified.html';
 
       try {
         if (!window.supabaseConfig) throw new Error('Auth service not ready. Please refresh and try again.');
