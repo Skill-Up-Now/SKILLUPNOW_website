@@ -16,19 +16,50 @@
 
     /* ── Hero ── */
     .forms-hero {
-      background: var(--grad);
+      background: linear-gradient(155deg,#06030e 0%,#0d0720 22%,#160b35 58%,#0a1230 100%);
       padding: 3.5rem 2rem 3rem;
       text-align: center;
       position: relative;
       overflow: hidden;
+      transition: background .4s;
+    }
+    :root[data-theme="light"] .forms-hero {
+      background: linear-gradient(155deg,#f8f6ff 0%,#f0ecff 28%,#e8e2ff 58%,#f5f3ff 100%);
     }
     .forms-hero::before {
-      content: '';
-      position: absolute; inset: 0;
-      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='rgba(255,255,255,0.07)' stroke-width='1'%3E%3Ccircle cx='30' cy='30' r='22'/%3E%3Ccircle cx='30' cy='30' r='10'/%3E%3C/g%3E%3C/svg%3E") repeat;
+      content: ''; position: absolute; inset: 0; pointer-events: none;
+      background:
+        radial-gradient(ellipse 60% 55% at 15% 40%, rgba(124,92,252,.22) 0%, transparent 55%),
+        radial-gradient(ellipse 50% 45% at 88% 60%, rgba(61,107,255,.18) 0%, transparent 52%);
+      animation: heroOrb 12s ease-in-out infinite;
     }
-    .forms-hero h1 { color: #fff; font-size: clamp(1.8rem, 4vw, 2.5rem); font-weight: 800; margin-bottom: .5rem; position: relative; }
-    .forms-hero p  { color: rgba(255,255,255,.8); position: relative; font-size: .95rem; }
+    :root[data-theme="light"] .forms-hero::before {
+      background:
+        radial-gradient(ellipse 60% 55% at 15% 40%, rgba(124,92,252,.12) 0%, transparent 55%),
+        radial-gradient(ellipse 50% 45% at 88% 60%, rgba(61,107,255,.10) 0%, transparent 52%);
+    }
+    .forms-hero::after {
+      content: ''; position: absolute; inset: 0; pointer-events: none;
+      background-image: radial-gradient(rgba(255,255,255,.05) 1px, transparent 1px);
+      background-size: 28px 28px;
+      -webkit-mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 20%, transparent 100%);
+      mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 20%, transparent 100%);
+    }
+    :root[data-theme="light"] .forms-hero::after {
+      background-image: radial-gradient(rgba(100,80,200,.07) 1px, transparent 1px);
+    }
+    @keyframes heroOrb {
+      0%,100% { transform: scale(1) translate(0,0); opacity: .35; }
+      40%     { transform: scale(1.12) translate(4%,-5%); opacity: .55; }
+      70%     { transform: scale(.92) translate(-3%,4%); opacity: .28; }
+    }
+    .forms-hero h1 {
+      color: #fff; font-size: clamp(1.8rem, 4vw, 2.5rem); font-weight: 800;
+      margin-bottom: .5rem; position: relative;
+    }
+    :root[data-theme="light"] .forms-hero h1 { color: #1a0a3d; }
+    .forms-hero p  { color: rgba(255,255,255,.78); position: relative; font-size: .95rem; }
+    :root[data-theme="light"] .forms-hero p { color: rgba(30,15,60,.58); }
 
     /* ── Grid ── */
     .forms-body { max-width: 1200px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }

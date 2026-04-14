@@ -10,24 +10,60 @@
   <style>
     .page-wrap { position:relative; z-index:1; padding-top:0px; min-height:100vh; }
 
-    /* ---- Hero ---- */
+    /* ---- Hero (theme-responsive) ---- */
+    @keyframes pamHeroOrb {
+      0%,100% { opacity:.35; transform:scale(1) translate(0,0); }
+      40%     { opacity:.55; transform:scale(1.1) translate(3%,-4%); }
+      70%     { opacity:.28; transform:scale(.92) translate(-2%,3%); }
+    }
     .pamphlet-hero {
-      background: var(--grad);
+      background: linear-gradient(155deg,#06030e 0%,#0d0720 22%,#160b35 58%,#0a1230 100%);
       padding: 4rem 2rem 3rem;
       text-align: center;
       position: relative;
       overflow: hidden;
+      transition: background .4s;
+    }
+    :root[data-theme="light"] .pamphlet-hero {
+      background: linear-gradient(155deg,#f8f6ff 0%,#f0ecff 28%,#e8e2ff 58%,#f5f3ff 100%);
     }
     .pamphlet-hero::before {
-      content: '';
-      position: absolute; inset: 0;
-      background: url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='rgba(255,255,255,0.05)' stroke-width='1'%3E%3Ccircle cx='40' cy='40' r='35'/%3E%3Ccircle cx='40' cy='40' r='20'/%3E%3C/g%3E%3C/svg%3E") repeat;
+      content:''; position:absolute; inset:0; pointer-events:none;
+      background:
+        radial-gradient(ellipse 60% 55% at 12% 40%, rgba(124,92,252,.22) 0%, transparent 55%),
+        radial-gradient(ellipse 50% 45% at 90% 60%, rgba(61,107,255,.18) 0%, transparent 52%);
+      animation: pamHeroOrb 12s ease-in-out infinite;
+    }
+    :root[data-theme="light"] .pamphlet-hero::before {
+      background:
+        radial-gradient(ellipse 60% 55% at 12% 40%, rgba(124,92,252,.12) 0%, transparent 55%),
+        radial-gradient(ellipse 50% 45% at 90% 60%, rgba(61,107,255,.10) 0%, transparent 52%);
+    }
+    .pamphlet-hero::after {
+      content:''; position:absolute; inset:0; pointer-events:none;
+      background-image: radial-gradient(rgba(255,255,255,.05) 1px, transparent 1px);
+      background-size: 28px 28px;
+      -webkit-mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 20%, transparent 100%);
+      mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 20%, transparent 100%);
+    }
+    :root[data-theme="light"] .pamphlet-hero::after {
+      background-image: radial-gradient(rgba(100,80,200,.07) 1px, transparent 1px);
     }
     .pamphlet-hero .badge-row { display:flex; justify-content:center; gap:0.6rem; flex-wrap:wrap; margin-bottom:1.25rem; position:relative; }
-    .pamphlet-hero .badge { background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.3); border-radius:999px; padding:0.3rem 0.85rem; font-size:0.78rem; font-weight:700; color:#fff; backdrop-filter:blur(6px); }
+    .pamphlet-hero .badge {
+      background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.3);
+      border-radius:999px; padding:0.3rem 0.85rem; font-size:0.78rem; font-weight:700;
+      color:#fff; -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px);
+    }
+    :root[data-theme="light"] .pamphlet-hero .badge {
+      background:rgba(124,92,252,0.1); border-color:rgba(124,92,252,0.3); color:#7c5cfc;
+    }
     .pamphlet-hero h1 { color:#fff; font-size:2.8rem; font-weight:900; line-height:1.15; position:relative; }
+    :root[data-theme="light"] .pamphlet-hero h1 { color:#1a0a3d; }
     .pamphlet-hero h1 span { color:rgba(255,255,255,0.75); }
+    :root[data-theme="light"] .pamphlet-hero h1 span { color:rgba(30,15,60,0.6); }
     .pamphlet-hero p  { color:rgba(255,255,255,0.82); font-size:1rem; max-width:520px; margin:0.75rem auto 0; position:relative; }
+    :root[data-theme="light"] .pamphlet-hero p { color:rgba(30,15,60,0.6); }
     .hero-actions { display:flex; justify-content:center; gap:1rem; flex-wrap:wrap; margin-top:2rem; position:relative; }
     .btn-white { background:#fff; color:var(--v1); border:none; border-radius:var(--r1); padding:0.75rem 1.75rem; font-size:0.9rem; font-weight:700; cursor:pointer; transition:all 0.2s; font-family:inherit; }
     .btn-white:hover { background:rgba(255,255,255,0.9); transform:scale(1.02); }

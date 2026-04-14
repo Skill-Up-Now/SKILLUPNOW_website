@@ -5,17 +5,26 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Contact Us — SkillUpNow</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Cormorant+Garamond:wght@600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../css/variables.css">
   <link rel="stylesheet" href="../css/main.css">
   <link rel="stylesheet" href="../css/responsive.css">
   <style>
     .page-wrap { position:relative; z-index:1; padding-top:0; min-height:100vh; }
-    /* ── Premium Cinematic Hero ── */
+
+    /* ── Premium Cinematic Hero (THEME-RESPONSIVE) ── */
+    @keyframes chHeroOrb {
+      0%,100% { opacity:1; transform:translateY(0) scale(1); }
+      50%      { opacity:.75; transform:translateY(-22px) scale(1.05); }
+    }
     .contact-hero {
       position: relative; overflow: hidden; text-align: center;
       padding: 5.5rem 2rem 4.5rem;
-      background: #07041a;
+      background: linear-gradient(170deg,#0d0621 0%,#0c1433 55%,#06021a 100%);
+      transition: background .4s;
+    }
+    :root[data-theme="light"] .contact-hero {
+      background: linear-gradient(155deg,#f8f6ff 0%,#f0ecff 28%,#e8e2ff 58%,#f5f3ff 100%);
     }
     /* Deep layered background */
     .contact-hero::before {
@@ -23,8 +32,13 @@
       background:
         radial-gradient(ellipse 80% 60% at 20% 30%, rgba(109,40,217,.35) 0%, transparent 55%),
         radial-gradient(ellipse 70% 50% at 82% 70%, rgba(16,90,220,.28) 0%, transparent 50%),
-        radial-gradient(ellipse 55% 45% at 55% 10%, rgba(236,72,153,.15) 0%, transparent 45%),
-        linear-gradient(170deg, #0d0621 0%, #0c1433 55%, #06021a 100%);
+        radial-gradient(ellipse 55% 45% at 55% 10%, rgba(236,72,153,.15) 0%, transparent 45%);
+    }
+    :root[data-theme="light"] .contact-hero::before {
+      background:
+        radial-gradient(ellipse 80% 60% at 20% 30%, rgba(109,40,217,.14) 0%, transparent 55%),
+        radial-gradient(ellipse 70% 50% at 82% 70%, rgba(16,90,220,.10) 0%, transparent 50%),
+        radial-gradient(ellipse 55% 45% at 55% 10%, rgba(236,72,153,.07) 0%, transparent 45%);
     }
     /* Animated noise/grain texture */
     .contact-hero::after {
@@ -91,13 +105,18 @@
     }
     /* Main headline */
     .contact-hero h1 {
-      font-family: 'Cinzel', 'Cormorant Garamond', Georgia, serif;
+      font-family: 'Plus Jakarta Sans', sans-serif;
       font-size: clamp(2.1rem, 5.5vw, 4rem);
-      font-weight: 900; letter-spacing: .05em; line-height: 1.12;
+      font-weight: 900; letter-spacing: .02em; line-height: 1.12;
       margin-bottom: .5rem; position: relative;
       background: linear-gradient(135deg, #ffffff 0%, #e0d4ff 30%, #c084fc 60%, #67e8f9 100%);
       -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
       filter: drop-shadow(0 0 40px rgba(192,132,252,.25));
+    }
+    :root[data-theme="light"] .contact-hero h1 {
+      background: linear-gradient(135deg, #1a0a3d 0%, #4c1d95 40%, #7c3aed 70%, #2563eb 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      filter: drop-shadow(0 0 24px rgba(124,58,237,.18));
     }
     /* Underline accent */
     .ch-underline {
@@ -106,14 +125,28 @@
       border-radius: 2px;
       box-shadow: 0 0 12px rgba(192,132,252,.55);
     }
+    :root[data-theme="light"] .ch-underline {
+      box-shadow: 0 0 10px rgba(124,58,237,.3);
+    }
     /* Subtitle */
     .contact-hero p {
-      font-family: 'Cormorant Garamond', Georgia, serif;
-      font-size: clamp(1rem, 2vw, 1.22rem);
-      font-style: italic; line-height: 1.8;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: clamp(.92rem, 1.8vw, 1.08rem);
+      line-height: 1.8;
       color: rgba(210,195,255,.72); max-width: 520px; margin: 0 auto 2rem;
       position: relative;
     }
+    :root[data-theme="light"] .contact-hero p { color: rgba(30,15,60,.62); }
+    /* Light theme: grid lines + orbs toned down */
+    :root[data-theme="light"] .ch-grid { opacity: .04; }
+    :root[data-theme="light"] .ch-orb1 { background: radial-gradient(circle, rgba(124,58,237,.1) 0%, transparent 70%); }
+    :root[data-theme="light"] .ch-orb2 { background: radial-gradient(circle, rgba(37,99,235,.08) 0%, transparent 70%); }
+    :root[data-theme="light"] .ch-orb3 { background: radial-gradient(circle, rgba(236,72,153,.06) 0%, transparent 70%); }
+    /* Light theme: kicker pill */
+    :root[data-theme="light"] .contact-hero-tag {
+      background: rgba(124,58,237,.08); border-color: rgba(124,58,237,.28); color: #7c3aed;
+    }
+    :root[data-theme="light"] .ch-dot { background: #7c3aed; box-shadow: 0 0 6px #7c3aed; }
     /* Stat pills row */
     .ch-stats {
       display: flex; justify-content: center; gap: 1.2rem; flex-wrap: wrap;
@@ -146,10 +179,10 @@
       background: linear-gradient(145deg,#f59e0b,#b45309);
       box-shadow: 0 2px 0 #92400e, 0 3px 8px rgba(245,158,11,.35);
     }
-    /* ── Section titles use royal font ── */
+    /* ── Section titles ── */
     .form-card h2, .info-card h3 {
-      font-family:'Cinzel', 'Cormorant Garamond', Georgia, serif;
-      letter-spacing:.03em;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      letter-spacing: 0;
     }
     /* ── Icon-only — no background ── */
     .ci-icon-3d {
@@ -529,7 +562,7 @@ function downloadContactQR() {
   <div style="max-width:1300px;margin:0 auto;">
     <div style="text-align:center;">
       <span style="display:inline-block;padding:.25rem .9rem;background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.25);border-radius:50px;font-size:.72rem;font-weight:700;color:#fbbf24;letter-spacing:.07em;text-transform:uppercase;margin-bottom:.8rem;">⭐ Student Reviews</span>
-      <h2 style="font-family:'Cormorant Garamond',serif;font-size:clamp(1.8rem,4vw,2.8rem);font-weight:700;color:var(--txt);margin:0 0 .5rem;line-height:1.15;">What Our <span style="background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Students Say</span></h2>
+      <h2 style="font-family:'Plus Jakarta Sans',sans-serif;font-size:clamp(1.8rem,4vw,2.8rem);font-weight:800;color:var(--txt);margin:0 0 .5rem;line-height:1.15;">What Our <span style="background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Students Say</span></h2>
       <p style="font-size:.95rem;color:var(--txt3);max-width:500px;margin:0 auto;">Real feedback from real learners who transformed their careers with SkillUpNow.</p>
     </div>
     <div class="test-grid" id="enq-reviews-grid">

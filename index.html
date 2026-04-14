@@ -1398,12 +1398,12 @@
       100% { transform: translateX(220%) skewX(-18deg); opacity: 0; }
     }
     @keyframes hcGlowPurple {
-      0%, 100% { box-shadow: 0 4px 14px rgba(235, 253, 76, 0.32); }
-      50%       { box-shadow: 0 6px 22px rgba(238, 247, 80, 0.52); }
+      0%, 100% { box-shadow: 0 4px 16px rgba(124,92,252,.38), 0 0 0 0 rgba(124,92,252,.18); }
+      50%       { box-shadow: 0 6px 28px rgba(124,92,252,.62), 0 0 0 6px rgba(124,92,252,.0); }
     }
     @keyframes hcGlowGreen {
-      0%, 100% { box-shadow: 0 4px 14px rgba(255, 238, 3, 0.32); }
-      50%       { box-shadow: 0 6px 22px rgba(244, 240, 20, 0.5); }
+      0%, 100% { box-shadow: 0 4px 16px rgba(74,222,128,.35), 0 0 0 0 rgba(74,222,128,.18); }
+      50%       { box-shadow: 0 6px 26px rgba(34,211,238,.55), 0 0 0 5px rgba(74,222,128,.0); }
     }
     @keyframes hcGlowAmber {
       0%, 100% { box-shadow: 0 4px 14px rgba(245,158,11,.36); }
@@ -1424,12 +1424,12 @@
       background: linear-gradient(90deg,#7c5cfc 0%,#3d6bff 50%,#7c5cfc 100%);
       background-size: 250% 100%;
       animation: hcLiquidShimmer 3s linear infinite, hcGlowPurple 2.6s ease-in-out infinite;
-      border: 1px solid rgba(238, 246, 5, 0.1);
+      border: 1px solid rgba(155,143,255,.25);
       transition: transform .25s cubic-bezier(.34,1.56,.64,1), filter .2s;
     }
     .hc-btn-enroll::before {
       content:''; position:absolute; inset:0; pointer-events:none; border-radius:inherit;
-      background: linear-gradient(105deg, transparent 35%, rgba(255, 251, 4, 0.448) 50%, transparent 65%);
+      background: linear-gradient(105deg, transparent 35%, rgba(255,255,255,.28) 50%, transparent 65%);
       background-size:200% 100%; animation: hcLiquidSweep 2.8s ease-in-out infinite;
     }
     .hc-btn-enroll:hover { transform:translateY(-2px) scale(1.03); filter:brightness(1.1); }
@@ -1488,16 +1488,34 @@
       cursor:pointer; font-size:1rem; color:var(--txt3); transition:all .2s;
     }
     .hc-em-close:hover { background:var(--v1); color:#fff; border-color:var(--v1); }
+    /* Modal pay button — liquid glass purple/blue */
     .hc-btn-pay {
-      width:100%; background:var(--grad); color:#fff; border:none;
-      border-radius:var(--r1); padding:.9rem; font-size:.95rem; font-weight:700;
-      cursor:pointer; transition:all .25s; font-family:inherit;
+      position: relative; overflow: hidden;
+      width:100%; border:none; border-radius:16px; padding:.95rem;
+      font-size:.95rem; font-weight:800; color:#fff; letter-spacing:.025em;
+      cursor:pointer; font-family:inherit;
+      background: linear-gradient(90deg,#7c5cfc 0%,#3d6bff 35%,#06b6d4 65%,#7c5cfc 100%);
+      background-size: 300% 100%;
+      animation: hcLiquidShimmer 3s linear infinite, hcGlowPurple 2.8s ease-in-out infinite;
+      border: 1.5px solid rgba(255,255,255,.12);
+      transition: transform .28s cubic-bezier(.34,1.56,.64,1), filter .22s;
     }
-    .hc-btn-pay:hover { opacity:.88; transform:scale(1.01); }
-    .hc-btn-pay:disabled { opacity:.5; cursor:not-allowed; transform:none; }
+    .hc-btn-pay::before {
+      content:''; position:absolute; inset:0; pointer-events:none; border-radius:inherit;
+      background: linear-gradient(105deg, transparent 35%, rgba(255,255,255,.22) 50%, transparent 65%);
+      background-size:200% 100%; animation: hcLiquidSweep 2.6s ease-in-out infinite;
+    }
+    .hc-btn-pay::after {
+      content:''; position:absolute; inset:-2px; z-index:-1; border-radius:18px;
+      background: linear-gradient(90deg,#7c5cfc,#3d6bff,#06b6d4,#7c5cfc); background-size:300% 100%;
+      animation: hcLiquidShimmer 3s linear infinite; filter:blur(9px); opacity:.5;
+    }
+    .hc-btn-pay:hover  { transform:translateY(-3px) scale(1.02); filter:brightness(1.08); }
+    .hc-btn-pay:active { transform:scale(.97) translateY(1px); }
+    .hc-btn-pay:disabled { opacity:.5; cursor:not-allowed; transform:none; animation:none; background:#6b5fa0; box-shadow:none; filter:none; }
     .hc-pay-actions { display:flex; gap:.65rem; margin-top:.25rem; }
     .hc-btn-pay-now { flex:1.6; }
-    .hc-btn-pay-later { flex:1; background:transparent!important; color:var(--v1)!important; border:1.5px solid var(--v1)!important; box-shadow:none!important; }
+    .hc-btn-pay-later { flex:1; background:transparent!important; color:var(--v1)!important; border:1.5px solid rgba(124,92,252,.45)!important; box-shadow:none!important; backdrop-filter:blur(4px)!important; }
     /* Confirmation popup */
     .hc-ec-overlay { display:none; position:fixed; inset:0; z-index:9100; background:rgba(6,3,18,.72); backdrop-filter:blur(18px); align-items:center; justify-content:center; padding:1rem; }
     .hc-ec-overlay.open { display:flex; }

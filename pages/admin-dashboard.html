@@ -396,6 +396,10 @@
         <span class="nav-icon">💬</span> Inquiries
         <span class="badge" id="inquiry-badge">0</span>
       </div>
+      <div class="nav-item" data-section="interests">
+        <span class="nav-icon">🔔</span> Interested Users
+        <span class="badge" id="interest-badge" style="display:none">0</span>
+      </div>
     </div>
   </nav>
   </div><!-- /.nav-scroll -->
@@ -1308,6 +1312,56 @@
       </div>
     </div>
 
+    <!-- ===== INTERESTED USERS ===== -->
+    <div class="section" id="section-interests">
+      <style>
+        .int-stats { display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:1rem; margin-bottom:1.5rem; }
+        .int-stat  { background:var(--panel); border:1.5px solid var(--border); border-radius:14px; padding:1rem 1.2rem; text-align:center; }
+        .int-stat .val { font-size:1.6rem; font-weight:800; color:var(--v1); line-height:1; }
+        .int-stat .lbl { font-size:.72rem; color:var(--txt4); margin-top:.3rem; font-weight:600; text-transform:uppercase; letter-spacing:.06em; }
+        .int-course-filter { display:flex; gap:.6rem; flex-wrap:wrap; align-items:center; margin-bottom:1rem; }
+        .int-course-filter select { padding:.45rem .85rem; border-radius:10px; border:1.5px solid var(--border); background:var(--bg); color:var(--txt); font-size:.82rem; font-family:inherit; }
+        .int-export-btn { margin-left:auto; padding:.45rem 1.1rem; border-radius:50px; font-size:.8rem; font-weight:700; border:1.5px solid var(--border); background:var(--bg); color:var(--txt3); cursor:pointer; transition:all .2s; font-family:inherit; }
+        .int-export-btn:hover { background:var(--v1); border-color:var(--v1); color:#fff; }
+      </style>
+
+      <!-- Stats -->
+      <div class="int-stats">
+        <div class="int-stat"><div class="val" id="int-total">—</div><div class="lbl">Total Interests</div></div>
+        <div class="int-stat"><div class="val" id="int-courses">—</div><div class="lbl">Courses</div></div>
+        <div class="int-stat"><div class="val" id="int-logged-in">—</div><div class="lbl">Logged-In</div></div>
+        <div class="int-stat"><div class="val" id="int-anon">—</div><div class="lbl">Anonymous</div></div>
+      </div>
+
+      <div class="table-card">
+        <div class="table-header">
+          <h3>Interested Users</h3>
+          <div class="table-actions" style="gap:.6rem;display:flex;flex-wrap:wrap;align-items:center;">
+            <select id="int-course-filter" onchange="loadInterested()">
+              <option value="">All Upcoming Courses</option>
+            </select>
+            <button class="int-export-btn" onclick="exportInterestCSV()">⬇ Export CSV</button>
+            <button class="int-export-btn" onclick="loadInterested()" style="margin-left:0;">↻ Refresh</button>
+          </div>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Course</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Logged In?</th>
+                <th>Date</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="interest-tbody"><tr><td colspan="6" class="table-empty">Loading…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div><!-- /section-interests -->
+
   </div><!-- /content -->
 </main>
 
@@ -1343,6 +1397,9 @@
     </div>
     <div class="form-row">
       <div class="f-group"><label>Is Featured</label><select id="c-featured"><option value="false">No</option><option value="true">Yes</option></select></div>
+      <div class="f-group"><label>Is Upcoming</label><select id="c-upcoming"><option value="false">No — Enrollable</option><option value="true">Yes — Coming Soon (view only)</option></select></div>
+    </div>
+    <div class="form-row">
       <div class="f-group"><label>Status</label><select id="c-published"><option value="true">Published</option><option value="false">Draft</option></select></div>
     </div>
     <div class="form-row">
@@ -1702,6 +1759,7 @@ function loadSection(sec) {
     pricing: loadPricing, discounts: loadDiscounts, referrals: loadReferrals,
     reports: loadReports, recordings: loadRecordings, schedules: loadSchedules,
     reviews: loadReviews, forms: loadFormsSection, inquiries: loadInquiries,
+    interests: loadInterested,
   };
   loaders[sec]?.();
 }
@@ -2907,6 +2965,104 @@ async function resolveInquiry(id) {
   loadInquiries();
 }
 
+// ===== INTERESTED USERS =====
+let _interestData = [];
+
+async function loadInterested() {
+  const tbody  = document.getElementById('interest-tbody');
+  const filter = document.getElementById('int-course-filter')?.value || '';
+  if (tbody) tbody.innerHTML = '<tr><td colspan="6" class="table-empty">Loading…</td></tr>';
+
+  try {
+    // Populate course filter dropdown with upcoming courses (first call only)
+    const sel = document.getElementById('int-course-filter');
+    if (sel && sel.options.length <= 1) {
+      const { data: upcoming } = await db.client.from('courses')
+        .select('id,title').eq('is_upcoming', true).order('title');
+      (upcoming || []).forEach(c => {
+        const o = document.createElement('option');
+        o.value = c.id; o.textContent = c.title;
+        sel.appendChild(o);
+      });
+    }
+
+    // Fetch interests with course title join
+    let q = db.client.from('course_interests')
+      .select('id, created_at, student_name, email, student_user_id, course_id, courses(title)')
+      .order('created_at', { ascending: false });
+    if (filter) q = q.eq('course_id', filter);
+
+    const { data, error } = await q;
+    if (error) throw error;
+    _interestData = data || [];
+
+    // Update stat cards
+    const total    = _interestData.length;
+    const courses  = new Set(_interestData.map(r => r.course_id)).size;
+    const loggedIn = _interestData.filter(r => r.student_user_id).length;
+    const anon     = total - loggedIn;
+    document.getElementById('int-total').textContent    = total;
+    document.getElementById('int-courses').textContent  = courses;
+    document.getElementById('int-logged-in').textContent = loggedIn;
+    document.getElementById('int-anon').textContent     = anon;
+
+    // Update sidebar badge
+    const badge = document.getElementById('interest-badge');
+    if (badge) { badge.textContent = total; badge.style.display = total ? '' : 'none'; }
+
+    if (!tbody) return;
+    if (!_interestData.length) {
+      tbody.innerHTML = `<tr><td colspan="6" class="table-empty">No interest records yet.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = _interestData.map(r => {
+      const name    = r.student_name || '<span style="color:var(--txt4)">—</span>';
+      const email   = r.email        || '<span style="color:var(--txt4)">—</span>';
+      const course  = r.courses?.title || r.course_id;
+      const isAuth  = r.student_user_id ? '✅ Yes' : '<span style="color:var(--txt4)">No</span>';
+      const dateStr = new Date(r.created_at).toLocaleString('en-IN', { dateStyle:'medium', timeStyle:'short' });
+      return `<tr>
+        <td style="font-weight:600;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${course}">${course}</td>
+        <td>${name}</td>
+        <td>${email}</td>
+        <td>${isAuth}</td>
+        <td style="color:var(--txt3);font-size:.8rem">${dateStr}</td>
+        <td><button onclick="deleteInterest('${r.id}')" style="padding:.3rem .7rem;border-radius:8px;border:1px solid rgba(239,68,68,.35);background:rgba(239,68,68,.08);color:#f87171;font-size:.75rem;font-weight:700;cursor:pointer;font-family:inherit;transition:all .18s;" onmouseover="this.style.background='rgba(239,68,68,.22)'" onmouseout="this.style.background='rgba(239,68,68,.08)'">Delete</button></td>
+      </tr>`;
+    }).join('');
+  } catch(err) {
+    console.error('loadInterested error', err);
+    if (tbody) tbody.innerHTML = `<tr><td colspan="6" class="table-empty">Error: ${err.message}</td></tr>`;
+  }
+}
+
+async function deleteInterest(id) {
+  if (!confirm('Remove this interest record?')) return;
+  await db.client.from('course_interests').delete().eq('id', id);
+  loadInterested();
+}
+
+function exportInterestCSV() {
+  if (!_interestData.length) { alert('No data to export.'); return; }
+  const rows = [['Course', 'Name', 'Email', 'Logged In', 'Date']];
+  _interestData.forEach(r => {
+    rows.push([
+      `"${(r.courses?.title || r.course_id).replace(/"/g,'""')}"`,
+      `"${(r.student_name || '').replace(/"/g,'""')}"`,
+      `"${(r.email || '').replace(/"/g,'""')}"`,
+      r.student_user_id ? 'Yes' : 'No',
+      new Date(r.created_at).toLocaleString('en-IN')
+    ]);
+  });
+  const csv  = rows.map(r => r.join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = `interested-users-${Date.now()}.csv`;
+  a.click(); URL.revokeObjectURL(url);
+}
+
 // ===== ACTIONS =====
 async function approveMentor(id, status) {
   if (!confirm(`${status === 'approved' ? 'Approve' : 'Reject'} this mentor?`)) return;
@@ -2967,6 +3123,7 @@ async function saveCourse() {
     description: document.getElementById('c-desc').value,
     is_featured: document.getElementById('c-featured').value === 'true',
     course_status: isPublished ? 'published' : 'draft',
+    is_upcoming: document.getElementById('c-upcoming')?.value === 'true',
     visibility: visibilityVal,
     duration_days: months ? months * 30 : null,
     total_live_classes: parseInt(document.getElementById('c-sessions').value) || 0,
@@ -3632,6 +3789,8 @@ async function editCourse(id) {
   document.getElementById('c-sessions').value = c.total_live_classes || '';
   document.getElementById('c-published').value = c.course_status === 'published' ? 'true' : 'false';
   document.getElementById('c-featured').value = c.is_featured ? 'true' : 'false';
+  const upcomingEl = document.getElementById('c-upcoming');
+  if (upcomingEl) upcomingEl.value = c.is_upcoming ? 'true' : 'false';
   const visEl = document.getElementById('c-visibility');
   if (visEl) visEl.value = c.visibility || 'public';
   // Set category (the modal uses UUID)
@@ -3825,20 +3984,17 @@ async function revokeAccess(enrollId) {
 }
 
 // ── Unenroll student ──────────────────────────────────────────
-// Cancels enrollment + revokes access. Payment history is kept.
-// Student's email becomes eligible to re-enroll in the same course.
+// Fully removes the enrollment record from the database.
+// The student will see the course as unenrolled on their side immediately.
+// Payment history in the payments table is kept for accounting.
 async function unenrollStudent(enrollId, studentName, courseTitle) {
   const label = [studentName, courseTitle].filter(Boolean).join(' from ');
-  if (!confirm(`Unenroll${label ? ' ' + label : ''}?\n\nThis will:\n  • Cancel their enrollment\n  • Revoke course access immediately\n  • Keep payment records for accounting\n\nThe student can be re-enrolled later if needed.`)) return;
+  if (!confirm(`Remove enrollment${label ? ' of ' + label : ''}?\n\nThis will:\n  • Permanently delete the enrollment record\n  • Remove course access immediately\n  • Remove the course from the student's dashboard\n  • Keep payment records for accounting\n\nThis cannot be undone.`)) return;
 
-  const { error } = await db.client.from('enrollments').update({
-    enrollment_status: 'cancelled',
-    access_status: 'revoked',
-    updated_at: new Date().toISOString(),
-  }).eq('id', enrollId);
+  const { error } = await db.client.from('enrollments').delete().eq('id', enrollId);
 
   if (error) { _showAdminToast('Unenroll failed: ' + error.message, 'error'); return; }
-  _showAdminToast(`✓ ${studentName || 'Student'} unenrolled${courseTitle ? ' from ' + courseTitle : ''}. Access revoked.`, 'success');
+  _showAdminToast(`✓ ${studentName || 'Student'} removed from${courseTitle ? ' ' + courseTitle : ' enrollment'}. Record deleted.`, 'success');
   loadEnrollments();
   loadDashboard();
 }

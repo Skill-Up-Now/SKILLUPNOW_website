@@ -3,71 +3,353 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Course Feedback — SkillUpNow</title>
+  <title>Feedback — SkillUpNow</title>
+  <meta name="description" content="Share your feedback about courses, mentors, admin support, and the SkillUpNow platform.">
   <link rel="stylesheet" href="../css/variables.css">
+  <link rel="stylesheet" href="../css/animations.css">
   <link rel="stylesheet" href="../css/main.css">
   <link rel="stylesheet" href="../css/responsive.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
+    /* ===== PAGE SHELL ===== */
     .page-wrap { position:relative; z-index:1; padding-top:0; min-height:100vh; }
-    .feedback-hero { background:var(--grad); padding:3rem 2rem; text-align:center; position:relative; overflow:hidden; }
-    .feedback-hero::before { content:''; position:absolute; inset:0; background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='rgba(255,255,255,0.06)' stroke-width='1'%3E%3Ccircle cx='30' cy='30' r='25'/%3E%3C/g%3E%3C/svg%3E") repeat; }
-    .feedback-hero h1 { color:#fff; font-size:2.2rem; font-weight:800; position:relative; }
-    .feedback-hero p  { color:rgba(255,255,255,0.82); position:relative; margin-top:0.5rem; }
 
-    .feedback-wrap { max-width:720px; margin:2.5rem auto; padding:0 1.5rem 4rem; }
-
-    .card { background:var(--panel); border:1.5px solid var(--border); border-radius:var(--r3); padding:2rem; margin-bottom:1.25rem; }
-    .card h2 { font-size:1.15rem; font-weight:800; margin-bottom:0.3rem; }
-    .card p.sub { font-size:0.85rem; color:var(--txt3); margin-bottom:1.5rem; }
-
-    /* Star rating */
-    .star-rating { display:flex; flex-direction:row-reverse; justify-content:flex-end; gap:0.25rem; margin-bottom:1.5rem; }
-    .star-rating input { display:none; }
-    .star-rating label { font-size:2.2rem; cursor:pointer; color:var(--border2); transition:color 0.1s; line-height:1; }
-    .star-rating input:checked ~ label,
-    .star-rating label:hover,
-    .star-rating label:hover ~ label { color:#f59e0b; }
-    .rating-text { font-size:0.85rem; color:var(--txt3); margin-top:0.35rem; }
-
-    /* Form */
-    .f-group { margin-bottom:1rem; }
-    .f-group label { display:block; font-size:0.82rem; font-weight:700; color:var(--txt2); margin-bottom:0.4rem; }
-    .f-group input, .f-group select, .f-group textarea {
-      width:100%; background:var(--bg); border:1.5px solid var(--border); border-radius:var(--r1);
-      padding:0.65rem 0.9rem; color:var(--txt); font-size:0.88rem; outline:none; font-family:inherit; transition:border-color 0.2s;
+    /* ===== HERO — THEME-RESPONSIVE ===== */
+    .feedback-hero {
+      background: linear-gradient(155deg,#06030e 0%,#0d0720 22%,#160b35 58%,#0a1230 100%);
+      min-height: 320px; padding: 5rem 2rem 3.5rem;
+      position: relative; overflow: hidden;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      text-align: center;
     }
-    .f-group input:focus, .f-group select:focus, .f-group textarea:focus { border-color:var(--v1); box-shadow:0 0 0 3px var(--v5); }
-    .f-group textarea { resize:vertical; min-height:130px; }
+    :root[data-theme="light"] .feedback-hero {
+      background: linear-gradient(155deg,#f8f6ff 0%,#f0ecff 28%,#e8e2ff 58%,#f5f3ff 100%);
+    }
+    /* Animated depth glow */
+    .feedback-hero::before {
+      content:''; position:absolute; inset:0; pointer-events:none;
+      background:
+        radial-gradient(ellipse 55% 70% at 8% 45%, rgba(124,92,252,.2) 0%, transparent 55%),
+        radial-gradient(ellipse 45% 55% at 92% 55%, rgba(61,107,255,.18) 0%, transparent 52%),
+        radial-gradient(ellipse 35% 45% at 50% 110%, rgba(103,232,249,.12) 0%, transparent 55%);
+      animation: fbHeroOrb 14s ease-in-out infinite;
+    }
+    :root[data-theme="light"] .feedback-hero::before {
+      background:
+        radial-gradient(ellipse 55% 70% at 8% 45%, rgba(124,92,252,.13) 0%, transparent 55%),
+        radial-gradient(ellipse 45% 55% at 92% 55%, rgba(61,107,255,.1) 0%, transparent 52%),
+        radial-gradient(ellipse 35% 45% at 50% 110%, rgba(103,232,249,.07) 0%, transparent 55%);
+    }
+    @keyframes fbHeroOrb {
+      0%,100% { opacity:1; transform:scale(1); }
+      50%      { opacity:.78; transform:scale(1.06); }
+    }
+    /* Dot grid texture */
+    .feedback-hero::after {
+      content:''; position:absolute; inset:0; pointer-events:none;
+      background-image: radial-gradient(rgba(255,255,255,.055) 1px, transparent 1px);
+      background-size: 22px 22px;
+      -webkit-mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 40%, transparent 100%);
+      mask-image:         radial-gradient(ellipse 80% 80% at 50% 50%, black 40%, transparent 100%);
+    }
+    :root[data-theme="light"] .feedback-hero::after {
+      background-image: radial-gradient(rgba(124,92,252,.08) 1px, transparent 1px);
+    }
+    /* Hero text */
+    .fhero-kicker {
+      position: relative; z-index: 2;
+      display: inline-flex; align-items: center; gap: .45rem;
+      background: rgba(124,92,252,.14); border: 1px solid rgba(124,92,252,.35);
+      border-radius: 999px; padding: .3rem .95rem;
+      font-size: .72rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+      color: var(--v1); margin-bottom: 1rem;
+      animation: fbKickerIn .6s cubic-bezier(.34,1.56,.64,1) both;
+    }
+    :root[data-theme="light"] .fhero-kicker { color: #7c5cfc; background: rgba(124,92,252,.1); }
+    @keyframes fbKickerIn { from { opacity:0; transform:translateY(-10px) scale(.9); } to { opacity:1; transform:none; } }
 
-    /* Aspect ratings */
-    .aspect-grid { display:grid; grid-template-columns:1fr 1fr; gap:0.85rem; margin-bottom:1rem; }
-    .aspect-item { background:var(--bg); border:1.5px solid var(--border); border-radius:var(--r1); padding:0.85rem; }
-    .aspect-label { font-size:0.8rem; font-weight:700; color:var(--txt2); margin-bottom:0.5rem; }
-    .aspect-stars { display:flex; gap:0.3rem; }
-    .aspect-star { font-size:1.3rem; cursor:pointer; color:var(--border2); transition:color 0.1s; }
-    .aspect-star.active { color:#f59e0b; }
+    .fhero-title {
+      position: relative; z-index: 2;
+      font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 800; line-height: 1.18;
+      color: #fff; margin-bottom: .75rem;
+      animation: fbTitleIn .7s .15s cubic-bezier(.34,1.56,.64,1) both;
+    }
+    :root[data-theme="light"] .fhero-title { color: #1e1b4b; }
+    @keyframes fbTitleIn { from { opacity:0; transform:translateY(18px); } to { opacity:1; transform:none; } }
 
-    /* Submit btn */
-    .btn-submit { background:var(--grad); color:#fff; border:none; border-radius:var(--r1); padding:0.8rem 2.5rem; font-size:0.95rem; font-weight:700; cursor:pointer; transition:all 0.25s; font-family:inherit; }
-    .btn-submit:hover:not(:disabled) { opacity:0.88; transform:scale(1.01); }
-    .btn-submit:disabled { opacity:0.5; cursor:not-allowed; }
+    .fhero-accent {
+      background: linear-gradient(135deg,#a78bfa,#67e8f9);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    :root[data-theme="light"] .fhero-accent {
+      background: linear-gradient(135deg,#7c5cfc,#3d6bff);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .fhero-sub {
+      position: relative; z-index: 2;
+      font-size: .95rem; color: rgba(255,255,255,.65); max-width: 520px;
+      animation: fbSubIn .8s .3s both; line-height: 1.6;
+    }
+    :root[data-theme="light"] .fhero-sub { color: rgba(30,27,75,.6); }
+    @keyframes fbSubIn { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:none; } }
 
-    /* Alert */
-    .alert { padding:0.85rem 1rem; border-radius:var(--r1); font-size:0.85rem; margin-bottom:1rem; display:none; }
-    .alert.success { background:rgba(34,197,94,0.1); border:1px solid rgba(34,197,94,0.25); color:#16a34a; }
-    .alert.error   { background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.25); color:#dc2626; }
+    /* ===== TYPE SELECTOR ===== */
+    .fb-type-outer {
+      background: var(--bg); border-bottom: 1px solid var(--border);
+      padding: 1.5rem 1.5rem 0; position: sticky; top: 60px; z-index: 50;
+      backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+    }
+    .fb-type-tabs {
+      max-width: 860px; margin: 0 auto;
+      display: flex; gap: 0; border-radius: 14px;
+      background: rgba(255,255,255,.04); border: 1.5px solid var(--border);
+      padding: 4px; overflow-x: auto;
+    }
+    .fb-type-tabs::-webkit-scrollbar { height: 3px; }
+    .fb-type-tabs::-webkit-scrollbar-thumb { background: rgba(124,92,252,.3); border-radius: 99px; }
+    .fb-tab {
+      flex: 1; min-width: 140px; display: flex; align-items: center; justify-content: center;
+      gap: .45rem; padding: .65rem .85rem;
+      border: none; border-radius: 10px; background: none; cursor: pointer;
+      font-family: 'Plus Jakarta Sans', sans-serif; font-size: .8rem; font-weight: 700;
+      color: var(--txt3); white-space: nowrap;
+      transition: all .22s cubic-bezier(.4,0,.2,1);
+    }
+    .fb-tab .tb-icon { font-size: 1.05rem; transition: transform .25s cubic-bezier(.34,1.56,.64,1); }
+    .fb-tab:hover { color: var(--txt); background: rgba(255,255,255,.06); }
+    .fb-tab:hover .tb-icon { transform: scale(1.2) rotate(-5deg); }
+    .fb-tab.active {
+      background: linear-gradient(135deg, var(--v2,#7c5cfc), #3d6bff);
+      color: #fff; box-shadow: 0 4px 16px rgba(124,92,252,.4);
+    }
+    .fb-tab.active .tb-icon { transform: scale(1.15); }
+    .fb-tab-indicator {
+      height: 3px; border-radius: 3px 3px 0 0;
+      background: linear-gradient(90deg, var(--v2,#7c5cfc), #3d6bff);
+      margin-top: .5rem; transition: width .3s;
+    }
+
+    /* ===== MAIN WRAP ===== */
+    .feedback-wrap { max-width: 780px; margin: 0 auto; padding: 2rem 1.5rem 5rem; }
+
+    /* ===== FORM PANELS ===== */
+    .fb-panel {
+      display: none; opacity: 0; transform: translateY(18px);
+      transition: opacity .35s ease, transform .35s cubic-bezier(.34,1.56,.64,1);
+    }
+    .fb-panel.active { display: block; }
+    .fb-panel.visible { opacity: 1; transform: none; }
+
+    /* ===== CARDS ===== */
+    .fb-card {
+      background: var(--panel); border: 1.5px solid var(--border);
+      border-radius: 20px; padding: 1.75rem; margin-bottom: 1.25rem;
+      position: relative; overflow: hidden;
+      box-shadow: 0 4px 24px rgba(0,0,0,.08);
+      transition: border-color .25s, box-shadow .25s;
+    }
+    .fb-card:hover { border-color: rgba(124,92,252,.35); box-shadow: 0 8px 40px rgba(124,92,252,.1); }
+    .fb-card::before {
+      content:''; position:absolute; top:0; left:0; right:0; height:3px;
+      background: linear-gradient(90deg, #7c5cfc, #3d6bff, #67e8f9);
+      border-radius: 20px 20px 0 0;
+    }
+    .fb-card-icon {
+      font-size: 2rem; margin-bottom: .75rem; display: block;
+      animation: fbCardIconBounce 2.5s ease-in-out infinite;
+    }
+    @keyframes fbCardIconBounce {
+      0%,100% { transform: translateY(0); }
+      50%      { transform: translateY(-4px); }
+    }
+    .fb-card h2 { font-size: 1.15rem; font-weight: 800; color: var(--txt); margin-bottom: .25rem; }
+    .fb-card .sub { font-size: .83rem; color: var(--txt3); margin-bottom: 1.5rem; line-height: 1.6; }
+
+    /* ===== FORM FIELDS WITH FLOATING LABEL + FOCUS EFFECTS ===== */
+    .f-group {
+      margin-bottom: 1.2rem; position: relative;
+    }
+    .f-group label {
+      display: block; font-size: .8rem; font-weight: 700; color: var(--txt3);
+      margin-bottom: .45rem;
+      transition: color .2s;
+    }
+    .f-group:focus-within label { color: var(--v1); }
+
+    .f-group input, .f-group select, .f-group textarea {
+      width: 100%; background: var(--bg); color: var(--txt);
+      border: 1.5px solid var(--border); border-radius: 12px;
+      padding: .7rem 1rem; font-size: .88rem; font-family: inherit;
+      outline: none; transition: border-color .22s, box-shadow .22s, background .22s;
+      position: relative;
+    }
+    .f-group input:focus, .f-group select:focus, .f-group textarea:focus {
+      border-color: var(--v1);
+      box-shadow: 0 0 0 4px rgba(124,92,252,.12), 0 2px 12px rgba(124,92,252,.1);
+      background: rgba(124,92,252,.04);
+    }
+    .f-group textarea { resize: vertical; min-height: 130px; line-height: 1.65; }
+    /* Underline sweep animation on focus */
+    .f-group::after {
+      content: ''; position: absolute; bottom: 0; left: 50%; right: 50%;
+      height: 2px; background: linear-gradient(90deg,#7c5cfc,#3d6bff);
+      border-radius: 1px; transition: left .3s ease, right .3s ease;
+      pointer-events: none;
+    }
+    .f-group:focus-within::after { left: 0; right: 0; bottom: 1px; }
+
+    /* ===== STAR RATING ===== */
+    .star-wrap { margin-bottom: 1.4rem; }
+    .star-wrap > label { display:block; font-size:.8rem; font-weight:700; color:var(--txt3); margin-bottom:.5rem; }
+    .star-wrap:focus-within > label { color: var(--v1); }
+    .star-row { display: flex; flex-direction: row-reverse; justify-content: flex-end; gap: .2rem; }
+    .star-row input { display: none; }
+    .star-row label {
+      font-size: 2.4rem; cursor: pointer; color: var(--border2);
+      transition: color .12s, transform .18s cubic-bezier(.34,1.56,.64,1), filter .18s;
+      display: inline-block;
+    }
+    .star-row input:checked ~ label,
+    .star-row label:hover,
+    .star-row label:hover ~ label {
+      color: #f59e0b;
+      filter: drop-shadow(0 2px 6px rgba(245,158,11,.5));
+    }
+    .star-row label:hover { transform: scale(1.28) rotate(-8deg); }
+    .star-desc { font-size: .82rem; color: var(--txt3); margin-top: .4rem; min-height: 1.2em; transition: color .2s; }
+
+    /* ===== ASPECT RATINGS ===== */
+    .aspect-section { margin-bottom: 1.25rem; }
+    .aspect-section > label { display:block; font-size:.8rem; font-weight:700; color:var(--txt3); margin-bottom:.75rem; }
+    .aspect-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .85rem; }
+    .aspect-item {
+      background: var(--bg); border: 1.5px solid var(--border); border-radius: 14px; padding: .9rem 1rem;
+      transition: border-color .22s, box-shadow .22s, transform .22s;
+    }
+    .aspect-item:hover { border-color: rgba(124,92,252,.4); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(124,92,252,.1); }
+    .aspect-label { font-size: .78rem; font-weight: 700; color: var(--txt2); margin-bottom: .5rem; }
+    .aspect-stars { display: flex; gap: .25rem; }
+    .aspect-star {
+      font-size: 1.35rem; cursor: pointer; color: var(--border2);
+      transition: color .1s, transform .18s cubic-bezier(.34,1.56,.64,1);
+      display: inline-block;
+    }
+    .aspect-star:hover { transform: scale(1.25); }
+    .aspect-star.active { color: #f59e0b; filter: drop-shadow(0 1px 4px rgba(245,158,11,.45)); }
+
+    /* ===== RADIO / CHECKBOX PILLS ===== */
+    .pill-group { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: 1.2rem; }
+    .pill-group label { position: relative; cursor: pointer; }
+    .pill-group input { position:absolute; opacity:0; width:0; height:0; }
+    .pill-label {
+      display: inline-flex; align-items: center; gap: .35rem;
+      padding: .45rem 1rem; border-radius: 999px;
+      border: 1.5px solid var(--border); font-size: .8rem; font-weight: 700;
+      color: var(--txt3); background: var(--bg);
+      transition: all .2s cubic-bezier(.4,0,.2,1);
+    }
+    .pill-group input:checked + .pill-label {
+      background: linear-gradient(135deg,#7c5cfc,#3d6bff);
+      border-color: #7c5cfc; color: #fff;
+      box-shadow: 0 4px 14px rgba(124,92,252,.38);
+    }
+    .pill-label:hover { border-color: var(--v1); color: var(--txt); transform: translateY(-1px); }
+
+    /* ===== SUBMIT BUTTON ===== */
+    .btn-submit {
+      position: relative; overflow: hidden;
+      background: linear-gradient(135deg, #7c5cfc 0%, #3d6bff 60%, #7c5cfc 100%);
+      background-size: 200% 100%; color: #fff; border: none;
+      border-radius: 14px; padding: .85rem 2.5rem;
+      font-size: .95rem; font-weight: 800; cursor: pointer;
+      font-family: inherit; letter-spacing: .02em;
+      transition: all .28s cubic-bezier(.4,0,.2,1);
+      box-shadow: 0 6px 24px rgba(124,92,252,.38);
+    }
+    .btn-submit::before {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(105deg, transparent 30%, rgba(255,255,255,.22) 50%, transparent 70%);
+      transform: translateX(-130%); transition: transform .55s ease;
+    }
+    .btn-submit:hover:not(:disabled) {
+      transform: translateY(-2px); background-position: 100% 0;
+      box-shadow: 0 10px 36px rgba(124,92,252,.55);
+    }
+    .btn-submit:hover::before { transform: translateX(130%); }
+    .btn-submit:disabled { opacity: .5; cursor: not-allowed; }
+    .submit-note { font-size: .75rem; color: var(--txt4); margin-top: .6rem; }
+
+    /* ===== ALERT ===== */
+    .alert {
+      padding: .85rem 1.1rem; border-radius: 12px; font-size: .85rem;
+      font-weight: 600; margin-bottom: 1.2rem; display: none;
+      animation: alertSlideIn .3s ease;
+    }
+    @keyframes alertSlideIn { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:none; } }
+    .alert.error   { background:rgba(239,68,68,.1); border:1.5px solid rgba(239,68,68,.3); color:#f87171; display:none; }
+    .alert.success { background:rgba(34,197,94,.1); border:1.5px solid rgba(34,197,94,.3); color:#4ade80; display:none; }
     .alert.show { display:block; }
 
-    /* Success screen */
-    .success-screen { display:none; text-align:center; padding:3rem 2rem; }
-    .success-screen.show { display:block; }
-    .success-icon { font-size:4rem; margin-bottom:1rem; }
-    .success-screen h2 { font-size:1.6rem; margin-bottom:0.5rem; }
-    .success-screen p { color:var(--txt3); margin-bottom:1.5rem; }
-
-    @media(max-width:640px) {
-      .aspect-grid { grid-template-columns:1fr; }
+    /* ===== SUCCESS SCREEN ===== */
+    .success-screen {
+      display: none; text-align: center; padding: 4rem 2rem;
+      animation: fbSuccessIn .6s cubic-bezier(.34,1.56,.64,1) both;
     }
+    @keyframes fbSuccessIn { from { opacity:0; transform:scale(.85) translateY(20px); } to { opacity:1; transform:none; } }
+    .success-screen.show { display: block; }
+    .success-icon { font-size: 4.5rem; margin-bottom: 1rem; display: block; animation: fbIconPop .7s cubic-bezier(.34,1.56,.64,1) both; }
+    @keyframes fbIconPop { from { transform:scale(0) rotate(-45deg); } to { transform:none; } }
+    .success-screen h2 { font-size: 1.8rem; font-weight: 800; color: var(--txt); margin-bottom: .5rem; }
+    .success-screen p  { color: var(--txt3); margin-bottom: 1.75rem; font-size: .95rem; line-height: 1.7; }
+    .btn-ghost {
+      display: inline-flex; align-items: center; gap: .5rem;
+      padding: .7rem 1.8rem; border-radius: 12px;
+      border: 1.5px solid var(--border); background: var(--bg); color: var(--txt);
+      font-size: .88rem; font-weight: 700; cursor: pointer; font-family: inherit;
+      transition: all .22s; text-decoration: none;
+    }
+    .btn-ghost:hover { border-color: var(--v1); color: var(--v1); transform: translateY(-2px); }
+
+    /* ===== FORM ROW ===== */
+    .f-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    @media(max-width:600px) {
+      .f-row { grid-template-columns: 1fr; }
+      .aspect-grid { grid-template-columns: 1fr; }
+      .fb-tab { min-width: 110px; font-size: .72rem; }
+    }
+
+    /* ===== ENTRANCE ANIMATION for cards ===== */
+    @keyframes fbCardIn {
+      from { opacity:0; transform:translateY(24px) scale(.98); }
+      to   { opacity:1; transform:none; }
+    }
+    .fb-card { animation: fbCardIn .5s both; }
+    .fb-card:nth-child(1) { animation-delay: .08s; }
+    .fb-card:nth-child(2) { animation-delay: .16s; }
+    .fb-card:nth-child(3) { animation-delay: .24s; }
+
+    /* ===== DIVIDER ===== */
+    .fb-divider {
+      display: flex; align-items: center; gap: 1rem; margin: 1.5rem 0;
+      font-size: .75rem; font-weight: 700; color: var(--txt4); text-transform: uppercase; letter-spacing: .06em;
+    }
+    .fb-divider::before, .fb-divider::after {
+      content:''; flex:1; height:1px; background: var(--border);
+    }
+
+    /* ===== TOPIC CHIPS (category sections) ===== */
+    .topic-chips { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: 1.25rem; }
+    .topic-chip {
+      padding: .35rem .85rem; border-radius: 999px; font-size: .78rem; font-weight: 700;
+      border: 1.5px solid var(--border); color: var(--txt3); background: var(--bg); cursor: pointer;
+      transition: all .2s;
+    }
+    .topic-chip.sel {
+      background: linear-gradient(135deg,#7c5cfc,#3d6bff);
+      border-color: #7c5cfc; color: #fff; box-shadow: 0 3px 12px rgba(124,92,252,.35);
+    }
+    .topic-chip:hover:not(.sel) { border-color: var(--v1); color: var(--v1); }
   </style>
 </head>
 <body>
@@ -76,91 +358,329 @@
 <nav></nav>
 
 <div class="page-wrap">
+
+  <!-- ===== HERO ===== -->
   <section class="feedback-hero">
-    <h1>Share Your Feedback</h1>
-    <p>Your review helps other learners and helps us improve our courses</p>
+    <div class="fhero-kicker">💬 Your Voice Matters</div>
+    <h1 class="fhero-title">Share Your <span class="fhero-accent">Feedback</span></h1>
+    <p class="fhero-sub" id="hero-sub">Your insights shape better courses, better mentors, and a better platform for everyone.</p>
   </section>
+
+  <!-- ===== TYPE TABS ===== -->
+  <div class="fb-type-outer">
+    <div class="fb-type-tabs" role="tablist">
+      <button class="fb-tab active" data-type="course" onclick="switchType('course',this)" role="tab">
+        <span class="tb-icon">📚</span> Course Review
+      </button>
+      <button class="fb-tab" data-type="mentor" onclick="switchType('mentor',this)" role="tab">
+        <span class="tb-icon">👨‍🏫</span> Mentor Feedback
+      </button>
+      <button class="fb-tab" data-type="admin" onclick="switchType('admin',this)" role="tab">
+        <span class="tb-icon">🏛</span> Admin & Management
+      </button>
+      <button class="fb-tab" data-type="website" onclick="switchType('website',this)" role="tab">
+        <span class="tb-icon">🌐</span> Website & Support
+      </button>
+    </div>
+  </div>
 
   <div class="feedback-wrap">
     <div class="alert error" id="err-alert"></div>
+    <div class="alert success" id="ok-alert"></div>
 
-    <!-- Main feedback form -->
-    <div class="card" id="feedback-form-card">
-      <h2>Course Review</h2>
-      <p class="sub">You must be enrolled in the course to submit a review.</p>
+    <!-- ===== PANEL: COURSE REVIEW ===== -->
+    <div class="fb-panel active" id="panel-course">
 
-      <!-- Course selector -->
-      <div class="f-group">
-        <label>Select Course *</label>
-        <select id="fb-course" onchange="onCourseChange()">
-          <option value="">Choose a course you're enrolled in…</option>
-        </select>
-      </div>
+      <div class="fb-card">
+        <span class="fb-card-icon">📚</span>
+        <h2>Course Review</h2>
+        <p class="sub">Share your experience with a course you're enrolled in. Your review is reviewed by admins before publishing.</p>
 
-      <!-- Overall rating -->
-      <div style="margin-bottom:1.25rem">
-        <label style="display:block;font-size:0.82rem;font-weight:700;color:var(--txt2);margin-bottom:0.5rem">Overall Rating *</label>
-        <div class="star-rating">
-          <input type="radio" id="star5" name="rating" value="5"><label for="star5" title="Excellent">★</label>
-          <input type="radio" id="star4" name="rating" value="4"><label for="star4" title="Very Good">★</label>
-          <input type="radio" id="star3" name="rating" value="3"><label for="star3" title="Good">★</label>
-          <input type="radio" id="star2" name="rating" value="2"><label for="star2" title="Fair">★</label>
-          <input type="radio" id="star1" name="rating" value="1"><label for="star1" title="Poor">★</label>
+        <div class="f-group">
+          <label>Select Your Course *</label>
+          <select id="fb-course">
+            <option value="">Choose a course you're enrolled in…</option>
+          </select>
         </div>
-        <div class="rating-text" id="rating-text">Click stars to rate</div>
-      </div>
 
-      <!-- Aspect ratings -->
-      <label style="display:block;font-size:0.82rem;font-weight:700;color:var(--txt2);margin-bottom:0.75rem">Rate Individual Aspects</label>
-      <div class="aspect-grid">
-        <div class="aspect-item">
-          <div class="aspect-label">📚 Course Content</div>
-          <div class="aspect-stars" data-aspect="content"></div>
-        </div>
-        <div class="aspect-item">
-          <div class="aspect-label">👨‍🏫 Mentor / Instructor</div>
-          <div class="aspect-stars" data-aspect="mentor"></div>
-        </div>
-        <div class="aspect-item">
-          <div class="aspect-label">🎬 Recordings / Resources</div>
-          <div class="aspect-stars" data-aspect="recordings"></div>
-        </div>
-        <div class="aspect-item">
-          <div class="aspect-label">💰 Value for Money</div>
-          <div class="aspect-stars" data-aspect="value"></div>
+        <!-- Overall star rating -->
+        <div class="star-wrap">
+          <label>Overall Rating *</label>
+          <div class="star-row">
+            <input type="radio" id="s5" name="rating" value="5"><label for="s5" title="Excellent">★</label>
+            <input type="radio" id="s4" name="rating" value="4"><label for="s4" title="Very Good">★</label>
+            <input type="radio" id="s3" name="rating" value="3"><label for="s3" title="Good">★</label>
+            <input type="radio" id="s2" name="rating" value="2"><label for="s2" title="Fair">★</label>
+            <input type="radio" id="s1" name="rating" value="1"><label for="s1" title="Poor">★</label>
+          </div>
+          <div class="star-desc" id="star-desc">Click a star to rate</div>
         </div>
       </div>
 
-      <!-- Title & comment -->
-      <div class="f-group"><label>Review Title *</label><input type="text" id="fb-title" placeholder="Summarise your experience in a sentence…"></div>
-      <div class="f-group"><label>Detailed Review *</label><textarea id="fb-comment" placeholder="Share what you liked, what could be improved, how the course helped your career…"></textarea></div>
+      <div class="fb-card">
+        <!-- Aspect ratings -->
+        <div class="aspect-section">
+          <label>Rate Individual Aspects</label>
+          <div class="aspect-grid">
+            <div class="aspect-item">
+              <div class="aspect-label">📖 Course Content</div>
+              <div class="aspect-stars" data-aspect="content"></div>
+            </div>
+            <div class="aspect-item">
+              <div class="aspect-label">👨‍🏫 Mentor / Instructor</div>
+              <div class="aspect-stars" data-aspect="mentor"></div>
+            </div>
+            <div class="aspect-item">
+              <div class="aspect-label">🎬 Recordings & Resources</div>
+              <div class="aspect-stars" data-aspect="recordings"></div>
+            </div>
+            <div class="aspect-item">
+              <div class="aspect-label">💰 Value for Money</div>
+              <div class="aspect-stars" data-aspect="value"></div>
+            </div>
+          </div>
+        </div>
 
-      <!-- Would recommend -->
-      <div class="f-group">
-        <label>Would you recommend this course? *</label>
-        <select id="fb-recommend">
-          <option value="">Select…</option>
-          <option value="yes">Yes, definitely!</option>
-          <option value="maybe">Maybe, with some improvements</option>
-          <option value="no">No, not at this time</option>
-        </select>
-      </div>
+        <div class="f-group">
+          <label>Review Title *</label>
+          <input type="text" id="fb-title" placeholder="Summarise your experience in a sentence…" maxlength="120">
+        </div>
+        <div class="f-group">
+          <label>Detailed Review *</label>
+          <textarea id="fb-comment" placeholder="Share what you liked, what could be improved, how the course helped your career…" rows="5"></textarea>
+        </div>
 
-      <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin-top:0.5rem">
-        <button class="btn-submit" id="submit-btn" onclick="submitFeedback()">Submit Review</button>
-        <span style="font-size:0.78rem;color:var(--txt4)">Reviews are reviewed by admin before publishing</span>
+        <div class="f-group">
+          <label>Would You Recommend This Course? *</label>
+          <div class="pill-group" id="recommend-pills">
+            <label><input type="radio" name="fb-rec" value="yes"><span class="pill-label">👍 Yes, Definitely!</span></label>
+            <label><input type="radio" name="fb-rec" value="maybe"><span class="pill-label">🤔 Maybe, With Improvements</span></label>
+            <label><input type="radio" name="fb-rec" value="no"><span class="pill-label">👎 Not Right Now</span></label>
+          </div>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap">
+          <button class="btn-submit" onclick="submitCourseReview()">Submit Review</button>
+          <span class="submit-note">Reviews go live after admin approval</span>
+        </div>
       </div>
     </div>
 
-    <!-- Success screen -->
-    <div class="card success-screen" id="success-screen">
-      <div class="success-icon">⭐</div>
-      <h2>Thank You!</h2>
-      <p>Your review has been submitted and will be visible after admin approval. We appreciate your feedback!</p>
-      <a href="courses.html"><button class="btn-submit">Browse More Courses</button></a>
+    <!-- ===== PANEL: MENTOR FEEDBACK ===== -->
+    <div class="fb-panel" id="panel-mentor">
+
+      <div class="fb-card">
+        <span class="fb-card-icon">👨‍🏫</span>
+        <h2>Mentor Feedback</h2>
+        <p class="sub">How was your experience with your mentor? Your feedback is confidential and shared only with management.</p>
+
+        <div class="f-row">
+          <div class="f-group">
+            <label>Your Name *</label>
+            <input type="text" id="m-name" placeholder="Full name">
+          </div>
+          <div class="f-group">
+            <label>Email *</label>
+            <input type="email" id="m-email" placeholder="your@email.com">
+          </div>
+        </div>
+        <div class="f-group">
+          <label>Mentor / Instructor Name *</label>
+          <input type="text" id="m-mentor" placeholder="Name of your mentor or instructor">
+        </div>
+        <div class="f-group">
+          <label>Course / Batch</label>
+          <input type="text" id="m-course" placeholder="Which course or batch were you in?">
+        </div>
+      </div>
+
+      <div class="fb-card">
+        <!-- Mentor aspect ratings -->
+        <div class="aspect-section">
+          <label>Rate Your Mentor</label>
+          <div class="aspect-grid">
+            <div class="aspect-item">
+              <div class="aspect-label">🗣 Communication</div>
+              <div class="aspect-stars" data-aspect="m-comm"></div>
+            </div>
+            <div class="aspect-item">
+              <div class="aspect-label">💡 Subject Clarity</div>
+              <div class="aspect-stars" data-aspect="m-clarity"></div>
+            </div>
+            <div class="aspect-item">
+              <div class="aspect-label">📞 Availability & Support</div>
+              <div class="aspect-stars" data-aspect="m-avail"></div>
+            </div>
+            <div class="aspect-item">
+              <div class="aspect-label">📋 Session Quality</div>
+              <div class="aspect-stars" data-aspect="m-quality"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="f-group">
+          <label>What Did Your Mentor Do Well?</label>
+          <textarea id="m-positive" placeholder="Share the positive aspects of your mentoring experience…" rows="3"></textarea>
+        </div>
+        <div class="f-group">
+          <label>What Could Be Improved? *</label>
+          <textarea id="m-improve" placeholder="Constructive feedback helps mentors grow…" rows="3"></textarea>
+        </div>
+
+        <button class="btn-submit" onclick="submitMentorFeedback()">Submit Mentor Feedback</button>
+      </div>
     </div>
-  </div>
-</div>
+
+    <!-- ===== PANEL: ADMIN & MANAGEMENT ===== -->
+    <div class="fb-panel" id="panel-admin">
+
+      <div class="fb-card">
+        <span class="fb-card-icon">🏛</span>
+        <h2>Admin & Management Feedback</h2>
+        <p class="sub">Feedback about enrollment processes, payment handling, batch management, or admin support goes here.</p>
+
+        <div class="f-row">
+          <div class="f-group">
+            <label>Your Name *</label>
+            <input type="text" id="a-name" placeholder="Full name">
+          </div>
+          <div class="f-group">
+            <label>Email *</label>
+            <input type="email" id="a-email" placeholder="your@email.com">
+          </div>
+        </div>
+
+        <div class="f-group">
+          <label>Topic *</label>
+          <div class="topic-chips" id="admin-topic-chips">
+            <span class="topic-chip sel" onclick="selectTopic(this,'admin')">📋 Enrollment Process</span>
+            <span class="topic-chip" onclick="selectTopic(this,'admin')">💳 Payment & Fees</span>
+            <span class="topic-chip" onclick="selectTopic(this,'admin')">📆 Batch Management</span>
+            <span class="topic-chip" onclick="selectTopic(this,'admin')">🤝 Admin Support</span>
+            <span class="topic-chip" onclick="selectTopic(this,'admin')">📜 Certificates</span>
+            <span class="topic-chip" onclick="selectTopic(this,'admin')">🔧 Other</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="fb-card">
+        <!-- Admin aspect ratings -->
+        <div class="aspect-section">
+          <label>Rate the Experience</label>
+          <div class="aspect-grid">
+            <div class="aspect-item">
+              <div class="aspect-label">⚡ Responsiveness</div>
+              <div class="aspect-stars" data-aspect="a-resp"></div>
+            </div>
+            <div class="aspect-item">
+              <div class="aspect-label">🎯 Issue Resolution</div>
+              <div class="aspect-stars" data-aspect="a-resolve"></div>
+            </div>
+            <div class="aspect-item">
+              <div class="aspect-label">😊 Professionalism</div>
+              <div class="aspect-stars" data-aspect="a-prof"></div>
+            </div>
+            <div class="aspect-item">
+              <div class="aspect-label">✨ Overall Experience</div>
+              <div class="aspect-stars" data-aspect="a-overall"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="f-group">
+          <label>Your Feedback *</label>
+          <textarea id="a-feedback" placeholder="Describe your experience with admin or management…" rows="5"></textarea>
+        </div>
+
+        <div class="f-group">
+          <label>Priority</label>
+          <div class="pill-group">
+            <label><input type="radio" name="a-priority" value="normal" checked><span class="pill-label">⚪ Normal</span></label>
+            <label><input type="radio" name="a-priority" value="high"><span class="pill-label">🟡 High</span></label>
+            <label><input type="radio" name="a-priority" value="urgent"><span class="pill-label">🔴 Urgent</span></label>
+          </div>
+        </div>
+
+        <button class="btn-submit" onclick="submitAdminFeedback()">Submit Feedback</button>
+      </div>
+    </div>
+
+    <!-- ===== PANEL: WEBSITE & SUPPORT ===== -->
+    <div class="fb-panel" id="panel-website">
+
+      <div class="fb-card">
+        <span class="fb-card-icon">🌐</span>
+        <h2>Website & Support Feedback</h2>
+        <p class="sub">Found a bug, have a feature request, or need technical help? Tell us here.</p>
+
+        <div class="f-row">
+          <div class="f-group">
+            <label>Your Name *</label>
+            <input type="text" id="w-name" placeholder="Full name">
+          </div>
+          <div class="f-group">
+            <label>Email *</label>
+            <input type="email" id="w-email" placeholder="your@email.com">
+          </div>
+        </div>
+
+        <div class="f-group">
+          <label>Category *</label>
+          <div class="topic-chips" id="web-topic-chips">
+            <span class="topic-chip sel" onclick="selectTopic(this,'web')">🐛 Bug Report</span>
+            <span class="topic-chip" onclick="selectTopic(this,'web')">✨ Feature Request</span>
+            <span class="topic-chip" onclick="selectTopic(this,'web')">🎨 UI / Design</span>
+            <span class="topic-chip" onclick="selectTopic(this,'web')">🔒 Login / Account</span>
+            <span class="topic-chip" onclick="selectTopic(this,'web')">📱 Mobile Issue</span>
+            <span class="topic-chip" onclick="selectTopic(this,'web')">⚙ Technical Error</span>
+            <span class="topic-chip" onclick="selectTopic(this,'web')">💬 General</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="fb-card">
+        <div class="f-group">
+          <label>Subject *</label>
+          <input type="text" id="w-subject" placeholder="Brief description of the issue or request…">
+        </div>
+        <div class="f-group">
+          <label>Detailed Description *</label>
+          <textarea id="w-message" placeholder="Steps to reproduce a bug, what you expected vs what happened, or a detailed feature description…" rows="5"></textarea>
+        </div>
+        <div class="f-group">
+          <label>Device / Browser (optional)</label>
+          <input type="text" id="w-device" placeholder="e.g. Chrome on Windows 11, Safari on iPhone…">
+        </div>
+
+        <!-- Website rating -->
+        <div class="star-wrap">
+          <label>How Would You Rate Your Overall Experience With the Website?</label>
+          <div class="star-row">
+            <input type="radio" id="ws5" name="ws-rating" value="5"><label for="ws5">★</label>
+            <input type="radio" id="ws4" name="ws-rating" value="4"><label for="ws4">★</label>
+            <input type="radio" id="ws3" name="ws-rating" value="3"><label for="ws3">★</label>
+            <input type="radio" id="ws2" name="ws-rating" value="2"><label for="ws2">★</label>
+            <input type="radio" id="ws1" name="ws-rating" value="1"><label for="ws1">★</label>
+          </div>
+        </div>
+
+        <button class="btn-submit" onclick="submitWebFeedback()">Submit Feedback</button>
+      </div>
+    </div>
+
+    <!-- ===== SUCCESS SCREEN ===== -->
+    <div class="success-screen" id="success-screen">
+      <span class="success-icon" id="success-icon">⭐</span>
+      <h2 id="success-title">Thank You!</h2>
+      <p id="success-msg">Your feedback has been received. We appreciate you helping us improve!</p>
+      <div style="display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap">
+        <a href="courses.html" class="btn-ghost">📚 Browse Courses</a>
+        <button class="btn-ghost" onclick="resetFeedback()">✏ Give More Feedback</button>
+      </div>
+    </div>
+
+  </div><!-- /feedback-wrap -->
+</div><!-- /page-wrap -->
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../config/supabase-config.js"></script>
@@ -168,123 +688,308 @@
 <script src="../js/profile-nav.js"></script>
 <script src="../js/qr-share.js"></script>
 <script>
+// ─── Supabase client ───────────────────────────────────────────────────────
 let _client = null;
-let currentUser = null, enrolledCourses = [];
-const ratingLabels = { 1:'Poor', 2:'Fair', 3:'Good', 4:'Very Good', 5:'Excellent' };
+let currentUser = null;
+let enrolledCourses = [];
 const aspectRatings = {};
+let selectedAdminTopic = 'Enrollment Process';
+let selectedWebTopic   = 'Bug Report';
 
 async function _getClient() {
   if (_client) return _client;
   let tries = 0;
-  while (!window.supabaseConfig?.client && tries++ < 25) {
+  while (!window.supabaseConfig?.client && tries++ < 30) {
     await new Promise(r => setTimeout(r, 150));
   }
   _client = window.supabaseConfig?.client || null;
   return _client;
 }
 
+// ─── TYPE SWITCHER ─────────────────────────────────────────────────────────
+const heroSubs = {
+  course:  'Share your experience with a course. Your review helps other learners make better decisions.',
+  mentor:  'Rate and give feedback on your mentor's teaching, communication, and support.',
+  admin:   'Tell us about your experience with enrollment, payments, batch management, or admin support.',
+  website: 'Report bugs, request features, or share thoughts on the SkillUpNow platform.',
+};
+
+function switchType(type, btn) {
+  document.querySelectorAll('.fb-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.fb-panel').forEach(p => {
+    p.classList.remove('active', 'visible');
+  });
+  const panel = document.getElementById('panel-' + type);
+  if (panel) {
+    panel.classList.add('active');
+    requestAnimationFrame(() => requestAnimationFrame(() => panel.classList.add('visible')));
+  }
+  const subEl = document.getElementById('hero-sub');
+  if (subEl) { subEl.style.opacity = '0'; setTimeout(() => { subEl.textContent = heroSubs[type] || heroSubs.course; subEl.style.opacity = '1'; subEl.style.transition = 'opacity .35s'; }, 180); }
+  document.getElementById('err-alert').classList.remove('show');
+  document.getElementById('ok-alert').classList.remove('show');
+}
+
+// ─── TOPIC CHIP SELECTOR ───────────────────────────────────────────────────
+function selectTopic(chip, area) {
+  const wrap = chip.closest('.topic-chips');
+  wrap.querySelectorAll('.topic-chip').forEach(c => c.classList.remove('sel'));
+  chip.classList.add('sel');
+  if (area === 'admin') selectedAdminTopic = chip.textContent.replace(/^[\p{Emoji}\s]+/u,'').trim();
+  if (area === 'web')   selectedWebTopic   = chip.textContent.replace(/^[\p{Emoji}\s]+/u,'').trim();
+}
+
+// ─── INIT ──────────────────────────────────────────────────────────────────
 async function init() {
   const client = await _getClient();
-  if (!client) { document.getElementById('err-alert').textContent = 'Could not connect. Please refresh.'; document.getElementById('err-alert').classList.add('show'); return; }
 
-  const { data: { session } } = await client.auth.getSession();
-  if (!session) { window.location.href = '../index.html?login=1'; return; }
-  currentUser = session.user;
+  // Session (optional — non-logged-in users can still submit admin/website feedback)
+  if (client) {
+    const { data: { session } } = await client.auth.getSession();
+    if (session) {
+      currentUser = session.user;
+      // Pre-fill name/email fields for logged-in users
+      const { data: prof } = await client.from('profiles').select('full_name').eq('id', session.user.id).single().catch(() => ({ data: null }));
+      const fullName = prof?.full_name || '';
+      const email    = session.user.email || '';
+      ['m-name','a-name','w-name'].forEach(id => { const el = document.getElementById(id); if (el && fullName) el.value = fullName; });
+      ['m-email','a-email','w-email'].forEach(id => { const el = document.getElementById(id); if (el && email) el.value = email; });
 
-  // Load enrolled active/completed courses
-  const { data } = await client.from('enrollments')
-    .select('id,course_id,courses(id,title)')
-    .eq('student_user_id', session.user.id)
-    .in('enrollment_status', ['active', 'completed']);
-  enrolledCourses = data || [];
-  const sel = document.getElementById('fb-course');
-  if (!enrolledCourses.length) {
-    sel.innerHTML = '<option value="">No active enrollments found</option>';
-    sel.disabled = true;
-  } else {
-    enrolledCourses.forEach(e => {
-      const o = document.createElement('option');
-      o.value = e.course_id;
-      o.dataset.enrollId = e.id;
-      o.textContent = e.courses?.title || e.course_id;
-      sel.appendChild(o);
-    });
+      // Load enrolled courses
+      const { data } = await client.from('enrollments')
+        .select('id,course_id,courses(id,title)')
+        .eq('student_user_id', session.user.id)
+        .in('enrollment_status', ['active','completed']);
+      enrolledCourses = data || [];
+      const sel = document.getElementById('fb-course');
+      if (!enrolledCourses.length) {
+        sel.innerHTML = '<option value="">No active enrollments — enroll in a course first</option>';
+        sel.disabled = true;
+      } else {
+        enrolledCourses.forEach(e => {
+          const o = document.createElement('option');
+          o.value = e.course_id;
+          o.dataset.enrollId = e.id;
+          o.textContent = e.courses?.title || e.course_id;
+          sel.appendChild(o);
+        });
+      }
+      const courseParam = new URLSearchParams(window.location.search).get('course');
+      if (courseParam) sel.value = courseParam;
+    } else {
+      // Not logged in — disable course review tab
+      const coursePanel = document.getElementById('panel-course');
+      if (coursePanel) {
+        coursePanel.innerHTML = `<div class="fb-card" style="text-align:center;padding:3rem">
+          <span style="font-size:3rem">🔒</span>
+          <h2 style="margin:.75rem 0 .4rem">Login Required</h2>
+          <p style="color:var(--txt3)">You need to be enrolled and logged in to submit a course review.</p>
+          <a href="../index.html?login=1" class="btn-submit" style="display:inline-block;text-decoration:none;margin-top:1rem">Log In</a>
+        </div>`;
+      }
+    }
   }
 
-  // Check URL for course param
-  const courseId = new URLSearchParams(window.location.search).get('course');
-  if (courseId) sel.value = courseId;
-
-  // Build aspect star pickers
+  // Build aspect stars (all panels)
   document.querySelectorAll('.aspect-stars').forEach(wrap => {
-    const aspect = wrap.dataset.aspect;
-    aspectRatings[aspect] = 0;
+    const asp = wrap.dataset.aspect;
+    aspectRatings[asp] = 0;
     for (let i = 1; i <= 5; i++) {
       const s = document.createElement('span');
       s.className = 'aspect-star'; s.textContent = '★'; s.dataset.val = i;
       s.onclick = () => {
-        aspectRatings[aspect] = i;
-        wrap.querySelectorAll('.aspect-star').forEach((st,idx) => st.classList.toggle('active', idx < i));
+        aspectRatings[asp] = i;
+        wrap.querySelectorAll('.aspect-star').forEach((st, idx) => st.classList.toggle('active', idx < i));
       };
+      s.onmouseenter = () => wrap.querySelectorAll('.aspect-star').forEach((st,idx) => { if(idx < i) st.style.transform='scale(1.18)'; });
+      s.onmouseleave = () => wrap.querySelectorAll('.aspect-star').forEach(st => { st.style.transform=''; });
       wrap.appendChild(s);
     }
   });
 
-  // Overall star rating label update
-  document.querySelectorAll('.star-rating input').forEach(r => {
+  // Overall star rating labels
+  const ratingLabels = {1:'Poor 😕',2:'Fair 😐',3:'Good 😊',4:'Very Good 😁',5:'Excellent 🤩'};
+  document.querySelectorAll('.star-row input').forEach(r => {
     r.addEventListener('change', () => {
-      document.getElementById('rating-text').textContent = ratingLabels[r.value] + ' — ' + '★'.repeat(r.value);
+      const desc = document.getElementById('star-desc');
+      if (desc) desc.textContent = ratingLabels[r.value] || '';
     });
   });
+
+  // Trigger panel entrance animation
+  const firstPanel = document.querySelector('.fb-panel.active');
+  if (firstPanel) requestAnimationFrame(() => requestAnimationFrame(() => firstPanel.classList.add('visible')));
 }
 
-function onCourseChange() {}
-
-async function submitFeedback() {
+// ─── COURSE REVIEW ─────────────────────────────────────────────────────────
+async function submitCourseReview() {
   const courseId = document.getElementById('fb-course').value;
-  const ratingEl = document.querySelector('.star-rating input:checked');
-  const title   = document.getElementById('fb-title').value.trim();
-  const comment = document.getElementById('fb-comment').value.trim();
+  const ratingEl = document.querySelector('.star-row input:checked');
+  const title    = document.getElementById('fb-title').value.trim();
+  const comment  = document.getElementById('fb-comment').value.trim();
+  const recEl    = document.querySelector('input[name="fb-rec"]:checked');
 
-  if (!courseId)    { showErr('Please select a course.'); return; }
-  if (!ratingEl)    { showErr('Please provide an overall star rating.'); return; }
-  if (!title)       { showErr('Please enter a review title.'); return; }
-  if (!comment || comment.length < 20) { showErr('Please write a review of at least 20 characters.'); return; }
+  if (!courseId)                       return showErr('Please select a course.');
+  if (!ratingEl)                       return showErr('Please give an overall star rating.');
+  if (!title)                          return showErr('Please enter a review title.');
+  if (!comment || comment.length < 20) return showErr('Review must be at least 20 characters.');
 
-  const btn = document.getElementById('submit-btn');
+  const btn = event.target;
   btn.disabled = true; btn.textContent = 'Submitting…';
 
   const sel = document.getElementById('fb-course');
   const enrollId = sel.options[sel.selectedIndex]?.dataset.enrollId;
   const client = await _getClient();
+  if (!client || !currentUser) { showErr('Please log in to submit a review.'); btn.disabled=false; btn.textContent='Submit Review'; return; }
 
   try {
     const { error } = await client.from('reviews').upsert({
-      user_id: currentUser.id,
-      course_id: courseId,
+      user_id: currentUser.id, course_id: courseId,
       enrollment_id: enrollId || null,
-      rating: parseInt(ratingEl.value),
-      title, comment,
-      recommend: document.getElementById('fb-recommend').value || null,
-      aspects: Object.keys(aspectRatings).length ? aspectRatings : null,
+      rating: parseInt(ratingEl.value), title, comment,
+      recommend: recEl?.value || null,
+      aspects: Object.keys(aspectRatings).length ? { ...aspectRatings } : null,
       is_approved: false,
     }, { onConflict: 'user_id,course_id' });
     if (error) throw error;
-
-    document.getElementById('feedback-form-card').style.display = 'none';
-    document.getElementById('success-screen').classList.add('show');
-  } catch (err) {
-    showErr(err.message || 'Failed to submit review. Please try again.');
-    btn.disabled = false; btn.textContent = 'Submit Review';
-    return;
+    showSuccess('⭐', 'Review Submitted!', 'Your review will be visible after admin approval. Thank you for helping the community!');
+  } catch(err) {
+    showErr(err.message || 'Failed to submit. Try again.');
   }
   btn.disabled = false; btn.textContent = 'Submit Review';
+}
+
+// ─── MENTOR FEEDBACK ───────────────────────────────────────────────────────
+async function submitMentorFeedback() {
+  const name    = document.getElementById('m-name').value.trim();
+  const email   = document.getElementById('m-email').value.trim();
+  const mentor  = document.getElementById('m-mentor').value.trim();
+  const improve = document.getElementById('m-improve').value.trim();
+
+  if (!name)    return showErr('Please enter your name.');
+  if (!email)   return showErr('Please enter your email.');
+  if (!mentor)  return showErr('Please enter your mentor\'s name.');
+  if (!improve || improve.length < 10) return showErr('Please write at least 10 characters of feedback.');
+
+  const btn = event.target;
+  btn.disabled = true; btn.textContent = 'Submitting…';
+  const client = await _getClient();
+  if (!client) { showErr('Connection error. Please refresh.'); btn.disabled=false; btn.textContent='Submit Mentor Feedback'; return; }
+
+  const positive = document.getElementById('m-positive').value.trim();
+  const course   = document.getElementById('m-course').value.trim();
+  const aspects  = Object.fromEntries(Object.entries(aspectRatings).filter(([k]) => k.startsWith('m-')));
+
+  try {
+    const { error } = await client.from('inquiries').insert({
+      name, email, type: 'mentor_feedback',
+      subject: `Mentor Feedback: ${mentor}${course ? ' — ' + course : ''}`,
+      message: `[Mentor]: ${mentor}\n[Course/Batch]: ${course || 'Not specified'}\n\n[Positives]:\n${positive || 'N/A'}\n\n[Improvements]:\n${improve}\n\n[Aspect Ratings]: ${JSON.stringify(aspects)}`,
+      status: 'open', priority: 'normal',
+      user_id: currentUser?.id || null,
+    });
+    if (error) throw error;
+    showSuccess('👨‍🏫', 'Feedback Received!', 'Your mentor feedback is confidential and has been shared with management. Thank you!');
+  } catch(err) {
+    showErr(err.message || 'Failed to submit. Try again.');
+  }
+  btn.disabled = false; btn.textContent = 'Submit Mentor Feedback';
+}
+
+// ─── ADMIN FEEDBACK ────────────────────────────────────────────────────────
+async function submitAdminFeedback() {
+  const name     = document.getElementById('a-name').value.trim();
+  const email    = document.getElementById('a-email').value.trim();
+  const feedback = document.getElementById('a-feedback').value.trim();
+  const priority = document.querySelector('input[name="a-priority"]:checked')?.value || 'normal';
+
+  if (!name)                               return showErr('Please enter your name.');
+  if (!email)                              return showErr('Please enter your email.');
+  if (!feedback || feedback.length < 15)   return showErr('Please write at least 15 characters of feedback.');
+
+  const btn = event.target;
+  btn.disabled = true; btn.textContent = 'Submitting…';
+  const client = await _getClient();
+  if (!client) { showErr('Connection error. Please refresh.'); btn.disabled=false; btn.textContent='Submit Feedback'; return; }
+
+  const aspects = Object.fromEntries(Object.entries(aspectRatings).filter(([k]) => k.startsWith('a-')));
+
+  try {
+    const { error } = await client.from('inquiries').insert({
+      name, email, type: 'admin_feedback',
+      subject: `Admin Feedback: ${selectedAdminTopic}`,
+      message: `[Topic]: ${selectedAdminTopic}\n\n${feedback}\n\n[Aspect Ratings]: ${JSON.stringify(aspects)}`,
+      status: 'open', priority,
+      user_id: currentUser?.id || null,
+    });
+    if (error) throw error;
+    showSuccess('🏛', 'Feedback Submitted!', 'Your feedback about admin and management has been received. We\'ll review it promptly.');
+  } catch(err) {
+    showErr(err.message || 'Failed to submit. Try again.');
+  }
+  btn.disabled = false; btn.textContent = 'Submit Feedback';
+}
+
+// ─── WEBSITE FEEDBACK ──────────────────────────────────────────────────────
+async function submitWebFeedback() {
+  const name    = document.getElementById('w-name').value.trim();
+  const email   = document.getElementById('w-email').value.trim();
+  const subject = document.getElementById('w-subject').value.trim();
+  const message = document.getElementById('w-message').value.trim();
+  const device  = document.getElementById('w-device').value.trim();
+  const wsRat   = document.querySelector('input[name="ws-rating"]:checked')?.value || null;
+
+  if (!name)                              return showErr('Please enter your name.');
+  if (!email)                             return showErr('Please enter your email.');
+  if (!subject)                           return showErr('Please enter a subject.');
+  if (!message || message.length < 15)    return showErr('Please write at least 15 characters.');
+
+  const btn = event.target;
+  btn.disabled = true; btn.textContent = 'Submitting…';
+  const client = await _getClient();
+  if (!client) { showErr('Connection error. Please refresh.'); btn.disabled=false; btn.textContent='Submit Feedback'; return; }
+
+  try {
+    const { error } = await client.from('inquiries').insert({
+      name, email, type: 'website_feedback',
+      subject: `[${selectedWebTopic}] ${subject}`,
+      message: `[Category]: ${selectedWebTopic}\n[Device/Browser]: ${device || 'Not specified'}\n[Site Rating]: ${wsRat ? '★'.repeat(wsRat) : 'Not rated'}\n\n${message}`,
+      status: 'open', priority: selectedWebTopic === 'Bug Report' ? 'high' : 'normal',
+      user_id: currentUser?.id || null,
+    });
+    if (error) throw error;
+    showSuccess('🌐', 'Feedback Sent!', 'Thank you for helping us improve the platform! We review all website feedback carefully.');
+  } catch(err) {
+    showErr(err.message || 'Failed to submit. Try again.');
+  }
+  btn.disabled = false; btn.textContent = 'Submit Feedback';
+}
+
+// ─── SUCCESS / ERROR HELPERS ───────────────────────────────────────────────
+function showSuccess(icon, title, msg) {
+  document.querySelectorAll('.fb-panel').forEach(p => { p.classList.remove('active','visible'); });
+  document.querySelector('.fb-type-outer').style.display = 'none';
+  const sc = document.getElementById('success-screen');
+  document.getElementById('success-icon').textContent = icon;
+  document.getElementById('success-title').textContent = title;
+  document.getElementById('success-msg').textContent   = msg;
+  sc.classList.add('show');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function showErr(msg) {
   const el = document.getElementById('err-alert');
   el.textContent = msg; el.classList.add('show');
-  setTimeout(() => el.classList.remove('show'), 4000);
+  el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  setTimeout(() => el.classList.remove('show'), 5000);
+}
+
+function resetFeedback() {
+  document.getElementById('success-screen').classList.remove('show');
+  document.querySelector('.fb-type-outer').style.display = '';
+  const firstTab = document.querySelector('.fb-tab[data-type="course"]');
+  if (firstTab) switchType('course', firstTab);
 }
 
 init();
