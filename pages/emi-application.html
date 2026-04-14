@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="../css/main.css">
   <link rel="stylesheet" href="../css/responsive.css">
   <style>
-    .page-wrap { position:relative; z-index:1; padding-top:80px; min-height:100vh; }
+    .page-wrap { position:relative; z-index:1; padding-top:0px; min-height:100vh; }
     .emi-hero { background:var(--grad); padding:3rem 2rem; text-align:center; position:relative; overflow:hidden; }
     .emi-hero::before { content:''; position:absolute; inset:0; background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='rgba(255,255,255,0.06)' stroke-width='1'%3E%3Ccircle cx='30' cy='30' r='25'/%3E%3C/g%3E%3C/svg%3E") repeat; }
     .emi-hero h1 { color:#fff; font-size:2.2rem; font-weight:800; position:relative; }
@@ -220,7 +220,7 @@
 <script src="../config/supabase-config.js"></script>
 <script src="../js/theme.js"></script>
 <script src="../js/profile-nav.js"></script>
-<script src="../js/qr-share.js"></script>
+<!-- <script src="../js/qr-share.js"></script> -->
 <script>
 const db = new SupabaseConfig();
 let coursesData = [], selectedMonths = 0, selectedCourse = null;
