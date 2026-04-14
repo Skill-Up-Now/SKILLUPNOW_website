@@ -500,7 +500,7 @@
   <nav></nav>
 
   <!-- Hero Section -->
-  <section class="hero" style="padding: 2rem 5vw 4rem; display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 2rem; overflow: visible;">
+  <section class="hero" style="padding: 0 5vw 4rem; display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 2rem; overflow: visible;">
     <div class="hero-content">
 <!-- styling -->
       <style>
@@ -1403,6 +1403,11 @@
       width:100%; background:linear-gradient(135deg,#4ade80,#22d3ee); color:#0a2a1a;
       border:none; border-radius:9px; padding:.44rem .4rem; font-size:.75rem; font-weight:700;
       cursor:pointer; font-family:inherit; box-shadow:0 4px 12px rgba(74,222,128,.28);
+    }
+    .hc-btn-pending {
+      width:100%; background:linear-gradient(135deg,#f59e0b,#f97316); color:#1a0a00;
+      border:none; border-radius:9px; padding:.44rem .4rem; font-size:.75rem; font-weight:700;
+      cursor:pointer; font-family:inherit; box-shadow:0 4px 12px rgba(245,158,11,.28);
     }
     /* Enrollment Modal */
     .hc-enroll-overlay {
@@ -2418,10 +2423,11 @@
           const { data: { session } } = await client.auth.getSession();
           if (session?.user) {
             const { data: enrollments } = await client.from('enrollments')
-              .select('course_id').eq('student_user_id', session.user.id)
-              .in('enrollment_status', ['active', 'completed']);
-            const enrolledIds = new Set((enrollments || []).map(e => e.course_id));
-            courses = courses.map(c => ({ ...c, _enrolled: enrolledIds.has(c.id) }));
+              .select('course_id, enrollment_status').eq('student_user_id', session.user.id)
+              .in('enrollment_status', ['active', 'completed', 'pending']);
+            const enrollMap = {};
+            (enrollments || []).forEach(e => { enrollMap[e.course_id] = e.enrollment_status; });
+            courses = courses.map(c => ({ ...c, _enrolled: !!enrollMap[c.id], _enrollStatus: enrollMap[c.id] || null }));
           }
         } catch(_) {}
 
@@ -2492,10 +2498,12 @@
                 ${c.rating ? `<span>⭐ ${Number(c.rating).toFixed(1)}</span>` : ''}
               </div>
               <div class="hc-actions">
-                ${enrolled
+                ${c._enrollStatus === 'active' || c._enrollStatus === 'completed'
                   ? `<button class="hc-btn-enrolled" onclick="event.stopPropagation();window.location.href='pages/profile.html?tab=learning'">✓ View Course →</button>`
-                  : `<button class="hc-btn-details" onclick="event.stopPropagation();hcOpenCourseDetail('${c.id}')">Details</button>
-                     <button class="hc-btn-enroll" onclick="event.stopPropagation();hcQuickEnroll('${c.id}')">Enroll →</button>`
+                  : c._enrollStatus === 'pending'
+                    ? `<button class="hc-btn-pending" onclick="event.stopPropagation();window.location.href='pages/profile.html?tab=payments'">⏳ Complete Payment →</button>`
+                    : `<button class="hc-btn-details" onclick="event.stopPropagation();hcOpenCourseDetail('${c.id}')">Details</button>
+                       <button class="hc-btn-enroll" onclick="event.stopPropagation();hcQuickEnroll('${c.id}')">Enroll →</button>`
                 }
               </div>
             </div>

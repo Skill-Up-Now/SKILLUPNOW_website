@@ -302,6 +302,7 @@
       cursor: pointer; transition: all .2s; border: none; font-family: inherit;
     }
     .btn-sm-primary { background: var(--grad); color: #fff; }
+    .lp-pay-btn { background: linear-gradient(135deg,#f59e0b,#f97316) !important; color: #1a0800 !important; box-shadow: 0 3px 10px rgba(245,158,11,.3); }
     .btn-sm-outline {
       background: transparent; border: 1.5px solid var(--border); color: var(--txt3);
     }
@@ -686,6 +687,11 @@
             <div class="stat-cell"><span class="stat-val" id="pay-count">0</span><div class="stat-lbl">Transactions</div></div>
           </div>
         </div>
+        <!-- Pending payments — shown only when due_amount > 0 -->
+        <div class="pcard" id="pending-pay-card" style="display:none;">
+          <div class="pcard-title" style="color:#f59e0b;">⏳ Pending Payments</div>
+          <div id="pending-pay-list"></div>
+        </div>
         <div class="pcard">
           <div class="pcard-title">Payment History</div>
           <div style="overflow-x:auto">
@@ -1031,6 +1037,9 @@ async function loadLearningPath() {
           <span class="cpb ${stCl}">${e.enrollment_status}</span>
           ${hasAcc ? '<span class="cpb cpb-purple">✓ Access Active</span>' : '<span class="cpb cpb-red">⚠ Access Pending</span>'}
           ${e.completed_at ? `<button class="btn-sm btn-sm-outline" onclick="alert('Certificate generation coming soon!')">🎓 Certificate</button>` : ''}
+          ${e.enrollment_status === 'pending' && (e.due_amount > 0 || e.net_amount > 0)
+            ? `<button class="btn-sm btn-sm-primary lp-pay-btn" onclick="profilePay('${e.id}',${JSON.stringify(c.title||'Course').replace(/"/g,'&quot;')},${e.due_amount || e.net_amount})">💳 Complete Payment →</button>`
+            : ''}
         </div>
       </div>
     </div>`;
@@ -1054,6 +1063,28 @@ async function loadPayments(enrollments) {
   document.getElementById('pay-paid').textContent    = fmtCurr(totalPaid);
   document.getElementById('pay-balance').textContent = fmtCurr(totalBal);
   document.getElementById('pay-count').textContent   = (payments || []).length;
+
+  // Show pending payment rows
+  const pendingEnrolls = (enrollments || []).filter(e => e.enrollment_status === 'pending' && (e.due_amount > 0 || e.net_amount > 0));
+  const pendingCard = document.getElementById('pending-pay-card');
+  if (pendingCard) {
+    if (pendingEnrolls.length) {
+      pendingCard.style.display = '';
+      document.getElementById('pending-pay-list').innerHTML = pendingEnrolls.map(e => {
+        const courseTitle = e.courses?.title || 'Course';
+        const due = e.due_amount || e.net_amount;
+        return `<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem;padding:.85rem 0;border-bottom:1px solid var(--border);">
+          <div>
+            <div style="font-weight:700;font-size:.88rem;color:var(--txt2)">${courseTitle}</div>
+            <div style="font-size:.75rem;color:var(--txt4);margin-top:.2rem">Balance due: <strong style="color:#f59e0b">${fmtCurr(due)}</strong></div>
+          </div>
+          <button class="btn-sm lp-pay-btn" onclick="profilePay('${e.id}',${JSON.stringify(courseTitle).replace(/"/g,'&quot;')},${due})">💳 Pay Now</button>
+        </div>`;
+      }).join('');
+    } else {
+      pendingCard.style.display = 'none';
+    }
+  }
 
   const stMap = { completed: 'cpb-green', pending: 'cpb-yellow', failed: 'cpb-red', refunded: 'cpb-blue' };
   document.getElementById('payment-history').innerHTML = (payments || []).map(p => `
@@ -1512,6 +1543,64 @@ async function loadReferralStats() {
 }
 
 init();
+
+/* ── Razorpay payment from profile page ─────────────────── */
+async function profilePay(enrollmentId, courseTitle, amount) {
+  if (window.location.protocol === 'file:') {
+    showMsg('err', 'Open the site via skillupnowadmin.org to pay');
+    return;
+  }
+  if (typeof window.Razorpay === 'undefined') {
+    showMsg('err', 'Payment gateway not loaded. Please refresh.');
+    return;
+  }
+  const options = {
+    key: 'rzp_live_ILgsSZCZoFMQjO',
+    amount: Math.round(amount * 100),
+    currency: 'INR',
+    name: 'SkillUpNow',
+    description: courseTitle,
+    prefill: {
+      name: currentUser?.user_metadata?.full_name || '',
+      email: currentUser?.email || '',
+    },
+    theme: { color: '#7c6cff' },
+    modal: { ondismiss: () => {} },
+    handler: async (response) => {
+      try {
+        await _db().from('payments').insert({
+          student_user_id: currentUser.id,
+          enrollment_id: enrollmentId,
+          amount,
+          payment_method: 'gateway_link',
+          payment_gateway: 'razorpay',
+          gateway_payment_id: response.razorpay_payment_id,
+          transaction_reference: response.razorpay_payment_id,
+          payment_status: 'completed',
+          paid_at: new Date().toISOString(),
+        });
+        await _db().from('enrollments').update({
+          enrollment_status: 'active',
+          access_status: 'active',
+          paid_amount: amount,
+          due_amount: 0,
+          activated_at: new Date().toISOString(),
+        }).eq('id', enrollmentId);
+        showMsg('ok', 'Payment successful! Access activated.');
+        setTimeout(() => loadLearningPath(), 1200);
+      } catch(e) {
+        console.error('profilePay handler:', e);
+        showMsg('err', 'Payment recorded but profile update failed. Contact support.');
+      }
+    },
+  };
+  const rzp = new window.Razorpay(options);
+  rzp.on('payment.failed', (r) => {
+    showMsg('err', r.error?.description || 'Payment failed. Please try again.');
+  });
+  rzp.open();
+}
 </script>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 </body>
 </html>
