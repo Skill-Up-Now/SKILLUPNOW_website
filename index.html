@@ -1386,29 +1386,88 @@
     .hc-name { font-size:.88rem; font-weight:700; color:var(--txt); line-height:1.38; }
     .hc-meta { display:flex; gap:.5rem; font-size:.73rem; color:var(--txt3); flex-wrap:wrap; }
     .hc-actions { display:flex; gap:.4rem; margin-top:auto; padding-top:.55rem; }
+    /* ── Card action buttons ── */
+    @keyframes hcLiquidShimmer {
+      0%   { background-position: 200% 50%; }
+      100% { background-position:   0% 50%; }
+    }
+    @keyframes hcLiquidSweep {
+      0%   { transform: translateX(-120%) skewX(-18deg); opacity: 0; }
+      35%  { opacity: 1; }
+      55%  { transform: translateX(220%) skewX(-18deg); opacity: 0; }
+      100% { transform: translateX(220%) skewX(-18deg); opacity: 0; }
+    }
+    @keyframes hcGlowPurple {
+      0%, 100% { box-shadow: 0 4px 14px rgba(235, 253, 76, 0.32); }
+      50%       { box-shadow: 0 6px 22px rgba(238, 247, 80, 0.52); }
+    }
+    @keyframes hcGlowGreen {
+      0%, 100% { box-shadow: 0 4px 14px rgba(255, 238, 3, 0.32); }
+      50%       { box-shadow: 0 6px 22px rgba(244, 240, 20, 0.5); }
+    }
+    @keyframes hcGlowAmber {
+      0%, 100% { box-shadow: 0 4px 14px rgba(245,158,11,.36); }
+      50%       { box-shadow: 0 6px 22px rgba(249,115,22,.56); }
+    }
     .hc-btn-details {
-      flex:1; background:transparent; border:1.5px solid rgba(124,92,252,.4); color:var(--v1);
-      border-radius:9px; padding:.44rem .4rem; font-size:.75rem; font-weight:700;
+      flex:1; background:transparent; border:1.5px solid rgba(124,92,252,.35); color:var(--v1);
+      border-radius:10px; padding:.46rem .4rem; font-size:.75rem; font-weight:700;
       cursor:pointer; transition:all .22s; font-family:inherit; white-space:nowrap;
+      backdrop-filter: blur(4px);
     }
-    .hc-btn-details:hover { background:rgba(124,92,252,.08); border-color:var(--v1); }
+    .hc-btn-details:hover { background:rgba(124,92,252,.1); border-color:var(--v1); transform:translateY(-1px); }
+    /* Enroll button — liquid purple/blue */
     .hc-btn-enroll {
-      flex:1.4; background:linear-gradient(135deg,var(--v1),#3d6bff); color:#fff;
-      border:none; border-radius:9px; padding:.44rem .4rem; font-size:.75rem; font-weight:700;
-      cursor:pointer; transition:all .25s; font-family:inherit; white-space:nowrap;
-      box-shadow:0 4px 12px rgba(124,92,252,.28);
+      position: relative; overflow: hidden;
+      flex:1.4; border:none; border-radius:10px; padding:.46rem .4rem; font-size:.75rem; font-weight:700;
+      cursor:pointer; font-family:inherit; white-space:nowrap; color:#fff; letter-spacing:.01em;
+      background: linear-gradient(90deg,#7c5cfc 0%,#3d6bff 50%,#7c5cfc 100%);
+      background-size: 250% 100%;
+      animation: hcLiquidShimmer 3s linear infinite, hcGlowPurple 2.6s ease-in-out infinite;
+      border: 1px solid rgba(238, 246, 5, 0.1);
+      transition: transform .25s cubic-bezier(.34,1.56,.64,1), filter .2s;
     }
-    .hc-btn-enroll:hover { opacity:.88; transform:translateY(-1px); }
+    .hc-btn-enroll::before {
+      content:''; position:absolute; inset:0; pointer-events:none; border-radius:inherit;
+      background: linear-gradient(105deg, transparent 35%, rgba(255, 251, 4, 0.448) 50%, transparent 65%);
+      background-size:200% 100%; animation: hcLiquidSweep 2.8s ease-in-out infinite;
+    }
+    .hc-btn-enroll:hover { transform:translateY(-2px) scale(1.03); filter:brightness(1.1); }
+    .hc-btn-enroll:active { transform:scale(.96); }
+    /* Enrolled button — liquid green/teal */
     .hc-btn-enrolled {
-      width:100%; background:linear-gradient(135deg,#4ade80,#22d3ee); color:#0a2a1a;
-      border:none; border-radius:9px; padding:.44rem .4rem; font-size:.75rem; font-weight:700;
-      cursor:pointer; font-family:inherit; box-shadow:0 4px 12px rgba(74,222,128,.28);
+      position: relative; overflow: hidden;
+      width:100%; border:none; border-radius:10px; padding:.46rem .4rem; font-size:.75rem; font-weight:700;
+      cursor:pointer; font-family:inherit; color:#041a10; letter-spacing:.01em;
+      background: linear-gradient(90deg,#cfde4a 0%,#22d3ee 50%,#4ade80 100%);
+      background-size: 250% 100%;
+      animation: hcLiquidShimmer 3.5s linear infinite, hcGlowGreen 2.8s ease-in-out infinite;
+      border: 1px solid rgba(255,255,255,.15);
+      transition: transform .25s cubic-bezier(.34,1.56,.64,1), filter .2s;
     }
+    .hc-btn-enrolled::before {
+      content:''; position:absolute; inset:0; pointer-events:none; border-radius:inherit;
+      background: linear-gradient(105deg, transparent 35%, rgba(255,255,255,.25) 50%, transparent 65%);
+      background-size:200% 100%; animation: hcLiquidSweep 3s ease-in-out infinite;
+    }
+    .hc-btn-enrolled:hover { transform:translateY(-2px) scale(1.02); filter:brightness(1.06); }
+    /* Pending / Complete Payment button — liquid amber/orange */
     .hc-btn-pending {
-      width:100%; background:linear-gradient(135deg,#f59e0b,#f97316); color:#1a0a00;
-      border:none; border-radius:9px; padding:.44rem .4rem; font-size:.75rem; font-weight:700;
-      cursor:pointer; font-family:inherit; box-shadow:0 4px 12px rgba(245,158,11,.28);
+      position: relative; overflow: hidden;
+      width:100%; border:none; border-radius:10px; padding:.46rem .4rem; font-size:.75rem; font-weight:700;
+      cursor:pointer; font-family:inherit; color:#1a0800; letter-spacing:.01em;
+      background: linear-gradient(90deg,#f59e0b 0%,#f97316 45%,#fbbf24 75%,#f59e0b 100%);
+      background-size: 280% 100%;
+      animation: hcLiquidShimmer 2.8s linear infinite, hcGlowAmber 2.2s ease-in-out infinite;
+      border: 1px solid rgba(255,255,255,.14);
+      transition: transform .25s cubic-bezier(.34,1.56,.64,1), filter .2s;
     }
+    .hc-btn-pending::before {
+      content:''; position:absolute; inset:0; pointer-events:none; border-radius:inherit;
+      background: linear-gradient(105deg, transparent 35%, rgba(255,255,255,.28) 50%, transparent 65%);
+      background-size:200% 100%; animation: hcLiquidSweep 2.4s ease-in-out infinite;
+    }
+    .hc-btn-pending:hover { transform:translateY(-2px) scale(1.03); filter:brightness(1.08); }
     /* Enrollment Modal */
     .hc-enroll-overlay {
       position:fixed; inset:0; z-index:9000; background:rgba(0,0,0,.6); backdrop-filter:blur(8px);
