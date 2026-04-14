@@ -755,12 +755,16 @@
       const items = g.videos.map((v, i) => {
         const isActive   = v.id === _activeVideoId;
         const isUnlocked = v._access === 'full';
+        const isChecking = v._access === null; // session check in progress
         const lockIcon = isUnlocked
           ? `<div class="rv-pi-lock unlocked"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>`
           : `<div class="rv-pi-lock"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>`;
-        const metaText = isUnlocked
-          ? 'Unlocked'
-          : v.totalPrice != null ? '₹' + Number(v.totalPrice).toLocaleString('en-IN') : 'Members only';
+        const metaText = isUnlocked ? 'Unlocked'
+          : isChecking ? '…'
+          : v._access === 'locked' ? 'Login to watch'
+          : v._access === 'unpaid'
+            ? (v.totalPrice != null ? '₹' + Number(v.totalPrice).toLocaleString('en-IN') : 'Pay to watch')
+            : v.totalPrice != null ? '₹' + Number(v.totalPrice).toLocaleString('en-IN') : 'Members only';
         const thumb = v.thumbnail
           ? `<img src="${v.thumbnail}" alt="" onerror="this.style.display='none'">`
           : v.icon;
@@ -797,7 +801,7 @@
   function filterPlaylist() { renderPlaylist(); }
 
 
-  // ── Access check: login → fetch URL → play (gen access: no payment required) ──
+  // ── Access check: login → enrollment check → fetch URL → play ──
   async function handleWatchClick(id) {
     const v = allVideos.find(x => x.id === id);
     if (!v) return;
@@ -810,18 +814,29 @@
 
     try {
       const { data: { session } } = await client.auth.getSession();
-      if (!session?.user) {
-        showVideoGate(v, 'login');
+      const user = session?.user;
+
+      // Public video — play for everyone (no login required)
+      if (v.accessLevel === 'public') {
+        const { data: rec } = await client.from('live_recordings')
+          .select('external_url').eq('id', id).single();
+        if (rec?.external_url) { v.videoUrl = rec.external_url; playVideo(v); }
         return;
       }
 
-      // Gen access: all logged-in users can watch — fetch URL and play directly
-      const { data: rec } = await client.from('live_recordings')
-        .select('external_url')
-        .eq('id', id)
-        .single();
-      if (rec?.external_url) v.videoUrl = rec.external_url;
-      playVideo(v);
+      // Not logged in → show login gate
+      if (!user) { showVideoGate(v, 'login'); return; }
+
+      // Check enrollment / admin-granted access
+      const hasAccess = await _checkVideoAccess(user.id, v);
+      if (hasAccess) {
+        const { data: rec } = await client.from('live_recordings')
+          .select('external_url').eq('id', id).single();
+        if (rec?.external_url) { v.videoUrl = rec.external_url; playVideo(v); }
+        else { _showRvToast('Video URL not available. Contact support.', 'error'); }
+      } else {
+        showVideoGate(v, 'payment');
+      }
     } catch(e) {
       console.error('handleWatchClick error:', e);
     } finally {
@@ -830,7 +845,7 @@
   }
 
   // ── Payment gate state ──
-  let _gateVideo = null, _gateCourse = null, _gateTotalAmount = 0;
+  let _gateVideo = null, _gateCourse = null, _gateTotalAmount = 0, _gatePricingId = null;
 
   // ── Show per-video gate modal ──
   function showVideoGate(v, reason) {
@@ -944,18 +959,81 @@
     }, 3500);
   }
 
-  // ── Confirm gen access for logged-in users and re-render badges ──
+  // ── Per-video enrollment access check ──
+  // Returns true if the user can watch this video:
+  //   access_level='public'   → always
+  //   access_level='enrolled' → any enrollment exists for the course
+  //   access_level='paid'     → enrollment_status IN (active,completed) AND access_status='active'
+  async function _checkVideoAccess(userId, v) {
+    if (v.accessLevel === 'public') return true;
+    if (!v.courseId || !userId) return false;
+    const { data } = await window.supabaseConfig.client
+      .from('enrollments')
+      .select('enrollment_status,access_status')
+      .eq('student_user_id', userId)
+      .eq('course_id', v.courseId)
+      .limit(1);
+    const e = data?.[0];
+    if (!e) return false;
+    if (v.accessLevel === 'enrolled') {
+      return ['pending','active','completed'].includes(e.enrollment_status);
+    }
+    // 'paid' (default)
+    return ['active','completed'].includes(e.enrollment_status) && e.access_status === 'active';
+  }
+
+  // ── Batch-refresh access badges for all videos ──
   async function checkUserAccess() {
     const client = window.supabaseConfig?.client;
     if (!client) return;
     try {
       const { data: { session } } = await client.auth.getSession();
-      if (!session?.user) return;
-      // Gen access: all logged-in users have full access to all videos
+      const userId = session?.user?.id || null;
       let changed = false;
+
+      if (!userId) {
+        // Not logged in — public videos unlocked, everything else locked
+        allVideos.forEach(v => {
+          const desired = v.accessLevel === 'public' ? 'full' : 'locked';
+          if (v._access !== desired) { v._access = desired; changed = true; }
+        });
+        if (changed) renderPlaylist();
+        return;
+      }
+
+      // Logged in — batch-fetch enrollments for all video courses
+      const courseIds = [...new Set(allVideos.filter(v => v.courseId).map(v => v.courseId))];
+      const enrollMap = {};
+      if (courseIds.length) {
+        const { data: rows } = await client
+          .from('enrollments')
+          .select('course_id,enrollment_status,access_status')
+          .eq('student_user_id', userId)
+          .in('course_id', courseIds);
+        (rows || []).forEach(e => { enrollMap[e.course_id] = e; });
+      }
+
       allVideos.forEach(v => {
-        if (v._access !== 'full') { v._access = 'full'; changed = true; }
+        let desired;
+        if (v.accessLevel === 'public') {
+          desired = 'full';
+        } else if (!v.courseId) {
+          desired = 'locked';
+        } else {
+          const e = enrollMap[v.courseId];
+          if (!e) {
+            desired = 'unpaid';
+          } else if (v.accessLevel === 'enrolled') {
+            desired = ['pending','active','completed'].includes(e.enrollment_status) ? 'full' : 'locked';
+          } else {
+            // 'paid': need active enrollment + active access (admin-approved or payment complete)
+            desired = ['active','completed'].includes(e.enrollment_status) && e.access_status === 'active'
+              ? 'full' : 'unpaid';
+          }
+        }
+        if (v._access !== desired) { v._access = desired; changed = true; }
       });
+
       if (changed) renderPlaylist();
     } catch(e) { console.warn('checkUserAccess:', e); }
   }
@@ -966,8 +1044,15 @@
     const optsEl = document.getElementById('rv-pay-options');
     const el = id => document.getElementById(id);
 
-    const showPrice = (total, courseId) => {
+    // Fast path: video already has pricing data pre-fetched during load
+    if (v.totalPrice != null && v.totalPrice > 0 && v._pricingId) {
+      showPrice(v.totalPrice, v.courseId, v._pricingId);
+      return;
+    }
+
+    const showPrice = (total, courseId, pricingId) => {
       _gateTotalAmount = total;
+      _gatePricingId   = pricingId || null;
       _gateCourse = { id: courseId || null };
       const fmtTotal = total > 0 ? '₹' + Number(total).toLocaleString('en-IN') : 'Contact Us';
       if (el('rv-total-price')) el('rv-total-price').textContent = fmtTotal;
@@ -980,34 +1065,40 @@
 
     try {
       // ── Priority 1: recording's own total_amount (set by admin in DB) ──
-      if (v.totalPrice != null && v.totalPrice > 0) {
-        showPrice(v.totalPrice, v.courseId);
+      // Pricing ID will be fetched from course_pricing below if needed
+      if (v.totalPrice != null && v.totalPrice > 0 && !v.courseId) {
+        showPrice(v.totalPrice, v.courseId, null);
         return;
       }
 
-      // ── Priority 2: calculate from recording's base_amount + 18% GST ──
-      if (v.basePrice != null && v.basePrice > 0) {
-        const total = Math.round(v.basePrice * 1.18);
-        showPrice(total, v.courseId);
-        return;
-      }
-
-      // ── Priority 3: fall back to course_pricing table ──
+      // ── Priority 2 + 3: look up course_pricing to get both price AND pricing_id ──
       const courseId = v.courseId || null;
       if (courseId && window.supabaseConfig) {
         const { data } = await window.supabaseConfig.client
           .from('course_pricing')
-          .select('sale_price,list_price,is_active')
+          .select('id,sale_price,list_price,is_active')
           .eq('course_id', courseId)
           .order('is_active', { ascending: false })
           .limit(1);
         const pricing = data?.[0] || null;
         if (pricing) {
-          const base = pricing.sale_price ?? pricing.list_price ?? 0;
-          const total = Math.round(base * 1.18);   // 18% GST (9% SGST + 9% CGST)
-          showPrice(total, courseId);
+          // Prefer recording-level total_amount if set, else calculate from pricing
+          const base = v.basePrice ?? pricing.sale_price ?? pricing.list_price ?? 0;
+          const total = v.totalPrice ?? Math.round(base * 1.18);
+          showPrice(total, courseId, pricing.id);
           return;
         }
+      }
+
+      // ── Fallback: no course pricing — use recording-level price if set ──
+      if (v.totalPrice != null && v.totalPrice > 0) {
+        showPrice(v.totalPrice, v.courseId, null);
+        return;
+      }
+      if (v.basePrice != null && v.basePrice > 0) {
+        const total = Math.round(v.basePrice * 1.18);
+        showPrice(total, v.courseId, null);
+        return;
       }
 
       // ── No pricing found ──
@@ -1084,33 +1175,37 @@
             const { data: enroll, error: enrollErr } = await window.supabaseConfig.client
               .from('enrollments').upsert({
                 student_user_id: user.id, course_id: _gateCourse.id,
-                pricing_id: null,
+                ...(_gatePricingId ? { pricing_id: _gatePricingId } : {}),
                 enrollment_status: 'active', access_status: 'active',
                 net_amount: totalAmount, paid_amount: totalAmount, due_amount: 0,
               }, { onConflict: 'student_user_id,course_id' }).select().maybeSingle();
             if (enrollErr) console.warn('Enrollment upsert:', enrollErr.message);
-            // Record payment
-            const { error: payErr } = await window.supabaseConfig.client.from('payments').insert({
-              student_user_id: user.id,
-              enrollment_id: enroll?.id || null,
-              course_id: _gateCourse.id,
-              amount: totalAmount,
-              payment_method: 'gateway_link',
-              payment_gateway: 'razorpay',
-              gateway_order_id: response.razorpay_order_id || null,
-              gateway_payment_id: response.razorpay_payment_id || null,
-              gateway_signature: response.razorpay_signature || null,
-              transaction_reference: response.razorpay_payment_id || null,
-              payment_status: 'completed',
-              paid_at: new Date().toISOString(),
-            });
-            if (payErr) console.warn('Payment record:', payErr.message);
+            // Record payment (only if enrollment succeeded and we have an enrollment ID)
+            if (enroll?.id) {
+              const { error: payErr } = await window.supabaseConfig.client.from('payments').insert({
+                student_user_id: user.id,
+                enrollment_id: enroll.id,
+                course_id: _gateCourse.id,
+                amount: totalAmount,
+                payment_method: 'gateway_link',
+                payment_gateway: 'razorpay',
+                gateway_order_id: response.razorpay_order_id || null,
+                gateway_payment_id: response.razorpay_payment_id || null,
+                gateway_signature: response.razorpay_signature || null,
+                transaction_reference: response.razorpay_payment_id || null,
+                payment_status: 'completed',
+                paid_at: new Date().toISOString(),
+              });
+              if (payErr) console.warn('Payment record:', payErr.message);
+            }
           } catch(dbErr) { console.warn('DB record error:', dbErr); }
           _showRvToast('Payment successful! Enjoy your session.', 'success');
-          // Update card badge immediately
+          // Unlock all videos in the same course immediately in the UI
           if (_gateVideo?.courseId) {
-            const vid = allVideos.find(x => x.id === _gateVideo.id);
-            if (vid) { vid._access = 'full'; renderPlaylist(); }
+            allVideos.forEach(v => {
+              if (v.courseId === _gateVideo.courseId) v._access = 'full';
+            });
+            renderPlaylist();
           }
           document.getElementById('rv-access-gate')?.remove();
           // Fetch video URL now that payment is confirmed, then play
@@ -1176,9 +1271,14 @@
 
     // Price / access badge
     if (priceRow) {
-      const isUnlocked = v._access === 'full';
-      if (isUnlocked) {
+      if (v._access === 'full') {
         priceRow.innerHTML = `<span class="rv-dv-badge-free"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Unlocked</span>`;
+      } else if (v._access === 'locked') {
+        priceRow.innerHTML = `<span class="rv-dv-badge-paid">Sign in to watch</span>`;
+      } else if (v._access === 'unpaid') {
+        priceRow.innerHTML = v.totalPrice != null
+          ? `<span class="rv-dv-price">₹${Number(v.totalPrice).toLocaleString('en-IN')}</span><span class="rv-dv-badge-paid">Purchase required</span>`
+          : `<span class="rv-dv-badge-paid">Purchase required</span>`;
       } else if (v.totalPrice != null) {
         priceRow.innerHTML = `<span class="rv-dv-price">₹${Number(v.totalPrice).toLocaleString('en-IN')}</span><span class="rv-dv-badge-paid">Purchase required</span>`;
       } else {
@@ -1567,10 +1667,24 @@
 
       const client = window.supabaseConfig.client;
 
-      // Step 1: Fetch all published recordings (external_url excluded — fetched after access check only)
+      // Single query — joins course (via course_id) AND batch (via batch_id → course_batches → courses)
+      // This gives real titles for ALL recordings, even those linked only via a batch
       const { data, error } = await client
         .from('live_recordings')
-        .select('id,title,provider_name,access_level,course_id,created_at,base_amount,gst_percentage,total_amount')
+        .select(`
+          id, title, provider_name, access_level, course_id, batch_id,
+          created_at, base_amount, gst_percentage, total_amount,
+          direct_course:course_id(id, title,
+            course_categories(name),
+            course_pricing(id, sale_price, list_price, is_active)
+          ),
+          batch:batch_id(batch_name, course_id,
+            batch_course:course_id(id, title,
+              course_categories(name),
+              course_pricing(id, sale_price, list_price, is_active)
+            )
+          )
+        `)
         .eq('is_published', true)
         .order('created_at', { ascending: false });
 
@@ -1584,30 +1698,28 @@
         return;
       }
 
-      // Step 2: Fetch all referenced courses by their IDs directly (avoids RLS filtering on JOIN)
-      const courseIds = [...new Set(data.filter(r => r.course_id).map(r => r.course_id))];
-      let courseMap = {};
-      if (courseIds.length) {
-        const { data: coursesData } = await client
-          .from('courses')
-          .select('id,title,course_categories(name),course_pricing(sale_price,list_price,is_active)')
-          .in('id', courseIds);
-        (coursesData || []).forEach(c => { courseMap[c.id] = c; });
-      }
-
       allVideos = data.map(r => {
-        const course = courseMap[r.course_id] || null;
-        const { icon, gradient } = videoMeta(r.provider_name);
-        const courseTitle  = course?.title || '';
+        // Priority: direct course → course via batch → batch name as label
+        const directCourse = r.direct_course || null;
+        const batch        = r.batch || null;
+        const batchCourse  = batch?.batch_course || null;
+        const course       = directCourse || batchCourse || null;
+
+        const courseTitle  = directCourse?.title || batchCourse?.title || batch?.batch_name || '';
         const categoryName = course?.course_categories?.name || '';
-        // Group label: prefer course title, fall back to category name
         const groupLabel   = courseTitle || categoryName;
         const filterKey    = groupLabel.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'other';
+
+        // Effective course ID for enrollment checks and pricing
+        const effectiveCourseId = r.course_id || batch?.course_id || null;
+
         // Resolve price: recording-level base_amount → course pricing → null
         const activePricing = (course?.course_pricing || []).find(p => p.is_active);
         const basePrice = r.base_amount ?? activePricing?.sale_price ?? activePricing?.list_price ?? null;
         const gstPct = r.gst_percentage ?? 18;
         const totalPrice = r.total_amount ?? (basePrice != null ? Math.round(basePrice * (1 + gstPct / 100)) : null);
+
+        const { icon, gradient } = videoMeta(r.provider_name);
         return {
           id: r.id,
           title: r.title || 'Session Recording',
@@ -1620,14 +1732,16 @@
           gradient,
           isNew: (Date.now() - new Date(r.created_at).getTime()) < 7 * 24 * 3600 * 1000,
           tags: groupLabel ? [groupLabel] : [],
-          videoUrl: null, // fetched after access verification, not during listing
-          courseId: r.course_id || null,
+          videoUrl: null,
+          courseId: effectiveCourseId,
           thumbnail: r.thumbnail_url || null,
           accessLevel: r.access_level || 'paid',
-          _access: 'full', // gen access: all logged-in users can watch
+          _access: null,
           basePrice,
           gstPct,
           totalPrice,
+          // Keep pricing ID for enrollment upsert (from active pricing row)
+          _pricingId: activePricing?.id || null,
         };
       });
 

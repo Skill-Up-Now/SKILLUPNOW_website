@@ -355,79 +355,223 @@
     .rating { display: flex; align-items: center; gap: 0.35rem; }
     .stars { color: #f59e0b; font-size: 0.8rem; }
 
-    /* ===== ENROLLMENT MODAL ===== */
+    /* ===== ENROLLMENT MODAL — LIQUID GLASS REDESIGN ===== */
+    @keyframes modalIn {
+      from { opacity:0; transform: translateY(32px) scale(.96); }
+      to   { opacity:1; transform: translateY(0)    scale(1);   }
+    }
+    @keyframes overlayIn  { from{opacity:0} to{opacity:1} }
+    @keyframes shimmerPay {
+      0%   { background-position: -200% center; }
+      100% { background-position:  200% center; }
+    }
+    @keyframes spinClose  { to { transform: rotate(90deg); } }
+    @keyframes backArrow  { 0%,100%{transform:translateX(0)} 50%{transform:translateX(-4px)} }
+
     .enroll-overlay {
       position: fixed; inset: 0; z-index: 9000;
-      background: rgba(0,0,0,0.6); backdrop-filter: blur(8px);
+      background: rgba(6,3,18,.72);
+      backdrop-filter: blur(20px) saturate(160%);
+      -webkit-backdrop-filter: blur(20px) saturate(160%);
       display: flex; align-items: center; justify-content: center;
-      opacity: 0; visibility: hidden; transition: all 0.3s var(--ease);
+      opacity: 0; visibility: hidden;
+      transition: opacity .35s cubic-bezier(.4,0,.2,1),
+                  visibility .35s cubic-bezier(.4,0,.2,1);
     }
     .enroll-overlay.open { opacity: 1; visibility: visible; }
+    .enroll-overlay.open .enroll-modal { animation: modalIn .38s cubic-bezier(.34,1.56,.64,1) forwards; }
+
     .enroll-modal {
-      background: var(--bg); border: 1.5px solid var(--border);
-      border-radius: var(--r3); padding: 2rem;
-      max-width: 520px; width: 92vw; max-height: 90vh; overflow-y: auto;
-      transform: scale(0.95); transition: transform 0.3s var(--ease);
+      /* Liquid glass card */
+      background: rgba(255,255,255,.97);
+      border: none;
+      border-radius: 28px;
+      padding: 0;
+      max-width: 480px; width: 94vw; max-height: 92vh; overflow-y: auto;
       position: relative;
+      box-shadow:
+        0 2px 0 rgba(255,255,255,.8) inset,
+        0 -1px 0 rgba(0,0,0,.06) inset,
+        0 32px 80px rgba(60,20,160,.22),
+        0 8px 24px rgba(0,0,0,.12);
+      /* Gradient border via outline */
+      outline: 1.5px solid rgba(124,92,252,.18);
+      scrollbar-width: thin; scrollbar-color: rgba(124,92,252,.2) transparent;
     }
-    .enroll-overlay.open .enroll-modal { transform: scale(1); }
+    .enroll-modal::-webkit-scrollbar { width: 4px; }
+    .enroll-modal::-webkit-scrollbar-thumb { background: rgba(124,92,252,.2); border-radius: 99px; }
+
+    /* Liquid top gradient strip */
+    .enroll-modal::before {
+      content: ''; display: block; position: sticky; top: 0; left: 0; right: 0;
+      height: 4px; border-radius: 28px 28px 0 0;
+      background: linear-gradient(90deg,#7c5cfc,#3d6bff,#06b6d4,#7c5cfc);
+      background-size: 300% 100%;
+      animation: shimmerPay 3.5s linear infinite;
+      z-index: 2; flex-shrink: 0;
+    }
+
+    /* Modal inner padding wrapper */
+    #em-panel-details,
+    #em-panel-payment { padding: 1.75rem 1.9rem 1.9rem; }
+
+    /* ── Close button ── */
     .em-close {
-      position: absolute; top: 1rem; right: 1rem;
-      background: var(--panel); border: 1.5px solid var(--border);
-      border-radius: 50%; width: 32px; height: 32px;
+      position: absolute; top: 1.1rem; right: 1.1rem; z-index: 10;
+      background: rgba(124,92,252,.08);
+      border: 1.5px solid rgba(124,92,252,.18);
+      border-radius: 50%; width: 36px; height: 36px;
       display: flex; align-items: center; justify-content: center;
-      cursor: pointer; font-size: 1rem; color: var(--txt3);
-      transition: all 0.2s;
+      cursor: pointer; color: #7c5cfc;
+      font-size: .9rem; font-weight: 700;
+      transition: background .22s, border-color .22s, box-shadow .22s, transform .32s cubic-bezier(.34,1.56,.64,1);
     }
-    .em-close:hover { background: var(--v1); color: #fff; border-color: var(--v1); }
-    .em-title { font-size: 1.3rem; font-weight: 800; margin-bottom: 0.25rem; }
-    .em-subtitle { font-size: 0.87rem; color: var(--txt3); margin-bottom: 1.5rem; }
-    .em-price-row {
-      display: flex; gap: 1rem; margin-bottom: 1.5rem;
-      padding: 1rem; background: var(--panel); border-radius: var(--r1);
+    .em-close:hover {
+      background: #7c5cfc; color: #fff; border-color: #7c5cfc;
+      box-shadow: 0 6px 20px rgba(124,92,252,.4);
+      transform: rotate(90deg) scale(1.1);
     }
-    .em-price-item { flex: 1; text-align: center; }
-    .em-price-item .label { font-size: 0.75rem; color: var(--txt3); margin-bottom: 0.2rem; }
-    .em-price-item .value { font-size: 1.1rem; font-weight: 800; color: var(--v1); }
-    .pay-options { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1.25rem; }
-    .pay-option {
-      border: 2px solid var(--border); border-radius: var(--r1);
-      padding: 0.85rem; cursor: pointer; transition: all 0.2s; text-align: center;
+    .em-close svg { display: block; transition: transform .32s; }
+
+    /* ── Back button ── */
+    .em-back-btn {
+      display: inline-flex; align-items: center; gap: .4rem;
+      background: none; border: none; padding: 0;
+      color: #7c5cfc; font-size: .84rem; font-weight: 700;
+      cursor: pointer; font-family: inherit; margin-bottom: 1.1rem;
+      transition: color .2s, gap .2s;
     }
-    .pay-option:hover, .pay-option.selected {
-      border-color: var(--v1); background: var(--v5);
+    .em-back-btn:hover { color: #5b3ed6; gap: .6rem; }
+    .em-back-btn:hover .em-back-arrow { animation: backArrow .5s ease infinite; }
+    .em-back-arrow { font-size: .95rem; transition: transform .2s; }
+
+    /* Headings inside modal */
+    .em-title { font-size: 1.32rem; font-weight: 800; color: #0d0720; margin-bottom: .22rem; }
+    .em-subtitle { font-size: .87rem; color: #6b7280; margin-bottom: 1.4rem; line-height: 1.5; }
+
+    /* ── Price breakdown card ── */
+    .em-price-card {
+      background: linear-gradient(135deg,rgba(124,92,252,.06),rgba(61,107,255,.04));
+      border: 1.5px solid rgba(124,92,252,.14);
+      border-radius: 18px; padding: 1rem 1.1rem; margin-bottom: .9rem;
     }
-    .pay-option .opt-icon { font-size: 1.5rem; margin-bottom: 0.25rem; }
-    .pay-option .opt-label { font-size: 0.85rem; font-weight: 700; }
-    .pay-option .opt-desc { font-size: 0.75rem; color: var(--txt3); }
-    .emi-selector { margin-bottom: 1.25rem; display: none; }
-    .emi-selector.show { display: block; }
-    .emi-selector label { font-size: 0.85rem; font-weight: 600; margin-bottom: 0.5rem; display: block; }
-    .emi-months {
-      display: flex; gap: 0.5rem; flex-wrap: wrap;
+    .em-price-row-item {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: .28rem 0; font-size: .86rem; color: #6b7280;
     }
-    .emi-month-btn {
-      padding: 0.4rem 0.85rem; border-radius: 999px;
-      border: 1.5px solid var(--border); background: var(--bg);
-      font-size: 0.82rem; cursor: pointer; transition: all 0.2s; font-weight: 600;
+    .em-price-row-item.total {
+      border-top: 1.5px solid rgba(124,92,252,.15); margin-top: .4rem; padding-top: .55rem;
+      font-size: 1rem; font-weight: 800; color: #7c5cfc;
     }
-    .emi-month-btn.active { background: var(--v1); border-color: var(--v1); color: #fff; }
-    .emi-breakdown {
-      background: var(--panel); border-radius: var(--r1);
-      padding: 0.85rem; margin-top: 0.75rem; font-size: 0.83rem;
+
+    /* ── Security badge ── */
+    .em-secure-badge {
+      display: flex; align-items: center; gap: .4rem;
+      font-size: .76rem; color: #9ca3af; margin-bottom: 1rem;
     }
-    .emi-breakdown div { display: flex; justify-content: space-between; padding: 0.2rem 0; }
-    .emi-breakdown strong { color: var(--v1); }
+
+    /* ── Pay Now button (full-width, centered, shimmer) ── */
+    .btn-pay-now-main {
+      width: 100%; border: none; border-radius: 16px;
+      padding: 1rem 1.5rem; margin-bottom: .65rem;
+      font-size: 1rem; font-weight: 800; color: #fff;
+      cursor: pointer; font-family: inherit; text-align: center;
+      background: linear-gradient(90deg,#7c5cfc,#3d6bff,#06b6d4,#7c5cfc);
+      background-size: 300% 100%;
+      animation: shimmerPay 3.5s linear infinite;
+      box-shadow: 0 8px 28px rgba(124,92,252,.4), 0 2px 8px rgba(0,0,0,.12);
+      transition: transform .22s cubic-bezier(.34,1.56,.64,1), box-shadow .22s, opacity .22s;
+      display: flex; align-items: center; justify-content: center; gap: .55rem;
+    }
+    .btn-pay-now-main:hover {
+      transform: translateY(-2px) scale(1.015);
+      box-shadow: 0 14px 36px rgba(124,92,252,.5);
+    }
+    .btn-pay-now-main:active  { transform: scale(.98); }
+    .btn-pay-now-main:disabled { opacity: .55; cursor: not-allowed; transform: none; animation: none;
+      background: #c4b5fd; box-shadow: none; }
+
+    /* ── Pay Later button ── */
+    .btn-pay-later-main {
+      width: 100%; border: 1.5px solid rgba(124,92,252,.35);
+      border-radius: 16px; padding: .78rem 1.5rem;
+      font-size: .88rem; font-weight: 700; color: #7c5cfc;
+      background: rgba(124,92,252,.05); cursor: pointer; font-family: inherit;
+      text-align: center;
+      transition: background .22s, border-color .22s, transform .18s;
+    }
+    .btn-pay-later-main:hover {
+      background: rgba(124,92,252,.1); border-color: #7c5cfc;
+      transform: translateY(-1px);
+    }
+
+    /* ── Enroll / enrolled button inside Panel 1 ── */
     .btn-pay {
-      width: 100%; background: var(--grad); color: #fff;
-      border: none; border-radius: var(--r1); padding: 0.9rem;
-      font-size: 0.95rem; font-weight: 700; cursor: pointer; transition: all 0.25s; margin-top: 0.5rem;
+      width: 100%; border: none; border-radius: 16px; padding: 1rem;
+      font-size: .96rem; font-weight: 800; color: #fff; cursor: pointer;
+      font-family: inherit; margin-top: .35rem;
+      background: linear-gradient(90deg,#7c5cfc,#3d6bff,#06b6d4,#7c5cfc);
+      background-size: 300% 100%;
+      animation: shimmerPay 3.5s linear infinite;
+      box-shadow: 0 8px 28px rgba(124,92,252,.38);
+      transition: transform .22s cubic-bezier(.34,1.56,.64,1), box-shadow .22s, opacity .22s;
     }
-    .btn-pay:hover { opacity: 0.88; transform: scale(1.01); }
-    .btn-pay:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-    .pay-actions { display: flex; gap: .65rem; margin-top: .25rem; }
-    .btn-pay-now  { flex: 1.6; }
-    .btn-pay-later { flex: 1; background: transparent; color: var(--v1); border: 1.5px solid var(--v1); }
+    .btn-pay:hover  { transform: translateY(-2px) scale(1.015); box-shadow: 0 14px 36px rgba(124,92,252,.5); }
+    .btn-pay:active { transform: scale(.98); }
+    .btn-pay:disabled { opacity:.55; cursor:not-allowed; transform:none; animation:none; background:#c4b5fd; box-shadow:none; }
+
+    /* keep old selectors that JS may reference */
+    .pay-actions { display: flex; flex-direction: column; gap: .55rem; margin-top: .25rem; }
+    .btn-pay-now  { /* aliased to btn-pay-now-main via HTML */ }
+    .btn-pay-later { display: none; } /* replaced by btn-pay-later-main */
+
+    .em-price-row { display:none; } /* legacy, replaced */
+    .em-price-item { display:none; }
+
+    /* ── Terms footer ── */
+    .em-terms { text-align: center; font-size: .74rem; color: #9ca3af; margin-top: .55rem; }
+    .em-terms a { color: #7c5cfc; text-decoration: none; font-weight: 600; }
+    .em-terms a:hover { text-decoration: underline; }
+
+    /* ── Panel 2 heading + course name ── */
+    .em-pay-heading { font-size: 1.18rem; font-weight: 800; color: #0d0720; margin-bottom: .18rem; }
+    .em-pay-course  { font-size: .84rem; color: #6b7280; margin-bottom: 1.1rem; font-weight: 500; }
+
+    /* ── Price value helpers ── */
+    .em-fee-val  { font-weight: 700; color: #111827; }
+    .em-tax-val  { color: #6b7280; }
+
+    /* ── Pending notice ── */
+    #em-pending-notice {
+      display: none;
+      background: linear-gradient(135deg,rgba(245,158,11,.1),rgba(249,115,22,.06));
+      border: 1.5px solid rgba(245,158,11,.35);
+      border-radius: 14px; padding: .85rem 1rem; margin-bottom: .9rem;
+      font-size: .83rem; color: #d97706; line-height: 1.6;
+    }
+    .em-pending-strong { display: block; margin-bottom: .2rem; }
+
+    /* ── Pay Later note ── */
+    .em-pay-later-note {
+      display: none; font-size: .76rem; color: #9ca3af;
+      text-align: center; margin-top: .4rem;
+    }
+
+    /* ── Mentor row ── */
+    .em-mentor-row {
+      font-size: .83rem; color: #6b7280;
+      margin-bottom: .9rem; display: none;
+      align-items: center; gap: .45rem;
+    }
+    .em-features-wrap { margin-bottom: .75rem; }
+
+    /* ── Payment error / notice box ── */
+    .em-payment-error {
+      background: rgba(239,68,68,.08); border: 1.5px solid rgba(239,68,68,.25);
+      border-radius: 14px; padding: .75rem 1rem;
+      font-size: .82rem; color: #dc2626; margin-top: .65rem; line-height: 1.6;
+    }
+    .em-payment-error strong { color: #b91c1c; }
 
     /* ===== ENROLLMENT CONFIRMATION POPUP (PAY LATER) ===== */
     .ec-overlay {
@@ -766,75 +910,91 @@
 <!-- Course Detail / Enrollment Modal -->
 <div class="enroll-overlay" id="enroll-overlay">
   <div class="enroll-modal" id="enroll-modal">
-    <button class="em-close" id="em-close" onclick="closeEnrollModal()">✕</button>
+
+    <!-- Animated close button -->
+    <button class="em-close" id="em-close" onclick="closeEnrollModal()" aria-label="Close">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round">
+        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
 
     <!-- Panel 1: Course Details -->
     <div id="em-panel-details">
-      <div id="em-thumb-wrap" style="height:150px;border-radius:var(--r2);overflow:hidden;margin-bottom:1rem;background:var(--grad2);display:flex;align-items:center;justify-content:center;font-size:3rem;"></div>
-      <div style="display:flex;align-items:center;gap:.4rem;margin-bottom:.4rem;flex-wrap:wrap;">
-        <span id="em-level-badge" style="background:var(--grad);color:#fff;padding:.18rem .6rem;border-radius:999px;font-size:.68rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;"></span>
-        <span id="em-cat-badge" style="border:1px solid var(--border);color:var(--v1);padding:.18rem .6rem;border-radius:999px;font-size:.68rem;font-weight:600;"></span>
+      <div id="em-thumb-wrap" style="height:160px;border-radius:18px;overflow:hidden;margin-bottom:1.1rem;background:linear-gradient(135deg,#7c5cfc22,#3d6bff22);display:flex;align-items:center;justify-content:center;font-size:3.2rem;"></div>
+      <div style="display:flex;align-items:center;gap:.4rem;margin-bottom:.5rem;flex-wrap:wrap;">
+        <span id="em-level-badge" style="background:linear-gradient(135deg,#7c5cfc,#3d6bff);color:#fff;padding:.2rem .65rem;border-radius:999px;font-size:.67rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;"></span>
+        <span id="em-cat-badge" style="background:rgba(124,92,252,.1);color:#7c5cfc;border:1px solid rgba(124,92,252,.25);padding:.2rem .65rem;border-radius:999px;font-size:.67rem;font-weight:600;"></span>
       </div>
       <div class="em-title" id="em-title">Course Title</div>
-      <div class="em-subtitle" id="em-subtitle" style="margin-bottom:.85rem;"></div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin-bottom:.85rem;">
-        <div style="background:var(--panel);border:1px solid var(--border);border-radius:var(--r1);padding:.5rem .3rem;text-align:center;">
-          <div style="font-size:.63rem;color:var(--txt4);margin-bottom:.12rem;">Duration</div>
-          <div style="font-size:.82rem;font-weight:700;color:var(--txt);" id="em-duration">—</div>
+      <div class="em-subtitle" id="em-subtitle"></div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.55rem;margin-bottom:.9rem;">
+        <div style="background:rgba(124,92,252,.06);border:1px solid rgba(124,92,252,.12);border-radius:14px;padding:.6rem .3rem;text-align:center;">
+          <div style="font-size:.62rem;color:#9ca3af;margin-bottom:.15rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em;">Duration</div>
+          <div style="font-size:.84rem;font-weight:800;color:#0d0720;" id="em-duration">—</div>
         </div>
-        <div style="background:var(--panel);border:1px solid var(--border);border-radius:var(--r1);padding:.5rem .3rem;text-align:center;">
-          <div style="font-size:.63rem;color:var(--txt4);margin-bottom:.12rem;">Sessions</div>
-          <div style="font-size:.82rem;font-weight:700;color:var(--txt);" id="em-sessions">—</div>
+        <div style="background:rgba(124,92,252,.06);border:1px solid rgba(124,92,252,.12);border-radius:14px;padding:.6rem .3rem;text-align:center;">
+          <div style="font-size:.62rem;color:#9ca3af;margin-bottom:.15rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em;">Sessions</div>
+          <div style="font-size:.84rem;font-weight:800;color:#0d0720;" id="em-sessions">—</div>
         </div>
-        <div style="background:var(--panel);border:1px solid var(--border);border-radius:var(--r1);padding:.5rem .3rem;text-align:center;">
-          <div style="font-size:.63rem;color:var(--txt4);margin-bottom:.12rem;">Level</div>
-          <div style="font-size:.82rem;font-weight:700;color:var(--txt);" id="em-level-val">—</div>
+        <div style="background:rgba(124,92,252,.06);border:1px solid rgba(124,92,252,.12);border-radius:14px;padding:.6rem .3rem;text-align:center;">
+          <div style="font-size:.62rem;color:#9ca3af;margin-bottom:.15rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em;">Level</div>
+          <div style="font-size:.84rem;font-weight:800;color:#0d0720;" id="em-level-val">—</div>
         </div>
       </div>
-      <div id="em-desc" style="font-size:.82rem;color:var(--txt3);line-height:1.72;margin-bottom:.1rem;max-height:130px;overflow-y:auto;padding-right:.2rem;"></div>
-      <div id="em-features" style="margin-bottom:.75rem;"></div>
-      <div id="em-mentor-row" style="font-size:.82rem;color:var(--txt3);margin-bottom:.9rem;display:none;align-items:center;gap:.4rem;">
+      <div id="em-desc" style="font-size:.83rem;color:#6b7280;line-height:1.72;margin-bottom:.6rem;max-height:120px;overflow-y:auto;padding-right:.2rem;"></div>
+      <div id="em-features" class="em-features-wrap"></div>
+      <div id="em-mentor-row" class="em-mentor-row">
         <span>👨‍🏫</span><span id="em-mentor">—</span>
+      </div>
+      <!-- Pending notice -->
+      <div id="em-pending-notice">
+        <strong class="em-pending-strong">⏳ Pending Enrollment</strong>
+        You selected Pay Later. Complete your payment below to unlock full access.
       </div>
       <button class="btn-pay" id="btn-enroll-detail">Enroll Now</button>
     </div>
 
     <!-- Panel 2: Payment Confirmation -->
     <div id="em-panel-payment" style="display:none;">
-      <button onclick="showDetailPanel()" style="background:none;border:none;color:var(--v1);font-size:.82rem;font-weight:600;cursor:pointer;font-family:inherit;margin-bottom:1rem;padding:0;display:flex;align-items:center;gap:.3rem;">← Back to Details</button>
-      <div style="font-size:1.05rem;font-weight:800;color:var(--txt);margin-bottom:.15rem;">Confirm Enrollment</div>
-      <div style="font-size:.82rem;color:var(--txt3);margin-bottom:1rem;" id="em-pay-course-name"></div>
-      <div style="background:var(--panel);border:1.5px solid var(--border);border-radius:var(--r2);padding:1rem;margin-bottom:.9rem;">
-        <div style="display:flex;justify-content:space-between;padding:.2rem 0;font-size:.84rem;color:var(--txt3);">
-          <span>Course Fee</span><span id="em-base-fee">—</span>
-        </div>
-        <div style="display:flex;justify-content:space-between;padding:.2rem 0;font-size:.84rem;color:var(--txt3);">
-          <span>SGST (9%)</span><span id="em-sgst">—</span>
-        </div>
-        <div style="display:flex;justify-content:space-between;padding:.2rem 0;font-size:.84rem;color:var(--txt3);">
-          <span>CGST (9%)</span><span id="em-cgst">—</span>
-        </div>
-        <div style="display:flex;justify-content:space-between;padding:.3rem 0 .05rem;font-size:1rem;font-weight:800;color:var(--v1);border-top:1px solid var(--border);margin-top:.25rem;">
-          <span>Total (incl. GST)</span><span id="em-total-fee">—</span>
-        </div>
+      <button class="em-back-btn" onclick="showDetailPanel()">
+        <span class="em-back-arrow">←</span> Back to Details
+      </button>
+      <div id="em-pay-heading" class="em-pay-heading">Confirm Enrollment</div>
+      <div id="em-pay-course-name" class="em-pay-course"></div>
+
+      <!-- Price breakdown card -->
+      <div class="em-price-card">
+        <div class="em-price-row-item"><span>Course Fee</span><span id="em-base-fee" class="em-fee-val">—</span></div>
+        <div class="em-price-row-item"><span>SGST (9%)</span><span id="em-sgst" class="em-tax-val">—</span></div>
+        <div class="em-price-row-item"><span>CGST (9%)</span><span id="em-cgst" class="em-tax-val">—</span></div>
+        <div class="em-price-row-item total"><span>Total (incl. GST)</span><span id="em-total-fee">—</span></div>
       </div>
-      <div style="font-size:.78rem;color:var(--txt3);margin-bottom:.85rem;display:flex;align-items:center;gap:.35rem;">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-        Secured by Razorpay · SSL Encrypted · PCI DSS Compliant
+
+      <!-- Security badge -->
+      <div class="em-secure-badge">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Secured by Razorpay &nbsp;·&nbsp; SSL Encrypted &nbsp;·&nbsp; PCI DSS Compliant
       </div>
-      <div class="pay-actions">
-        <button type="button" class="btn-pay btn-pay-now" id="btn-pay" onclick="initiatePayment()">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:-2px;margin-right:.3rem;"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-          Pay Now
-        </button>
-        <button type="button" class="btn-pay btn-pay-later" id="btn-pay-later" onclick="enrollPayLater()">
-          Pay Later
-        </button>
+
+      <!-- Pay Now — full-width centered shimmer button -->
+      <button type="button" class="btn-pay-now-main" id="btn-pay" onclick="initiatePayment()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+        Pay via Razorpay
+      </button>
+
+      <!-- Pay Later -->
+      <button type="button" class="btn-pay-later-main" id="btn-pay-later" onclick="enrollPayLater()">
+        Pay Later — I'll complete payment later
+      </button>
+      <div id="em-pay-later-note" class="em-pay-later-note">
+        You already chose Pay Later — complete payment above to get access.
       </div>
-      <p style="text-align:center;font-size:.75rem;color:var(--txt4);margin-top:.6rem;">
-        By enrolling you agree to our <a href="#" style="color:var(--v1)">Terms</a> &amp; <a href="#" style="color:var(--v1)">Refund Policy</a>
+
+      <p class="em-terms">
+        By enrolling you agree to our <a href="#">Terms</a> &amp; <a href="#">Refund Policy</a>
       </p>
     </div>
+
   </div>
 </div>
 
@@ -891,16 +1051,21 @@
         const activePricing = (c.course_pricing || []).find(p => p.is_active) || c.course_pricing?.[0] || {};
         return { ...c, _price: activePricing.sale_price ?? activePricing.list_price ?? 0, _basePrice: activePricing.list_price ?? 0, _pricingType: activePricing.pricing_type || 'full_payment', _catName: c.course_categories?.name || '', _pricingId: activePricing.id };
       });
-      // Mark enrolled courses for logged-in user
+      // Mark enrolled courses for logged-in user (active, completed, pending)
       try {
         const { data: { session } } = await _db().auth.getSession();
         if (session?.user) {
           const { data: enrollments } = await _db().from('enrollments')
-            .select('course_id')
+            .select('course_id, enrollment_status')
             .eq('student_user_id', session.user.id)
-            .in('enrollment_status', ['active', 'completed']);
-          const enrolledIds = new Set((enrollments || []).map(e => e.course_id));
-          allCourses = allCourses.map(c => ({ ...c, _enrolled: enrolledIds.has(c.id) }));
+            .in('enrollment_status', ['active', 'completed', 'pending']);
+          const enrollMap = {};
+          (enrollments || []).forEach(e => { enrollMap[e.course_id] = e.enrollment_status; });
+          allCourses = allCourses.map(c => ({
+            ...c,
+            _enrolled: !!enrollMap[c.id],
+            _enrollStatus: enrollMap[c.id] || null,
+          }));
         }
       } catch(_) {}
       // Update hero course count
@@ -1221,19 +1386,22 @@
       const hasDiscount = c._price > 0 && c._basePrice > c._price;
       const durationMo = c.duration_days ? Math.round(c.duration_days / 30) : null;
       const enrolled = !!c._enrolled;
+      const isPending = c._enrollStatus === 'pending';
       const featured = !!c.is_featured;
       const delay = Math.min(i * 0.07, 0.56); // stagger up to 560ms
       return `<div class="course-card${featured ? ' featured' : ''}" onclick="openCourseDetail('${c.id}')" style="animation-delay:${delay}s">
         <div class="course-thumb" style="${c.thumbnail_url ? '' : `background:${thumb.bg};`}">
           ${c.thumbnail_url ? `<img src="${c.thumbnail_url}" alt="${c.title}" loading="lazy">` : `<div class="thumb-icon">${thumb.svg}<span class="cat-label">${c._catName || 'Course'}</span></div>`}
           <div class="course-badge">${c.level || 'Course'}</div>
-          ${enrolled
+          ${enrolled && !isPending
             ? `<div class="discount-badge enrolled-badge">✓ Enrolled</div>`
-            : featured
-              ? `<div class="featured-ribbon">⭐ Featured</div>`
-              : hasDiscount
-                ? `<div class="discount-badge">SAVE ${Math.round((1-c._price/c._basePrice)*100)}%</div>`
-                : ''}
+            : isPending
+              ? `<div class="discount-badge" style="background:linear-gradient(135deg,#f59e0b,#f97316)!important;color:#fff!important;">⏳ Pending</div>`
+              : featured
+                ? `<div class="featured-ribbon">⭐ Featured</div>`
+                : hasDiscount
+                  ? `<div class="discount-badge">SAVE ${Math.round((1-c._price/c._basePrice)*100)}%</div>`
+                  : ''}
         </div>
         <div class="course-body">
           <div class="course-category">${c._catName || 'Course'}</div>
@@ -1248,10 +1416,12 @@
         </div>
         <div class="course-footer" style="justify-content:flex-end;">
           <div class="card-actions">
-            ${enrolled
+            ${enrolled && !isPending
               ? `<button type="button" class="btn-enroll enrolled-btn" onclick="event.stopPropagation();window.location.href='profile.html?tab=learning'">View Course →</button>`
-              : `<button type="button" class="btn-details" onclick="event.stopPropagation();openCourseDetail('${c.id}')">Details</button>
-                 <button type="button" class="btn-enroll" onclick="event.stopPropagation();quickEnroll('${c.id}')">Enroll →</button>`
+              : isPending
+                ? `<button type="button" class="btn-enroll" style="background:linear-gradient(135deg,#f59e0b,#f97316);" onclick="event.stopPropagation();openCourseDetail('${c.id}')">Complete Payment →</button>`
+                : `<button type="button" class="btn-details" onclick="event.stopPropagation();openCourseDetail('${c.id}')">Details</button>
+                   <button type="button" class="btn-enroll" onclick="event.stopPropagation();quickEnroll('${c.id}')">Enroll →</button>`
             }
           </div>
         </div>
@@ -1348,32 +1518,43 @@
     // Auth + enrollment state
     let isLoggedIn = !!window.profileNav?.currentUser;
     let alreadyEnrolled = false;
+    let existingEnrollStatus = null;
     try {
       const { data: { session } } = await _db().auth.getSession();
       if (session?.user) {
         isLoggedIn = true;
         window.profileNav && (window.profileNav.currentUser = session.user);
         const { data: existing } = await _db().from('enrollments')
-          .select('id')
+          .select('id, enrollment_status')
           .eq('student_user_id', session.user.id)
           .eq('course_id', c.id)
-          .in('enrollment_status', ['active', 'completed'])
+          .in('enrollment_status', ['active', 'completed', 'pending'])
           .maybeSingle();
-        if (existing) alreadyEnrolled = true;
+        if (existing) { alreadyEnrolled = true; existingEnrollStatus = existing.enrollment_status; }
       }
     } catch(_) {}
 
     const enrollBtn = el('btn-enroll-detail');
     if (enrollBtn) {
       enrollBtn.style.cssText = '';
-      if (alreadyEnrolled) {
+      if (alreadyEnrolled && existingEnrollStatus !== 'pending') {
         enrollBtn.textContent = '✓ Already Enrolled — View Course';
         enrollBtn.style.background = 'linear-gradient(135deg,#4ade80,#22d3ee)';
         enrollBtn.style.color = '#0a2a1a';
         enrollBtn.onclick = () => { window.location.href = 'profile.html?tab=learning'; };
+      } else if (existingEnrollStatus === 'pending') {
+        // Show the pending notice in Panel 1
+        const notice = document.getElementById('em-pending-notice');
+        if (notice) notice.style.display = '';
+        enrollBtn.textContent = '⏳ Complete Payment →';
+        enrollBtn.style.background = 'linear-gradient(135deg,#f59e0b,#f97316)';
+        enrollBtn.style.color = '#fff';
+        enrollBtn.onclick = () => confirmEnrollment(true); // true = is resume
       } else {
+        const notice = document.getElementById('em-pending-notice');
+        if (notice) notice.style.display = 'none';
         enrollBtn.textContent = isLoggedIn ? 'Enroll Now →' : 'Login to Enroll';
-        enrollBtn.onclick = confirmEnrollment;
+        enrollBtn.onclick = () => confirmEnrollment(false);
       }
     }
 
@@ -1389,7 +1570,7 @@
     if (p) p.style.display = 'none';
   }
 
-  async function confirmEnrollment() {
+  async function confirmEnrollment(isResume = false) {
     let user = window.profileNav?.currentUser;
     if (!user) {
       try {
@@ -1424,6 +1605,20 @@
       ? _cardSvg + 'Pay ₹' + Number(selectedTotalAmount).toLocaleString('en-IN') + ' via Razorpay'
       : 'Contact Us to Enroll';
 
+    // Adjust Panel 2 for resuming a pending enrollment
+    const heading = el('em-pay-heading');
+    const payLaterBtn  = el('btn-pay-later');
+    const payLaterNote = el('em-pay-later-note');
+    if (isResume) {
+      if (heading)      heading.textContent    = 'Resume Payment';
+      if (payLaterBtn)  payLaterBtn.style.display  = 'none';
+      if (payLaterNote) payLaterNote.style.display  = '';
+    } else {
+      if (heading)      heading.textContent    = 'Confirm Enrollment';
+      if (payLaterBtn)  payLaterBtn.style.display  = '';
+      if (payLaterNote) payLaterNote.style.display  = 'none';
+    }
+
     const d = document.getElementById('em-panel-details');
     const p = document.getElementById('em-panel-payment');
     if (d) d.style.display = 'none';
@@ -1433,6 +1628,15 @@
   function closeEnrollModal() {
     document.getElementById('enroll-overlay').classList.remove('open');
     document.body.style.overflow = '';
+    // Reset Panel 2 state so it's clean for the next course opened
+    const notice = document.getElementById('em-pending-notice');
+    const heading = document.getElementById('em-pay-heading');
+    const payLaterBtn  = document.getElementById('btn-pay-later');
+    const payLaterNote = document.getElementById('em-pay-later-note');
+    if (notice)      notice.style.display      = 'none';
+    if (heading)     heading.textContent        = 'Confirm Enrollment';
+    if (payLaterBtn) payLaterBtn.style.display  = '';
+    if (payLaterNote) payLaterNote.style.display = 'none';
   }
 
   // ── Open modal then immediately proceed to payment step ──
@@ -1512,6 +1716,12 @@
       }, { onConflict: 'student_user_id,course_id' });
       if (enrollErr) throw enrollErr;
 
+      // Immediately reflect pending state on the card (no page refresh needed)
+      allCourses = allCourses.map(c =>
+        c.id === selectedCourse.id ? { ...c, _enrolled: true, _enrollStatus: 'pending' } : c
+      );
+      applyFilters();
+
       closeEnrollModal();
       showEnrollConfirm(selectedCourse.title, netAmount);
     } catch(e) {
@@ -1556,13 +1766,24 @@
     }
     if (!selectedCourse) return;
 
+    const btn = document.getElementById('btn-pay');
+    const _payBtnHtml = btn.innerHTML;
+
+    // Razorpay requires HTTPS — show a friendly in-modal notice on file://
     if (window.location.protocol === 'file:') {
-      alert('Payment requires a hosted site (HTTPS). Please access SkillUpNow via its web URL.');
+      const errEl = document.createElement('div');
+      errEl.className = 'em-payment-error';
+      errEl.innerHTML = `
+        <strong>Payment unavailable on local files.</strong><br>
+        Open the site via your hosted URL
+        <strong>skillupnowadmin.org</strong> to complete payment.
+        Your enrollment is saved — you can pay any time.`;
+      const existing = btn.parentNode?.querySelector('.em-payment-error');
+      if (existing) existing.remove();
+      btn.parentNode?.insertBefore(errEl, btn.nextSibling);
       return;
     }
 
-    const btn = document.getElementById('btn-pay');
-    const _payBtnHtml = btn.innerHTML; // save original HTML (with SVG icon)
     btn.disabled = true; btn.textContent = 'Processing…';
 
     const totalAmount = selectedTotalAmount;
@@ -1597,6 +1818,12 @@
         description: selectedCourse.title,
         prefill: { name: user.user_metadata?.full_name || '', email: user.email },
         theme: { color: '#7c6cff' },
+        modal: {
+          ondismiss: () => {
+            btn.disabled = false;
+            btn.innerHTML = _payBtnHtml;
+          }
+        },
         handler: async (response) => {
           const paymentInsert = {
             student_user_id: user.id,
@@ -1635,10 +1862,10 @@
           notes: { error_code: response.error?.code, error_description: response.error?.description }
         }).catch(() => {});
         btn.disabled = false;
-        btn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:-2px;margin-right:.3rem;"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>Retry Payment`;
+        btn.innerHTML = _payBtnHtml.replace('Pay via Razorpay', 'Retry Payment');
         const errMsg = response.error?.description || response.error?.reason || 'Payment was declined.';
         const errEl = document.createElement('div');
-        errEl.style.cssText = 'background:rgba(239,68,68,.12);border:1.5px solid rgba(239,68,68,.3);border-radius:10px;padding:.5rem .75rem;font-size:.8rem;color:#f87171;margin-top:.5rem;';
+        errEl.className = 'em-payment-error';
         errEl.textContent = errMsg;
         btn.parentNode?.insertBefore(errEl, btn.nextSibling);
         setTimeout(() => errEl.remove(), 7000);
@@ -1647,7 +1874,7 @@
     } catch (e) {
       console.error(e);
       btn.disabled = false;
-      btn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:-2px;margin-right:.3rem;"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>Pay Now`;
+      btn.innerHTML = _payBtnHtml;
       const errMsg = e.message?.includes('pricing') ? e.message : 'Unable to initiate payment. Please check your connection and try again.';
       alert(errMsg);
     }

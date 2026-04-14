@@ -504,9 +504,17 @@
           <h3>User Management</h3>
           <div class="table-actions">
             <input class="tbl-search" placeholder="Search users…" oninput="filterTable('user-tbody', this.value, [0,1,2])">
+            <select id="user-role-filter" onchange="loadUsers()" style="font-size:.8rem;padding:.35rem .65rem;border-radius:8px;border:1px solid rgba(124,92,252,.25);background:var(--bg2);color:var(--txt);">
+              <option value="">All Roles</option>
+              <option value="user">Students</option>
+              <option value="mentor">Mentors</option>
+              <option value="admin">Admins</option>
+            </select>
+            <button class="btn-secondary" onclick="syncMissingProfiles()" title="Create profiles for auth users that have no profile row yet">⟳ Sync Auth Users</button>
             <button class="btn-secondary" onclick="exportTable('users')">⬇ Export</button>
           </div>
         </div>
+        <div id="user-sync-banner" style="display:none;background:rgba(124,92,252,.1);border:1px solid rgba(124,92,252,.3);border-radius:10px;padding:.6rem 1rem;font-size:.82rem;color:#c4b5fd;margin-bottom:.75rem;"></div>
         <div class="table-scroll"><table class="data-table">
           <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Role</th><th>Enrolled</th><th>Joined</th><th>Status</th><th>Actions</th></tr></thead>
           <tbody id="user-tbody"><tr><td colspan="8" class="table-empty">Loading…</td></tr></tbody>
@@ -1823,7 +1831,7 @@ async function loadDashboard() {
     pendingReviewsRes,
     recentEnrollmentsRes
   ] = await Promise.all([
-    db.client.from('user_profiles').select('user_id', { count: 'exact', head: true }).or('role.eq.user,role.eq.student,role.is.null'),
+    db.client.from('user_profiles').select('user_id', { count: 'exact', head: true }),
     db.client.from('mentor_profiles').select('user_id', { count: 'exact', head: true }),
     db.client.from('courses').select('id', { count: 'exact', head: true }).eq('course_status', 'published'),
     db.client.from('enrollments').select('id', { count: 'exact', head: true }).eq('enrollment_status', 'active'),
@@ -2018,8 +2026,18 @@ async function loadCategories() {
 }
 
 async function loadUsers() {
+  const roleFilter = document.getElementById('user-role-filter')?.value || '';
+  let q = db.client.from('user_profiles')
+    .select('user_id, full_name, email, phone, role, is_active, created_at, account_created_at')
+    .order('account_created_at', { ascending: false })
+    .limit(200);
+  if (roleFilter) {
+    // 'user' filter includes both 'user' and 'student' role values
+    if (roleFilter === 'user') q = q.in('role', ['user', 'student']);
+    else q = q.eq('role', roleFilter);
+  }
   const [{ data: users, error: usersError }, { data: enrollments, error: enrollmentsError }] = await Promise.all([
-    db.client.from('user_profiles').select('user_id, full_name, email, phone, role, is_active, created_at, account_created_at').in('role', ['user', 'student']).order('account_created_at', { ascending: false }).limit(100),
+    q,
     db.client.from('enrollments').select('student_user_id')
   ]);
   if (usersError) throw usersError;
@@ -2050,7 +2068,7 @@ async function loadUsers() {
       <td>${statusBadge(u.is_active === false ? 'inactive' : 'active')}</td>
       <td><div class="action-btns">
         <button class="action-btn" onclick="viewUser('${u.user_id}')">View</button>
-        <button class="action-btn danger" onclick="deleteUser('${u.user_id}', ${JSON.stringify(u.full_name || u.email || 'this user')})">Delete</button>
+        <button class="action-btn danger" onclick="deleteUser('${u.user_id}', ${JSON.stringify(u.full_name || u.email || 'this user').replace(/"/g,'&quot;')})">Delete</button>
       </div></td>
     </tr>`).join('') || '<tr><td colspan="8" class="table-empty">No users</td></tr>';
 }
@@ -2145,6 +2163,28 @@ async function adminEnrollUser() {
   }
 }
 
+// ── Sync auth users that have no user_profiles row ─────────────
+async function syncMissingProfiles() {
+  const banner = document.getElementById('user-sync-banner');
+  if (banner) { banner.style.display = ''; banner.textContent = 'Scanning for unsynced auth users…'; }
+  try {
+    const { data, error } = await db.client.rpc('sync_missing_user_profiles');
+    if (error) throw error;
+    const n = data?.synced ?? 0;
+    const msg = n === 0
+      ? '✓ All auth users already have profiles. No sync needed.'
+      : `✓ Synced ${n} user${n !== 1 ? 's' : ''} — profile rows created for auth accounts that were missing one.`;
+    if (banner) { banner.textContent = msg; }
+    _showAdminToast(msg, n > 0 ? 'success' : 'info');
+    if (n > 0) { loadUsers(); loadDashboard(); }
+    setTimeout(() => { if (banner) banner.style.display = 'none'; }, 6000);
+  } catch(e) {
+    const msg = 'Sync failed: ' + (e.message || e) + ' — run db/v12-sync-users.sql in Supabase SQL editor first.';
+    if (banner) banner.textContent = msg;
+    _showAdminToast(msg, 'error');
+  }
+}
+
 async function deleteUser(userId, displayName) {
   const confirmed = confirm(
     `⚠️ PERMANENTLY DELETE USER\n\n` +
@@ -2153,30 +2193,30 @@ async function deleteUser(userId, displayName) {
     `  • All enrollments & payments\n` +
     `  • All reviews & inquiries\n` +
     `  • Mentor profile (if any)\n` +
-    `  • Auth account (login disabled)\n\n` +
+    `  • Auth account (cannot log in again)\n\n` +
+    `The email address will be free to re-register after deletion.\n\n` +
     `This CANNOT be undone. Continue?`
   );
   if (!confirmed) return;
 
-  // Double-confirm for safety
   const reconfirmed = confirm(`Final confirmation: Delete "${displayName}" and all their data?`);
   if (!reconfirmed) return;
 
   try {
     const { data, error } = await db.client.rpc('admin_delete_user', { target_user_id: userId });
     if (error) throw error;
-    _showAdminToast(`✓ User "${displayName}" permanently deleted`, 'success');
+    _showAdminToast(`✓ User "${displayName}" permanently deleted. Email is now free to re-register.`, 'success');
     loadUsers();
     loadDashboard();
   } catch (e) {
     console.error('deleteUser error:', e);
     const msg = e.message || 'Unknown error';
     if (msg.includes('Unauthorized')) {
-      alert('Permission denied: Only super admins can delete users.');
-    } else if (msg.includes('Cannot delete your own')) {
-      alert('You cannot delete your own account.');
+      _showAdminToast('Permission denied: Only admins can delete users.', 'error');
+    } else if (msg.includes('Cannot delete your own') || msg.includes('cannot delete your own')) {
+      _showAdminToast('You cannot delete your own account.', 'error');
     } else {
-      alert('Delete failed: ' + msg + '\n\nMake sure db/v3-user-delete-fix.sql has been run in Supabase SQL editor.');
+      _showAdminToast('Delete failed: ' + msg + '\n\nRun db/v11-user-ban-fix.sql in Supabase SQL editor.', 'error');
     }
   }
 }
@@ -2272,8 +2312,9 @@ async function loadEnrollments() {
       <td><div class="action-btns">
         <button class="action-btn" onclick="editEnrollmentById('${safe}')">Edit</button>
         ${e.due_amount > 0 ? `<button class="action-btn" style="background:rgba(124,92,252,.15);color:#a78bfa;border-color:rgba(124,92,252,.3);font-size:.72rem" onclick="recordPartialPayment('${e.id}',${e.due_amount})">+ Pay</button>` : ''}
-        ${!hasAccess(e.access_status) ? `<button class="action-btn" style="background:rgba(74,222,128,.15);color:#4ade80;border-color:rgba(74,222,128,.3);" onclick="grantAccess('${e.id}')">Grant</button>` : ''}
+        ${!hasAccess(e.access_status) && e.enrollment_status !== 'cancelled' ? `<button class="action-btn" style="background:rgba(74,222,128,.15);color:#4ade80;border-color:rgba(74,222,128,.3);" onclick="grantAccess('${e.id}')">Grant</button>` : ''}
         ${hasAccess(e.access_status) ? `<button class="action-btn danger" style="font-size:.72rem;padding:.25rem .55rem;" onclick="revokeAccess('${e.id}')">Revoke</button>` : ''}
+        ${e.enrollment_status !== 'cancelled' ? `<button class="action-btn danger" style="font-size:.72rem;padding:.25rem .55rem;" onclick="unenrollStudent('${e.id}', '${(p.full_name||p.email||'').replace(/'/g,'')}', '${(e.courses?.title||'').replace(/'/g,'')}')">Unenroll</button>` : `<span style="font-size:.7rem;color:var(--txt4);padding:.25rem .4rem;">Unenrolled</span>`}
       </div></td>
     </tr>`;
   }).join('');
@@ -3781,6 +3822,25 @@ async function revokeAccess(enrollId) {
   if (error) { _showAdminToast('Revoke failed: ' + error.message, 'error'); return; }
   _showAdminToast('✓ Access revoked', 'success');
   loadEnrollments();
+}
+
+// ── Unenroll student ──────────────────────────────────────────
+// Cancels enrollment + revokes access. Payment history is kept.
+// Student's email becomes eligible to re-enroll in the same course.
+async function unenrollStudent(enrollId, studentName, courseTitle) {
+  const label = [studentName, courseTitle].filter(Boolean).join(' from ');
+  if (!confirm(`Unenroll${label ? ' ' + label : ''}?\n\nThis will:\n  • Cancel their enrollment\n  • Revoke course access immediately\n  • Keep payment records for accounting\n\nThe student can be re-enrolled later if needed.`)) return;
+
+  const { error } = await db.client.from('enrollments').update({
+    enrollment_status: 'cancelled',
+    access_status: 'revoked',
+    updated_at: new Date().toISOString(),
+  }).eq('id', enrollId);
+
+  if (error) { _showAdminToast('Unenroll failed: ' + error.message, 'error'); return; }
+  _showAdminToast(`✓ ${studentName || 'Student'} unenrolled${courseTitle ? ' from ' + courseTitle : ''}. Access revoked.`, 'success');
+  loadEnrollments();
+  loadDashboard();
 }
 
 // ===== DELETE RECORDING =====

@@ -754,10 +754,10 @@
           </div>
         </div>
 
-        <div class="pcard">
+        <div class="pcard" id="referral-pcard">
           <div class="pcard-title">
             Referral Program
-            <span style="font-size:.75rem;color:var(--txt4);font-weight:500">Students only</span>
+            <span style="font-size:.75rem;color:var(--txt4);font-weight:500">Earn rewards</span>
           </div>
 
           <!-- Points + code -->
@@ -950,8 +950,23 @@ async function loadProfile() {
   document.getElementById('hero-role').textContent      = data.role === 'mentor' ? '👨‍🏫 Mentor' : '🎓 Student';
   document.getElementById('hero-joined').textContent    = 'Joined ' + fmtDate(data.account_created_at || data.created_at);
   document.getElementById('avatar-initial').textContent = (data.full_name || 'U')[0].toUpperCase();
-  document.getElementById('referral-code').textContent  = data.referral_code || '—';
   document.getElementById('reward-points').textContent  = data.reward_points || 0;
+
+  // Referral code: use user_profiles.referral_code (set by v14 migration).
+  // Fallback: read from student_profiles for users created before v14.
+  if (data.referral_code) {
+    document.getElementById('referral-code').textContent = data.referral_code;
+  } else {
+    const { data: sp } = await _db().from('student_profiles')
+      .select('referral_code').eq('user_id', currentUser.id).maybeSingle();
+    document.getElementById('referral-code').textContent =
+      (sp?.referral_code || '—').toUpperCase();
+  }
+
+  // Hide referral section for admin / super_admin / support roles
+  const adminRoles = ['admin', 'super_admin', 'support'];
+  const refCard = document.getElementById('referral-pcard');
+  if (refCard) refCard.style.display = adminRoles.includes(data.role) ? 'none' : '';
 
   if (data.profile_picture_url) _setAvatar(data.profile_picture_url);
 
